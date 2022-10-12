@@ -1,0 +1,14 @@
+syntax = "proto3";
+package mercury.mercury;
+
+import "gogoproto/gogo.proto";
+import "mercury/params.proto";
+// this line is used by starport scaffolding # genesis/proto/import
+
+option go_package = "mercury/x/mercury/types";
+
+// GenesisState defines the mercury module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+  // this line is used by starport scaffolding # genesis/proto/state
+}
