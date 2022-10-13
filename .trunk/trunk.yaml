@@ -17,5 +17,9 @@ lint:
   ignore:
     - linters: [ALL]
       paths:
+        - "vue"
+        - "ts-client"
+        - "docs"
+        - "config.yml"
     - linters:
         - prettier

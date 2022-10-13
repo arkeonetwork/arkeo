@@ -1,4 +1,5 @@
 *.pb.go
+generated
 
 vue/node_modules
 vue/dist

@@ -1,3 +1,4 @@
+version: 0
 accounts:
   - name: alice
     coins: ["20000token", "200000000stake"]
