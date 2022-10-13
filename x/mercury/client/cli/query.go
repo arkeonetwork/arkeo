@@ -3,14 +3,13 @@ package cli
 import (
 	"fmt"
 	// "strings"
+	"mercury/x/mercury/types"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
 	// sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"mercury/x/mercury/types"
 )
 
 // GetQueryCmd returns the cli query commands for this module

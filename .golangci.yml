@@ -1,0 +1,35 @@
+linters:
+  enable:
+    - deadcode
+    - errcheck
+    - exportloopref
+    - forcetypeassert
+    - gocritic
+    - revive
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - promlinter
+    - revive
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unused
+    - varcheck
+linters-settings:
+  exhaustive:
+    check-generated: false
+  exhaustivestruct:
+    check-generated: false
+  staticcheck:
+    checks: ["all", "-SA1029", "-SA1019"]
+  revive:
+    rules:
+      - name: exported
+        disabled: true
+run:
+  skip-files:
+    - ".*\\.pb\\.go$"

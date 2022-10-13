@@ -1,0 +1,21 @@
+version: 0.1
+cli:
+  version: 0.18.1-beta
+lint:
+  enabled:
+    - black-py@22.3.0
+    - flake8@4.0.1
+    - gitleaks@8.2.5
+    - gofmt@1.16.7
+    - golangci-lint@1.46.2
+    - hadolint@2.8.0
+    - isort@5.10.1
+    - markdownlint@0.30.0
+    - prettier@2.5.1
+    - shellcheck@0.8.0
+    - shfmt@3.4.0
+  ignore:
+    - linters: [ALL]
+      paths:
+    - linters:
+        - prettier

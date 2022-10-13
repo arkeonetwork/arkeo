@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	"mercury/app"
 	"testing"
 	"time"
 
@@ -18,8 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmdb "github.com/tendermint/tm-db"
-
-	"mercury/app"
 )
 
 type (

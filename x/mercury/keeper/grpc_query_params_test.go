@@ -1,12 +1,12 @@
 package keeper_test
 
 import (
+	testkeeper "mercury/testutil/keeper"
+	"mercury/x/mercury/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	testkeeper "mercury/testutil/keeper"
-	"mercury/x/mercury/types"
 )
 
 func TestParamsQuery(t *testing.T) {

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"mercury/app"
 	"os"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/xstrings"
-	"mercury/app"
 )
 
 func main() {

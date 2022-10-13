@@ -1,8 +1,9 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"mercury/x/mercury/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // GetParams get all parameters as types.Params

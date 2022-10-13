@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"mercury/x/mercury/keeper"
+	"mercury/x/mercury/types"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -13,8 +15,6 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmdb "github.com/tendermint/tm-db"
-	"mercury/x/mercury/keeper"
-	"mercury/x/mercury/types"
 )
 
 func MercuryKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {

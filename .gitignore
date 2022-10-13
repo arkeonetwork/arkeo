@@ -1,3 +1,5 @@
+*.pb.go
+
 vue/node_modules
 vue/dist
 release/

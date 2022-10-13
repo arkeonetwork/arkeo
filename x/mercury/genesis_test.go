@@ -1,13 +1,13 @@
 package mercury_test
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/require"
 	keepertest "mercury/testutil/keeper"
 	"mercury/testutil/nullify"
 	"mercury/x/mercury"
 	"mercury/x/mercury/types"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {

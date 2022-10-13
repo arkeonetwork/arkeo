@@ -2,11 +2,11 @@ package cli
 
 import (
 	"context"
+	"mercury/x/mercury/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	"mercury/x/mercury/types"
 )
 
 func CmdQueryParams() *cobra.Command {

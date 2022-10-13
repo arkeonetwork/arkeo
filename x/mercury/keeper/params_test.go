@@ -1,11 +1,11 @@
 package keeper_test
 
 import (
+	testkeeper "mercury/testutil/keeper"
+	"mercury/x/mercury/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	testkeeper "mercury/testutil/keeper"
-	"mercury/x/mercury/types"
 )
 
 func TestGetParams(t *testing.T) {

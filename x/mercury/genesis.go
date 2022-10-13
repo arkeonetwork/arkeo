@@ -1,9 +1,10 @@
 package mercury
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"mercury/x/mercury/keeper"
 	"mercury/x/mercury/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

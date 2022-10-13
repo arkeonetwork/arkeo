@@ -1,10 +1,10 @@
 package types_test
 
 import (
+	"mercury/x/mercury/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"mercury/x/mercury/types"
 )
 
 func TestGenesisState_Validate(t *testing.T) {
