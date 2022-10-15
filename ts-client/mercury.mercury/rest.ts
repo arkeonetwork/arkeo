@@ -9,19 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-/**
- * Params defines the parameters for the module.
- */
-export type MercuryParams = object;
-
-/**
- * QueryParamsResponse is response type for the Query/Params RPC method.
- */
-export interface MercuryQueryParamsResponse {
-  /** params holds all the parameters of this module. */
-  params?: MercuryParams;
-}
-
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -225,23 +212,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title mercury/genesis.proto
+ * @title mercury/keeper/keeper.proto
  * @version version not set
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryParams
-   * @summary Parameters queries the parameters of the module.
-   * @request GET:/mercury/mercury/params
-   */
-  queryParams = (params: RequestParams = {}) =>
-    this.request<MercuryQueryParamsResponse, RpcStatus>({
-      path: `/mercury/mercury/params`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-}
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {}
