@@ -7,10 +7,21 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
+import { MsgRegisterProvider } from "./types/mercury/tx";
 
 
-export {  };
+export { MsgRegisterProvider };
 
+type sendMsgRegisterProviderParams = {
+  value: MsgRegisterProvider,
+  fee?: StdFee,
+  memo?: string
+};
+
+
+type msgRegisterProviderParams = {
+  value: MsgRegisterProvider,
+};
 
 
 export const registry = new Registry(msgTypes);
@@ -30,6 +41,28 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
+		async sendMsgRegisterProvider({ value, fee, memo }: sendMsgRegisterProviderParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgRegisterProvider: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgRegisterProvider({ value: MsgRegisterProvider.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgRegisterProvider: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		
+		msgRegisterProvider({ value }: msgRegisterProviderParams): EncodeObject {
+			try {
+				return { typeUrl: "/mercury.mercury.MsgRegisterProvider", value: MsgRegisterProvider.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgRegisterProvider: Could not create message: ' + e.message)
+			}
+		},
 		
 	}
 };

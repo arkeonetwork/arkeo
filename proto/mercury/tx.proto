@@ -7,7 +7,17 @@ option go_package = "mercury/x/mercury/types";
 
 // Msg defines the Msg service.
 service Msg {
-    // this line is used by starport scaffolding # proto/tx/rpc
+      rpc RegisterProvider(MsgRegisterProvider) returns (MsgRegisterProviderResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgRegisterProvider {
+  string creator = 1;
+  string chain = 2;
+  string pubkey = 3;
+}
+
+message MsgRegisterProviderResponse {
 }
 
 // this line is used by starport scaffolding # proto/tx/message
