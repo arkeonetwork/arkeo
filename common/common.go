@@ -1,0 +1,47 @@
+package common
+
+import (
+	"fmt"
+
+	"mercury/common/cosmos"
+)
+
+// GetSafeShare does the same as GetUncappedShare , but GetSafeShare will guarantee the result will not more than total
+func GetSafeShare(part, total, allocation cosmos.Uint) cosmos.Uint {
+	if part.GTE(total) {
+		part = total
+	}
+	return GetUncappedShare(part, total, allocation)
+}
+
+// GetUncappedShare this method will panic if any of the input parameter can't be convert to cosmos.Dec
+// which shouldn't happen
+func GetUncappedShare(part, total, allocation cosmos.Uint) (share cosmos.Uint) {
+	if part.IsZero() || total.IsZero() {
+		return cosmos.ZeroUint()
+	}
+	defer func() {
+		if err := recover(); err != nil {
+			share = cosmos.ZeroUint()
+		}
+	}()
+	// use string to convert cosmos.Uint to cosmos.Dec is the only way I can find out without being constrain to uint64
+	// cosmos.Uint can hold values way larger than uint64 , because it is using big.Int internally
+	aD, err := cosmos.NewDecFromStr(allocation.String())
+	if err != nil {
+		panic(fmt.Errorf("fail to convert %s to cosmos.Dec: %w", allocation.String(), err))
+	}
+
+	pD, err := cosmos.NewDecFromStr(part.String())
+	if err != nil {
+		panic(fmt.Errorf("fail to convert %s to cosmos.Dec: %w", part.String(), err))
+	}
+	tD, err := cosmos.NewDecFromStr(total.String())
+	if err != nil {
+		panic(fmt.Errorf("fail to convert%s to cosmos.Dec: %w", total.String(), err))
+	}
+	// A / (Total / part) == A * (part/Total) but safer when part < Totals
+	result := aD.Quo(tD.Quo(pD))
+	share = cosmos.NewUintFromBigInt(result.RoundInt().BigInt())
+	return
+}
