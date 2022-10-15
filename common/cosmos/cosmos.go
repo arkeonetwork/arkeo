@@ -1,17 +1,7 @@
 package cosmos
 
 import (
-	"bufio"
-	"bytes"
-	"fmt"
-	"math/big"
-	"os"
-	"os/user"
-	"path/filepath"
-	"strings"
-
-	"github.com/cosmos/cosmos-sdk/client/input"
-	ckeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	se "github.com/cosmos/cosmos-sdk/types/errors"
@@ -32,20 +22,20 @@ var (
 	NewRoute                     = sdk.NewRoute
 	NewKVStoreKeys               = sdk.NewKVStoreKeys
 	NewUint                      = sdk.NewUint
-	ParseUint                    = sdk.ParseUint
+	ParseUint                    = sdkmath.ParseUint
 	NewInt                       = sdk.NewInt
 	NewDec                       = sdk.NewDec
 	ZeroInt                      = sdk.ZeroInt
-	ZeroUint                     = sdk.ZeroUint
+	ZeroUint                     = sdkmath.ZeroUint
 	ZeroDec                      = sdk.ZeroDec
-	OneUint                      = sdk.OneUint
+	OneUint                      = sdkmath.OneUint
 	NewCoin                      = sdk.NewCoin
 	NewCoins                     = sdk.NewCoins
 	ParseCoins                   = sdk.ParseCoinsNormalized
 	NewDecWithPrec               = sdk.NewDecWithPrec
 	NewDecFromBigInt             = sdk.NewDecFromBigInt
 	NewIntFromBigInt             = sdk.NewIntFromBigInt
-	NewUintFromBigInt            = sdk.NewUintFromBigInt
+	NewUintFromBigInt            = sdkmath.NewUintFromBigInt
 	AccAddressFromBech32         = sdk.AccAddressFromBech32
 	VerifyAddressFormat          = sdk.VerifyAddressFormat
 	GetFromBech32                = sdk.GetFromBech32
@@ -61,8 +51,6 @@ var (
 	KVStoreReversePrefixIterator = sdk.KVStoreReversePrefixIterator
 	NewKVStoreKey                = sdk.NewKVStoreKey
 	NewTransientStoreKey         = sdk.NewTransientStoreKey
-	StoreTypeTransient           = sdk.StoreTypeTransient
-	StoreTypeIAVL                = sdk.StoreTypeIAVL
 	NewContext                   = sdk.NewContext
 
 	// nolint
@@ -93,7 +81,6 @@ type (
 	Msg        = sdk.Msg
 	Iterator   = sdk.Iterator
 	Handler    = sdk.Handler
-	StoreKey   = sdk.StoreKey
 	Querier    = sdk.Querier
 	TxResponse = sdk.TxResponse
 	Account    = authtypes.AccountI
@@ -119,67 +106,4 @@ func ErrUnauthorized(msg string) error {
 
 func ErrInsufficientCoins(err error, msg string) error {
 	return se.Wrap(multierror.Append(se.ErrInsufficientFunds, err), msg)
-}
-
-// RoundToDecimal round the given amt to the desire decimals
-func RoundToDecimal(amt Uint, dec int64) Uint {
-	if dec != 0 && dec < DefaultCoinDecimals {
-		prec := DefaultCoinDecimals - dec
-		if prec == 0 { // sanity check
-			return amt
-		}
-		precisionAdjust := sdk.NewUintFromBigInt(big.NewInt(0).Exp(big.NewInt(10), big.NewInt(prec), nil))
-		amt = amt.Quo(precisionAdjust).Mul(precisionAdjust)
-	}
-	return amt
-}
-
-// KeybaseStore to store keys
-type KeybaseStore struct {
-	Keybase      ckeys.Keyring
-	SignerName   string
-	SignerPasswd string
-}
-
-func SignerCreds() (string, string) {
-	var username, password string
-	reader := bufio.NewReader(os.Stdin)
-
-	if signerName := os.Getenv(EnvSignerName); signerName != "" {
-		username = signerName
-	} else {
-		username, _ = input.GetString("Enter Signer name:", reader)
-	}
-
-	if signerPassword := os.Getenv(EnvSignerPassword); signerPassword != "" {
-		password = signerPassword
-	} else {
-		password, _ = input.GetPassword("Enter Signer password:", reader)
-	}
-
-	return strings.TrimSpace(username), strings.TrimSpace(password)
-}
-
-// GetKeybase will create an instance of Keybase
-func GetKeybase(thorchainHome string) (KeybaseStore, error) {
-	username, password := SignerCreds()
-	buf := bytes.NewBufferString(password)
-	// the library used by keyring is using ReadLine , which expect a new line
-	buf.WriteByte('\n')
-
-	cliDir := thorchainHome
-	if len(thorchainHome) == 0 {
-		usr, err := user.Current()
-		if err != nil {
-			return KeybaseStore{}, fmt.Errorf("fail to get current user,err:%w", err)
-		}
-		cliDir = filepath.Join(usr.HomeDir, ".thornode")
-	}
-
-	kb, err := ckeys.New(KeyringServiceName(), ckeys.BackendFile, cliDir, buf)
-	return KeybaseStore{
-		SignerName:   username,
-		SignerPasswd: password,
-		Keybase:      kb,
-	}, err
 }

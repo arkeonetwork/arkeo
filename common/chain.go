@@ -3,6 +3,8 @@ package common
 import (
 	"errors"
 	"strings"
+
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 var (
@@ -11,6 +13,10 @@ var (
 )
 
 type Chain string
+type Chains []Chain
+
+// ChainNetwork is to indicate which chain environment
+type ChainNetwork uint8
 
 // Validate validates chain format, should consist only of uppercase letters
 func (c Chain) Validate() error {
@@ -45,6 +51,11 @@ func (c Chain) Equals(c2 Chain) bool {
 // IsEmpty is to determinate whether the chain is empty
 func (c Chain) IsEmpty() bool {
 	return strings.TrimSpace(c.String()) == ""
+}
+
+// AddressPrefix return the address prefix used by the given network (testnet/mainnet)
+func (c Chain) AddressPrefix(cn ChainNetwork) string {
+	return types.GetConfig().GetBech32AccountAddrPrefix()
 }
 
 // String implement fmt.Stringer

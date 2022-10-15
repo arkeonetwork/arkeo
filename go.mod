@@ -3,6 +3,8 @@ module mercury
 go 1.18
 
 require (
+	cosmossdk.io/math v1.0.0-beta.3
+	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/cosmos/cosmos-sdk v0.46.1
 	github.com/cosmos/ibc-go/v5 v5.0.0-rc1
 	github.com/gogo/protobuf v1.3.3
@@ -15,7 +17,6 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/tendermint/tendermint v0.34.21
 	github.com/tendermint/tm-db v0.6.7
-	gitlab.com/thorchain/thornode v1.97.2
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc
 	google.golang.org/grpc v1.49.0
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
@@ -28,7 +29,6 @@ require (
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/storage v1.22.1 // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
-	cosmossdk.io/math v1.0.0-beta.3 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect

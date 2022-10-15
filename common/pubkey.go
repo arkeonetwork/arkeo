@@ -7,6 +7,9 @@ import (
 	"strings"
 
 	"mercury/common/cosmos"
+
+	"github.com/btcsuite/btcutil/bech32"
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 type (
@@ -15,8 +18,6 @@ type (
 )
 
 var EmptyPubKey PubKey
-
-var EmptyPubKeySet PubKeySet
 
 // NewPubKey create a new instance of PubKey
 // key is bech32 encoded string
@@ -47,11 +48,16 @@ func (pubKey PubKey) String() string {
 }
 
 func (pubKey PubKey) GetMyAddress() (cosmos.AccAddress, error) {
-	addr, err := pubKey.GetAddress(BaseChain)
+	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, string(pubKey))
 	if err != nil {
-		return nil, err
+		return cosmos.AccAddress{}, err
 	}
-	return cosmos.AccAddressFromBech32(addr.String())
+	prefix := types.GetConfig().GetBech32AccountAddrPrefix()
+	addr, err := ConvertAndEncode(prefix, pk.Address().Bytes())
+	if err != nil {
+		return cosmos.AccAddress{}, fmt.Errorf("fail to bech32 encode the address, err: %w", err)
+	}
+	return cosmos.AccAddressFromBech32(addr)
 }
 
 // MarshalJSON to Marshals to JSON using Bech32
@@ -133,4 +139,13 @@ func (pks PubKeys) Strings() []string {
 		allStrings[i] = pk.String()
 	}
 	return allStrings
+}
+
+// ConvertAndEncode converts from a base64 encoded byte string to hex or base32 encoded byte string and then to bech32
+func ConvertAndEncode(hrp string, data []byte) (string, error) {
+	converted, err := bech32.ConvertBits(data, 8, 5, true)
+	if err != nil {
+		return "", fmt.Errorf("encoding bech32 failed,%w", err)
+	}
+	return bech32.Encode(hrp, converted)
 }

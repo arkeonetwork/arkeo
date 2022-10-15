@@ -1438,8 +1438,6 @@ github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f/go
 github.com/zondax/hid v0.9.0/go.mod h1:l5wttcP0jwtdLjqjMMWFVEE7d1zO0jvSPA9OPZxWpEM=
 github.com/zondax/hid v0.9.1-0.20220302062450-5552068d2266 h1:O9XLFXGkVswDFmH9LaYpqu+r/AAFWqr0DL6V00KEVFg=
 github.com/zondax/hid v0.9.1-0.20220302062450-5552068d2266/go.mod h1:l5wttcP0jwtdLjqjMMWFVEE7d1zO0jvSPA9OPZxWpEM=
-gitlab.com/thorchain/thornode v1.97.2 h1:sinD9ONKfSQUZiadzXHwsnSdxFJEKAjhGgHtqoVpd8Q=
-gitlab.com/thorchain/thornode v1.97.2/go.mod h1:agqln/mIaeyJbg2RjjRJXF6R3vyKMPyTLpyHdZ1VY90=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=

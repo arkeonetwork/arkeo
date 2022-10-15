@@ -3,7 +3,8 @@ package common
 import (
 	"testing"
 
-	"gitlab.com/thorchain/thornode/common/cosmos"
+	"mercury/common/cosmos"
+
 	. "gopkg.in/check.v1"
 )
 
