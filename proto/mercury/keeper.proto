@@ -3,7 +3,7 @@ package mercury.mercury;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "mercury/x/mercury/keeper";
+option go_package = "mercury/x/mercury/types";
 
 enum ProviderStatus {
   Offline = 0;
