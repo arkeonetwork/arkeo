@@ -3,6 +3,7 @@ package mercury.mercury;
 
 import "gogoproto/gogo.proto";
 import "mercury/params.proto";
+import "mercury/keeper.proto";
 // this line is used by starport scaffolding # genesis/proto/import
 
 option go_package = "mercury/x/mercury/types";
@@ -10,5 +11,6 @@ option go_package = "mercury/x/mercury/types";
 // GenesisState defines the mercury module's genesis state.
 message GenesisState {
   Params params = 1 [(gogoproto.nullable) = false];
-  // this line is used by starport scaffolding # genesis/proto/state
+  repeated Provider providers = 2 [(gogoproto.nullable) = false];
+  repeated Contract contracts = 3 [(gogoproto.nullable) = false];
 }

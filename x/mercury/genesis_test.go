@@ -18,8 +18,8 @@ func TestGenesis(t *testing.T) {
 	}
 
 	k, ctx := keepertest.MercuryKeeper(t)
-	mercury.InitGenesis(ctx, *k, genesisState)
-	got := mercury.ExportGenesis(ctx, *k)
+	mercury.InitGenesis(ctx, k, genesisState)
+	got := mercury.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
 	nullify.Fill(&genesisState)
