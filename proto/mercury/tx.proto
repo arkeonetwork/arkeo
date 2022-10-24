@@ -1,7 +1,7 @@
 syntax = "proto3";
 package mercury.mercury;
 
-// this line is used by starport scaffolding # proto/tx/import
+import "gogoproto/gogo.proto";
 
 option go_package = "mercury/x/mercury/types";
 
@@ -13,8 +13,8 @@ service Msg {
 
 message MsgRegisterProvider {
   string creator = 1;
-  string chain = 2;
-  string pubkey = 3;
+  string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
+  string pubkey = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
 }
 
 message MsgRegisterProviderResponse {
