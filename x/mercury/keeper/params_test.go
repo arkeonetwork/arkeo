@@ -9,7 +9,7 @@ import (
 )
 
 func TestGetParams(t *testing.T) {
-	k, ctx := testkeeper.MercuryKeeper(t)
+	ctx, k := testkeeper.MercuryKeeper(t)
 	params := types.DefaultParams()
 
 	k.SetParams(ctx, params)

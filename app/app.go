@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/blang/semver"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -485,11 +487,14 @@ func New(
 		govConfig,
 	)
 
-	app.MercuryKeeper = *mercurymodulekeeper.NewKeeper(
+	app.MercuryKeeper = *mercurymodulekeeper.NewKVStore(
 		appCodec,
 		keys[mercurymoduletypes.StoreKey],
 		keys[mercurymoduletypes.MemStoreKey],
 		app.GetSubspace(mercurymoduletypes.ModuleName),
+		app.BankKeeper,
+		app.AccountKeeper,
+		semver.MustParse("0.0.0"),
 	)
 	mercuryModule := mercurymodule.NewAppModule(appCodec, app.MercuryKeeper, app.AccountKeeper, app.BankKeeper)
 

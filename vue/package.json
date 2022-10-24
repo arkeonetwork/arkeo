@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "mercury-client-ts": "file:../ts-client"
+  }
+}

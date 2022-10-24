@@ -1,14 +1,8 @@
 package keeper
 
 import (
-	"io/ioutil"
 	"mercury/common/cosmos"
-	"mercury/x/mercury/keeper"
 	"mercury/x/mercury/types"
-	"path"
-	"runtime"
-	"strings"
-	"testing"
 
 	"github.com/blang/semver"
 
@@ -24,7 +18,6 @@ import (
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmdb "github.com/tendermint/tm-db"
@@ -41,7 +34,7 @@ func MakeTestCodec() *codec.LegacyAmino {
 	return cdc
 }
 
-func MercuryKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
+func SetupKeeper() (cosmos.Context, Keeper) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
@@ -53,7 +46,6 @@ func MercuryKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	stateStore := store.NewCommitMultiStore(db)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
-	require.NoError(t, stateStore.LoadLatestVersion())
 
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
@@ -73,14 +65,14 @@ func MercuryKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 
 	bk := bankkeeper.NewBaseKeeper(cdc, keyBank, ak, pk.Subspace(banktypes.ModuleName), nil)
 
-	k := keeper.NewKVStore(
+	k := NewKVStore(
 		cdc,
 		storeKey,
 		memStoreKey,
 		paramsSubspace,
 		bk,
 		ak,
-		GetCurrentVersion(),
+		semver.MustParse("0.0.0"),
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
@@ -88,22 +80,5 @@ func MercuryKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
-	return ctx, k
-}
-
-// GetCurrentVersion - intended for unit tests, fetches the current version of
-// mercury via `version` file
-// #nosec G304 this is a method only used for test purpose
-func GetCurrentVersion() semver.Version {
-	_, filename, _, _ := runtime.Caller(0)
-	dir := path.Join(path.Dir(filename), "../..")
-	dat, err := ioutil.ReadFile(path.Join(dir, "version"))
-	if err != nil {
-		panic(err)
-	}
-	v, err := semver.Make(strings.TrimSpace(string(dat)))
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return ctx, *k
 }

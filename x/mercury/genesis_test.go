@@ -17,9 +17,9 @@ func TestGenesis(t *testing.T) {
 		// this line is used by starport scaffolding # genesis/test/state
 	}
 
-	k, ctx := keepertest.MercuryKeeper(t)
-	mercury.InitGenesis(ctx, *k, genesisState)
-	got := mercury.ExportGenesis(ctx, *k)
+	ctx, k := keepertest.MercuryKeeper(t)
+	mercury.InitGenesis(ctx, k, genesisState)
+	got := mercury.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
 	nullify.Fill(&genesisState)

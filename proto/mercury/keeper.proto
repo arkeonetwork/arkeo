@@ -32,6 +32,7 @@ message Contract {
   string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   bytes  client_address = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   ContractType type = 4;
-  uint64 rate = 5;
+  uint64 height = 5;
   uint64 duration = 6;
+  uint64 rate = 7;
 }
