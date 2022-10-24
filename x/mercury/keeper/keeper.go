@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/types"
 	"strings"
@@ -49,27 +50,25 @@ type Keeper interface {
 }
 
 type KeeperProvider interface {
-	/*
-		GetProviderIterator(_ cosmos.Context) cosmos.Iterator
-		GetProvider(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain) (Provider, error)
-		SetProvider(_ cosmos.Context, _ Provider) error
-		ProviderExists(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain) bool
-		RemoveProvider(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain)
-	*/
+	GetProviderIterator(_ cosmos.Context) cosmos.Iterator
+	GetProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain) (types.Provider, error)
+	SetProvider(_ cosmos.Context, _ types.Provider) error
+	ProviderExists(_ cosmos.Context, _ common.PubKey, _ common.Chain) bool
+	RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain)
 }
 
 type KeeperContract interface {
-	/*
-		GetContractIterator(_ cosmos.Context) cosmos.Iterator
-		GetContract(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain, _ cosmos.AccAddress) (Contract, error)
-		SetContract(_ cosmos.Context, _ Contract) error
-		ContractExists(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain, _ cosmos.AccAddress) bool
-		RemoveContract(_ cosmos.Context, _ cosmos.AccAddress, _ common.Chain, _ cosmos.AccAddress)
-	*/
+	GetContractIterator(_ cosmos.Context) cosmos.Iterator
+	GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) (types.Contract, error)
+	SetContract(_ cosmos.Context, _ types.Contract) error
+	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) bool
+	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress)
 }
 
 const (
-	prefixVersion dbPrefix = "ver/"
+	prefixVersion  dbPrefix = "ver/"
+	prefixProvider dbPrefix = "p/"
+	prefixContract dbPrefix = "c/"
 )
 
 type KVStore struct {

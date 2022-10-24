@@ -10,6 +10,8 @@ import (
 var (
 	EmptyChain = Chain("")
 	BaseChain  = Chain("MCY")
+	BTCChain   = Chain("BTC")
+	ETHChain   = Chain("ETH")
 )
 
 type Chain string

@@ -85,8 +85,9 @@ export interface Contract {
   chain: string;
   clientAddress: Uint8Array;
   type: ContractType;
-  rate: number;
+  height: number;
   duration: number;
+  rate: number;
 }
 
 const baseProvider: object = {
@@ -312,8 +313,9 @@ const baseContract: object = {
   providerPubKey: "",
   chain: "",
   type: 0,
-  rate: 0,
+  height: 0,
   duration: 0,
+  rate: 0,
 };
 
 export const Contract = {
@@ -330,11 +332,14 @@ export const Contract = {
     if (message.type !== 0) {
       writer.uint32(32).int32(message.type);
     }
-    if (message.rate !== 0) {
-      writer.uint32(40).uint64(message.rate);
+    if (message.height !== 0) {
+      writer.uint32(40).uint64(message.height);
     }
     if (message.duration !== 0) {
       writer.uint32(48).uint64(message.duration);
+    }
+    if (message.rate !== 0) {
+      writer.uint32(56).uint64(message.rate);
     }
     return writer;
   },
@@ -359,10 +364,13 @@ export const Contract = {
           message.type = reader.int32() as any;
           break;
         case 5:
-          message.rate = longToNumber(reader.uint64() as Long);
+          message.height = longToNumber(reader.uint64() as Long);
           break;
         case 6:
           message.duration = longToNumber(reader.uint64() as Long);
+          break;
+        case 7:
+          message.rate = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -392,15 +400,20 @@ export const Contract = {
     } else {
       message.type = 0;
     }
-    if (object.rate !== undefined && object.rate !== null) {
-      message.rate = Number(object.rate);
+    if (object.height !== undefined && object.height !== null) {
+      message.height = Number(object.height);
     } else {
-      message.rate = 0;
+      message.height = 0;
     }
     if (object.duration !== undefined && object.duration !== null) {
       message.duration = Number(object.duration);
     } else {
       message.duration = 0;
+    }
+    if (object.rate !== undefined && object.rate !== null) {
+      message.rate = Number(object.rate);
+    } else {
+      message.rate = 0;
     }
     return message;
   },
@@ -417,8 +430,9 @@ export const Contract = {
           : new Uint8Array()
       ));
     message.type !== undefined && (obj.type = contractTypeToJSON(message.type));
-    message.rate !== undefined && (obj.rate = message.rate);
+    message.height !== undefined && (obj.height = message.height);
     message.duration !== undefined && (obj.duration = message.duration);
+    message.rate !== undefined && (obj.rate = message.rate);
     return obj;
   },
 
@@ -444,15 +458,20 @@ export const Contract = {
     } else {
       message.type = 0;
     }
-    if (object.rate !== undefined && object.rate !== null) {
-      message.rate = object.rate;
+    if (object.height !== undefined && object.height !== null) {
+      message.height = object.height;
     } else {
-      message.rate = 0;
+      message.height = 0;
     }
     if (object.duration !== undefined && object.duration !== null) {
       message.duration = object.duration;
     } else {
       message.duration = 0;
+    }
+    if (object.rate !== undefined && object.rate !== null) {
+      message.rate = object.rate;
+    } else {
+      message.rate = 0;
     }
     return message;
   },
