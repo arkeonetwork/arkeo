@@ -1,13 +1,23 @@
 syntax = "proto3";
 package mercury.mercury;
 
-// this line is used by starport scaffolding # proto/tx/import
+import "gogoproto/gogo.proto";
 
 option go_package = "mercury/x/mercury/types";
 
 // Msg defines the Msg service.
 service Msg {
-    // this line is used by starport scaffolding # proto/tx/rpc
+      rpc RegisterProvider(MsgRegisterProvider) returns (MsgRegisterProviderResponse);
+// this line is used by starport scaffolding # proto/tx/rpc
+}
+
+message MsgRegisterProvider {
+  string creator = 1;
+  string pubkey = 2 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  string chain = 3 [(gogoproto.casttype) = "mercury/common.Chain"];
+}
+
+message MsgRegisterProviderResponse {
 }
 
 // this line is used by starport scaffolding # proto/tx/message

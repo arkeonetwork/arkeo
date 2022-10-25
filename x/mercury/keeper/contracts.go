@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"errors"
-
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/types"

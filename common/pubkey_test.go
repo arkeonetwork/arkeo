@@ -3,11 +3,10 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"mercury/common/cosmos"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	. "gopkg.in/check.v1"
-
-	"mercury/common/cosmos"
 )
 
 type PubKeyTestSuite struct{}

@@ -1,10 +1,10 @@
 package keeper
 
 import (
-	. "gopkg.in/check.v1"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
+
+	. "gopkg.in/check.v1"
 )
 
 type KeeperContractSuite struct{}
@@ -12,7 +12,7 @@ type KeeperContractSuite struct{}
 var _ = Suite(&KeeperContractSuite{})
 
 func (s *KeeperContractSuite) TestContract(c *C) {
-	ctx, k := SetupKeeper()
+	ctx, k := SetupKeeper(c)
 
 	c.Check(k.SetContract(ctx, types.Contract{}), NotNil) // empty asset should error
 

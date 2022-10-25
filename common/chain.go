@@ -14,8 +14,10 @@ var (
 	ETHChain   = Chain("ETH")
 )
 
-type Chain string
-type Chains []Chain
+type (
+	Chain  string
+	Chains []Chain
+)
 
 // ChainNetwork is to indicate which chain environment
 type ChainNetwork uint8

@@ -8,5 +8,7 @@ import (
 
 // x/mercury module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+	ErrProviderBadSigner     = sdkerrors.Register(ModuleName, 2, "unauthorized: bad provider pubkey and signer")
+	ErrProviderAlreadyExists = sdkerrors.Register(ModuleName, 3, "provider already exists")
+	ErrInsufficientFunds     = sdkerrors.Register(ModuleName, 4, "insufficient funds")
 )

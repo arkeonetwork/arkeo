@@ -1,9 +1,8 @@
 package common
 
 import (
-	"testing"
-
 	"mercury/common/cosmos"
+	"testing"
 
 	. "gopkg.in/check.v1"
 )

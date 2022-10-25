@@ -9,6 +9,8 @@
  * ---------------------------------------------------------------
  */
 
+export type MercuryMsgRegisterProviderResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
