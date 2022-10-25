@@ -77,7 +77,7 @@ export interface Provider {
   maxContractDuration: number;
   subscriptionRate: number;
   payAsYouGoRate: number;
-  bond: number;
+  bond: string;
 }
 
 export interface Contract {
@@ -99,7 +99,7 @@ const baseProvider: object = {
   maxContractDuration: 0,
   subscriptionRate: 0,
   payAsYouGoRate: 0,
-  bond: 0,
+  bond: "",
 };
 
 export const Provider = {
@@ -128,8 +128,8 @@ export const Provider = {
     if (message.payAsYouGoRate !== 0) {
       writer.uint32(64).uint64(message.payAsYouGoRate);
     }
-    if (message.bond !== 0) {
-      writer.uint32(72).uint64(message.bond);
+    if (message.bond !== "") {
+      writer.uint32(74).string(message.bond);
     }
     return writer;
   },
@@ -166,7 +166,7 @@ export const Provider = {
           message.payAsYouGoRate = longToNumber(reader.uint64() as Long);
           break;
         case 9:
-          message.bond = longToNumber(reader.uint64() as Long);
+          message.bond = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -225,9 +225,9 @@ export const Provider = {
       message.payAsYouGoRate = 0;
     }
     if (object.bond !== undefined && object.bond !== null) {
-      message.bond = Number(object.bond);
+      message.bond = String(object.bond);
     } else {
-      message.bond = 0;
+      message.bond = "";
     }
     return message;
   },
@@ -303,7 +303,7 @@ export const Provider = {
     if (object.bond !== undefined && object.bond !== null) {
       message.bond = object.bond;
     } else {
-      message.bond = 0;
+      message.bond = "";
     }
     return message;
   },

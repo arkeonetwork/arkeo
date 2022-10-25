@@ -2,6 +2,7 @@ syntax = "proto3";
 package mercury.mercury;
 
 import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "mercury/x/mercury/types";
 
@@ -19,7 +20,7 @@ message Provider {
   uint64 max_contract_duration = 6;
   uint64 subscription_rate = 7;
   uint64 pay_as_you_go_rate = 8;
-  uint64 bond = 9;
+  string bond = 9 [(cosmos_proto.scalar)  = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 enum ContractType {

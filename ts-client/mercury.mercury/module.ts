@@ -8,9 +8,10 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgRegisterProvider } from "./types/mercury/tx";
+import { MsgBondProvider } from "./types/mercury/tx";
 
 
-export { MsgRegisterProvider };
+export { MsgRegisterProvider, MsgBondProvider };
 
 type sendMsgRegisterProviderParams = {
   value: MsgRegisterProvider,
@@ -18,9 +19,19 @@ type sendMsgRegisterProviderParams = {
   memo?: string
 };
 
+type sendMsgBondProviderParams = {
+  value: MsgBondProvider,
+  fee?: StdFee,
+  memo?: string
+};
+
 
 type msgRegisterProviderParams = {
   value: MsgRegisterProvider,
+};
+
+type msgBondProviderParams = {
+  value: MsgBondProvider,
 };
 
 
@@ -55,12 +66,34 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgBondProvider({ value, fee, memo }: sendMsgBondProviderParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgBondProvider: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgBondProvider({ value: MsgBondProvider.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgBondProvider: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		
 		msgRegisterProvider({ value }: msgRegisterProviderParams): EncodeObject {
 			try {
 				return { typeUrl: "/mercury.mercury.MsgRegisterProvider", value: MsgRegisterProvider.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgRegisterProvider: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgBondProvider({ value }: msgBondProviderParams): EncodeObject {
+			try {
+				return { typeUrl: "/mercury.mercury.MsgBondProvider", value: MsgBondProvider.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgBondProvider: Could not create message: ' + e.message)
 			}
 		},
 		

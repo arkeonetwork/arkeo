@@ -24,6 +24,7 @@ var (
 	NewUint                      = sdk.NewUint
 	ParseUint                    = sdkmath.ParseUint
 	NewInt                       = sdk.NewInt
+	NewIntFromString             = sdk.NewIntFromString
 	NewDec                       = sdk.NewDec
 	ZeroInt                      = sdk.ZeroInt
 	ZeroUint                     = sdkmath.ZeroUint

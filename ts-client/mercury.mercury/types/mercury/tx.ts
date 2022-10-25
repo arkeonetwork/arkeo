@@ -11,6 +11,15 @@ export interface MsgRegisterProvider {
 
 export interface MsgRegisterProviderResponse {}
 
+export interface MsgBondProvider {
+  creator: string;
+  pubkey: string;
+  chain: string;
+  bond: string;
+}
+
+export interface MsgBondProviderResponse {}
+
 const baseMsgRegisterProvider: object = { creator: "", pubkey: "", chain: "" };
 
 export const MsgRegisterProvider = {
@@ -155,12 +164,170 @@ export const MsgRegisterProviderResponse = {
   },
 };
 
+const baseMsgBondProvider: object = {
+  creator: "",
+  pubkey: "",
+  chain: "",
+  bond: "",
+};
+
+export const MsgBondProvider = {
+  encode(message: MsgBondProvider, writer: Writer = Writer.create()): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.pubkey !== "") {
+      writer.uint32(18).string(message.pubkey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    if (message.bond !== "") {
+      writer.uint32(34).string(message.bond);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgBondProvider {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgBondProvider } as MsgBondProvider;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.pubkey = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        case 4:
+          message.bond = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgBondProvider {
+    const message = { ...baseMsgBondProvider } as MsgBondProvider;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.pubkey !== undefined && object.pubkey !== null) {
+      message.pubkey = String(object.pubkey);
+    } else {
+      message.pubkey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.bond !== undefined && object.bond !== null) {
+      message.bond = String(object.bond);
+    } else {
+      message.bond = "";
+    }
+    return message;
+  },
+
+  toJSON(message: MsgBondProvider): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.pubkey !== undefined && (obj.pubkey = message.pubkey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.bond !== undefined && (obj.bond = message.bond);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgBondProvider>): MsgBondProvider {
+    const message = { ...baseMsgBondProvider } as MsgBondProvider;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.pubkey !== undefined && object.pubkey !== null) {
+      message.pubkey = object.pubkey;
+    } else {
+      message.pubkey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.bond !== undefined && object.bond !== null) {
+      message.bond = object.bond;
+    } else {
+      message.bond = "";
+    }
+    return message;
+  },
+};
+
+const baseMsgBondProviderResponse: object = {};
+
+export const MsgBondProviderResponse = {
+  encode(_: MsgBondProviderResponse, writer: Writer = Writer.create()): Writer {
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgBondProviderResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgBondProviderResponse,
+    } as MsgBondProviderResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgBondProviderResponse {
+    const message = {
+      ...baseMsgBondProviderResponse,
+    } as MsgBondProviderResponse;
+    return message;
+  },
+
+  toJSON(_: MsgBondProviderResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgBondProviderResponse>
+  ): MsgBondProviderResponse {
+    const message = {
+      ...baseMsgBondProviderResponse,
+    } as MsgBondProviderResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   RegisterProvider(
     request: MsgRegisterProvider
   ): Promise<MsgRegisterProviderResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -179,6 +346,18 @@ export class MsgClientImpl implements Msg {
     );
     return promise.then((data) =>
       MsgRegisterProviderResponse.decode(new Reader(data))
+    );
+  }
+
+  BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse> {
+    const data = MsgBondProvider.encode(request).finish();
+    const promise = this.rpc.request(
+      "mercury.mercury.Msg",
+      "BondProvider",
+      data
+    );
+    return promise.then((data) =>
+      MsgBondProviderResponse.decode(new Reader(data))
     );
   }
 }
