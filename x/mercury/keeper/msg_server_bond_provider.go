@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -41,11 +40,12 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	}
 	coins := cosmos.NewCoins(cosmos.NewCoin(configs.Denom, msg.Bond.Abs()))
 
-	if msg.Bond.IsPositive() {
+	switch {
+	case msg.Bond.IsPositive():
 		if err := k.SendFromAccountToModule(ctx, addr, types.ProviderName, coins); err != nil {
 			return err
 		}
-	} else if msg.Bond.IsNegative() {
+	case msg.Bond.IsNegative():
 		// ensure we provider bond is never negative
 		if provider.Bond.LT(msg.Bond.Abs()) {
 			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", msg.Bond.Int64(), provider.Bond.Int64())
@@ -53,7 +53,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 		if err := k.SendFromModuleToAccount(ctx, types.ProviderName, addr, coins); err != nil {
 			return err
 		}
-	} else {
+	default:
 		return fmt.Errorf("dev error: bond is neither positive or negative")
 	}
 	provider.Bond = provider.Bond.Add(msg.Bond)

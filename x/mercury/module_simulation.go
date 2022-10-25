@@ -28,7 +28,7 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgRegisterProvider int = 100
 
-	opWeightMsgBondProvider = "op_weight_msg_bond_provider"
+	opWeightMsgBondProvider = "op_weight_msg_bond_provider" // nolint
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgBondProvider int = 100
 

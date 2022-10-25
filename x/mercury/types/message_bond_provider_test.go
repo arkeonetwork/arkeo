@@ -1,9 +1,9 @@
 package types
 
 import (
-	. "gopkg.in/check.v1"
-
 	"mercury/common/cosmos"
+
+	. "gopkg.in/check.v1"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -13,7 +13,6 @@ type MsgBondProviderSuite struct{}
 var _ = Suite(&MsgBondProviderSuite{})
 
 func (MsgBondProviderSuite) TestValidateBasic(c *C) {
-
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
