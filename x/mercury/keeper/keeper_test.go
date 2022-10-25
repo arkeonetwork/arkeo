@@ -109,8 +109,9 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 
 	pk := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	ak := authkeeper.NewAccountKeeper(cdc, keyAcc, pk.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
-		types.ModuleName:  {authtypes.Minter, authtypes.Burner},
-		types.ReserveName: {},
+		types.ModuleName:   {authtypes.Minter, authtypes.Burner},
+		types.ReserveName:  {},
+		types.ProviderName: {},
 	}, sdk.Bech32PrefixAccAddr)
 	ak.SetParams(ctx, authtypes.DefaultParams())
 

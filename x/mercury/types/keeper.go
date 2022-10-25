@@ -10,6 +10,7 @@ func NewProvider(pubkey common.PubKey, chain common.Chain) Provider {
 	return Provider{
 		PubKey: pubkey,
 		Chain:  chain,
+		Bond:   cosmos.ZeroInt(),
 	}
 }
 

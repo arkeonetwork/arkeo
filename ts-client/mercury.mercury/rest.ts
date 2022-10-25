@@ -9,6 +9,8 @@
  * ---------------------------------------------------------------
  */
 
+export type MercuryMsgBondProviderResponse = object;
+
 export type MercuryMsgRegisterProviderResponse = object;
 
 /**

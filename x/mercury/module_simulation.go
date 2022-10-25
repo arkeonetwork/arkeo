@@ -28,6 +28,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgRegisterProvider int = 100
 
+	opWeightMsgBondProvider = "op_weight_msg_bond_provider" // nolint
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgBondProvider int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -70,6 +74,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgRegisterProvider,
 		mercurysimulation.SimulateMsgRegisterProvider(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgBondProvider int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgBondProvider, &weightMsgBondProvider, nil,
+		func(_ *rand.Rand) {
+			weightMsgBondProvider = defaultWeightMsgBondProvider
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgBondProvider,
+		mercurysimulation.SimulateMsgBondProvider(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
 	// this line is used by starport scaffolding # simapp/module/operation

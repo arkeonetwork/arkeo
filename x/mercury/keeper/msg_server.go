@@ -64,3 +64,7 @@ func getCoins(vals ...int64) cosmos.Coins {
 	}
 	return coins
 }
+
+func tokens(i int64) int64 {
+	return i * (10 * cosmos.DefaultCoinDecimals)
+}
