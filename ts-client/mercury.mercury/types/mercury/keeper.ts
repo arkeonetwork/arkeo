@@ -71,13 +71,15 @@ export function contractTypeToJSON(object: ContractType): string {
 export interface Provider {
   pubKey: string;
   chain: string;
-  metadataUri: string;
+  metadataURI: string;
   metadataNonce: number;
   type: ProviderStatus;
+  minContractDuration: number;
   maxContractDuration: number;
   subscriptionRate: number;
   payAsYouGoRate: number;
   bond: string;
+  lastUpdate: number;
 }
 
 export interface Contract {
@@ -93,13 +95,15 @@ export interface Contract {
 const baseProvider: object = {
   pubKey: "",
   chain: "",
-  metadataUri: "",
+  metadataURI: "",
   metadataNonce: 0,
   type: 0,
+  minContractDuration: 0,
   maxContractDuration: 0,
   subscriptionRate: 0,
   payAsYouGoRate: 0,
   bond: "",
+  lastUpdate: 0,
 };
 
 export const Provider = {
@@ -110,8 +114,8 @@ export const Provider = {
     if (message.chain !== "") {
       writer.uint32(18).string(message.chain);
     }
-    if (message.metadataUri !== "") {
-      writer.uint32(26).string(message.metadataUri);
+    if (message.metadataURI !== "") {
+      writer.uint32(26).string(message.metadataURI);
     }
     if (message.metadataNonce !== 0) {
       writer.uint32(32).uint64(message.metadataNonce);
@@ -119,17 +123,23 @@ export const Provider = {
     if (message.type !== 0) {
       writer.uint32(40).int32(message.type);
     }
+    if (message.minContractDuration !== 0) {
+      writer.uint32(48).uint64(message.minContractDuration);
+    }
     if (message.maxContractDuration !== 0) {
-      writer.uint32(48).uint64(message.maxContractDuration);
+      writer.uint32(56).uint64(message.maxContractDuration);
     }
     if (message.subscriptionRate !== 0) {
-      writer.uint32(56).uint64(message.subscriptionRate);
+      writer.uint32(64).uint64(message.subscriptionRate);
     }
     if (message.payAsYouGoRate !== 0) {
-      writer.uint32(64).uint64(message.payAsYouGoRate);
+      writer.uint32(72).uint64(message.payAsYouGoRate);
     }
     if (message.bond !== "") {
-      writer.uint32(74).string(message.bond);
+      writer.uint32(82).string(message.bond);
+    }
+    if (message.lastUpdate !== 0) {
+      writer.uint32(88).uint64(message.lastUpdate);
     }
     return writer;
   },
@@ -148,7 +158,7 @@ export const Provider = {
           message.chain = reader.string();
           break;
         case 3:
-          message.metadataUri = reader.string();
+          message.metadataURI = reader.string();
           break;
         case 4:
           message.metadataNonce = longToNumber(reader.uint64() as Long);
@@ -157,16 +167,22 @@ export const Provider = {
           message.type = reader.int32() as any;
           break;
         case 6:
-          message.maxContractDuration = longToNumber(reader.uint64() as Long);
+          message.minContractDuration = longToNumber(reader.uint64() as Long);
           break;
         case 7:
-          message.subscriptionRate = longToNumber(reader.uint64() as Long);
+          message.maxContractDuration = longToNumber(reader.uint64() as Long);
           break;
         case 8:
-          message.payAsYouGoRate = longToNumber(reader.uint64() as Long);
+          message.subscriptionRate = longToNumber(reader.uint64() as Long);
           break;
         case 9:
+          message.payAsYouGoRate = longToNumber(reader.uint64() as Long);
+          break;
+        case 10:
           message.bond = reader.string();
+          break;
+        case 11:
+          message.lastUpdate = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -188,10 +204,10 @@ export const Provider = {
     } else {
       message.chain = "";
     }
-    if (object.metadataUri !== undefined && object.metadataUri !== null) {
-      message.metadataUri = String(object.metadataUri);
+    if (object.metadataURI !== undefined && object.metadataURI !== null) {
+      message.metadataURI = String(object.metadataURI);
     } else {
-      message.metadataUri = "";
+      message.metadataURI = "";
     }
     if (object.metadataNonce !== undefined && object.metadataNonce !== null) {
       message.metadataNonce = Number(object.metadataNonce);
@@ -202,6 +218,14 @@ export const Provider = {
       message.type = providerStatusFromJSON(object.type);
     } else {
       message.type = 0;
+    }
+    if (
+      object.minContractDuration !== undefined &&
+      object.minContractDuration !== null
+    ) {
+      message.minContractDuration = Number(object.minContractDuration);
+    } else {
+      message.minContractDuration = 0;
     }
     if (
       object.maxContractDuration !== undefined &&
@@ -229,6 +253,11 @@ export const Provider = {
     } else {
       message.bond = "";
     }
+    if (object.lastUpdate !== undefined && object.lastUpdate !== null) {
+      message.lastUpdate = Number(object.lastUpdate);
+    } else {
+      message.lastUpdate = 0;
+    }
     return message;
   },
 
@@ -236,12 +265,14 @@ export const Provider = {
     const obj: any = {};
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
-    message.metadataUri !== undefined &&
-      (obj.metadataUri = message.metadataUri);
+    message.metadataURI !== undefined &&
+      (obj.metadataURI = message.metadataURI);
     message.metadataNonce !== undefined &&
       (obj.metadataNonce = message.metadataNonce);
     message.type !== undefined &&
       (obj.type = providerStatusToJSON(message.type));
+    message.minContractDuration !== undefined &&
+      (obj.minContractDuration = message.minContractDuration);
     message.maxContractDuration !== undefined &&
       (obj.maxContractDuration = message.maxContractDuration);
     message.subscriptionRate !== undefined &&
@@ -249,6 +280,7 @@ export const Provider = {
     message.payAsYouGoRate !== undefined &&
       (obj.payAsYouGoRate = message.payAsYouGoRate);
     message.bond !== undefined && (obj.bond = message.bond);
+    message.lastUpdate !== undefined && (obj.lastUpdate = message.lastUpdate);
     return obj;
   },
 
@@ -264,10 +296,10 @@ export const Provider = {
     } else {
       message.chain = "";
     }
-    if (object.metadataUri !== undefined && object.metadataUri !== null) {
-      message.metadataUri = object.metadataUri;
+    if (object.metadataURI !== undefined && object.metadataURI !== null) {
+      message.metadataURI = object.metadataURI;
     } else {
-      message.metadataUri = "";
+      message.metadataURI = "";
     }
     if (object.metadataNonce !== undefined && object.metadataNonce !== null) {
       message.metadataNonce = object.metadataNonce;
@@ -278,6 +310,14 @@ export const Provider = {
       message.type = object.type;
     } else {
       message.type = 0;
+    }
+    if (
+      object.minContractDuration !== undefined &&
+      object.minContractDuration !== null
+    ) {
+      message.minContractDuration = object.minContractDuration;
+    } else {
+      message.minContractDuration = 0;
     }
     if (
       object.maxContractDuration !== undefined &&
@@ -304,6 +344,11 @@ export const Provider = {
       message.bond = object.bond;
     } else {
       message.bond = "";
+    }
+    if (object.lastUpdate !== undefined && object.lastUpdate !== null) {
+      message.lastUpdate = object.lastUpdate;
+    } else {
+      message.lastUpdate = 0;
     }
     return message;
   },

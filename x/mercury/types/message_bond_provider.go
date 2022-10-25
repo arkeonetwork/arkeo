@@ -16,7 +16,7 @@ var _ sdk.Msg = &MsgBondProvider{}
 func NewMsgBondProvider(creator string, pubkey common.PubKey, chain common.Chain, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
 		Creator: creator,
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 		Chain:   chain,
 		Bond:    bond,
 	}
@@ -59,7 +59,7 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 	}
 
 	signer := msg.MustGetSigner()
-	provider, err := msg.Pubkey.GetMyAddress()
+	provider, err := msg.PubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}

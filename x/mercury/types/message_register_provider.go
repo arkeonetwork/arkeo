@@ -15,7 +15,7 @@ func NewMsgRegisterProvider(creator string, pubkey common.PubKey, chain common.C
 	return &MsgRegisterProvider{
 		Creator: creator,
 		Chain:   chain,
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 	}
 }
 

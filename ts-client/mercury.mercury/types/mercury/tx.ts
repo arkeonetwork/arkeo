@@ -5,7 +5,7 @@ export const protobufPackage = "mercury.mercury";
 
 export interface MsgRegisterProvider {
   creator: string;
-  pubkey: string;
+  pubKey: string;
   chain: string;
 }
 
@@ -13,14 +13,14 @@ export interface MsgRegisterProviderResponse {}
 
 export interface MsgBondProvider {
   creator: string;
-  pubkey: string;
+  pubKey: string;
   chain: string;
   bond: string;
 }
 
 export interface MsgBondProviderResponse {}
 
-const baseMsgRegisterProvider: object = { creator: "", pubkey: "", chain: "" };
+const baseMsgRegisterProvider: object = { creator: "", pubKey: "", chain: "" };
 
 export const MsgRegisterProvider = {
   encode(
@@ -30,8 +30,8 @@ export const MsgRegisterProvider = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubkey !== "") {
-      writer.uint32(18).string(message.pubkey);
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
     }
     if (message.chain !== "") {
       writer.uint32(26).string(message.chain);
@@ -50,7 +50,7 @@ export const MsgRegisterProvider = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubkey = reader.string();
+          message.pubKey = reader.string();
           break;
         case 3:
           message.chain = reader.string();
@@ -70,10 +70,10 @@ export const MsgRegisterProvider = {
     } else {
       message.creator = "";
     }
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = String(object.pubkey);
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
     } else {
-      message.pubkey = "";
+      message.pubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = String(object.chain);
@@ -86,7 +86,7 @@ export const MsgRegisterProvider = {
   toJSON(message: MsgRegisterProvider): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubkey !== undefined && (obj.pubkey = message.pubkey);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
     return obj;
   },
@@ -98,10 +98,10 @@ export const MsgRegisterProvider = {
     } else {
       message.creator = "";
     }
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = object.pubkey;
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
     } else {
-      message.pubkey = "";
+      message.pubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = object.chain;
@@ -166,7 +166,7 @@ export const MsgRegisterProviderResponse = {
 
 const baseMsgBondProvider: object = {
   creator: "",
-  pubkey: "",
+  pubKey: "",
   chain: "",
   bond: "",
 };
@@ -176,8 +176,8 @@ export const MsgBondProvider = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubkey !== "") {
-      writer.uint32(18).string(message.pubkey);
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
     }
     if (message.chain !== "") {
       writer.uint32(26).string(message.chain);
@@ -199,7 +199,7 @@ export const MsgBondProvider = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubkey = reader.string();
+          message.pubKey = reader.string();
           break;
         case 3:
           message.chain = reader.string();
@@ -222,10 +222,10 @@ export const MsgBondProvider = {
     } else {
       message.creator = "";
     }
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = String(object.pubkey);
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
     } else {
-      message.pubkey = "";
+      message.pubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = String(object.chain);
@@ -243,7 +243,7 @@ export const MsgBondProvider = {
   toJSON(message: MsgBondProvider): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubkey !== undefined && (obj.pubkey = message.pubkey);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
     message.bond !== undefined && (obj.bond = message.bond);
     return obj;
@@ -256,10 +256,10 @@ export const MsgBondProvider = {
     } else {
       message.creator = "";
     }
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = object.pubkey;
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
     } else {
-      message.pubkey = "";
+      message.pubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = object.chain;
