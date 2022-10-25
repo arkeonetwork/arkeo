@@ -59,7 +59,26 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	provider.Bond = provider.Bond.Add(msg.Bond)
 	if provider.Bond.IsZero() {
 		k.RemoveProvider(ctx, provider.PubKey, provider.Chain)
+		k.BondProviderEvent(ctx, provider.Bond, msg)
 		return nil
 	}
-	return k.SetProvider(ctx, provider)
+	err = k.SetProvider(ctx, provider)
+	if err == nil {
+		k.BondProviderEvent(ctx, provider.Bond, msg)
+	}
+	return err
+}
+
+func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
+	ctx.EventManager().EmitEvents(
+		sdk.Events{
+			sdk.NewEvent(
+				types.EventTypeProviderBond,
+				sdk.NewAttribute("pubkey", msg.Pubkey.String()),
+				sdk.NewAttribute("chain", msg.Chain.String()),
+				sdk.NewAttribute("bond_rel", msg.Bond.String()),
+				sdk.NewAttribute("bond_abs", bond.String()),
+			),
+		},
+	)
 }
