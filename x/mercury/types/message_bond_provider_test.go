@@ -27,7 +27,7 @@ func (MsgBondProviderSuite) TestValidateBasic(c *C) {
 
 	msg = MsgBondProvider{
 		Creator: acct.String(),
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidBond)

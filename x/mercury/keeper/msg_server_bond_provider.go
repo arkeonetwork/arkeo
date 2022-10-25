@@ -30,11 +30,11 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 }
 
 func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProvider) error {
-	provider, err := k.GetProvider(ctx, msg.Pubkey, msg.Chain)
+	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
 	if err != nil {
 		return err
 	}
-	addr, err := msg.Pubkey.GetMyAddress()
+	addr, err := msg.PubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *t
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeProviderBond,
-				sdk.NewAttribute("pubkey", msg.Pubkey.String()),
+				sdk.NewAttribute("pubkey", msg.PubKey.String()),
 				sdk.NewAttribute("chain", msg.Chain.String()),
 				sdk.NewAttribute("bond_rel", msg.Bond.String()),
 				sdk.NewAttribute("bond_abs", bond.String()),

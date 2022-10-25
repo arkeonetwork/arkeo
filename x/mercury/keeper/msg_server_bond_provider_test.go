@@ -30,7 +30,7 @@ func (BondProviderSuite) TestHandle(c *C) {
 	// Add to bond
 	msg := types.MsgBondProvider{
 		Creator: acct.String(),
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 		Chain:   common.BTCChain,
 		Bond:    cosmos.NewInt(tokens(8)),
 	}
@@ -39,8 +39,8 @@ func (BondProviderSuite) TestHandle(c *C) {
 	bal := k.GetBalance(ctx, acct)
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, tokens(2))
 	// check that provider now exists
-	c.Check(k.ProviderExists(ctx, msg.Pubkey, msg.Chain), Equals, true)
-	provider, err := k.GetProvider(ctx, msg.Pubkey, msg.Chain)
+	c.Check(k.ProviderExists(ctx, msg.PubKey, msg.Chain), Equals, true)
+	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
 	c.Assert(err, IsNil)
 	c.Check(provider.Bond.Int64(), Equals, tokens(8))
 
@@ -53,7 +53,7 @@ func (BondProviderSuite) TestHandle(c *C) {
 	bal = k.GetBalance(ctx, acct)
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, tokens(2))
 	// check provider has same bond
-	provider, err = k.GetProvider(ctx, msg.Pubkey, msg.Chain)
+	provider, err = k.GetProvider(ctx, msg.PubKey, msg.Chain)
 	c.Assert(err, IsNil)
 	c.Check(provider.Bond.Int64(), Equals, tokens(8))
 
@@ -64,5 +64,5 @@ func (BondProviderSuite) TestHandle(c *C) {
 
 	bal = k.GetBalance(ctx, acct) // check balance
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, tokens(10))
-	c.Check(k.ProviderExists(ctx, msg.Pubkey, msg.Chain), Equals, false) // should be removed
+	c.Check(k.ProviderExists(ctx, msg.PubKey, msg.Chain), Equals, false) // should be removed
 }

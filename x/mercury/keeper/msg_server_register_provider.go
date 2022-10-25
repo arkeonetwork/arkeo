@@ -27,7 +27,7 @@ func (k msgServer) RegisterProvider(goCtx context.Context, msg *types.MsgRegiste
 func (k msgServer) RegisterProviderValidate(ctx cosmos.Context, msg *types.MsgRegisterProvider) error {
 	// Verify signer is the same as the bidder (this validates both the bidder and signer addresses)
 	signer := msg.MustGetSigner()
-	provider, err := msg.Pubkey.GetMyAddress()
+	provider, err := msg.PubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}
@@ -36,8 +36,8 @@ func (k msgServer) RegisterProviderValidate(ctx cosmos.Context, msg *types.MsgRe
 		return sdkerrors.Wrapf(types.ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	if k.ProviderExists(ctx, msg.Pubkey, msg.Chain) {
-		return sdkerrors.Wrapf(types.ErrProviderAlreadyExists, "Provider already exists: %s", msg.Pubkey)
+	if k.ProviderExists(ctx, msg.PubKey, msg.Chain) {
+		return sdkerrors.Wrapf(types.ErrProviderAlreadyExists, "Provider already exists: %s", msg.PubKey)
 	}
 
 	if err := k.hasCoins(ctx, provider, configs.GasFee, configs.RegisterProviderFee); err != nil {
@@ -49,7 +49,7 @@ func (k msgServer) RegisterProviderValidate(ctx cosmos.Context, msg *types.MsgRe
 
 func (k msgServer) RegisterProviderHandle(ctx cosmos.Context, msg *types.MsgRegisterProvider) error {
 	// pay the fee
-	addr, err := msg.Pubkey.GetMyAddress()
+	addr, err := msg.PubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}
@@ -59,6 +59,6 @@ func (k msgServer) RegisterProviderHandle(ctx cosmos.Context, msg *types.MsgRegi
 		return err
 	}
 
-	provider := types.NewProvider(msg.Pubkey, msg.Chain)
+	provider := types.NewProvider(msg.PubKey, msg.Chain)
 	return k.SetProvider(ctx, provider)
 }

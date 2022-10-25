@@ -25,7 +25,7 @@ func (RegisterProviderSuite) TestValidate(c *C) {
 
 	msg := types.MsgRegisterProvider{
 		Creator: acct.String(),
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 		Chain:   common.BTCChain,
 	}
 
@@ -40,11 +40,11 @@ func (RegisterProviderSuite) TestValidate(c *C) {
 
 	// provider already exists
 	msg.Creator = acct.String()
-	provider := types.NewProvider(msg.Pubkey, msg.Chain)
+	provider := types.NewProvider(msg.PubKey, msg.Chain)
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 	err = s.RegisterProviderValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrProviderAlreadyExists)
-	k.RemoveProvider(ctx, msg.Pubkey, msg.Chain)
+	k.RemoveProvider(ctx, msg.PubKey, msg.Chain)
 
 	// insufficient funds
 	c.Assert(k.SendFromAccountToModule(ctx, acct, types.ModuleName, getCoins(9_00000000)), IsNil)
@@ -65,7 +65,7 @@ func (RegisterProviderSuite) TestHandle(c *C) {
 
 	msg := types.MsgRegisterProvider{
 		Creator: acct.String(),
-		Pubkey:  pubkey,
+		PubKey:  pubkey,
 		Chain:   common.BTCChain,
 	}
 
@@ -76,5 +76,5 @@ func (RegisterProviderSuite) TestHandle(c *C) {
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(8_00000000))
 
 	// check that provider now exists
-	c.Check(k.ProviderExists(ctx, msg.Pubkey, msg.Chain), Equals, true)
+	c.Check(k.ProviderExists(ctx, msg.PubKey, msg.Chain), Equals, true)
 }
