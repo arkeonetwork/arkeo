@@ -1,4 +1,4 @@
-![CI](https://github.com/cbarraford/mercury/actions/workflows/ci/badge.svg)
+[![Mercury CI](https://github.com/cbarraford/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/cbarraford/mercury/actions/workflows/ci.yml)
 
 # Mercury
 Mercury - Free Market Blockchain Data Infrastructure
