@@ -5,13 +5,13 @@ export const protobufPackage = "mercury.mercury";
 
 export interface MsgRegisterProvider {
   creator: string;
-  chain: string;
   pubkey: string;
+  chain: string;
 }
 
 export interface MsgRegisterProviderResponse {}
 
-const baseMsgRegisterProvider: object = { creator: "", chain: "", pubkey: "" };
+const baseMsgRegisterProvider: object = { creator: "", pubkey: "", chain: "" };
 
 export const MsgRegisterProvider = {
   encode(
@@ -21,11 +21,11 @@ export const MsgRegisterProvider = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
-    }
     if (message.pubkey !== "") {
-      writer.uint32(26).string(message.pubkey);
+      writer.uint32(18).string(message.pubkey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
     }
     return writer;
   },
@@ -41,10 +41,10 @@ export const MsgRegisterProvider = {
           message.creator = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.pubkey = reader.string();
           break;
         case 3:
-          message.pubkey = reader.string();
+          message.chain = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -61,15 +61,15 @@ export const MsgRegisterProvider = {
     } else {
       message.creator = "";
     }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
-    } else {
-      message.chain = "";
-    }
     if (object.pubkey !== undefined && object.pubkey !== null) {
       message.pubkey = String(object.pubkey);
     } else {
       message.pubkey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
     }
     return message;
   },
@@ -77,8 +77,8 @@ export const MsgRegisterProvider = {
   toJSON(message: MsgRegisterProvider): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.chain !== undefined && (obj.chain = message.chain);
     message.pubkey !== undefined && (obj.pubkey = message.pubkey);
+    message.chain !== undefined && (obj.chain = message.chain);
     return obj;
   },
 
@@ -89,15 +89,15 @@ export const MsgRegisterProvider = {
     } else {
       message.creator = "";
     }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = object.chain;
-    } else {
-      message.chain = "";
-    }
     if (object.pubkey !== undefined && object.pubkey !== null) {
       message.pubkey = object.pubkey;
     } else {
       message.pubkey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
     }
     return message;
   },

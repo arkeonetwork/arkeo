@@ -12,7 +12,7 @@ type KeeperProviderSuite struct{}
 var _ = Suite(&KeeperProviderSuite{})
 
 func (s *KeeperProviderSuite) TestProvider(c *C) {
-	ctx, k := SetupKeeper()
+	ctx, k := SetupKeeper(c)
 
 	c.Check(k.SetProvider(ctx, types.Provider{}), NotNil) // empty asset should error
 

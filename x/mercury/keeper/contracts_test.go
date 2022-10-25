@@ -12,7 +12,7 @@ type KeeperContractSuite struct{}
 var _ = Suite(&KeeperContractSuite{})
 
 func (s *KeeperContractSuite) TestContract(c *C) {
-	ctx, k := SetupKeeper()
+	ctx, k := SetupKeeper(c)
 
 	c.Check(k.SetContract(ctx, types.Contract{}), NotNil) // empty asset should error
 

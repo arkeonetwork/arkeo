@@ -40,6 +40,14 @@ func (msg *MsgRegisterProvider) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func (msg *MsgRegisterProvider) MustGetSigner() sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.Creator)
+	if err != nil {
+		panic(err)
+	}
+	return addr
+}
+
 func (msg *MsgRegisterProvider) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
