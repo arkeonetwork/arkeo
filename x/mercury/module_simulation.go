@@ -24,7 +24,7 @@ var (
 )
 
 const (
-opWeightMsgRegisterProvider = "op_weight_msg_register_provider"
+	opWeightMsgRegisterProvider = "op_weight_msg_register_provider"
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgRegisterProvider int = 100
 

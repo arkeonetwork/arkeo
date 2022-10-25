@@ -1,11 +1,11 @@
 package types
 
 import (
+	"mercury/testutil/sample"
 	"testing"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
-	"mercury/testutil/sample"
 )
 
 func TestMsgRegisterProvider_ValidateBasic(t *testing.T) {

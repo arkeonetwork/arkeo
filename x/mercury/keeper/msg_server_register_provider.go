@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"

@@ -1,10 +1,10 @@
 package keeper
 
 import (
-	. "gopkg.in/check.v1"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
+
+	. "gopkg.in/check.v1"
 )
 
 type KeeperContractSuite struct{}

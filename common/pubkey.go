@@ -3,10 +3,9 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"mercury/common/cosmos"
 	"sort"
 	"strings"
-
-	"mercury/common/cosmos"
 
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/types"
