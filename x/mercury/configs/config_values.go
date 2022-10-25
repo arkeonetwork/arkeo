@@ -11,12 +11,10 @@ type ConfigName int
 
 const (
 	GasFee ConfigName = iota
-	RegisterProviderFee
 )
 
 var nameToString = map[ConfigName]string{
-	GasFee:              "GasFee",
-	RegisterProviderFee: "RegisterProviderFee",
+	GasFee: "GasFee",
 }
 
 // String implement fmt.stringer

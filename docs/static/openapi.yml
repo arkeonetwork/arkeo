@@ -73238,8 +73238,6 @@ definitions:
       the connection handshake.
   mercury.mercury.MsgBondProviderResponse:
     type: object
-  mercury.mercury.MsgRegisterProviderResponse:
-    type: object
   mercury.mercury.Params:
     type: object
     description: Params defines the parameters for the module.
