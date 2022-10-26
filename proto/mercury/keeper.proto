@@ -17,8 +17,8 @@ message Provider {
   string metadataURI = 3;
   uint64 metadata_nonce = 4;
   ProviderStatus status = 5;
-  uint64 min_contract_duration = 6;
-  uint64 max_contract_duration = 7;
+  int64 min_contract_duration = 6;
+  int64 max_contract_duration = 7;
   int64 subscription_rate = 8;
   int64 pay_as_you_go_rate = 9;
   string bond = 10 [(cosmos_proto.scalar)  = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
@@ -35,7 +35,7 @@ message Contract {
   string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   bytes  client_address = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   ContractType type = 4;
-  uint64 height = 5;
-  uint64 duration = 6;
-  uint64 rate = 7;
+  int64 height = 5;
+  int64 duration = 6;
+  int64 rate = 7;
 }

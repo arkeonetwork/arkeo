@@ -14,45 +14,34 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdModProvider() *cobra.Command {
+func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate]",
-		Short: "Broadcast message modProvider",
-		Args:  cobra.ExactArgs(7),
+		Use:   "open-contract [pubkey] [chain] [c-type] [duration] [rate]",
+		Short: "Broadcast message openContract",
+		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
-			pubkey, err := common.NewPubKey(argPubkey)
-			if err != nil {
-				return err
-			}
 			argChain := args[1]
+
 			chain, err := common.NewChain(argChain)
 			if err != nil {
 				return err
 			}
 
-			argMetatadataURI := args[2]
-			argMetadataNonce, err := cast.ToUint64E(args[3])
+			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
 				return err
 			}
-			argStatus, err := cast.ToInt32E(args[4])
+
+			argCType, err := cast.ToInt32E(args[2])
 			if err != nil {
 				return err
 			}
-			argMinContractDuration, err := cast.ToInt64E(args[5])
+			argDuration, err := cast.ToInt64E(args[3])
 			if err != nil {
 				return err
 			}
-			argMaxContractDuration, err := cast.ToInt64E(args[6])
-			if err != nil {
-				return err
-			}
-			argSubscriptionRate, err := cast.ToInt64E(args[7])
-			if err != nil {
-				return err
-			}
-			argPayAsYouGoRate, err := cast.ToInt64E(args[8])
+			argRate, err := cast.ToInt64E(args[4])
 			if err != nil {
 				return err
 			}
@@ -62,17 +51,13 @@ func CmdModProvider() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgModProvider(
+			msg := types.NewMsgOpenContract(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
 				chain,
-				argMetatadataURI,
-				argMetadataNonce,
-				types.ProviderStatus(argStatus),
-				argMinContractDuration,
-				argMaxContractDuration,
-				argSubscriptionRate,
-				argPayAsYouGoRate,
+				types.ContractType(argCType),
+				argDuration,
+				argRate,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

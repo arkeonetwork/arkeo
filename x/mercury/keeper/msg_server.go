@@ -49,6 +49,7 @@ func (k msgServer) hasCoins(ctx cosmos.Context, addr cosmos.AccAddress, names ..
 	}
 	return nil
 }
+*/
 
 // convert int64s into coins asset
 func getCoins(vals ...int64) cosmos.Coins {
@@ -58,13 +59,8 @@ func getCoins(vals ...int64) cosmos.Coins {
 	}
 	return coins
 }
-*/
 
 // convert int64 into coin asset
 func getCoin(val int64) cosmos.Coin {
 	return cosmos.NewCoin(configs.Denom, cosmos.NewInt(val))
-}
-
-func tokens(i int64) int64 {
-	return i * (10 * cosmos.DefaultCoinDecimals)
 }

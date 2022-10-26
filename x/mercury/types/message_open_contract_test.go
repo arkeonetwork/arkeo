@@ -1,43 +1,40 @@
 package types
 
 import (
-	"mercury/common"
-	"mercury/common/cosmos"
-
 	. "gopkg.in/check.v1"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-type MsgBondProviderSuite struct{}
+type MsgOpenContractSuite struct{}
 
-var _ = Suite(&MsgBondProviderSuite{})
+var _ = Suite(&MsgOpenContractSuite{})
 
-func (MsgBondProviderSuite) TestValidateBasic(c *C) {
+func (MsgOpenContractSuite) TestValidateBasic(c *C) {
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
 	c.Assert(err, IsNil)
 
 	// invalid address
-	msg := MsgBondProvider{
+	msg := MsgOpenContract{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
 
-	msg = MsgBondProvider{
+	msg = MsgOpenContract{
 		Creator: acct.String(),
 		PubKey:  pubkey,
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidChain)
+	c.Check(err, ErrIs, ErrOpenContractDuration)
 
-	msg.Chain = common.BTCChain
+	msg.Duration = 100
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidBond)
+	c.Check(err, ErrIs, ErrOpenContractRate)
 
-	msg.Bond = cosmos.NewInt(500)
+	msg.Rate = 100
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
 }

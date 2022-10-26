@@ -1,8 +1,11 @@
 /* eslint-disable */
 import {
   ProviderStatus,
+  ContractType,
   providerStatusFromJSON,
   providerStatusToJSON,
+  contractTypeFromJSON,
+  contractTypeToJSON,
 } from "../mercury/keeper";
 import { Reader, util, configure, Writer } from "protobufjs/minimal";
 import * as Long from "long";
@@ -32,6 +35,17 @@ export interface MsgModProvider {
 }
 
 export interface MsgModProviderResponse {}
+
+export interface MsgOpenContract {
+  creator: string;
+  pubKey: string;
+  chain: string;
+  cType: ContractType;
+  duration: number;
+  rate: number;
+}
+
+export interface MsgOpenContractResponse {}
 
 const baseMsgBondProvider: object = {
   creator: "",
@@ -224,10 +238,10 @@ export const MsgModProvider = {
       writer.uint32(48).int32(message.status);
     }
     if (message.minContractDuration !== 0) {
-      writer.uint32(56).uint64(message.minContractDuration);
+      writer.uint32(56).int64(message.minContractDuration);
     }
     if (message.maxContractDuration !== 0) {
-      writer.uint32(64).uint64(message.maxContractDuration);
+      writer.uint32(64).int64(message.maxContractDuration);
     }
     if (message.subscriptionRate !== 0) {
       writer.uint32(72).int64(message.subscriptionRate);
@@ -264,10 +278,10 @@ export const MsgModProvider = {
           message.status = reader.int32() as any;
           break;
         case 7:
-          message.minContractDuration = longToNumber(reader.uint64() as Long);
+          message.minContractDuration = longToNumber(reader.int64() as Long);
           break;
         case 8:
-          message.maxContractDuration = longToNumber(reader.uint64() as Long);
+          message.maxContractDuration = longToNumber(reader.int64() as Long);
           break;
         case 9:
           message.subscriptionRate = longToNumber(reader.int64() as Long);
@@ -472,11 +486,206 @@ export const MsgModProviderResponse = {
   },
 };
 
+const baseMsgOpenContract: object = {
+  creator: "",
+  pubKey: "",
+  chain: "",
+  cType: 0,
+  duration: 0,
+  rate: 0,
+};
+
+export const MsgOpenContract = {
+  encode(message: MsgOpenContract, writer: Writer = Writer.create()): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    if (message.cType !== 0) {
+      writer.uint32(32).int32(message.cType);
+    }
+    if (message.duration !== 0) {
+      writer.uint32(40).int64(message.duration);
+    }
+    if (message.rate !== 0) {
+      writer.uint32(48).int64(message.rate);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgOpenContract {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgOpenContract } as MsgOpenContract;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.pubKey = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        case 4:
+          message.cType = reader.int32() as any;
+          break;
+        case 5:
+          message.duration = longToNumber(reader.int64() as Long);
+          break;
+        case 6:
+          message.rate = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgOpenContract {
+    const message = { ...baseMsgOpenContract } as MsgOpenContract;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.cType !== undefined && object.cType !== null) {
+      message.cType = contractTypeFromJSON(object.cType);
+    } else {
+      message.cType = 0;
+    }
+    if (object.duration !== undefined && object.duration !== null) {
+      message.duration = Number(object.duration);
+    } else {
+      message.duration = 0;
+    }
+    if (object.rate !== undefined && object.rate !== null) {
+      message.rate = Number(object.rate);
+    } else {
+      message.rate = 0;
+    }
+    return message;
+  },
+
+  toJSON(message: MsgOpenContract): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.cType !== undefined &&
+      (obj.cType = contractTypeToJSON(message.cType));
+    message.duration !== undefined && (obj.duration = message.duration);
+    message.rate !== undefined && (obj.rate = message.rate);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgOpenContract>): MsgOpenContract {
+    const message = { ...baseMsgOpenContract } as MsgOpenContract;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.cType !== undefined && object.cType !== null) {
+      message.cType = object.cType;
+    } else {
+      message.cType = 0;
+    }
+    if (object.duration !== undefined && object.duration !== null) {
+      message.duration = object.duration;
+    } else {
+      message.duration = 0;
+    }
+    if (object.rate !== undefined && object.rate !== null) {
+      message.rate = object.rate;
+    } else {
+      message.rate = 0;
+    }
+    return message;
+  },
+};
+
+const baseMsgOpenContractResponse: object = {};
+
+export const MsgOpenContractResponse = {
+  encode(_: MsgOpenContractResponse, writer: Writer = Writer.create()): Writer {
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgOpenContractResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgOpenContractResponse,
+    } as MsgOpenContractResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgOpenContractResponse {
+    const message = {
+      ...baseMsgOpenContractResponse,
+    } as MsgOpenContractResponse;
+    return message;
+  },
+
+  toJSON(_: MsgOpenContractResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgOpenContractResponse>
+  ): MsgOpenContractResponse {
+    const message = {
+      ...baseMsgOpenContractResponse,
+    } as MsgOpenContractResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   ModProvider(request: MsgModProvider): Promise<MsgModProviderResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  OpenContract(request: MsgOpenContract): Promise<MsgOpenContractResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -505,6 +714,18 @@ export class MsgClientImpl implements Msg {
     );
     return promise.then((data) =>
       MsgModProviderResponse.decode(new Reader(data))
+    );
+  }
+
+  OpenContract(request: MsgOpenContract): Promise<MsgOpenContractResponse> {
+    const data = MsgOpenContract.encode(request).finish();
+    const promise = this.rpc.request(
+      "mercury.mercury.Msg",
+      "OpenContract",
+      data
+    );
+    return promise.then((data) =>
+      MsgOpenContractResponse.decode(new Reader(data))
     );
   }
 }

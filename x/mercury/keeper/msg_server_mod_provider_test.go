@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"mercury/common"
+	"mercury/common/cosmos"
 	"mercury/x/mercury/types"
 
 	. "gopkg.in/check.v1"
@@ -16,8 +17,17 @@ func (ModProviderSuite) TestValidate(c *C) {
 
 	s := newMsgServer(k)
 
+	// setup
+	pubkey := types.GetRandomPubKey()
+
+	provider := types.NewProvider(pubkey, common.BTCChain)
+	provider.Bond = cosmos.NewInt(500)
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
 	// happy path
 	msg := types.MsgModProvider{
+		PubKey:              provider.PubKey,
+		Chain:               provider.Chain,
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_Online,
@@ -65,8 +75,8 @@ func (ModProviderSuite) TestHandle(c *C) {
 	c.Assert(err, IsNil)
 	c.Check(provider.MetadataURI, Equals, "foobar")
 	c.Check(provider.MetadataNonce, Equals, uint64(3))
-	c.Check(provider.MinContractDuration, Equals, uint64(10))
-	c.Check(provider.MaxContractDuration, Equals, uint64(500))
+	c.Check(provider.MinContractDuration, Equals, int64(10))
+	c.Check(provider.MaxContractDuration, Equals, int64(500))
 	c.Check(provider.Status, Equals, types.ProviderStatus_Online)
 	c.Check(provider.SubscriptionRate, Equals, int64(11))
 	c.Check(provider.PayAsYouGoRate, Equals, int64(12))

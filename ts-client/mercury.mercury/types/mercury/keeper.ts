@@ -124,10 +124,10 @@ export const Provider = {
       writer.uint32(40).int32(message.status);
     }
     if (message.minContractDuration !== 0) {
-      writer.uint32(48).uint64(message.minContractDuration);
+      writer.uint32(48).int64(message.minContractDuration);
     }
     if (message.maxContractDuration !== 0) {
-      writer.uint32(56).uint64(message.maxContractDuration);
+      writer.uint32(56).int64(message.maxContractDuration);
     }
     if (message.subscriptionRate !== 0) {
       writer.uint32(64).int64(message.subscriptionRate);
@@ -167,10 +167,10 @@ export const Provider = {
           message.status = reader.int32() as any;
           break;
         case 6:
-          message.minContractDuration = longToNumber(reader.uint64() as Long);
+          message.minContractDuration = longToNumber(reader.int64() as Long);
           break;
         case 7:
-          message.maxContractDuration = longToNumber(reader.uint64() as Long);
+          message.maxContractDuration = longToNumber(reader.int64() as Long);
           break;
         case 8:
           message.subscriptionRate = longToNumber(reader.int64() as Long);
@@ -378,13 +378,13 @@ export const Contract = {
       writer.uint32(32).int32(message.type);
     }
     if (message.height !== 0) {
-      writer.uint32(40).uint64(message.height);
+      writer.uint32(40).int64(message.height);
     }
     if (message.duration !== 0) {
-      writer.uint32(48).uint64(message.duration);
+      writer.uint32(48).int64(message.duration);
     }
     if (message.rate !== 0) {
-      writer.uint32(56).uint64(message.rate);
+      writer.uint32(56).int64(message.rate);
     }
     return writer;
   },
@@ -409,13 +409,13 @@ export const Contract = {
           message.type = reader.int32() as any;
           break;
         case 5:
-          message.height = longToNumber(reader.uint64() as Long);
+          message.height = longToNumber(reader.int64() as Long);
           break;
         case 6:
-          message.duration = longToNumber(reader.uint64() as Long);
+          message.duration = longToNumber(reader.int64() as Long);
           break;
         case 7:
-          message.rate = longToNumber(reader.uint64() as Long);
+          message.rate = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);

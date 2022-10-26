@@ -10,7 +10,7 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 )
 
-func SimulateMsgModProvider(
+func SimulateMsgOpenContract(
 	ak types.AccountKeeper,
 	bk types.BankKeeper,
 	k keeper.Keeper,
@@ -18,12 +18,12 @@ func SimulateMsgModProvider(
 	return func(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
-		msg := &types.MsgModProvider{
+		msg := &types.MsgOpenContract{
 			Creator: simAccount.Address.String(),
 		}
 
-		// TODO: Handling the ModProvider simulation
+		// TODO: Handling the OpenContract simulation
 
-		return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "ModProvider simulation not implemented"), nil, nil
+		return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "OpenContract simulation not implemented"), nil, nil
 	}
 }

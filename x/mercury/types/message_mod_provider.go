@@ -11,7 +11,7 @@ const TypeMsgModProvider = "mod_provider"
 
 var _ sdk.Msg = &MsgModProvider{}
 
-func NewMsgModProvider(creator string, pubkey common.PubKey, chain common.Chain, metadataURI string, metadataNonce uint64, status ProviderStatus, minContractDuration uint64, maxContractDuration uint64, subscriptionRate int64, payAsYouGoRate int64) *MsgModProvider {
+func NewMsgModProvider(creator string, pubkey common.PubKey, chain common.Chain, metadataURI string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
 		PubKey:              pubkey,
@@ -83,6 +83,10 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	// check durations
+	if msg.MinContractDuration < 0 {
+		return sdkerrors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contraction duration cannot be zero")
+	}
+
 	if msg.MinContractDuration > msg.MaxContractDuration {
 		return sdkerrors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, msg.MaxContractDuration)
 	}

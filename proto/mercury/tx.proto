@@ -11,6 +11,7 @@ option go_package = "mercury/x/mercury/types";
 service Msg {
   rpc BondProvider(MsgBondProvider) returns (MsgBondProviderResponse);
   rpc ModProvider(MsgModProvider) returns (MsgModProviderResponse);
+  rpc OpenContract(MsgOpenContract) returns (MsgOpenContractResponse);
 // this line is used by starport scaffolding # proto/tx/rpc
 }
 
@@ -30,12 +31,23 @@ message MsgModProvider {
   string metadataURI = 4;
   uint64 metadataNonce = 5;
   ProviderStatus status = 6;
-  uint64 minContractDuration = 7;
-  uint64 maxContractDuration = 8;
+  int64 minContractDuration = 7;
+  int64 maxContractDuration = 8;
   int64 subscriptionRate = 9;
   int64 payAsYouGoRate = 10;
 }
 
 message MsgModProviderResponse {}
+
+message MsgOpenContract {
+  string creator = 1;
+  string pub_key = 2 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  string chain = 3 [(gogoproto.casttype) = "mercury/common.Chain"];
+  ContractType cType = 4;
+  int64 duration = 5;
+  int64 rate = 6;
+}
+
+message MsgOpenContractResponse {}
 
 // this line is used by starport scaffolding # proto/tx/message
