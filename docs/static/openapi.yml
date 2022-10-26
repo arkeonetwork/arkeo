@@ -73238,9 +73238,17 @@ definitions:
       the connection handshake.
   mercury.mercury.MsgBondProviderResponse:
     type: object
+  mercury.mercury.MsgModProviderResponse:
+    type: object
   mercury.mercury.Params:
     type: object
     description: Params defines the parameters for the module.
+  mercury.mercury.ProviderStatus:
+    type: string
+    enum:
+      - Offline
+      - Online
+    default: Offline
   mercury.mercury.QueryParamsResponse:
     type: object
     properties:

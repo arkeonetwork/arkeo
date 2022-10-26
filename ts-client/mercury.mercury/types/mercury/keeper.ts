@@ -73,7 +73,7 @@ export interface Provider {
   chain: string;
   metadataURI: string;
   metadataNonce: number;
-  type: ProviderStatus;
+  status: ProviderStatus;
   minContractDuration: number;
   maxContractDuration: number;
   subscriptionRate: number;
@@ -97,7 +97,7 @@ const baseProvider: object = {
   chain: "",
   metadataURI: "",
   metadataNonce: 0,
-  type: 0,
+  status: 0,
   minContractDuration: 0,
   maxContractDuration: 0,
   subscriptionRate: 0,
@@ -120,8 +120,8 @@ export const Provider = {
     if (message.metadataNonce !== 0) {
       writer.uint32(32).uint64(message.metadataNonce);
     }
-    if (message.type !== 0) {
-      writer.uint32(40).int32(message.type);
+    if (message.status !== 0) {
+      writer.uint32(40).int32(message.status);
     }
     if (message.minContractDuration !== 0) {
       writer.uint32(48).uint64(message.minContractDuration);
@@ -130,16 +130,16 @@ export const Provider = {
       writer.uint32(56).uint64(message.maxContractDuration);
     }
     if (message.subscriptionRate !== 0) {
-      writer.uint32(64).uint64(message.subscriptionRate);
+      writer.uint32(64).int64(message.subscriptionRate);
     }
     if (message.payAsYouGoRate !== 0) {
-      writer.uint32(72).uint64(message.payAsYouGoRate);
+      writer.uint32(72).int64(message.payAsYouGoRate);
     }
     if (message.bond !== "") {
       writer.uint32(82).string(message.bond);
     }
     if (message.lastUpdate !== 0) {
-      writer.uint32(88).uint64(message.lastUpdate);
+      writer.uint32(88).int64(message.lastUpdate);
     }
     return writer;
   },
@@ -164,7 +164,7 @@ export const Provider = {
           message.metadataNonce = longToNumber(reader.uint64() as Long);
           break;
         case 5:
-          message.type = reader.int32() as any;
+          message.status = reader.int32() as any;
           break;
         case 6:
           message.minContractDuration = longToNumber(reader.uint64() as Long);
@@ -173,16 +173,16 @@ export const Provider = {
           message.maxContractDuration = longToNumber(reader.uint64() as Long);
           break;
         case 8:
-          message.subscriptionRate = longToNumber(reader.uint64() as Long);
+          message.subscriptionRate = longToNumber(reader.int64() as Long);
           break;
         case 9:
-          message.payAsYouGoRate = longToNumber(reader.uint64() as Long);
+          message.payAsYouGoRate = longToNumber(reader.int64() as Long);
           break;
         case 10:
           message.bond = reader.string();
           break;
         case 11:
-          message.lastUpdate = longToNumber(reader.uint64() as Long);
+          message.lastUpdate = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -214,10 +214,10 @@ export const Provider = {
     } else {
       message.metadataNonce = 0;
     }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = providerStatusFromJSON(object.type);
+    if (object.status !== undefined && object.status !== null) {
+      message.status = providerStatusFromJSON(object.status);
     } else {
-      message.type = 0;
+      message.status = 0;
     }
     if (
       object.minContractDuration !== undefined &&
@@ -269,8 +269,8 @@ export const Provider = {
       (obj.metadataURI = message.metadataURI);
     message.metadataNonce !== undefined &&
       (obj.metadataNonce = message.metadataNonce);
-    message.type !== undefined &&
-      (obj.type = providerStatusToJSON(message.type));
+    message.status !== undefined &&
+      (obj.status = providerStatusToJSON(message.status));
     message.minContractDuration !== undefined &&
       (obj.minContractDuration = message.minContractDuration);
     message.maxContractDuration !== undefined &&
@@ -306,10 +306,10 @@ export const Provider = {
     } else {
       message.metadataNonce = 0;
     }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = object.type;
+    if (object.status !== undefined && object.status !== null) {
+      message.status = object.status;
     } else {
-      message.type = 0;
+      message.status = 0;
     }
     if (
       object.minContractDuration !== undefined &&

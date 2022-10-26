@@ -14,6 +14,12 @@ import (
 func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvider) (*types.MsgBondProviderResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	ctx.Logger().Info(
+		"receive MsgBondProvider",
+		"pubkey", msg.PubKey,
+		"chain", msg.Chain,
+		"bond", msg.Bond,
+	)
 	if err := k.BondProviderValidate(ctx, msg); err != nil {
 		return nil, err
 	}
@@ -26,6 +32,9 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 }
 
 func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondProvider) error {
+	if k.FetchConfig(ctx, configs.HandlerBondProvider) > 0 {
+		return sdkerrors.Wrapf(types.ErrDisabledHandler, "bond provider")
+	}
 	return nil
 }
 
