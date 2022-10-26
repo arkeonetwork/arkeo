@@ -1,10 +1,9 @@
 package cli
 
 import (
-	"strconv"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -41,11 +40,11 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argMinContractDuration, err := cast.ToUint64E(args[5])
+			argMinContractDuration, err := cast.ToInt64E(args[5])
 			if err != nil {
 				return err
 			}
-			argMaxContractDuration, err := cast.ToUint64E(args[6])
+			argMaxContractDuration, err := cast.ToInt64E(args[6])
 			if err != nil {
 				return err
 			}

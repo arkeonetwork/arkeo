@@ -12,13 +12,17 @@ type ConfigName int
 const (
 	HandlerBondProvider ConfigName = iota
 	HandlerModProvider
+	HandlerOpenContract
 	MaxContractLength
+	MinProviderBond
 )
 
 var nameToString = map[ConfigName]string{
 	HandlerBondProvider: "HandlerBondProvider",
 	HandlerModProvider:  "HandlerModProvider",
+	HandlerOpenContract: "HandlerOpenContract",
 	MaxContractLength:   "MaxContractLength",
+	MinProviderBond:     "MinProviderBond",
 }
 
 // String implement fmt.stringer

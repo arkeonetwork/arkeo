@@ -73236,9 +73236,17 @@ definitions:
     description: |-
       Version defines the versioning scheme used to negotiate the IBC verison in
       the connection handshake.
+  mercury.mercury.ContractType:
+    type: string
+    enum:
+      - Subscription
+      - PayAsYouGo
+    default: Subscription
   mercury.mercury.MsgBondProviderResponse:
     type: object
   mercury.mercury.MsgModProviderResponse:
+    type: object
+  mercury.mercury.MsgOpenContractResponse:
     type: object
   mercury.mercury.Params:
     type: object

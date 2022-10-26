@@ -9,9 +9,16 @@
  * ---------------------------------------------------------------
  */
 
+export enum MercuryContractType {
+  Subscription = "Subscription",
+  PayAsYouGo = "PayAsYouGo",
+}
+
 export type MercuryMsgBondProviderResponse = object;
 
 export type MercuryMsgModProviderResponse = object;
+
+export type MercuryMsgOpenContractResponse = object;
 
 /**
  * Params defines the parameters for the module.

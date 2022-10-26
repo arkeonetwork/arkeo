@@ -2,11 +2,10 @@ package keeper
 
 import (
 	"context"
-	"strconv"
-
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -44,12 +43,20 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 	}
 	maxContractDuration := k.FetchConfig(ctx, configs.MaxContractLength)
 	if maxContractDuration > 0 {
-		if msg.MaxContractDuration > uint64(maxContractDuration) {
+		if msg.MaxContractDuration > maxContractDuration {
 			return sdkerrors.Wrapf(types.ErrInvalidModProviderMaxContractDuration, "max contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
 		}
-		if msg.MinContractDuration > uint64(maxContractDuration) {
+		if msg.MinContractDuration > maxContractDuration {
 			return sdkerrors.Wrapf(types.ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
 		}
+	}
+
+	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	if err != nil {
+		return err
+	}
+	if provider.Bond.IsZero() {
+		return sdkerrors.Wrapf(types.ErrInvalidModProviderNoBond, "bond cannot be zero")
 	}
 
 	return nil
@@ -101,8 +108,8 @@ func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider types.Provider)
 				sdk.NewAttribute("metadata_uri", provider.MetadataURI),
 				sdk.NewAttribute("metadata_nonce", strconv.FormatUint(provider.MetadataNonce, 10)),
 				sdk.NewAttribute("status", provider.Status.String()),
-				sdk.NewAttribute("min_contract_duration", strconv.FormatUint(provider.MinContractDuration, 10)),
-				sdk.NewAttribute("max_contract_duration", strconv.FormatUint(provider.MaxContractDuration, 10)),
+				sdk.NewAttribute("min_contract_duration", strconv.FormatInt(provider.MinContractDuration, 10)),
+				sdk.NewAttribute("max_contract_duration", strconv.FormatInt(provider.MaxContractDuration, 10)),
 				sdk.NewAttribute("subscription_rate", strconv.FormatInt(provider.SubscriptionRate, 10)),
 				sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
 			),

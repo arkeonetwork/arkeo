@@ -67,6 +67,10 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
+	if msg.Chain.IsEmpty() {
+		return sdkerrors.Wrapf(ErrInvalidChain, "%s", msg.Chain)
+	}
+
 	if msg.Bond.IsNil() || msg.Bond.IsZero() {
 		return sdkerrors.Wrapf(ErrInvalidBond, "bond cannot be set to zero")
 	}
