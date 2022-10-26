@@ -10,11 +10,15 @@ import (
 type ConfigName int
 
 const (
-	GasFee ConfigName = iota
+	HandlerBondProvider ConfigName = iota
+	HandlerModProvider
+	MaxContractLength
 )
 
 var nameToString = map[ConfigName]string{
-	GasFee: "GasFee",
+	HandlerBondProvider: "HandlerBondProvider",
+	HandlerModProvider:  "HandlerModProvider",
+	MaxContractLength:   "MaxContractLength",
 }
 
 // String implement fmt.stringer

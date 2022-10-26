@@ -11,10 +11,17 @@
 
 export type MercuryMsgBondProviderResponse = object;
 
+export type MercuryMsgModProviderResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
 export type MercuryParams = object;
+
+export enum MercuryProviderStatus {
+  Offline = "Offline",
+  Online = "Online",
+}
 
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.

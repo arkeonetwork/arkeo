@@ -4,7 +4,9 @@ package configs
 func NewConfigValue010() *ConfigVals {
 	return &ConfigVals{
 		int64values: map[ConfigName]int64{
-			GasFee: 1_00000000, // number of tokens for gas fee
+			HandlerBondProvider: 0,       // enable/disable bond provider handler
+			HandlerModProvider:  0,       // enable/disable mod provider handler
+			MaxContractLength:   5256000, // one year
 		},
 		boolValues:   map[ConfigName]bool{},
 		stringValues: map[ConfigName]string{},
