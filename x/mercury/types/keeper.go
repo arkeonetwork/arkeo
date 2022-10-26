@@ -35,16 +35,12 @@ func (c Contract) Expiration() int64 {
 }
 
 func (c Contract) IsOpen(h int64) bool {
-	fmt.Printf("Height: %d\n", h)
 	if c.IsEmpty() {
-		fmt.Println("is empty")
 		return false
 	}
 	if c.Expiration() < h {
-		fmt.Println("is expired")
 		return false
 	}
-	fmt.Println("done.")
 	return true
 }
 

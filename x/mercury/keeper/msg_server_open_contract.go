@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"context"
-	"strconv"
-
+	"fmt"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -84,6 +84,17 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 }
 
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
+	cost := getCoins(k.FetchConfig(ctx, configs.OpenContractCost))
+	if !cost.IsZero() {
+		if !k.HasCoins(ctx, msg.MustGetSigner(), cost) {
+			fmt.Printf("Balance: %+v\n", k.GetBalance(ctx, msg.MustGetSigner()))
+			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+		}
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cost); err != nil {
+			return nil
+		}
+	}
+
 	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.MustGetSigner())
 	if err != nil {
 		return err

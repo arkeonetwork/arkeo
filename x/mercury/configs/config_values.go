@@ -14,6 +14,7 @@ const (
 	HandlerModProvider
 	HandlerOpenContract
 	MaxContractLength
+	OpenContractCost
 	MinProviderBond
 )
 
@@ -22,6 +23,7 @@ var nameToString = map[ConfigName]string{
 	HandlerModProvider:  "HandlerModProvider",
 	HandlerOpenContract: "HandlerOpenContract",
 	MaxContractLength:   "MaxContractLength",
+	OpenContractCost:    "OpenContractCost",
 	MinProviderBond:     "MinProviderBond",
 }
 

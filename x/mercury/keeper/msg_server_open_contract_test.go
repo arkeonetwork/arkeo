@@ -3,6 +3,7 @@ package keeper
 import (
 	"mercury/common"
 	"mercury/common/cosmos"
+	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
 
 	. "gopkg.in/check.v1"
@@ -89,6 +90,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	acc, err := pubkey.GetMyAddress()
 	c.Assert(err, IsNil)
 	chain := common.BTCChain
+	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
 		PubKey:   pubkey,
@@ -107,4 +109,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))
+
+	bal := k.GetBalance(ctx, acc) // check balance
+	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, common.Tokens(9))
 }

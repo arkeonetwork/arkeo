@@ -44,3 +44,7 @@ func GetUncappedShare(part, total, allocation cosmos.Uint) (share cosmos.Uint) {
 	share = cosmos.NewUintFromBigInt(result.RoundInt().BigInt())
 	return
 }
+
+func Tokens(i int64) int64 {
+	return i * 1e8
+}
