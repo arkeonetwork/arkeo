@@ -1,8 +1,9 @@
+# Mercury
+
+Mercury - Free Market Blockchain Data Infrastructure
+
 [![Mercury CI](https://github.com/cbarraford/mercury/actions/workflows/ci.yml/badge.svg)](https://github.com/cbarraford/mercury/actions/workflows/ci.yml)
 [![Release](https://github.com/cbarraford/mercury/actions/workflows/release.yml/badge.svg)](https://github.com/cbarraford/mercury/actions/workflows/release.yml)
-
-# Mercury
-Mercury - Free Market Blockchain Data Infrastructure
 
 **mercury** is a blockchain built using Cosmos SDK and Tendermint and created
 with [Ignite CLI](https://ignite.com/cli).
