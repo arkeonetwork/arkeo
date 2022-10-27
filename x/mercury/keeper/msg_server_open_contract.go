@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -87,10 +86,19 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	cost := getCoins(k.FetchConfig(ctx, configs.OpenContractCost))
 	if !cost.IsZero() {
 		if !k.HasCoins(ctx, msg.MustGetSigner(), cost) {
-			fmt.Printf("Balance: %+v\n", k.GetBalance(ctx, msg.MustGetSigner()))
 			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
 		}
 		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cost); err != nil {
+			return nil
+		}
+	}
+
+	deposit := cosmos.NewCoins(cosmos.NewCoin(configs.Denom, msg.Deposit))
+	if !deposit.IsZero() {
+		if !k.HasCoins(ctx, msg.MustGetSigner(), deposit) {
+			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+		}
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, deposit); err != nil {
 			return nil
 		}
 	}
@@ -104,6 +112,9 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate
+	contract.Deposit = msg.Deposit
+	contract.Queries = 0
+	contract.Paid = cosmos.ZeroInt()
 
 	err = k.SetContract(ctx, contract)
 	if err != nil {

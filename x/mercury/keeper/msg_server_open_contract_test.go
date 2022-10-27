@@ -99,6 +99,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 		CType:    types.ContractType_PayAsYouGo,
 		Duration: 100,
 		Rate:     15,
+		Deposit:  cosmos.NewInt(1000),
 	}
 	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 
@@ -109,7 +110,10 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))
+	c.Check(contract.Queries, Equals, int64(0))
+	c.Check(contract.Deposit.Int64(), Equals, int64(1000))
+	c.Check(contract.Paid.Int64(), Equals, int64(0))
 
 	bal := k.GetBalance(ctx, acc) // check balance
-	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, common.Tokens(9))
+	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(899999000))
 }

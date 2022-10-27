@@ -112,6 +112,7 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 		types.ModuleName:   {authtypes.Minter, authtypes.Burner},
 		types.ReserveName:  {},
 		types.ProviderName: {},
+		types.ContractName: {},
 	}, sdk.Bech32PrefixAccAddr)
 	ak.SetParams(ctx, authtypes.DefaultParams())
 
