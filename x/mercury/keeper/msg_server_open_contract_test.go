@@ -40,6 +40,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 		CType:    types.ContractType_Subscription,
 		Duration: 100,
 		Rate:     15,
+		Deposit:  cosmos.NewInt(100 * 15),
 	}
 	c.Assert(s.OpenContractValidate(ctx, &msg), IsNil)
 
