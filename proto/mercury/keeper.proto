@@ -38,4 +38,7 @@ message Contract {
   int64 height = 5;
   int64 duration = 6;
   int64 rate = 7;
+  string deposit = 8 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string paid = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  int64 queries = 10;
 }

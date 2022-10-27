@@ -8,20 +8,14 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgBondProvider } from "./types/mercury/tx";
-import { MsgOpenContract } from "./types/mercury/tx";
 import { MsgModProvider } from "./types/mercury/tx";
+import { MsgOpenContract } from "./types/mercury/tx";
 
 
-export { MsgBondProvider, MsgOpenContract, MsgModProvider };
+export { MsgBondProvider, MsgModProvider, MsgOpenContract };
 
 type sendMsgBondProviderParams = {
   value: MsgBondProvider,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgOpenContractParams = {
-  value: MsgOpenContract,
   fee?: StdFee,
   memo?: string
 };
@@ -32,17 +26,23 @@ type sendMsgModProviderParams = {
   memo?: string
 };
 
+type sendMsgOpenContractParams = {
+  value: MsgOpenContract,
+  fee?: StdFee,
+  memo?: string
+};
+
 
 type msgBondProviderParams = {
   value: MsgBondProvider,
 };
 
-type msgOpenContractParams = {
-  value: MsgOpenContract,
-};
-
 type msgModProviderParams = {
   value: MsgModProvider,
+};
+
+type msgOpenContractParams = {
+  value: MsgOpenContract,
 };
 
 
@@ -77,20 +77,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgOpenContract({ value, fee, memo }: sendMsgOpenContractParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgOpenContract: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgOpenContract({ value: MsgOpenContract.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgOpenContract: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgModProvider({ value, fee, memo }: sendMsgModProviderParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgModProvider: Unable to sign Tx. Signer is not present.')
@@ -105,6 +91,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
+		async sendMsgOpenContract({ value, fee, memo }: sendMsgOpenContractParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgOpenContract: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgOpenContract({ value: MsgOpenContract.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgOpenContract: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		
 		msgBondProvider({ value }: msgBondProviderParams): EncodeObject {
 			try {
@@ -114,19 +114,19 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgOpenContract({ value }: msgOpenContractParams): EncodeObject {
-			try {
-				return { typeUrl: "/mercury.mercury.MsgOpenContract", value: MsgOpenContract.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgOpenContract: Could not create message: ' + e.message)
-			}
-		},
-		
 		msgModProvider({ value }: msgModProviderParams): EncodeObject {
 			try {
 				return { typeUrl: "/mercury.mercury.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgOpenContract({ value }: msgOpenContractParams): EncodeObject {
+			try {
+				return { typeUrl: "/mercury.mercury.MsgOpenContract", value: MsgOpenContract.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgOpenContract: Could not create message: ' + e.message)
 			}
 		},
 		

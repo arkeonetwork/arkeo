@@ -90,6 +90,9 @@ export interface Contract {
   height: number;
   duration: number;
   rate: number;
+  deposit: string;
+  paid: string;
+  queries: number;
 }
 
 const baseProvider: object = {
@@ -361,6 +364,9 @@ const baseContract: object = {
   height: 0,
   duration: 0,
   rate: 0,
+  deposit: "",
+  paid: "",
+  queries: 0,
 };
 
 export const Contract = {
@@ -385,6 +391,15 @@ export const Contract = {
     }
     if (message.rate !== 0) {
       writer.uint32(56).int64(message.rate);
+    }
+    if (message.deposit !== "") {
+      writer.uint32(66).string(message.deposit);
+    }
+    if (message.paid !== "") {
+      writer.uint32(74).string(message.paid);
+    }
+    if (message.queries !== 0) {
+      writer.uint32(80).int64(message.queries);
     }
     return writer;
   },
@@ -416,6 +431,15 @@ export const Contract = {
           break;
         case 7:
           message.rate = longToNumber(reader.int64() as Long);
+          break;
+        case 8:
+          message.deposit = reader.string();
+          break;
+        case 9:
+          message.paid = reader.string();
+          break;
+        case 10:
+          message.queries = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -460,6 +484,21 @@ export const Contract = {
     } else {
       message.rate = 0;
     }
+    if (object.deposit !== undefined && object.deposit !== null) {
+      message.deposit = String(object.deposit);
+    } else {
+      message.deposit = "";
+    }
+    if (object.paid !== undefined && object.paid !== null) {
+      message.paid = String(object.paid);
+    } else {
+      message.paid = "";
+    }
+    if (object.queries !== undefined && object.queries !== null) {
+      message.queries = Number(object.queries);
+    } else {
+      message.queries = 0;
+    }
     return message;
   },
 
@@ -478,6 +517,9 @@ export const Contract = {
     message.height !== undefined && (obj.height = message.height);
     message.duration !== undefined && (obj.duration = message.duration);
     message.rate !== undefined && (obj.rate = message.rate);
+    message.deposit !== undefined && (obj.deposit = message.deposit);
+    message.paid !== undefined && (obj.paid = message.paid);
+    message.queries !== undefined && (obj.queries = message.queries);
     return obj;
   },
 
@@ -517,6 +559,21 @@ export const Contract = {
       message.rate = object.rate;
     } else {
       message.rate = 0;
+    }
+    if (object.deposit !== undefined && object.deposit !== null) {
+      message.deposit = object.deposit;
+    } else {
+      message.deposit = "";
+    }
+    if (object.paid !== undefined && object.paid !== null) {
+      message.paid = object.paid;
+    } else {
+      message.paid = "";
+    }
+    if (object.queries !== undefined && object.queries !== null) {
+      message.queries = object.queries;
+    } else {
+      message.queries = 0;
     }
     return message;
   },

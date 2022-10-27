@@ -43,6 +43,7 @@ export interface MsgOpenContract {
   cType: ContractType;
   duration: number;
   rate: number;
+  deposit: string;
 }
 
 export interface MsgOpenContractResponse {}
@@ -493,6 +494,7 @@ const baseMsgOpenContract: object = {
   cType: 0,
   duration: 0,
   rate: 0,
+  deposit: "",
 };
 
 export const MsgOpenContract = {
@@ -514,6 +516,9 @@ export const MsgOpenContract = {
     }
     if (message.rate !== 0) {
       writer.uint32(48).int64(message.rate);
+    }
+    if (message.deposit !== "") {
+      writer.uint32(58).string(message.deposit);
     }
     return writer;
   },
@@ -542,6 +547,9 @@ export const MsgOpenContract = {
           break;
         case 6:
           message.rate = longToNumber(reader.int64() as Long);
+          break;
+        case 7:
+          message.deposit = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -583,6 +591,11 @@ export const MsgOpenContract = {
     } else {
       message.rate = 0;
     }
+    if (object.deposit !== undefined && object.deposit !== null) {
+      message.deposit = String(object.deposit);
+    } else {
+      message.deposit = "";
+    }
     return message;
   },
 
@@ -595,6 +608,7 @@ export const MsgOpenContract = {
       (obj.cType = contractTypeToJSON(message.cType));
     message.duration !== undefined && (obj.duration = message.duration);
     message.rate !== undefined && (obj.rate = message.rate);
+    message.deposit !== undefined && (obj.deposit = message.deposit);
     return obj;
   },
 
@@ -629,6 +643,11 @@ export const MsgOpenContract = {
       message.rate = object.rate;
     } else {
       message.rate = 0;
+    }
+    if (object.deposit !== undefined && object.deposit !== null) {
+      message.deposit = object.deposit;
+    } else {
+      message.deposit = "";
     }
     return message;
   },

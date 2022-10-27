@@ -859,6 +859,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(mercurymoduletypes.ModuleName)
 	paramsKeeper.Subspace(mercurymoduletypes.ReserveName)
 	paramsKeeper.Subspace(mercurymoduletypes.ProviderName)
+	paramsKeeper.Subspace(mercurymoduletypes.ContractName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

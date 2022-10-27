@@ -23,6 +23,8 @@ func NewContract(pubkey common.PubKey, chain common.Chain, client cosmos.AccAddr
 		ProviderPubKey: pubkey,
 		Chain:          chain,
 		ClientAddress:  client,
+		Deposit:        cosmos.ZeroInt(),
+		Paid:           cosmos.ZeroInt(),
 	}
 }
 
