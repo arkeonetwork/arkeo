@@ -57,6 +57,9 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		if msg.Rate != provider.SubscriptionRate {
 			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "subscription %d (client) vs %d (provider)", msg.Rate, provider.SubscriptionRate)
 		}
+		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
+			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
+		}
 	case types.ContractType_PayAsYouGo:
 		if msg.Rate != provider.SubscriptionRate {
 			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go %d (client) vs %d (provider)", msg.Rate, provider.PayAsYouGoRate)
@@ -83,40 +86,21 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 }
 
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
-	cost := getCoins(k.FetchConfig(ctx, configs.OpenContractCost))
+	cost := getCoin(k.FetchConfig(ctx, configs.OpenContractCost)).AddAmount(msg.Deposit)
 	if !cost.IsZero() {
-		if !k.HasCoins(ctx, msg.MustGetSigner(), cost) {
-			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
-		}
-		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cost); err != nil {
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cosmos.NewCoins(cost)); err != nil {
 			return nil
 		}
 	}
 
-	deposit := cosmos.NewCoins(cosmos.NewCoin(configs.Denom, msg.Deposit))
-	if !deposit.IsZero() {
-		if !k.HasCoins(ctx, msg.MustGetSigner(), deposit) {
-			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
-		}
-		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, deposit); err != nil {
-			return nil
-		}
-	}
-
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.MustGetSigner())
-	if err != nil {
-		return err
-	}
-
+	contract := types.NewContract(msg.PubKey, msg.Chain, msg.MustGetSigner())
 	contract.Type = msg.CType
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
-	contract.Queries = 0
-	contract.Paid = cosmos.ZeroInt()
 
-	err = k.SetContract(ctx, contract)
+	err := k.SetContract(ctx, contract)
 	if err != nil {
 		return err
 	}

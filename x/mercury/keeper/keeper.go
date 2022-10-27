@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -201,6 +202,9 @@ func (k KVStore) AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosm
 
 // SendFromAccountToModule transfer fund from one account to a module
 func (k KVStore) SendFromAccountToModule(ctx cosmos.Context, from cosmos.AccAddress, to string, coins cosmos.Coins) error {
+	if !k.HasCoins(ctx, from, coins) {
+		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+	}
 	return k.coinKeeper.SendCoinsFromAccountToModule(ctx, from, to, coins)
 }
 
