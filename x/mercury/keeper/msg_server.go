@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
@@ -52,8 +51,6 @@ func (k msgServer) SettleContract(ctx cosmos.Context, contract types.Contract, c
 		if err != nil {
 			return contract, err
 		}
-		fmt.Printf("Debt: %+v\n", debt)
-		fmt.Printf("Val : %+v\n", valIncome)
 		if err := k.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, debt))); err != nil {
 			return contract, err
 		}
