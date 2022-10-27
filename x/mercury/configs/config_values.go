@@ -17,6 +17,7 @@ const (
 	MaxContractLength
 	OpenContractCost
 	MinProviderBond
+	ReserveTax
 )
 
 var nameToString = map[ConfigName]string{
@@ -27,6 +28,7 @@ var nameToString = map[ConfigName]string{
 	MaxContractLength:    "MaxContractLength",
 	OpenContractCost:     "OpenContractCost",
 	MinProviderBond:      "MinProviderBond",
+	ReserveTax:           "ReserveTax",
 }
 
 // String implement fmt.stringer
