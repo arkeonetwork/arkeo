@@ -24,4 +24,6 @@ var (
 	ErrOpenContractAlreadyOpen               = sdkerrors.Register(ModuleName, 15, "contract is already open")
 	ErrOpenContractRate                      = sdkerrors.Register(ModuleName, 16, "invalid contract rate")
 	ErrInvalidContractType                   = sdkerrors.Register(ModuleName, 17, "invalid contract type")
+	ErrInvalidPubKey                         = sdkerrors.Register(ModuleName, 18, "invalid pubkey")
+	ErrCloseContractAlreadyClosed            = sdkerrors.Register(ModuleName, 19, "contract is already closed")
 )

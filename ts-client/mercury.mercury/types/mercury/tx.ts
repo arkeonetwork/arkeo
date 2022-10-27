@@ -48,6 +48,15 @@ export interface MsgOpenContract {
 
 export interface MsgOpenContractResponse {}
 
+export interface MsgCloseContract {
+  creator: string;
+  pubKey: string;
+  chain: string;
+  client: string;
+}
+
+export interface MsgCloseContractResponse {}
+
 const baseMsgBondProvider: object = {
   creator: "",
   pubKey: "",
@@ -699,12 +708,176 @@ export const MsgOpenContractResponse = {
   },
 };
 
+const baseMsgCloseContract: object = {
+  creator: "",
+  pubKey: "",
+  chain: "",
+  client: "",
+};
+
+export const MsgCloseContract = {
+  encode(message: MsgCloseContract, writer: Writer = Writer.create()): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    if (message.client !== "") {
+      writer.uint32(34).string(message.client);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgCloseContract {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgCloseContract } as MsgCloseContract;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.pubKey = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        case 4:
+          message.client = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgCloseContract {
+    const message = { ...baseMsgCloseContract } as MsgCloseContract;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
+    }
+    return message;
+  },
+
+  toJSON(message: MsgCloseContract): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.client !== undefined && (obj.client = message.client);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgCloseContract>): MsgCloseContract {
+    const message = { ...baseMsgCloseContract } as MsgCloseContract;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
+    } else {
+      message.client = "";
+    }
+    return message;
+  },
+};
+
+const baseMsgCloseContractResponse: object = {};
+
+export const MsgCloseContractResponse = {
+  encode(
+    _: MsgCloseContractResponse,
+    writer: Writer = Writer.create()
+  ): Writer {
+    return writer;
+  },
+
+  decode(
+    input: Reader | Uint8Array,
+    length?: number
+  ): MsgCloseContractResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgCloseContractResponse,
+    } as MsgCloseContractResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgCloseContractResponse {
+    const message = {
+      ...baseMsgCloseContractResponse,
+    } as MsgCloseContractResponse;
+    return message;
+  },
+
+  toJSON(_: MsgCloseContractResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgCloseContractResponse>
+  ): MsgCloseContractResponse {
+    const message = {
+      ...baseMsgCloseContractResponse,
+    } as MsgCloseContractResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse>;
   ModProvider(request: MsgModProvider): Promise<MsgModProviderResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   OpenContract(request: MsgOpenContract): Promise<MsgOpenContractResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  CloseContract(request: MsgCloseContract): Promise<MsgCloseContractResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -745,6 +918,18 @@ export class MsgClientImpl implements Msg {
     );
     return promise.then((data) =>
       MsgOpenContractResponse.decode(new Reader(data))
+    );
+  }
+
+  CloseContract(request: MsgCloseContract): Promise<MsgCloseContractResponse> {
+    const data = MsgCloseContract.encode(request).finish();
+    const promise = this.rpc.request(
+      "mercury.mercury.Msg",
+      "CloseContract",
+      data
+    );
+    return promise.then((data) =>
+      MsgCloseContractResponse.decode(new Reader(data))
     );
   }
 }

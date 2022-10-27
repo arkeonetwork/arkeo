@@ -93,6 +93,7 @@ export interface Contract {
   deposit: string;
   paid: string;
   queries: number;
+  closedHeight: number;
 }
 
 const baseProvider: object = {
@@ -367,6 +368,7 @@ const baseContract: object = {
   deposit: "",
   paid: "",
   queries: 0,
+  closedHeight: 0,
 };
 
 export const Contract = {
@@ -400,6 +402,9 @@ export const Contract = {
     }
     if (message.queries !== 0) {
       writer.uint32(80).int64(message.queries);
+    }
+    if (message.closedHeight !== 0) {
+      writer.uint32(88).int64(message.closedHeight);
     }
     return writer;
   },
@@ -440,6 +445,9 @@ export const Contract = {
           break;
         case 10:
           message.queries = longToNumber(reader.int64() as Long);
+          break;
+        case 11:
+          message.closedHeight = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -499,6 +507,11 @@ export const Contract = {
     } else {
       message.queries = 0;
     }
+    if (object.closedHeight !== undefined && object.closedHeight !== null) {
+      message.closedHeight = Number(object.closedHeight);
+    } else {
+      message.closedHeight = 0;
+    }
     return message;
   },
 
@@ -520,6 +533,8 @@ export const Contract = {
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
     message.queries !== undefined && (obj.queries = message.queries);
+    message.closedHeight !== undefined &&
+      (obj.closedHeight = message.closedHeight);
     return obj;
   },
 
@@ -574,6 +589,11 @@ export const Contract = {
       message.queries = object.queries;
     } else {
       message.queries = 0;
+    }
+    if (object.closedHeight !== undefined && object.closedHeight !== null) {
+      message.closedHeight = object.closedHeight;
+    } else {
+      message.closedHeight = 0;
     }
     return message;
   },

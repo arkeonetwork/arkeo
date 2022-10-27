@@ -43,6 +43,9 @@ func (c Contract) IsOpen(h int64) bool {
 	if c.Expiration() < h {
 		return false
 	}
+	if c.ClosedHeight > 0 && c.ClosedHeight < h {
+		return false
+	}
 	return true
 }
 

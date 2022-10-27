@@ -13,18 +13,20 @@ const (
 	HandlerBondProvider ConfigName = iota
 	HandlerModProvider
 	HandlerOpenContract
+	HandlerCloseContract
 	MaxContractLength
 	OpenContractCost
 	MinProviderBond
 )
 
 var nameToString = map[ConfigName]string{
-	HandlerBondProvider: "HandlerBondProvider",
-	HandlerModProvider:  "HandlerModProvider",
-	HandlerOpenContract: "HandlerOpenContract",
-	MaxContractLength:   "MaxContractLength",
-	OpenContractCost:    "OpenContractCost",
-	MinProviderBond:     "MinProviderBond",
+	HandlerBondProvider:  "HandlerBondProvider",
+	HandlerModProvider:   "HandlerModProvider",
+	HandlerOpenContract:  "HandlerOpenContract",
+	HandlerCloseContract: "HandlerCloseContract",
+	MaxContractLength:    "MaxContractLength",
+	OpenContractCost:     "OpenContractCost",
+	MinProviderBond:      "MinProviderBond",
 }
 
 // String implement fmt.stringer
