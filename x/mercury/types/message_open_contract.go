@@ -57,6 +57,12 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
+	// verify pubkey
+	_, err = common.NewPubKey(msg.PubKey.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
+	}
+
 	if msg.Duration <= 0 {
 		return sdkerrors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
 	}

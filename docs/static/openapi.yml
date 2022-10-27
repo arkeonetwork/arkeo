@@ -73244,6 +73244,8 @@ definitions:
     default: Subscription
   mercury.mercury.MsgBondProviderResponse:
     type: object
+  mercury.mercury.MsgCloseContractResponse:
+    type: object
   mercury.mercury.MsgModProviderResponse:
     type: object
   mercury.mercury.MsgOpenContractResponse:

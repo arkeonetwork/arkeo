@@ -11,6 +11,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBondProvider{}, "mercury/BondProvider", nil)
 	cdc.RegisterConcrete(&MsgModProvider{}, "mercury/ModProvider", nil)
 	cdc.RegisterConcrete(&MsgOpenContract{}, "mercury/OpenContract", nil)
+	cdc.RegisterConcrete(&MsgCloseContract{}, "mercury/CloseContract", nil)
 	// this line is used by starport scaffolding # 2
 }
 
@@ -23,6 +24,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgOpenContract{},
+	)
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgCloseContract{},
 	)
 	// this line is used by starport scaffolding # 3
 

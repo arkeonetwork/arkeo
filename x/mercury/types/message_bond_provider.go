@@ -1,7 +1,6 @@
 package types
 
 import (
-	fmt "fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
 
@@ -54,8 +53,13 @@ func (msg *MsgBondProvider) GetSignBytes() []byte {
 func (msg *MsgBondProvider) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		fmt.Println("got here")
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+	}
+
+	// verify pubkey
+	_, err = common.NewPubKey(msg.PubKey.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
 	}
 
 	signer := msg.MustGetSigner()
@@ -67,8 +71,10 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	if msg.Chain.IsEmpty() {
-		return sdkerrors.Wrapf(ErrInvalidChain, "%s", msg.Chain)
+	// verify chain
+	_, err = common.NewChain(msg.Chain.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
 	if msg.Bond.IsNil() || msg.Bond.IsZero() {
