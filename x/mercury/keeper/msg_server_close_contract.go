@@ -56,7 +56,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if err != nil {
 		return err
 	}
-	if contract.Type == types.ContractType_PayAsYouGo && !provider.Equals(client) {
+	if contract.Type == types.ContractType_PayAsYouGo && !provider.Equals(msg.MustGetSigner()) {
 		// clients are not allowed to cancel a pay-as-you-go contract as it
 		// could be a way to game providers. IE, the client make 1,000 requests
 		// and before the provider can claim the rewards, the client cancels
