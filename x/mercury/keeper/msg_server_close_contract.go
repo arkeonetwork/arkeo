@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -21,13 +20,16 @@ func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContr
 		"client", msg.Client,
 	)
 
-	if err := k.CloseContractValidate(ctx, msg); err != nil {
+	cacheCtx, commit := ctx.CacheContext()
+	if err := k.CloseContractValidate(cacheCtx, msg); err != nil {
 		return nil, err
 	}
 
-	if err := k.CloseContractHandle(ctx, msg); err != nil {
+	if err := k.CloseContractHandle(cacheCtx, msg); err != nil {
 		return nil, err
 	}
+
+	commit()
 	return &types.MsgCloseContractResponse{}, nil
 }
 
@@ -48,6 +50,18 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 
 	if contract.IsClose(ctx.BlockHeight()) {
 		return sdkerrors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
+	}
+
+	provider, err := contract.ProviderPubKey.GetMyAddress()
+	if err != nil {
+		return err
+	}
+	if contract.Type == types.ContractType_PayAsYouGo && !provider.Equals(client) {
+		// clients are not allowed to cancel a pay-as-you-go contract as it
+		// could be a way to game providers. IE, the client make 1,000 requests
+		// and before the provider can claim the rewards, the client cancels
+		// the contract.
+		return sdkerrors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
 	}
 
 	return nil

@@ -83,18 +83,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	c.Check(contract.ClosedHeight, Equals, ctx.BlockHeight())
 
 	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
-	c.Check(bal.Int64(), Equals, int64(480))
+	c.Check(bal.Int64(), Equals, int64(0))
 	c.Check(k.HasCoins(ctx, provider, getCoins(20)), Equals, true)
-
-	// do it again, further into the future (make sure we don't pay out debt multiple times
-	ctx = ctx.WithBlockHeight(30)
-	c.Assert(s.CloseContractHandle(ctx, &msg), IsNil)
-	contract, err = k.GetContract(ctx, pubkey, chain, acc)
-	c.Assert(err, IsNil)
-	c.Check(contract.Paid.Int64(), Equals, int64(100))
-	c.Check(contract.ClosedHeight, Equals, ctx.BlockHeight())
-
-	bal = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
-	c.Check(bal.Int64(), Equals, int64(400))
-	c.Check(k.HasCoins(ctx, provider, getCoins(100)), Equals, true)
+	c.Check(k.HasCoins(ctx, contract.ClientAddress, getCoins(480)), Equals, true)
 }

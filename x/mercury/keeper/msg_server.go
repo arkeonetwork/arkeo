@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -39,7 +38,6 @@ func (k msgServer) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 // any owed debt is paid to data provider
 func (k msgServer) SettleContract(ctx cosmos.Context, contract types.Contract, closed bool) (types.Contract, error) {
 	debt, err := k.ContractDebt(ctx, contract)
-	fmt.Printf("Debt: %d\n", debt.Int64())
 	if err != nil {
 		return contract, err
 	}
@@ -55,10 +53,15 @@ func (k msgServer) SettleContract(ctx cosmos.Context, contract types.Contract, c
 
 	contract.Paid = contract.Paid.Add(debt)
 	if closed {
+		remainder := contract.Deposit.Sub(contract.Paid)
+		if !remainder.IsZero() {
+			if err := k.SendFromModuleToAccount(ctx, types.ContractName, contract.ClientAddress, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
+				return contract, err
+			}
+		}
 		contract.ClosedHeight = ctx.BlockHeight()
 	}
 
-	fmt.Printf("Contract: %+v\n", contract)
 	err = k.SetContract(ctx, contract)
 	if err != nil {
 		return contract, err

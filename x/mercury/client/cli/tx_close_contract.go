@@ -1,10 +1,9 @@
 package cli
 
 import (
-	"strconv"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
