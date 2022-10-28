@@ -56,3 +56,11 @@ func (c Contract) IsClose(h int64) bool {
 func (c Contract) IsEmpty() bool {
 	return c.Height == 0
 }
+
+func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) *ContractExpiration {
+	return &ContractExpiration{
+		ProviderPubKey: pubkey,
+		Chain:          chain,
+		ClientAddress:  client,
+	}
+}

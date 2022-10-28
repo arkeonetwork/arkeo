@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"mercury/common/cosmos"
 	"mercury/x/mercury/client/cli"
 	"mercury/x/mercury/keeper"
 	"mercury/x/mercury/types"
@@ -155,6 +156,10 @@ func (AppModule) ConsensusVersion() uint64 { return 1 }
 func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx cosmos.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	mgr := keeper.NewManager(am.keeper)
+	if err := mgr.EndBlock(ctx); err != nil {
+		ctx.Logger().Error("manager endblock error ", "error", err)
+	}
 	return []abci.ValidatorUpdate{}
 }

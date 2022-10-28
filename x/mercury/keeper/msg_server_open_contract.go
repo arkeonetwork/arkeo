@@ -100,7 +100,18 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
 
-	err := k.SetContract(ctx, contract)
+	exp := types.NewContractExpiration(msg.PubKey, msg.Chain, msg.MustGetSigner())
+	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
+	if err != nil {
+		return err
+	}
+	set.Contracts = append(set.Contracts, exp)
+	err = k.SetContractExpirationSet(ctx, set)
+	if err != nil {
+		return err
+	}
+
+	err = k.SetContract(ctx, contract)
 	if err != nil {
 		return err
 	}
