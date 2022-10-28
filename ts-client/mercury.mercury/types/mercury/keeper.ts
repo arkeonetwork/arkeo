@@ -96,6 +96,17 @@ export interface Contract {
   closedHeight: number;
 }
 
+export interface ContractExpiration {
+  providerPubKey: string;
+  chain: string;
+  clientAddress: Uint8Array;
+}
+
+export interface ContractExpirationSet {
+  height: number;
+  contracts: ContractExpiration[];
+}
+
 const baseProvider: object = {
   pubKey: "",
   chain: "",
@@ -594,6 +605,190 @@ export const Contract = {
       message.closedHeight = object.closedHeight;
     } else {
       message.closedHeight = 0;
+    }
+    return message;
+  },
+};
+
+const baseContractExpiration: object = { providerPubKey: "", chain: "" };
+
+export const ContractExpiration = {
+  encode(
+    message: ContractExpiration,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.providerPubKey !== "") {
+      writer.uint32(10).string(message.providerPubKey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(18).string(message.chain);
+    }
+    if (message.clientAddress.length !== 0) {
+      writer.uint32(26).bytes(message.clientAddress);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): ContractExpiration {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseContractExpiration } as ContractExpiration;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.providerPubKey = reader.string();
+          break;
+        case 2:
+          message.chain = reader.string();
+          break;
+        case 3:
+          message.clientAddress = reader.bytes();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ContractExpiration {
+    const message = { ...baseContractExpiration } as ContractExpiration;
+    if (object.providerPubKey !== undefined && object.providerPubKey !== null) {
+      message.providerPubKey = String(object.providerPubKey);
+    } else {
+      message.providerPubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.clientAddress !== undefined && object.clientAddress !== null) {
+      message.clientAddress = bytesFromBase64(object.clientAddress);
+    }
+    return message;
+  },
+
+  toJSON(message: ContractExpiration): unknown {
+    const obj: any = {};
+    message.providerPubKey !== undefined &&
+      (obj.providerPubKey = message.providerPubKey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.clientAddress !== undefined &&
+      (obj.clientAddress = base64FromBytes(
+        message.clientAddress !== undefined
+          ? message.clientAddress
+          : new Uint8Array()
+      ));
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<ContractExpiration>): ContractExpiration {
+    const message = { ...baseContractExpiration } as ContractExpiration;
+    if (object.providerPubKey !== undefined && object.providerPubKey !== null) {
+      message.providerPubKey = object.providerPubKey;
+    } else {
+      message.providerPubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.clientAddress !== undefined && object.clientAddress !== null) {
+      message.clientAddress = object.clientAddress;
+    } else {
+      message.clientAddress = new Uint8Array();
+    }
+    return message;
+  },
+};
+
+const baseContractExpirationSet: object = { height: 0 };
+
+export const ContractExpirationSet = {
+  encode(
+    message: ContractExpirationSet,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.height !== 0) {
+      writer.uint32(8).int64(message.height);
+    }
+    for (const v of message.contracts) {
+      ContractExpiration.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): ContractExpirationSet {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseContractExpirationSet } as ContractExpirationSet;
+    message.contracts = [];
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.height = longToNumber(reader.int64() as Long);
+          break;
+        case 2:
+          message.contracts.push(
+            ContractExpiration.decode(reader, reader.uint32())
+          );
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ContractExpirationSet {
+    const message = { ...baseContractExpirationSet } as ContractExpirationSet;
+    message.contracts = [];
+    if (object.height !== undefined && object.height !== null) {
+      message.height = Number(object.height);
+    } else {
+      message.height = 0;
+    }
+    if (object.contracts !== undefined && object.contracts !== null) {
+      for (const e of object.contracts) {
+        message.contracts.push(ContractExpiration.fromJSON(e));
+      }
+    }
+    return message;
+  },
+
+  toJSON(message: ContractExpirationSet): unknown {
+    const obj: any = {};
+    message.height !== undefined && (obj.height = message.height);
+    if (message.contracts) {
+      obj.contracts = message.contracts.map((e) =>
+        e ? ContractExpiration.toJSON(e) : undefined
+      );
+    } else {
+      obj.contracts = [];
+    }
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<ContractExpirationSet>
+  ): ContractExpirationSet {
+    const message = { ...baseContractExpirationSet } as ContractExpirationSet;
+    message.contracts = [];
+    if (object.height !== undefined && object.height !== null) {
+      message.height = object.height;
+    } else {
+      message.height = 0;
+    }
+    if (object.contracts !== undefined && object.contracts !== null) {
+      for (const e of object.contracts) {
+        message.contracts.push(ContractExpiration.fromPartial(e));
+      }
     }
     return message;
   },

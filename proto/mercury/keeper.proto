@@ -43,3 +43,14 @@ message Contract {
   int64 queries = 10;
   int64 closed_height = 11;
 }
+
+message ContractExpiration {
+  string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
+  bytes  client_address = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+}
+
+message ContractExpirationSet {
+  int64 height = 1;
+  repeated ContractExpiration contracts = 2;
+}

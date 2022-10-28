@@ -29,3 +29,30 @@ func (s *KeeperContractSuite) TestContract(c *C) {
 	k.RemoveContract(ctx, contract.ProviderPubKey, contract.Chain, contract.ClientAddress)
 	c.Check(k.ContractExists(ctx, contract.ProviderPubKey, contract.Chain, contract.ClientAddress), Equals, false)
 }
+
+func (s *KeeperContractSuite) TestContractExpirationSet(c *C) {
+	var err error
+	ctx, k := SetupKeeper(c)
+	set := types.ContractExpirationSet{}
+	c.Check(k.SetContractExpirationSet(ctx, set), NotNil) // empty asset should error
+
+	set.Height = 100
+	c.Check(k.SetContractExpirationSet(ctx, set), IsNil) // empty asset NOT should error
+
+	exp := types.NewContractExpiration(types.GetRandomPubKey(), common.BTCChain, types.GetRandomBech32Addr())
+	set.Contracts = append(set.Contracts, exp)
+
+	c.Assert(k.SetContractExpirationSet(ctx, set), IsNil)
+	set, err = k.GetContractExpirationSet(ctx, set.Height)
+	c.Assert(err, IsNil)
+	c.Check(set.Height, Equals, int64(100))
+	c.Assert(set.Contracts, HasLen, 1)
+	c.Check(set.Contracts[0].ProviderPubKey, Equals, exp.ProviderPubKey)
+	c.Check(set.Contracts[0].Chain, Equals, exp.Chain)
+	c.Check(set.Contracts[0].ClientAddress.String(), Equals, exp.ClientAddress.String())
+
+	k.RemoveContractExpirationSet(ctx, 100)
+	set, err = k.GetContractExpirationSet(ctx, set.Height)
+	c.Assert(err, IsNil)
+	c.Assert(set.Contracts, HasLen, 0)
+}

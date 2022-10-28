@@ -1,5 +1,7 @@
 import { Provider } from "./types/mercury/keeper"
 import { Contract } from "./types/mercury/keeper"
+import { ContractExpiration } from "./types/mercury/keeper"
+import { ContractExpirationSet } from "./types/mercury/keeper"
 import { ProtoInt64 } from "./types/mercury/misc"
 import { ProtoUint64 } from "./types/mercury/misc"
 import { ProtoAccAddresses } from "./types/mercury/misc"
@@ -11,6 +13,8 @@ import { Params } from "./types/mercury/params"
 export {     
     Provider,
     Contract,
+    ContractExpiration,
+    ContractExpirationSet,
     ProtoInt64,
     ProtoUint64,
     ProtoAccAddresses,

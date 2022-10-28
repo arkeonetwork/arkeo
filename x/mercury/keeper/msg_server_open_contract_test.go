@@ -117,4 +117,10 @@ func (OpenContractSuite) TestHandle(c *C) {
 
 	bal := k.GetBalance(ctx, acc) // check balance
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(899999000))
+
+	// check that contract expiration has been set
+	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
+	c.Assert(err, IsNil)
+	c.Check(set.Height, Equals, contract.Expiration())
+	c.Check(set.Contracts, HasLen, 1)
 }

@@ -78,7 +78,7 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	_, err = k.SettleContract(ctx, contract, true)
+	_, err = k.mgr.SettleContract(ctx, contract, true)
 	if err != nil {
 		return err
 	}
