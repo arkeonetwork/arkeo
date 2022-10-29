@@ -13,6 +13,7 @@ func NewConfigValue010() *ConfigVals {
 			MaxContractLength:    5256000,          // one year
 			OpenContractCost:     common.Tokens(1), // cost to open a contract
 			MinProviderBond:      common.Tokens(1), // min bond for a data provider to be able to open contracts with
+			ReserveTax:           1000,             // reserve income off provider income, in basis points
 		},
 		boolValues:   map[ConfigName]bool{},
 		stringValues: map[ConfigName]string{},

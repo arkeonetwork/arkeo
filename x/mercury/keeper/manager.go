@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -51,9 +52,16 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 	return nil
 }
 
+func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int64 {
+	// TODO: use ctx to fetch config overrides from the chain state
+	return mgr.configs.GetInt64Value(name)
+}
+
 // any owed debt is paid to data provider
 func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, closed bool) (types.Contract, error) {
-	debt, err := mgr.contractDebt(ctx, contract)
+	totalDebt, err := mgr.contractDebt(ctx, contract)
+	valIncome := common.GetSafeShare(cosmos.NewInt(mgr.FetchConfig(ctx, configs.ReserveTax)), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
+	debt := totalDebt.Sub(valIncome)
 	if err != nil {
 		return contract, err
 	}
@@ -65,9 +73,12 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, c
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, debt))); err != nil {
 			return contract, err
 		}
+		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, valIncome))); err != nil {
+			return contract, err
+		}
 	}
 
-	contract.Paid = contract.Paid.Add(debt)
+	contract.Paid = contract.Paid.Add(totalDebt)
 	if closed {
 		remainder := contract.Deposit.Sub(contract.Paid)
 		if !remainder.IsZero() {

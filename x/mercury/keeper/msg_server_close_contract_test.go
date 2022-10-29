@@ -84,6 +84,8 @@ func (CloseContractSuite) TestHandle(c *C) {
 
 	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(0))
-	c.Check(k.HasCoins(ctx, provider, getCoins(20)), Equals, true)
+	c.Check(k.HasCoins(ctx, provider, getCoins(18)), Equals, true)
 	c.Check(k.HasCoins(ctx, contract.ClientAddress, getCoins(480)), Equals, true)
+	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
+	c.Check(bal.Int64(), Equals, int64(2))
 }

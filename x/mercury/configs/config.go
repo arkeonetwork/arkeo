@@ -10,13 +10,14 @@ import (
 )
 
 var (
-	GitCommit       = "null"  // sha1 revision used to build the program
-	BuildTime       = "null"  // when the executable was built
-	Version         = "0.1.0" // software version
-	Denom           = "token" // base asset denom name TODO: come up with better name
-	int64Overrides  = map[ConfigName]int64{}
-	boolOverrides   = map[ConfigName]bool{}
-	stringOverrides = map[ConfigName]string{}
+	GitCommit             = "null"  // sha1 revision used to build the program
+	BuildTime             = "null"  // when the executable was built
+	Version               = "0.1.0" // software version
+	Denom                 = "token" // base asset denom name TODO: come up with better name
+	MaxBasisPoints  int64 = 10_000
+	int64Overrides        = map[ConfigName]int64{}
+	boolOverrides         = map[ConfigName]bool{}
+	stringOverrides       = map[ConfigName]string{}
 )
 
 var SWVersion, _ = semver.Make(Version)
