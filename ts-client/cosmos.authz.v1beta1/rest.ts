@@ -414,7 +414,15 @@ export interface V1Beta1QueryGranteeGrantsResponse {
   /** grants is a list of grants granted to the grantee. */
   grants?: V1Beta1GrantAuthorization[];
 
-  /** pagination defines an pagination for the response. */
+  /**
+   * PageResponse is to be embedded in gRPC response messages where the
+   * corresponding request message has used PageRequest.
+   *
+   *  message SomeResponse {
+   *          repeated Bar results = 1;
+   *          PageResponse page = 2;
+   *  }
+   */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -425,7 +433,15 @@ export interface V1Beta1QueryGranterGrantsResponse {
   /** grants is a list of grants granted by the granter. */
   grants?: V1Beta1GrantAuthorization[];
 
-  /** pagination defines an pagination for the response. */
+  /**
+   * PageResponse is to be embedded in gRPC response messages where the
+   * corresponding request message has used PageRequest.
+   *
+   *  message SomeResponse {
+   *          repeated Bar results = 1;
+   *          PageResponse page = 2;
+   *  }
+   */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -436,7 +452,15 @@ export interface V1Beta1QueryGrantsResponse {
   /** authorizations is a list of grants granted for grantee by granter. */
   grants?: V1Beta1Grant[];
 
-  /** pagination defines an pagination for the response. */
+  /**
+   * PageResponse is to be embedded in gRPC response messages where the
+   * corresponding request message has used PageRequest.
+   *
+   *  message SomeResponse {
+   *          repeated Bar results = 1;
+   *          PageResponse page = 2;
+   *  }
+   */
   pagination?: V1Beta1PageResponse;
 }
 
