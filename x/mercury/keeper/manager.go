@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
@@ -79,7 +78,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	blocksPerYear := mgr.FetchConfig(ctx, configs.BlocksPerYear)
 	blockReward := mgr.calcBlockReward(reserve.Int64(), emissionCurve, (blocksPerYear / valCycle))
 
-	//sum tokens
+	// sum tokens
 	total := cosmos.ZeroInt()
 	for _, val := range validators {
 		if val.Status != stakingtypes.Bonded {
@@ -94,25 +93,20 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 		}
 		acc, err := cosmos.AccAddressFromBech32(val.OperatorAddress)
 		if err != nil {
-			continue
 			ctx.Logger().Error("unable to parse validator operator address", "error", err)
 			continue
 		}
 
 		rwd := common.GetSafeShare(val.Tokens, total, blockReward)
-		fmt.Printf("Reward: %d (%d/%d/%d)\n", rwd.Int64(), val.Tokens.Int64(), total.Int64(), blockReward.Int64())
 		rewards := getCoins(rwd.Int64())
 
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, rewards); err != nil {
-			fmt.Println("we got a failure to communicate", err)
 			ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
 			continue
 		}
-		fmt.Printf("Validator Payout: %+v %s\n", rewards, acc.String())
 		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", rwd)
 	}
 
-	fmt.Println("Done.")
 	return nil
 }
 

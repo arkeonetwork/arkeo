@@ -3,7 +3,6 @@ package keeper
 import (
 	"errors"
 	"fmt"
-
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/types"
@@ -24,6 +23,7 @@ type KVStoreDummy struct{}
 func (k KVStoreDummy) Cdc() codec.BinaryCodec {
 	return nil
 }
+
 func (k KVStoreDummy) GetParams(ctx sdk.Context) types.Params {
 	return types.NewParams()
 }
@@ -128,6 +128,7 @@ func (k KVStoreDummy) SetContract(_ cosmos.Context, _ types.Contract) error { re
 func (k KVStoreDummy) ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) bool {
 	return false
 }
+
 func (k KVStoreDummy) RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) {
 }
 
@@ -135,6 +136,7 @@ func (k KVStoreDummy) GetContractExpirationSetIterator(_ cosmos.Context) cosmos.
 func (k KVStoreDummy) GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error) {
 	return types.ContractExpirationSet{}, kaboom
 }
+
 func (k KVStoreDummy) SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error {
 	return kaboom
 }

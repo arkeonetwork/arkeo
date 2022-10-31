@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
@@ -23,18 +22,23 @@ type TestManagerKeeperValidatorPayout struct {
 func (k *TestManagerKeeperValidatorPayout) MintToModule(ctx cosmos.Context, module string, coin cosmos.Coin) error {
 	return k.keeper.MintToModule(ctx, module, coin)
 }
+
 func (k *TestManagerKeeperValidatorPayout) SendFromModuleToModule(ctx cosmos.Context, from, to string, coins cosmos.Coins) error {
 	return k.keeper.SendFromModuleToModule(ctx, from, to, coins)
 }
+
 func (k *TestManagerKeeperValidatorPayout) SendFromModuleToAccount(ctx cosmos.Context, from string, to cosmos.AccAddress, coins cosmos.Coins) error {
 	return k.keeper.SendFromModuleToAccount(ctx, from, to, coins)
 }
+
 func (k *TestManagerKeeperValidatorPayout) GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string) cosmos.Int {
 	return k.keeper.GetBalanceOfModule(ctx, moduleName, denom)
 }
+
 func (k *TestManagerKeeperValidatorPayout) GetBalance(ctx cosmos.Context, acc cosmos.AccAddress) cosmos.Coins {
 	return k.keeper.GetBalance(ctx, acc)
 }
+
 func (k *TestManagerKeeperValidatorPayout) GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator {
 	return []stakingtypes.Validator{
 		{
@@ -76,7 +80,6 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	valAddr, err := cosmos.AccAddressFromBech32("cosmos1n07t9h5h5f75aqmfpdv6tlp490dktx2mynkmxw")
 	c.Assert(err, IsNil)
 	bal := k.GetBalance(ctx, valAddr)
-	fmt.Println("bal", bal)
 	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(356694))
 
 	valAddr, err = cosmos.AccAddressFromBech32("cosmos1tvvzxkzgwavypl8agjtmlk5tzdtrh7x5scfvmn")
