@@ -494,6 +494,7 @@ func New(
 		app.GetSubspace(mercurymoduletypes.ModuleName),
 		app.BankKeeper,
 		app.AccountKeeper,
+		app.StakingKeeper,
 		semver.MustParse("0.0.0"),
 	)
 	mercuryModule := mercurymodule.NewAppModule(appCodec, app.MercuryKeeper, app.AccountKeeper, app.BankKeeper)

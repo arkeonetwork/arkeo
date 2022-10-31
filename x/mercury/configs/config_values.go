@@ -18,6 +18,9 @@ const (
 	OpenContractCost
 	MinProviderBond
 	ReserveTax
+	BlocksPerYear
+	EmissionCurve
+	ValidatorPayoutCycle
 )
 
 var nameToString = map[ConfigName]string{
@@ -29,6 +32,9 @@ var nameToString = map[ConfigName]string{
 	OpenContractCost:     "OpenContractCost",
 	MinProviderBond:      "MinProviderBond",
 	ReserveTax:           "ReserveTax",
+	BlocksPerYear:        "BlocksPerYear",
+	EmissionCurve:        "EmissionCurve",
+	ValidatorPayoutCycle: "ValidatorPayoutCycle",
 }
 
 // String implement fmt.stringer
