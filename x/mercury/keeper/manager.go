@@ -78,6 +78,11 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	blocksPerYear := mgr.FetchConfig(ctx, configs.BlocksPerYear)
 	blockReward := mgr.calcBlockReward(reserve.Int64(), emissionCurve, (blocksPerYear / valCycle))
 
+	if blockReward.IsZero() {
+		ctx.Logger().Info("no validator rewards this block")
+		return nil
+	}
+
 	// sum tokens
 	total := cosmos.ZeroInt()
 	for _, val := range validators {
@@ -113,6 +118,9 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 func (mgr Manager) calcBlockReward(totalReserve, emissionCurve, blocksPerYear int64) cosmos.Int {
 	// Block Rewards will take the latest reserve, divide it by the emission
 	// curve factor, then divide by blocks per year
+	if emissionCurve == 0 || blocksPerYear == 0 {
+		return cosmos.ZeroInt()
+	}
 	trD := cosmos.NewDec(totalReserve)
 	ecD := cosmos.NewDec(emissionCurve)
 	bpyD := cosmos.NewDec(blocksPerYear)
