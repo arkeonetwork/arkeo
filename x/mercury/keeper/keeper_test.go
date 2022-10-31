@@ -37,6 +37,8 @@ import (
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	"github.com/tendermint/tendermint/libs/log"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -79,6 +81,7 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
+	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
 	keyParams := cosmos.NewKVStoreKey(paramstypes.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
@@ -109,16 +112,19 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 
 	pk := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	ak := authkeeper.NewAccountKeeper(cdc, keyAcc, pk.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
-		types.ModuleName:   {authtypes.Minter, authtypes.Burner},
-		types.ReserveName:  {},
-		types.ProviderName: {},
-		types.ContractName: {},
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+		types.ReserveName:              {},
+		types.ProviderName:             {},
+		types.ContractName:             {},
 	}, sdk.Bech32PrefixAccAddr)
 	ak.SetParams(ctx, authtypes.DefaultParams())
 
 	bk := bankkeeper.NewBaseKeeper(cdc, keyBank, ak, pk.Subspace(banktypes.ModuleName), nil)
 	bk.SetParams(ctx, banktypes.DefaultParams())
 
+	sk := stakingkeeper.NewKeeper(cdc, keyStake, ak, bk, pk.Subspace(stakingtypes.ModuleName))
 	k := NewKVStore(
 		cdc,
 		storeKey,
@@ -126,6 +132,7 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 		paramsSubspace,
 		bk,
 		ak,
+		sk,
 		semver.MustParse("0.0.0"),
 	)
 

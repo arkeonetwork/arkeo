@@ -15,6 +15,8 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
 
@@ -44,6 +46,7 @@ type Keeper interface {
 	// passthrough funcs
 	SendCoins(ctx cosmos.Context, from, to cosmos.AccAddress, coins cosmos.Coins) error
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
+	GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator
 
 	// Keeper Interfaces
 	KeeperProvider
@@ -85,6 +88,7 @@ type KVStore struct {
 	paramstore    paramtypes.Subspace
 	coinKeeper    bankkeeper.Keeper
 	accountKeeper authkeeper.AccountKeeper
+	stakingKeeper stakingkeeper.Keeper
 	version       semver.Version
 }
 
@@ -95,6 +99,7 @@ func NewKVStore(
 	ps paramtypes.Subspace,
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
+	stakingKeeper stakingkeeper.Keeper,
 	version semver.Version,
 ) *KVStore {
 	// set KeyTable if it has not already been set
@@ -254,4 +259,8 @@ func (k KVStore) HasCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosm
 
 func (k KVStore) GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account {
 	return k.accountKeeper.GetAccount(ctx, addr)
+}
+
+func (k KVStore) GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator {
+	return k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 }
