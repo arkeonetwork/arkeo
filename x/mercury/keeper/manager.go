@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
@@ -8,6 +9,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 type Manager struct {
@@ -59,10 +61,10 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 // TODO: the method of accomplishing this is admittedly quite inefficient. The
 // better approach would be to track live allocation via assigning "units" to
 // validators when they bond and unbond. The math for this is as follows
-// P = total units
-// t = tokens bonded
-// T = tokens bonded (after deposit)
-// units = P(Tt) / 2T
+// U = total bond units
+// T = tokens bonded
+// t = new tokens being bonded
+// units = U / (T / t)
 // Since the development goal at the moment is to get this chain up and
 // running, we can save this optimization for another day.
 func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
@@ -80,26 +82,37 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	//sum tokens
 	total := cosmos.ZeroInt()
 	for _, val := range validators {
+		if val.Status != stakingtypes.Bonded {
+			continue
+		}
 		total = total.Add(val.Tokens)
 	}
 
 	for _, val := range validators {
+		if val.Status != stakingtypes.Bonded {
+			continue
+		}
 		acc, err := cosmos.AccAddressFromBech32(val.OperatorAddress)
 		if err != nil {
+			continue
 			ctx.Logger().Error("unable to parse validator operator address", "error", err)
 			continue
 		}
 
 		rwd := common.GetSafeShare(val.Tokens, total, blockReward)
+		fmt.Printf("Reward: %d (%d/%d/%d)\n", rwd.Int64(), val.Tokens.Int64(), total.Int64(), blockReward.Int64())
 		rewards := getCoins(rwd.Int64())
 
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, rewards); err != nil {
+			fmt.Println("we got a failure to communicate", err)
 			ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
 			continue
 		}
-		ctx.Logger().Info("validator rewarded", "validator", acc.String, "amount", rwd)
+		fmt.Printf("Validator Payout: %+v %s\n", rewards, acc.String())
+		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", rwd)
 	}
 
+	fmt.Println("Done.")
 	return nil
 }
 
