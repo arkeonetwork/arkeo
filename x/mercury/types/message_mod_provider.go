@@ -61,6 +61,18 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
+	// verify pubkey
+	_, err = common.NewPubKey(msg.PubKey.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+	}
+
+	// verify chain
+	_, err = common.NewChain(msg.Chain.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+	}
+
 	signer := msg.MustGetSigner()
 	provider, err := msg.PubKey.GetMyAddress()
 	if err != nil {
