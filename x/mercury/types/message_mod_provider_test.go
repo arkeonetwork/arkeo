@@ -1,6 +1,8 @@
 package types
 
 import (
+	"mercury/common"
+
 	. "gopkg.in/check.v1"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -27,6 +29,7 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 	msg = MsgModProvider{
 		Creator:     acct.String(),
 		PubKey:      pubkey,
+		Chain:       common.BTCChain,
 		MetadataURI: "http://mad.hatter.net/test?foo=baz",
 	}
 	err = msg.ValidateBasic()

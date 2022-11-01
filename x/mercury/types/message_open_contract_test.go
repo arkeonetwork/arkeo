@@ -1,6 +1,8 @@
 package types
 
 import (
+	"mercury/common"
+
 	. "gopkg.in/check.v1"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -26,6 +28,7 @@ func (MsgOpenContractSuite) TestValidateBasic(c *C) {
 	msg = MsgOpenContract{
 		Creator: acct.String(),
 		PubKey:  pubkey,
+		Chain:   common.BTCChain,
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrOpenContractDuration)

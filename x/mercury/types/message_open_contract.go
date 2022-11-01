@@ -63,6 +63,12 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
+	// verify chain
+	_, err = common.NewChain(msg.Chain.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+	}
+
 	if msg.Duration <= 0 {
 		return sdkerrors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
 	}
