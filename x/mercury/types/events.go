@@ -6,4 +6,5 @@ const (
 	EventTypeOpenContract       = "open_contract"
 	EventTypeCloseContract      = "close_contract"
 	EventTypeContractSettlement = "contract_settlement"
+	EventTypeValidatorPayout    = "validator_payout"
 )

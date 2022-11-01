@@ -110,6 +110,16 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 			continue
 		}
 		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", rwd)
+
+		ctx.EventManager().EmitEvents(
+			sdk.Events{
+				sdk.NewEvent(
+					types.EventTypeValidatorPayout,
+					sdk.NewAttribute("validator", acc.String()),
+					sdk.NewAttribute("paid", rwd.String()),
+				),
+			},
+		)
 	}
 
 	return nil
