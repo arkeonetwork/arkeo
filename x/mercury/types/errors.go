@@ -27,4 +27,6 @@ var (
 	ErrInvalidPubKey                         = sdkerrors.Register(ModuleName, 18, "invalid pubkey")
 	ErrCloseContractAlreadyClosed            = sdkerrors.Register(ModuleName, 19, "contract is already closed")
 	ErrCloseContractUnauthorized             = sdkerrors.Register(ModuleName, 20, "unauthorized to close contract")
+	ErrClaimContractIncomeBadHeight          = sdkerrors.Register(ModuleName, 21, "height must be greater than zero")
+	ErrClaimContractIncomeBadNonce           = sdkerrors.Register(ModuleName, 22, "nonce must be non-negative")
 )

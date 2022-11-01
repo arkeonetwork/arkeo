@@ -92,7 +92,7 @@ export interface Contract {
   rate: number;
   deposit: string;
   paid: string;
-  queries: number;
+  nonce: number;
   closedHeight: number;
 }
 
@@ -378,7 +378,7 @@ const baseContract: object = {
   rate: 0,
   deposit: "",
   paid: "",
-  queries: 0,
+  nonce: 0,
   closedHeight: 0,
 };
 
@@ -411,8 +411,8 @@ export const Contract = {
     if (message.paid !== "") {
       writer.uint32(74).string(message.paid);
     }
-    if (message.queries !== 0) {
-      writer.uint32(80).int64(message.queries);
+    if (message.nonce !== 0) {
+      writer.uint32(80).int64(message.nonce);
     }
     if (message.closedHeight !== 0) {
       writer.uint32(88).int64(message.closedHeight);
@@ -455,7 +455,7 @@ export const Contract = {
           message.paid = reader.string();
           break;
         case 10:
-          message.queries = longToNumber(reader.int64() as Long);
+          message.nonce = longToNumber(reader.int64() as Long);
           break;
         case 11:
           message.closedHeight = longToNumber(reader.int64() as Long);
@@ -513,10 +513,10 @@ export const Contract = {
     } else {
       message.paid = "";
     }
-    if (object.queries !== undefined && object.queries !== null) {
-      message.queries = Number(object.queries);
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = Number(object.nonce);
     } else {
-      message.queries = 0;
+      message.nonce = 0;
     }
     if (object.closedHeight !== undefined && object.closedHeight !== null) {
       message.closedHeight = Number(object.closedHeight);
@@ -543,7 +543,7 @@ export const Contract = {
     message.rate !== undefined && (obj.rate = message.rate);
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
-    message.queries !== undefined && (obj.queries = message.queries);
+    message.nonce !== undefined && (obj.nonce = message.nonce);
     message.closedHeight !== undefined &&
       (obj.closedHeight = message.closedHeight);
     return obj;
@@ -596,10 +596,10 @@ export const Contract = {
     } else {
       message.paid = "";
     }
-    if (object.queries !== undefined && object.queries !== null) {
-      message.queries = object.queries;
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = object.nonce;
     } else {
-      message.queries = 0;
+      message.nonce = 0;
     }
     if (object.closedHeight !== undefined && object.closedHeight !== null) {
       message.closedHeight = object.closedHeight;

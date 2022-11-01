@@ -16,6 +16,8 @@ export enum MercuryContractType {
 
 export type MercuryMsgBondProviderResponse = object;
 
+export type MercuryMsgClaimContractIncomeResponse = object;
+
 export type MercuryMsgCloseContractResponse = object;
 
 export type MercuryMsgModProviderResponse = object;

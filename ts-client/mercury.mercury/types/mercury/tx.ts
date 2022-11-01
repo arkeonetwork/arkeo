@@ -57,6 +57,17 @@ export interface MsgCloseContract {
 
 export interface MsgCloseContractResponse {}
 
+export interface MsgClaimContractIncome {
+  creator: string;
+  pubKey: string;
+  chain: string;
+  client: string;
+  nonce: number;
+  height: number;
+}
+
+export interface MsgClaimContractIncomeResponse {}
+
 const baseMsgBondProvider: object = {
   creator: "",
   pubKey: "",
@@ -871,13 +882,220 @@ export const MsgCloseContractResponse = {
   },
 };
 
+const baseMsgClaimContractIncome: object = {
+  creator: "",
+  pubKey: "",
+  chain: "",
+  client: "",
+  nonce: 0,
+  height: 0,
+};
+
+export const MsgClaimContractIncome = {
+  encode(
+    message: MsgClaimContractIncome,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    if (message.client !== "") {
+      writer.uint32(34).string(message.client);
+    }
+    if (message.nonce !== 0) {
+      writer.uint32(40).int64(message.nonce);
+    }
+    if (message.height !== 0) {
+      writer.uint32(48).int64(message.height);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgClaimContractIncome {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.pubKey = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        case 4:
+          message.client = reader.string();
+          break;
+        case 5:
+          message.nonce = longToNumber(reader.int64() as Long);
+          break;
+        case 6:
+          message.height = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgClaimContractIncome {
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
+    }
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = Number(object.nonce);
+    } else {
+      message.nonce = 0;
+    }
+    if (object.height !== undefined && object.height !== null) {
+      message.height = Number(object.height);
+    } else {
+      message.height = 0;
+    }
+    return message;
+  },
+
+  toJSON(message: MsgClaimContractIncome): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.client !== undefined && (obj.client = message.client);
+    message.nonce !== undefined && (obj.nonce = message.nonce);
+    message.height !== undefined && (obj.height = message.height);
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<MsgClaimContractIncome>
+  ): MsgClaimContractIncome {
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
+    } else {
+      message.client = "";
+    }
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = object.nonce;
+    } else {
+      message.nonce = 0;
+    }
+    if (object.height !== undefined && object.height !== null) {
+      message.height = object.height;
+    } else {
+      message.height = 0;
+    }
+    return message;
+  },
+};
+
+const baseMsgClaimContractIncomeResponse: object = {};
+
+export const MsgClaimContractIncomeResponse = {
+  encode(
+    _: MsgClaimContractIncomeResponse,
+    writer: Writer = Writer.create()
+  ): Writer {
+    return writer;
+  },
+
+  decode(
+    input: Reader | Uint8Array,
+    length?: number
+  ): MsgClaimContractIncomeResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgClaimContractIncomeResponse {
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    return message;
+  },
+
+  toJSON(_: MsgClaimContractIncomeResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgClaimContractIncomeResponse>
+  ): MsgClaimContractIncomeResponse {
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse>;
   ModProvider(request: MsgModProvider): Promise<MsgModProviderResponse>;
   OpenContract(request: MsgOpenContract): Promise<MsgOpenContractResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   CloseContract(request: MsgCloseContract): Promise<MsgCloseContractResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  ClaimContractIncome(
+    request: MsgClaimContractIncome
+  ): Promise<MsgClaimContractIncomeResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -930,6 +1148,20 @@ export class MsgClientImpl implements Msg {
     );
     return promise.then((data) =>
       MsgCloseContractResponse.decode(new Reader(data))
+    );
+  }
+
+  ClaimContractIncome(
+    request: MsgClaimContractIncome
+  ): Promise<MsgClaimContractIncomeResponse> {
+    const data = MsgClaimContractIncome.encode(request).finish();
+    const promise = this.rpc.request(
+      "mercury.mercury.Msg",
+      "ClaimContractIncome",
+      data
+    );
+    return promise.then((data) =>
+      MsgClaimContractIncomeResponse.decode(new Reader(data))
     );
   }
 }

@@ -8,15 +8,22 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgModProvider } from "./types/mercury/tx";
+import { MsgClaimContractIncome } from "./types/mercury/tx";
 import { MsgBondProvider } from "./types/mercury/tx";
 import { MsgOpenContract } from "./types/mercury/tx";
 import { MsgCloseContract } from "./types/mercury/tx";
 
 
-export { MsgModProvider, MsgBondProvider, MsgOpenContract, MsgCloseContract };
+export { MsgModProvider, MsgClaimContractIncome, MsgBondProvider, MsgOpenContract, MsgCloseContract };
 
 type sendMsgModProviderParams = {
   value: MsgModProvider,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
   fee?: StdFee,
   memo?: string
 };
@@ -42,6 +49,10 @@ type sendMsgCloseContractParams = {
 
 type msgModProviderParams = {
   value: MsgModProvider,
+};
+
+type msgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
 };
 
 type msgBondProviderParams = {
@@ -85,6 +96,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
 				throw new Error('TxClient:sendMsgModProvider: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgClaimContractIncome({ value, fee, memo }: sendMsgClaimContractIncomeParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimContractIncome: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimContractIncome({ value: MsgClaimContractIncome.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimContractIncome: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -136,6 +161,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/mercury.mercury.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgClaimContractIncome({ value }: msgClaimContractIncomeParams): EncodeObject {
+			try {
+				return { typeUrl: "/mercury.mercury.MsgClaimContractIncome", value: MsgClaimContractIncome.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimContractIncome: Could not create message: ' + e.message)
 			}
 		},
 		

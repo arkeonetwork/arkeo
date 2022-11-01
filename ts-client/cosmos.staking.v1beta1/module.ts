@@ -8,14 +8,14 @@ import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgCancelUnbondingDelegation } from "./types/cosmos/staking/v1beta1/tx";
-import { MsgBeginRedelegate } from "./types/cosmos/staking/v1beta1/tx";
+import { MsgUndelegate } from "./types/cosmos/staking/v1beta1/tx";
 import { MsgDelegate } from "./types/cosmos/staking/v1beta1/tx";
+import { MsgBeginRedelegate } from "./types/cosmos/staking/v1beta1/tx";
 import { MsgCreateValidator } from "./types/cosmos/staking/v1beta1/tx";
 import { MsgEditValidator } from "./types/cosmos/staking/v1beta1/tx";
-import { MsgUndelegate } from "./types/cosmos/staking/v1beta1/tx";
 
 
-export { MsgCancelUnbondingDelegation, MsgBeginRedelegate, MsgDelegate, MsgCreateValidator, MsgEditValidator, MsgUndelegate };
+export { MsgCancelUnbondingDelegation, MsgUndelegate, MsgDelegate, MsgBeginRedelegate, MsgCreateValidator, MsgEditValidator };
 
 type sendMsgCancelUnbondingDelegationParams = {
   value: MsgCancelUnbondingDelegation,
@@ -23,14 +23,20 @@ type sendMsgCancelUnbondingDelegationParams = {
   memo?: string
 };
 
-type sendMsgBeginRedelegateParams = {
-  value: MsgBeginRedelegate,
+type sendMsgUndelegateParams = {
+  value: MsgUndelegate,
   fee?: StdFee,
   memo?: string
 };
 
 type sendMsgDelegateParams = {
   value: MsgDelegate,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgBeginRedelegateParams = {
+  value: MsgBeginRedelegate,
   fee?: StdFee,
   memo?: string
 };
@@ -47,23 +53,21 @@ type sendMsgEditValidatorParams = {
   memo?: string
 };
 
-type sendMsgUndelegateParams = {
-  value: MsgUndelegate,
-  fee?: StdFee,
-  memo?: string
-};
-
 
 type msgCancelUnbondingDelegationParams = {
   value: MsgCancelUnbondingDelegation,
 };
 
-type msgBeginRedelegateParams = {
-  value: MsgBeginRedelegate,
+type msgUndelegateParams = {
+  value: MsgUndelegate,
 };
 
 type msgDelegateParams = {
   value: MsgDelegate,
+};
+
+type msgBeginRedelegateParams = {
+  value: MsgBeginRedelegate,
 };
 
 type msgCreateValidatorParams = {
@@ -72,10 +76,6 @@ type msgCreateValidatorParams = {
 
 type msgEditValidatorParams = {
   value: MsgEditValidator,
-};
-
-type msgUndelegateParams = {
-  value: MsgUndelegate,
 };
 
 
@@ -110,17 +110,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgBeginRedelegate({ value, fee, memo }: sendMsgBeginRedelegateParams): Promise<DeliverTxResponse> {
+		async sendMsgUndelegate({ value, fee, memo }: sendMsgUndelegateParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgBeginRedelegate: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgUndelegate: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgBeginRedelegate({ value: MsgBeginRedelegate.fromPartial(value) })
+				let msg = this.msgUndelegate({ value: MsgUndelegate.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgBeginRedelegate: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgUndelegate: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -135,6 +135,20 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
 				throw new Error('TxClient:sendMsgDelegate: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgBeginRedelegate({ value, fee, memo }: sendMsgBeginRedelegateParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgBeginRedelegate: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgBeginRedelegate({ value: MsgBeginRedelegate.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgBeginRedelegate: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -166,20 +180,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgUndelegate({ value, fee, memo }: sendMsgUndelegateParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgUndelegate: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgUndelegate({ value: MsgUndelegate.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgUndelegate: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		
 		msgCancelUnbondingDelegation({ value }: msgCancelUnbondingDelegationParams): EncodeObject {
 			try {
@@ -189,11 +189,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgBeginRedelegate({ value }: msgBeginRedelegateParams): EncodeObject {
+		msgUndelegate({ value }: msgUndelegateParams): EncodeObject {
 			try {
-				return { typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate", value: MsgBeginRedelegate.fromPartial( value ) }  
+				return { typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate", value: MsgUndelegate.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgBeginRedelegate: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgUndelegate: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -202,6 +202,14 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/cosmos.staking.v1beta1.MsgDelegate", value: MsgDelegate.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgDelegate: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgBeginRedelegate({ value }: msgBeginRedelegateParams): EncodeObject {
+			try {
+				return { typeUrl: "/cosmos.staking.v1beta1.MsgBeginRedelegate", value: MsgBeginRedelegate.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgBeginRedelegate: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -218,14 +226,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/cosmos.staking.v1beta1.MsgEditValidator", value: MsgEditValidator.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgEditValidator: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgUndelegate({ value }: msgUndelegateParams): EncodeObject {
-			try {
-				return { typeUrl: "/cosmos.staking.v1beta1.MsgUndelegate", value: MsgUndelegate.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgUndelegate: Could not create message: ' + e.message)
 			}
 		},
 		
