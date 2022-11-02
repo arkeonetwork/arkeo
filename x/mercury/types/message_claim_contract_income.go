@@ -101,6 +101,8 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 
+	// TODO: verify cryptographic signature of claim
+
 	return nil
 
 }

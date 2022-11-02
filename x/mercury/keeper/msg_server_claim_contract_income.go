@@ -56,7 +56,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 	}
 
 	if contract.IsClose(ctx.BlockHeight()) {
-		return sdkerrors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
+		return sdkerrors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
 	}
 
 	return nil

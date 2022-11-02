@@ -210,5 +210,11 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	if debt.IsNegative() {
 		return cosmos.ZeroInt(), nil
 	}
+
+	// sanity check, ensure provider cannot take more than deposited into the contract
+	if contract.Paid.Add(debt).GT(contract.Deposit) {
+		return contract.Deposit.Sub(contract.Paid), nil
+	}
+
 	return debt, nil
 }
