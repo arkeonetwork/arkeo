@@ -9,6 +9,7 @@ export const protobufPackage = "mercury.mercury";
 export interface GenesisState {
   params: Params | undefined;
   providers: Provider[];
+  /** this line is used by starport scaffolding # genesis/proto/state */
   contracts: Contract[];
 }
 

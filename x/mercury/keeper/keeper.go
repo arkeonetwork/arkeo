@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 	"mercury/common"
 	"mercury/common/cosmos"
@@ -21,6 +22,10 @@ import (
 )
 
 type dbPrefix string
+
+func (p dbPrefix) String() string {
+	return string(p)
+}
 
 type Keeper interface {
 	Logger(ctx sdk.Context) log.Logger
@@ -47,6 +52,13 @@ type Keeper interface {
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
 	GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
+
+	// Query
+	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
+	FetchProvider(c context.Context, req *types.QueryFetchProviderRequest) (*types.QueryFetchProviderResponse, error)
+	ProviderAll(c context.Context, req *types.QueryAllProviderRequest) (*types.QueryAllProviderResponse, error)
+	FetchContract(c context.Context, req *types.QueryFetchContractRequest) (*types.QueryFetchContractResponse, error)
+	ContractAll(c context.Context, req *types.QueryAllContractRequest) (*types.QueryAllContractResponse, error)
 
 	// Keeper Interfaces
 	KeeperProvider

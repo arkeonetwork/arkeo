@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"mercury/common"
@@ -141,3 +142,23 @@ func (k KVStoreDummy) SetContractExpirationSet(_ cosmos.Context, _ types.Contrac
 	return kaboom
 }
 func (k KVStoreDummy) RemoveContractExpirationSet(_ cosmos.Context, _ int64) {}
+
+func (k KVStoreDummy) Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
+	return nil, kaboom
+}
+
+func (k KVStoreDummy) FetchProvider(c context.Context, req *types.QueryFetchProviderRequest) (*types.QueryFetchProviderResponse, error) {
+	return nil, kaboom
+}
+
+func (k KVStoreDummy) ProviderAll(c context.Context, req *types.QueryAllProviderRequest) (*types.QueryAllProviderResponse, error) {
+	return nil, kaboom
+}
+
+func (k KVStoreDummy) FetchContract(c context.Context, req *types.QueryFetchContractRequest) (*types.QueryFetchContractResponse, error) {
+	return nil, kaboom
+}
+
+func (k KVStoreDummy) ContractAll(c context.Context, req *types.QueryAllContractRequest) (*types.QueryAllContractResponse, error) {
+	return nil, kaboom
+}

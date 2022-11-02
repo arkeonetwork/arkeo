@@ -44256,6 +44256,232 @@ paths:
           format: uint64
       tags:
         - Query
+  '/mercury/mercury/contract/{pubkey}/{chain}/{client}':
+    get:
+      operationId: MercuryMercuryFetchContract
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              contract:
+                type: object
+                properties:
+                  provider_pub_key:
+                    type: string
+                  chain:
+                    type: string
+                  client:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - Subscription
+                      - PayAsYouGo
+                    default: Subscription
+                  height:
+                    type: string
+                    format: int64
+                  duration:
+                    type: string
+                    format: int64
+                  rate:
+                    type: string
+                    format: int64
+                  deposit:
+                    type: string
+                  paid:
+                    type: string
+                  nonce:
+                    type: string
+                    format: int64
+                  closed_height:
+                    type: string
+                    format: int64
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pubkey
+          in: path
+          required: true
+          type: string
+        - name: chain
+          in: path
+          required: true
+          type: string
+        - name: client
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /mercury/mercury/contracts:
+    get:
+      operationId: MercuryMercuryContractAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              contract:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    provider_pub_key:
+                      type: string
+                    chain:
+                      type: string
+                    client:
+                      type: string
+                    type:
+                      type: string
+                      enum:
+                        - Subscription
+                        - PayAsYouGo
+                      default: Subscription
+                    height:
+                      type: string
+                      format: int64
+                    duration:
+                      type: string
+                      format: int64
+                    rate:
+                      type: string
+                      format: int64
+                    deposit:
+                      type: string
+                    paid:
+                      type: string
+                    nonce:
+                      type: string
+                      format: int64
+                    closed_height:
+                      type: string
+                      format: int64
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
   /mercury/mercury/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -44290,6 +44516,230 @@ paths:
                     '@type':
                       type: string
                   additionalProperties: {}
+      tags:
+        - Query
+  '/mercury/mercury/provider/{pubkey}/{chain}':
+    get:
+      operationId: MercuryMercuryFetchProvider
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              provider:
+                type: object
+                properties:
+                  pub_key:
+                    type: string
+                  chain:
+                    type: string
+                  metadataURI:
+                    type: string
+                  metadata_nonce:
+                    type: string
+                    format: uint64
+                  status:
+                    type: string
+                    enum:
+                      - Offline
+                      - Online
+                    default: Offline
+                  min_contract_duration:
+                    type: string
+                    format: int64
+                  max_contract_duration:
+                    type: string
+                    format: int64
+                  subscription_rate:
+                    type: string
+                    format: int64
+                  pay_as_you_go_rate:
+                    type: string
+                    format: int64
+                  bond:
+                    type: string
+                  last_update:
+                    type: string
+                    format: int64
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pubkey
+          in: path
+          required: true
+          type: string
+        - name: chain
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /mercury/mercury/providers:
+    get:
+      operationId: MercuryMercuryProviderAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              provider:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pub_key:
+                      type: string
+                    chain:
+                      type: string
+                    metadataURI:
+                      type: string
+                    metadata_nonce:
+                      type: string
+                      format: uint64
+                    status:
+                      type: string
+                      enum:
+                        - Offline
+                        - Online
+                      default: Offline
+                    min_contract_duration:
+                      type: string
+                      format: int64
+                    max_contract_duration:
+                      type: string
+                      format: int64
+                    subscription_rate:
+                      type: string
+                      format: int64
+                    pay_as_you_go_rate:
+                      type: string
+                      format: int64
+                    bond:
+                      type: string
+                    last_update:
+                      type: string
+                      format: int64
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
       tags:
         - Query
 definitions:
@@ -73668,6 +74118,40 @@ definitions:
     description: |-
       Version defines the versioning scheme used to negotiate the IBC verison in
       the connection handshake.
+  mercury.mercury.Contract:
+    type: object
+    properties:
+      provider_pub_key:
+        type: string
+      chain:
+        type: string
+      client:
+        type: string
+      type:
+        type: string
+        enum:
+          - Subscription
+          - PayAsYouGo
+        default: Subscription
+      height:
+        type: string
+        format: int64
+      duration:
+        type: string
+        format: int64
+      rate:
+        type: string
+        format: int64
+      deposit:
+        type: string
+      paid:
+        type: string
+      nonce:
+        type: string
+        format: int64
+      closed_height:
+        type: string
+        format: int64
   mercury.mercury.ContractType:
     type: string
     enum:
@@ -73687,12 +74171,253 @@ definitions:
   mercury.mercury.Params:
     type: object
     description: Params defines the parameters for the module.
+  mercury.mercury.Provider:
+    type: object
+    properties:
+      pub_key:
+        type: string
+      chain:
+        type: string
+      metadataURI:
+        type: string
+      metadata_nonce:
+        type: string
+        format: uint64
+      status:
+        type: string
+        enum:
+          - Offline
+          - Online
+        default: Offline
+      min_contract_duration:
+        type: string
+        format: int64
+      max_contract_duration:
+        type: string
+        format: int64
+      subscription_rate:
+        type: string
+        format: int64
+      pay_as_you_go_rate:
+        type: string
+        format: int64
+      bond:
+        type: string
+      last_update:
+        type: string
+        format: int64
   mercury.mercury.ProviderStatus:
     type: string
     enum:
       - Offline
       - Online
     default: Offline
+  mercury.mercury.QueryAllContractResponse:
+    type: object
+    properties:
+      contract:
+        type: array
+        items:
+          type: object
+          properties:
+            provider_pub_key:
+              type: string
+            chain:
+              type: string
+            client:
+              type: string
+            type:
+              type: string
+              enum:
+                - Subscription
+                - PayAsYouGo
+              default: Subscription
+            height:
+              type: string
+              format: int64
+            duration:
+              type: string
+              format: int64
+            rate:
+              type: string
+              format: int64
+            deposit:
+              type: string
+            paid:
+              type: string
+            nonce:
+              type: string
+              format: int64
+            closed_height:
+              type: string
+              format: int64
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  mercury.mercury.QueryAllProviderResponse:
+    type: object
+    properties:
+      provider:
+        type: array
+        items:
+          type: object
+          properties:
+            pub_key:
+              type: string
+            chain:
+              type: string
+            metadataURI:
+              type: string
+            metadata_nonce:
+              type: string
+              format: uint64
+            status:
+              type: string
+              enum:
+                - Offline
+                - Online
+              default: Offline
+            min_contract_duration:
+              type: string
+              format: int64
+            max_contract_duration:
+              type: string
+              format: int64
+            subscription_rate:
+              type: string
+              format: int64
+            pay_as_you_go_rate:
+              type: string
+              format: int64
+            bond:
+              type: string
+            last_update:
+              type: string
+              format: int64
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  mercury.mercury.QueryFetchContractResponse:
+    type: object
+    properties:
+      contract:
+        type: object
+        properties:
+          provider_pub_key:
+            type: string
+          chain:
+            type: string
+          client:
+            type: string
+          type:
+            type: string
+            enum:
+              - Subscription
+              - PayAsYouGo
+            default: Subscription
+          height:
+            type: string
+            format: int64
+          duration:
+            type: string
+            format: int64
+          rate:
+            type: string
+            format: int64
+          deposit:
+            type: string
+          paid:
+            type: string
+          nonce:
+            type: string
+            format: int64
+          closed_height:
+            type: string
+            format: int64
+  mercury.mercury.QueryFetchProviderResponse:
+    type: object
+    properties:
+      provider:
+        type: object
+        properties:
+          pub_key:
+            type: string
+          chain:
+            type: string
+          metadataURI:
+            type: string
+          metadata_nonce:
+            type: string
+            format: uint64
+          status:
+            type: string
+            enum:
+              - Offline
+              - Online
+            default: Offline
+          min_contract_duration:
+            type: string
+            format: int64
+          max_contract_duration:
+            type: string
+            format: int64
+          subscription_rate:
+            type: string
+            format: int64
+          pay_as_you_go_rate:
+            type: string
+            format: int64
+          bond:
+            type: string
+          last_update:
+            type: string
+            format: int64
   mercury.mercury.QueryParamsResponse:
     type: object
     properties:
