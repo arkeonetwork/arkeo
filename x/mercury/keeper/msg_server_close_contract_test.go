@@ -21,7 +21,7 @@ func (CloseContractSuite) TestValidate(c *C) {
 
 	// setup
 	pubkey := types.GetRandomPubKey()
-	acc := types.GetRandomBech32Addr()
+	acc := types.GetRandomPubKey()
 	chain := common.BTCChain
 
 	contract := types.NewContract(pubkey, chain, acc)
@@ -34,7 +34,7 @@ func (CloseContractSuite) TestValidate(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain,
 		Creator: acc.String(),
-		Client:  acc.String(),
+		Client:  acc,
 	}
 	c.Assert(s.CloseContractValidate(ctx, &msg), IsNil)
 
@@ -56,7 +56,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	pubkey := types.GetRandomPubKey()
 	provider, err := pubkey.GetMyAddress()
 	c.Assert(err, IsNil)
-	acc := types.GetRandomBech32Addr()
+	acc := types.GetRandomPubKey()
 	chain := common.BTCChain
 	c.Check(k.GetBalance(ctx, provider).IsZero(), Equals, true)
 
@@ -73,7 +73,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain,
 		Creator: acc.String(),
-		Client:  acc.String(),
+		Client:  acc,
 	}
 	c.Assert(s.CloseContractHandle(ctx, &msg), IsNil)
 
@@ -85,7 +85,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(0))
 	c.Check(k.HasCoins(ctx, provider, getCoins(18)), Equals, true)
-	c.Check(k.HasCoins(ctx, contract.ClientAddress, getCoins(480)), Equals, true)
+	c.Check(k.HasCoins(ctx, contract.ClientAddress(), getCoins(480)), Equals, true)
 	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(2))
 }

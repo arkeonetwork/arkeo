@@ -323,13 +323,19 @@ export interface TypesHeader {
   time?: string;
   last_block_id?: TypesBlockID;
 
-  /** @format byte */
+  /**
+   * commit from validators from the last block
+   * @format byte
+   */
   last_commit_hash?: string;
 
   /** @format byte */
   data_hash?: string;
 
-  /** @format byte */
+  /**
+   * validators for the current block
+   * @format byte
+   */
   validators_hash?: string;
 
   /** @format byte */
@@ -344,7 +350,10 @@ export interface TypesHeader {
   /** @format byte */
   last_results_hash?: string;
 
-  /** @format byte */
+  /**
+   * evidence included in the block
+   * @format byte
+   */
   evidence_hash?: string;
 
   /** @format byte */
@@ -428,6 +437,8 @@ export interface TypesVote {
 
   /** @format int32 */
   round?: number;
+
+  /** zero if vote is nil. */
   block_id?: TypesBlockID;
 
   /** @format date-time */
@@ -481,14 +492,18 @@ export interface V1Beta1AuthInfo {
   signer_infos?: V1Beta1SignerInfo[];
 
   /**
-   * Fee includes the amount of coins paid in fees and the maximum
-   * gas to be used by the transaction. The ratio yields an effective "gasprice",
-   * which must be above some miminum to be accepted into the mempool.
+   * Fee is the fee and gas limit for the transaction. The first signer is the
+   * primary signer and the one which pays the fee. The fee can be calculated
+   * based on the cost of evaluating the body and doing signature verification
+   * of the signers. This can be estimated via simulation.
    */
   fee?: V1Beta1Fee;
 
   /**
-   * Tip is the tip used for meta-transactions.
+   * Tip is the optional tip used for transactions fees paid in another denom.
+   *
+   * This field is ignored if the chain didn't enable tips, i.e. didn't add the
+   * `TipDecorator` in its posthandler.
    *
    * Since: cosmos-sdk 0.46
    */
@@ -543,10 +558,7 @@ export interface V1Beta1BroadcastTxRequest {
 Service.BroadcastTx method.
 */
 export interface V1Beta1BroadcastTxResponse {
-  /**
-   * TxResponse defines a structure containing relevant tx data and metadata. The
-   * tags are stringified and the log is JSON decoded.
-   */
+  /** tx_response is the queried TxResponses. */
   tx_response?: V1Beta1TxResponse;
 }
 
@@ -623,15 +635,7 @@ export interface V1Beta1GetBlockWithTxsResponse {
   block_id?: TypesBlockID;
   block?: TypesBlock;
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines a pagination for the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -639,13 +643,10 @@ export interface V1Beta1GetBlockWithTxsResponse {
  * GetTxResponse is the response type for the Service.GetTx method.
  */
 export interface V1Beta1GetTxResponse {
-  /** Tx is the standard type used for broadcasting transactions. */
+  /** tx is the queried transaction. */
   tx?: V1Beta1Tx;
 
-  /**
-   * TxResponse defines a structure containing relevant tx data and metadata. The
-   * tags are stringified and the log is JSON decoded.
-   */
+  /** tx_response is the queried TxResponses. */
   tx_response?: V1Beta1TxResponse;
 }
 
@@ -661,13 +662,8 @@ export interface V1Beta1GetTxsEventResponse {
   tx_responses?: V1Beta1TxResponse[];
 
   /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
+   * pagination defines a pagination for the response.
+   * Deprecated post v0.46.x: use total instead.
    */
   pagination?: V1Beta1PageResponse;
 
@@ -864,88 +860,9 @@ signer.
 */
 export interface V1Beta1SignerInfo {
   /**
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   *
-   * Example 1: Pack and unpack a message in C++.
-   *
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   *
-   * Example 2: Pack and unpack a message in Java.
-   *
-   *     Foo foo = ...;
-   *     Any any = Any.pack(foo);
-   *     ...
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *     }
-   *
-   *  Example 3: Pack and unpack a message in Python.
-   *
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     ...
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *       ...
-   *
-   *  Example 4: Pack and unpack a message in Go
-   *
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   *        ...
-   *      }
-   *
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   *
-   *
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     }
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   *     }
-   *
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   *     }
+   * public_key is the public key of the signer. It is optional for accounts
+   * that already exist in state. If unset, the verifier can use the required \
+   * signer address for this position and lookup the public key.
    */
   public_key?: ProtobufAny;
 
@@ -966,7 +883,10 @@ export interface V1Beta1SignerInfo {
 RPC method.
 */
 export interface V1Beta1SimulateRequest {
-  /** Tx is the standard type used for broadcasting transactions. */
+  /**
+   * tx is the transaction to simulate.
+   * Deprecated. Send raw tx bytes instead.
+   */
   tx?: V1Beta1Tx;
 
   /**
@@ -983,10 +903,10 @@ export interface V1Beta1SimulateRequest {
 Service.SimulateRPC method.
 */
 export interface V1Beta1SimulateResponse {
-  /** GasInfo defines tx execution gas context. */
+  /** gas_info is the information about gas used in the simulation. */
   gas_info?: V1Beta1GasInfo;
 
-  /** Result is the union of ResponseFormat and ResponseCheckTx. */
+  /** result is the result of the simulation. */
   result?: Abciv1Beta1Result;
 }
 
@@ -1103,90 +1023,7 @@ export interface V1Beta1TxResponse {
    */
   gas_used?: string;
 
-  /**
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   *
-   * Example 1: Pack and unpack a message in C++.
-   *
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   *
-   * Example 2: Pack and unpack a message in Java.
-   *
-   *     Foo foo = ...;
-   *     Any any = Any.pack(foo);
-   *     ...
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *     }
-   *
-   *  Example 3: Pack and unpack a message in Python.
-   *
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     ...
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *       ...
-   *
-   *  Example 4: Pack and unpack a message in Go
-   *
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   *        ...
-   *      }
-   *
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   *
-   *
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     }
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   *     }
-   *
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   *     }
-   */
+  /** The request transaction bytes. */
   tx?: ProtobufAny;
 
   /**

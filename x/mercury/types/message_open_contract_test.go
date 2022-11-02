@@ -28,6 +28,7 @@ func (MsgOpenContractSuite) TestValidateBasic(c *C) {
 	msg = MsgOpenContract{
 		Creator: acct.String(),
 		PubKey:  pubkey,
+		Client:  pubkey,
 		Chain:   common.BTCChain,
 	}
 	err = msg.ValidateBasic()

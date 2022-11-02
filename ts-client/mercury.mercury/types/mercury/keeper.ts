@@ -85,21 +85,21 @@ export interface Provider {
 export interface Contract {
   providerPubKey: string;
   chain: string;
-  clientAddress: Uint8Array;
+  client: string;
   type: ContractType;
   height: number;
   duration: number;
   rate: number;
   deposit: string;
   paid: string;
-  queries: number;
+  nonce: number;
   closedHeight: number;
 }
 
 export interface ContractExpiration {
   providerPubKey: string;
   chain: string;
-  clientAddress: Uint8Array;
+  client: string;
 }
 
 export interface ContractExpirationSet {
@@ -372,13 +372,14 @@ export const Provider = {
 const baseContract: object = {
   providerPubKey: "",
   chain: "",
+  client: "",
   type: 0,
   height: 0,
   duration: 0,
   rate: 0,
   deposit: "",
   paid: "",
-  queries: 0,
+  nonce: 0,
   closedHeight: 0,
 };
 
@@ -390,8 +391,8 @@ export const Contract = {
     if (message.chain !== "") {
       writer.uint32(18).string(message.chain);
     }
-    if (message.clientAddress.length !== 0) {
-      writer.uint32(26).bytes(message.clientAddress);
+    if (message.client !== "") {
+      writer.uint32(26).string(message.client);
     }
     if (message.type !== 0) {
       writer.uint32(32).int32(message.type);
@@ -411,8 +412,8 @@ export const Contract = {
     if (message.paid !== "") {
       writer.uint32(74).string(message.paid);
     }
-    if (message.queries !== 0) {
-      writer.uint32(80).int64(message.queries);
+    if (message.nonce !== 0) {
+      writer.uint32(80).int64(message.nonce);
     }
     if (message.closedHeight !== 0) {
       writer.uint32(88).int64(message.closedHeight);
@@ -434,7 +435,7 @@ export const Contract = {
           message.chain = reader.string();
           break;
         case 3:
-          message.clientAddress = reader.bytes();
+          message.client = reader.string();
           break;
         case 4:
           message.type = reader.int32() as any;
@@ -455,7 +456,7 @@ export const Contract = {
           message.paid = reader.string();
           break;
         case 10:
-          message.queries = longToNumber(reader.int64() as Long);
+          message.nonce = longToNumber(reader.int64() as Long);
           break;
         case 11:
           message.closedHeight = longToNumber(reader.int64() as Long);
@@ -480,8 +481,10 @@ export const Contract = {
     } else {
       message.chain = "";
     }
-    if (object.clientAddress !== undefined && object.clientAddress !== null) {
-      message.clientAddress = bytesFromBase64(object.clientAddress);
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
     }
     if (object.type !== undefined && object.type !== null) {
       message.type = contractTypeFromJSON(object.type);
@@ -513,10 +516,10 @@ export const Contract = {
     } else {
       message.paid = "";
     }
-    if (object.queries !== undefined && object.queries !== null) {
-      message.queries = Number(object.queries);
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = Number(object.nonce);
     } else {
-      message.queries = 0;
+      message.nonce = 0;
     }
     if (object.closedHeight !== undefined && object.closedHeight !== null) {
       message.closedHeight = Number(object.closedHeight);
@@ -531,19 +534,14 @@ export const Contract = {
     message.providerPubKey !== undefined &&
       (obj.providerPubKey = message.providerPubKey);
     message.chain !== undefined && (obj.chain = message.chain);
-    message.clientAddress !== undefined &&
-      (obj.clientAddress = base64FromBytes(
-        message.clientAddress !== undefined
-          ? message.clientAddress
-          : new Uint8Array()
-      ));
+    message.client !== undefined && (obj.client = message.client);
     message.type !== undefined && (obj.type = contractTypeToJSON(message.type));
     message.height !== undefined && (obj.height = message.height);
     message.duration !== undefined && (obj.duration = message.duration);
     message.rate !== undefined && (obj.rate = message.rate);
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
-    message.queries !== undefined && (obj.queries = message.queries);
+    message.nonce !== undefined && (obj.nonce = message.nonce);
     message.closedHeight !== undefined &&
       (obj.closedHeight = message.closedHeight);
     return obj;
@@ -561,10 +559,10 @@ export const Contract = {
     } else {
       message.chain = "";
     }
-    if (object.clientAddress !== undefined && object.clientAddress !== null) {
-      message.clientAddress = object.clientAddress;
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
     } else {
-      message.clientAddress = new Uint8Array();
+      message.client = "";
     }
     if (object.type !== undefined && object.type !== null) {
       message.type = object.type;
@@ -596,10 +594,10 @@ export const Contract = {
     } else {
       message.paid = "";
     }
-    if (object.queries !== undefined && object.queries !== null) {
-      message.queries = object.queries;
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = object.nonce;
     } else {
-      message.queries = 0;
+      message.nonce = 0;
     }
     if (object.closedHeight !== undefined && object.closedHeight !== null) {
       message.closedHeight = object.closedHeight;
@@ -610,7 +608,11 @@ export const Contract = {
   },
 };
 
-const baseContractExpiration: object = { providerPubKey: "", chain: "" };
+const baseContractExpiration: object = {
+  providerPubKey: "",
+  chain: "",
+  client: "",
+};
 
 export const ContractExpiration = {
   encode(
@@ -623,8 +625,8 @@ export const ContractExpiration = {
     if (message.chain !== "") {
       writer.uint32(18).string(message.chain);
     }
-    if (message.clientAddress.length !== 0) {
-      writer.uint32(26).bytes(message.clientAddress);
+    if (message.client !== "") {
+      writer.uint32(26).string(message.client);
     }
     return writer;
   },
@@ -643,7 +645,7 @@ export const ContractExpiration = {
           message.chain = reader.string();
           break;
         case 3:
-          message.clientAddress = reader.bytes();
+          message.client = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -665,8 +667,10 @@ export const ContractExpiration = {
     } else {
       message.chain = "";
     }
-    if (object.clientAddress !== undefined && object.clientAddress !== null) {
-      message.clientAddress = bytesFromBase64(object.clientAddress);
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
     }
     return message;
   },
@@ -676,12 +680,7 @@ export const ContractExpiration = {
     message.providerPubKey !== undefined &&
       (obj.providerPubKey = message.providerPubKey);
     message.chain !== undefined && (obj.chain = message.chain);
-    message.clientAddress !== undefined &&
-      (obj.clientAddress = base64FromBytes(
-        message.clientAddress !== undefined
-          ? message.clientAddress
-          : new Uint8Array()
-      ));
+    message.client !== undefined && (obj.client = message.client);
     return obj;
   },
 
@@ -697,10 +696,10 @@ export const ContractExpiration = {
     } else {
       message.chain = "";
     }
-    if (object.clientAddress !== undefined && object.clientAddress !== null) {
-      message.clientAddress = object.clientAddress;
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
     } else {
-      message.clientAddress = new Uint8Array();
+      message.client = "";
     }
     return message;
   },
@@ -803,29 +802,6 @@ var globalThis: any = (() => {
   if (typeof global !== "undefined") return global;
   throw "Unable to locate global object";
 })();
-
-const atob: (b64: string) => string =
-  globalThis.atob ||
-  ((b64) => globalThis.Buffer.from(b64, "base64").toString("binary"));
-function bytesFromBase64(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; ++i) {
-    arr[i] = bin.charCodeAt(i);
-  }
-  return arr;
-}
-
-const btoa: (bin: string) => string =
-  globalThis.btoa ||
-  ((bin) => globalThis.Buffer.from(bin, "binary").toString("base64"));
-function base64FromBytes(arr: Uint8Array): string {
-  const bin: string[] = [];
-  for (let i = 0; i < arr.byteLength; ++i) {
-    bin.push(String.fromCharCode(arr[i]));
-  }
-  return btoa(bin.join(""));
-}
 
 type Builtin = Date | Function | Uint8Array | string | number | undefined;
 export type DeepPartial<T> = T extends Builtin

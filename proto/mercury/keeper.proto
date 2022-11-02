@@ -33,21 +33,21 @@ enum ContractType {
 message Contract {
   string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
   string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
-  bytes  client_address = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string client = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
   ContractType type = 4;
   int64 height = 5;
   int64 duration = 6;
   int64 rate = 7;
   string deposit = 8 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
   string paid = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
-  int64 queries = 10;
+  int64 nonce = 10;
   int64 closed_height = 11;
 }
 
 message ContractExpiration {
   string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
   string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
-  bytes  client_address = 3 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string client = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
 }
 
 message ContractExpirationSet {

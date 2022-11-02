@@ -379,7 +379,7 @@ export interface V1Params {
 method.
 */
 export interface V1QueryClientParamsResponse {
-  /** Params defines the set of IBC light client parameters. */
+  /** params defines the parameters of the module. */
   params?: V1Params;
 }
 

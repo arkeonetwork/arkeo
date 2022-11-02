@@ -121,15 +121,15 @@ func (k KVStoreDummy) ProviderExists(_ cosmos.Context, _ common.PubKey, _ common
 }
 func (k KVStoreDummy) RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain) {}
 func (k KVStoreDummy) GetContractIterator(_ cosmos.Context) cosmos.Iterator             { return nil }
-func (k KVStoreDummy) GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) (types.Contract, error) {
+func (k KVStoreDummy) GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) (types.Contract, error) {
 	return types.Contract{}, kaboom
 }
 func (k KVStoreDummy) SetContract(_ cosmos.Context, _ types.Contract) error { return kaboom }
-func (k KVStoreDummy) ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) bool {
+func (k KVStoreDummy) ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool {
 	return false
 }
 
-func (k KVStoreDummy) RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) {
+func (k KVStoreDummy) RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) {
 }
 
 func (k KVStoreDummy) GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator { return nil }

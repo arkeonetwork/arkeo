@@ -21,7 +21,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	// setup
 	pubkey := types.GetRandomPubKey()
-	acc := types.GetRandomBech32Addr()
+	acc := types.GetRandomPubKey()
 	chain := common.BTCChain
 
 	provider := types.NewProvider(pubkey, chain)
@@ -36,6 +36,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 	msg := types.MsgOpenContract{
 		PubKey:   pubkey,
 		Chain:    chain,
+		Client:   acc,
 		Creator:  acc.String(),
 		CType:    types.ContractType_Subscription,
 		Duration: 100,
@@ -97,6 +98,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 		PubKey:   pubkey,
 		Chain:    chain,
 		Creator:  acc.String(),
+		Client:   pubkey,
 		CType:    types.ContractType_PayAsYouGo,
 		Duration: 100,
 		Rate:     15,
@@ -104,14 +106,14 @@ func (OpenContractSuite) TestHandle(c *C) {
 	}
 	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 
-	contract, err := k.GetContract(ctx, pubkey, chain, acc)
+	contract, err := k.GetContract(ctx, pubkey, chain, pubkey)
 	c.Assert(err, IsNil)
 
 	c.Check(contract.Type, Equals, types.ContractType_PayAsYouGo)
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))
-	c.Check(contract.Queries, Equals, int64(0))
+	c.Check(contract.Nonce, Equals, int64(0))
 	c.Check(contract.Deposit.Int64(), Equals, int64(1000))
 	c.Check(contract.Paid.Int64(), Equals, int64(0))
 

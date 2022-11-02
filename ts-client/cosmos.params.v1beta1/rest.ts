@@ -34,10 +34,7 @@ export interface V1Beta1ParamChange {
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */
 export interface V1Beta1QueryParamsResponse {
-  /**
-   * ParamChange defines an individual parameter change, for use in
-   * ParameterChangeProposal.
-   */
+  /** param defines the queried parameter. */
   param?: V1Beta1ParamChange;
 }
 

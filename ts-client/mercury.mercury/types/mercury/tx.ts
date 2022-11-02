@@ -40,6 +40,7 @@ export interface MsgOpenContract {
   creator: string;
   pubKey: string;
   chain: string;
+  client: string;
   cType: ContractType;
   duration: number;
   rate: number;
@@ -56,6 +57,18 @@ export interface MsgCloseContract {
 }
 
 export interface MsgCloseContractResponse {}
+
+export interface MsgClaimContractIncome {
+  creator: string;
+  pubKey: string;
+  chain: string;
+  client: string;
+  signature: Uint8Array;
+  nonce: number;
+  height: number;
+}
+
+export interface MsgClaimContractIncomeResponse {}
 
 const baseMsgBondProvider: object = {
   creator: "",
@@ -500,6 +513,7 @@ const baseMsgOpenContract: object = {
   creator: "",
   pubKey: "",
   chain: "",
+  client: "",
   cType: 0,
   duration: 0,
   rate: 0,
@@ -517,17 +531,20 @@ export const MsgOpenContract = {
     if (message.chain !== "") {
       writer.uint32(26).string(message.chain);
     }
+    if (message.client !== "") {
+      writer.uint32(34).string(message.client);
+    }
     if (message.cType !== 0) {
-      writer.uint32(32).int32(message.cType);
+      writer.uint32(40).int32(message.cType);
     }
     if (message.duration !== 0) {
-      writer.uint32(40).int64(message.duration);
+      writer.uint32(48).int64(message.duration);
     }
     if (message.rate !== 0) {
-      writer.uint32(48).int64(message.rate);
+      writer.uint32(56).int64(message.rate);
     }
     if (message.deposit !== "") {
-      writer.uint32(58).string(message.deposit);
+      writer.uint32(66).string(message.deposit);
     }
     return writer;
   },
@@ -549,15 +566,18 @@ export const MsgOpenContract = {
           message.chain = reader.string();
           break;
         case 4:
-          message.cType = reader.int32() as any;
+          message.client = reader.string();
           break;
         case 5:
-          message.duration = longToNumber(reader.int64() as Long);
+          message.cType = reader.int32() as any;
           break;
         case 6:
-          message.rate = longToNumber(reader.int64() as Long);
+          message.duration = longToNumber(reader.int64() as Long);
           break;
         case 7:
+          message.rate = longToNumber(reader.int64() as Long);
+          break;
+        case 8:
           message.deposit = reader.string();
           break;
         default:
@@ -584,6 +604,11 @@ export const MsgOpenContract = {
       message.chain = String(object.chain);
     } else {
       message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
     }
     if (object.cType !== undefined && object.cType !== null) {
       message.cType = contractTypeFromJSON(object.cType);
@@ -613,6 +638,7 @@ export const MsgOpenContract = {
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
+    message.client !== undefined && (obj.client = message.client);
     message.cType !== undefined &&
       (obj.cType = contractTypeToJSON(message.cType));
     message.duration !== undefined && (obj.duration = message.duration);
@@ -637,6 +663,11 @@ export const MsgOpenContract = {
       message.chain = object.chain;
     } else {
       message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
+    } else {
+      message.client = "";
     }
     if (object.cType !== undefined && object.cType !== null) {
       message.cType = object.cType;
@@ -871,13 +902,238 @@ export const MsgCloseContractResponse = {
   },
 };
 
+const baseMsgClaimContractIncome: object = {
+  creator: "",
+  pubKey: "",
+  chain: "",
+  client: "",
+  nonce: 0,
+  height: 0,
+};
+
+export const MsgClaimContractIncome = {
+  encode(
+    message: MsgClaimContractIncome,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.pubKey !== "") {
+      writer.uint32(18).string(message.pubKey);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    if (message.client !== "") {
+      writer.uint32(34).string(message.client);
+    }
+    if (message.signature.length !== 0) {
+      writer.uint32(42).bytes(message.signature);
+    }
+    if (message.nonce !== 0) {
+      writer.uint32(48).int64(message.nonce);
+    }
+    if (message.height !== 0) {
+      writer.uint32(56).int64(message.height);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgClaimContractIncome {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.pubKey = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        case 4:
+          message.client = reader.string();
+          break;
+        case 5:
+          message.signature = reader.bytes();
+          break;
+        case 6:
+          message.nonce = longToNumber(reader.int64() as Long);
+          break;
+        case 7:
+          message.height = longToNumber(reader.int64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgClaimContractIncome {
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = String(object.pubKey);
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = String(object.chain);
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = String(object.client);
+    } else {
+      message.client = "";
+    }
+    if (object.signature !== undefined && object.signature !== null) {
+      message.signature = bytesFromBase64(object.signature);
+    }
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = Number(object.nonce);
+    } else {
+      message.nonce = 0;
+    }
+    if (object.height !== undefined && object.height !== null) {
+      message.height = Number(object.height);
+    } else {
+      message.height = 0;
+    }
+    return message;
+  },
+
+  toJSON(message: MsgClaimContractIncome): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.client !== undefined && (obj.client = message.client);
+    message.signature !== undefined &&
+      (obj.signature = base64FromBytes(
+        message.signature !== undefined ? message.signature : new Uint8Array()
+      ));
+    message.nonce !== undefined && (obj.nonce = message.nonce);
+    message.height !== undefined && (obj.height = message.height);
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<MsgClaimContractIncome>
+  ): MsgClaimContractIncome {
+    const message = { ...baseMsgClaimContractIncome } as MsgClaimContractIncome;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.pubKey !== undefined && object.pubKey !== null) {
+      message.pubKey = object.pubKey;
+    } else {
+      message.pubKey = "";
+    }
+    if (object.chain !== undefined && object.chain !== null) {
+      message.chain = object.chain;
+    } else {
+      message.chain = "";
+    }
+    if (object.client !== undefined && object.client !== null) {
+      message.client = object.client;
+    } else {
+      message.client = "";
+    }
+    if (object.signature !== undefined && object.signature !== null) {
+      message.signature = object.signature;
+    } else {
+      message.signature = new Uint8Array();
+    }
+    if (object.nonce !== undefined && object.nonce !== null) {
+      message.nonce = object.nonce;
+    } else {
+      message.nonce = 0;
+    }
+    if (object.height !== undefined && object.height !== null) {
+      message.height = object.height;
+    } else {
+      message.height = 0;
+    }
+    return message;
+  },
+};
+
+const baseMsgClaimContractIncomeResponse: object = {};
+
+export const MsgClaimContractIncomeResponse = {
+  encode(
+    _: MsgClaimContractIncomeResponse,
+    writer: Writer = Writer.create()
+  ): Writer {
+    return writer;
+  },
+
+  decode(
+    input: Reader | Uint8Array,
+    length?: number
+  ): MsgClaimContractIncomeResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgClaimContractIncomeResponse {
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    return message;
+  },
+
+  toJSON(_: MsgClaimContractIncomeResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial(
+    _: DeepPartial<MsgClaimContractIncomeResponse>
+  ): MsgClaimContractIncomeResponse {
+    const message = {
+      ...baseMsgClaimContractIncomeResponse,
+    } as MsgClaimContractIncomeResponse;
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   BondProvider(request: MsgBondProvider): Promise<MsgBondProviderResponse>;
   ModProvider(request: MsgModProvider): Promise<MsgModProviderResponse>;
   OpenContract(request: MsgOpenContract): Promise<MsgOpenContractResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   CloseContract(request: MsgCloseContract): Promise<MsgCloseContractResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  ClaimContractIncome(
+    request: MsgClaimContractIncome
+  ): Promise<MsgClaimContractIncomeResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -932,6 +1188,20 @@ export class MsgClientImpl implements Msg {
       MsgCloseContractResponse.decode(new Reader(data))
     );
   }
+
+  ClaimContractIncome(
+    request: MsgClaimContractIncome
+  ): Promise<MsgClaimContractIncomeResponse> {
+    const data = MsgClaimContractIncome.encode(request).finish();
+    const promise = this.rpc.request(
+      "mercury.mercury.Msg",
+      "ClaimContractIncome",
+      data
+    );
+    return promise.then((data) =>
+      MsgClaimContractIncomeResponse.decode(new Reader(data))
+    );
+  }
 }
 
 interface Rpc {
@@ -951,6 +1221,29 @@ var globalThis: any = (() => {
   if (typeof global !== "undefined") return global;
   throw "Unable to locate global object";
 })();
+
+const atob: (b64: string) => string =
+  globalThis.atob ||
+  ((b64) => globalThis.Buffer.from(b64, "base64").toString("binary"));
+function bytesFromBase64(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; ++i) {
+    arr[i] = bin.charCodeAt(i);
+  }
+  return arr;
+}
+
+const btoa: (bin: string) => string =
+  globalThis.btoa ||
+  ((bin) => globalThis.Buffer.from(bin, "binary").toString("base64"));
+function base64FromBytes(arr: Uint8Array): string {
+  const bin: string[] = [];
+  for (let i = 0; i < arr.byteLength; ++i) {
+    bin.push(String.fromCharCode(arr[i]));
+  }
+  return btoa(bin.join(""));
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | undefined;
 export type DeepPartial<T> = T extends Builtin

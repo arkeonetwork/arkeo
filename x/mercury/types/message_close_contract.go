@@ -11,7 +11,7 @@ const TypeMsgCloseContract = "close_contract"
 
 var _ sdk.Msg = &MsgCloseContract{}
 
-func NewMsgCloseContract(creator string, pubkey common.PubKey, chain common.Chain, client string) *MsgCloseContract {
+func NewMsgCloseContract(creator string, pubkey common.PubKey, chain common.Chain, client common.PubKey) *MsgCloseContract {
 	return &MsgCloseContract{
 		Creator: creator,
 		PubKey:  pubkey,
@@ -45,7 +45,7 @@ func (msg *MsgCloseContract) MustGetSigner() sdk.AccAddress {
 }
 
 func (msg *MsgCloseContract) GetClientAddress() (sdk.AccAddress, error) {
-	acc, err := sdk.AccAddressFromBech32(msg.Client)
+	acc, err := msg.Client.GetMyAddress()
 	if err == nil {
 		return acc, nil
 	}
@@ -77,9 +77,9 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	}
 
 	if len(msg.Client) > 0 {
-		_, err := sdk.AccAddressFromBech32(msg.Client)
+		_, err = common.NewPubKey(msg.Client.String())
 		if err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid client address (%s)", err)
+			return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
 		}
 
 		signer := msg.MustGetSigner()

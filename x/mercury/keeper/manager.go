@@ -41,14 +41,14 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 	}
 
 	for _, exp := range set.Contracts {
-		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.ClientAddress)
+		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.Client)
 		if err != nil {
-			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.ClientAddress, "error", err)
+			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
 			continue
 		}
-		_, err = mgr.SettleContract(ctx, contract, true)
+		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
-			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.ClientAddress, "error", err)
+			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
 			continue
 		}
 	}
@@ -143,7 +143,10 @@ func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 }
 
 // any owed debt is paid to data provider
-func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, closed bool) (types.Contract, error) {
+func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonce int64, closed bool) (types.Contract, error) {
+	if nonce > contract.Nonce {
+		contract.Nonce = nonce
+	}
 	totalDebt, err := mgr.contractDebt(ctx, contract)
 	valIncome := common.GetSafeShare(cosmos.NewInt(mgr.FetchConfig(ctx, configs.ReserveTax)), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
 	debt := totalDebt.Sub(valIncome)
@@ -167,7 +170,11 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, c
 	if closed {
 		remainder := contract.Deposit.Sub(contract.Paid)
 		if !remainder.IsZero() {
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, contract.ClientAddress, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
+			client, err := contract.Client.GetMyAddress()
+			if err != nil {
+				return contract, err
+			}
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
 				return contract, err
 			}
 		}
@@ -185,7 +192,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, c
 				types.EventTypeContractSettlement,
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
-				sdk.NewAttribute("client", contract.ClientAddress.String()),
+				sdk.NewAttribute("client", contract.Client.String()),
 				sdk.NewAttribute("paid", debt.String()),
 			),
 		},
@@ -199,7 +206,7 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	case types.ContractType_Subscription:
 		debt = cosmos.NewInt(contract.Rate * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
 	case types.ContractType_PayAsYouGo:
-		debt = cosmos.NewInt(contract.Rate * contract.Queries).Sub(contract.Paid)
+		debt = cosmos.NewInt(contract.Rate * contract.Nonce).Sub(contract.Paid)
 	default:
 		return cosmos.ZeroInt(), sdkerrors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
 	}
@@ -207,5 +214,11 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	if debt.IsNegative() {
 		return cosmos.ZeroInt(), nil
 	}
+
+	// sanity check, ensure provider cannot take more than deposited into the contract
+	if contract.Paid.Add(debt).GT(contract.Deposit) {
+		return contract.Deposit.Sub(contract.Paid), nil
+	}
+
 	return debt, nil
 }

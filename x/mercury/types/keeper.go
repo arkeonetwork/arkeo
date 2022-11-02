@@ -18,18 +18,18 @@ func (p Provider) Key() string {
 	return fmt.Sprintf("%s/%s", p.PubKey, p.Chain)
 }
 
-func NewContract(pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) Contract {
+func NewContract(pubkey common.PubKey, chain common.Chain, client common.PubKey) Contract {
 	return Contract{
 		ProviderPubKey: pubkey,
 		Chain:          chain,
-		ClientAddress:  client,
+		Client:         client,
 		Deposit:        cosmos.ZeroInt(),
 		Paid:           cosmos.ZeroInt(),
 	}
 }
 
 func (c Contract) Key() string {
-	return fmt.Sprintf("%s/%s/%s", c.ProviderPubKey, c.Chain, c.ClientAddress)
+	return fmt.Sprintf("%s/%s/%s", c.ProviderPubKey, c.Chain, c.Client)
 }
 
 func (c Contract) Expiration() int64 {
@@ -57,10 +57,18 @@ func (c Contract) IsEmpty() bool {
 	return c.Height == 0
 }
 
-func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) *ContractExpiration {
+func (c Contract) ClientAddress() cosmos.AccAddress {
+	addr, err := c.Client.GetMyAddress()
+	if err != nil {
+		panic(err)
+	}
+	return addr
+}
+
+func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client common.PubKey) *ContractExpiration {
 	return &ContractExpiration{
 		ProviderPubKey: pubkey,
 		Chain:          chain,
-		ClientAddress:  client,
+		Client:         client,
 	}
 }

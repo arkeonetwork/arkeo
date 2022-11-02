@@ -7,16 +7,23 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgModProvider } from "./types/mercury/tx";
+import { MsgCloseContract } from "./types/mercury/tx";
+import { MsgClaimContractIncome } from "./types/mercury/tx";
 import { MsgBondProvider } from "./types/mercury/tx";
 import { MsgOpenContract } from "./types/mercury/tx";
-import { MsgCloseContract } from "./types/mercury/tx";
+import { MsgModProvider } from "./types/mercury/tx";
 
 
-export { MsgModProvider, MsgBondProvider, MsgOpenContract, MsgCloseContract };
+export { MsgCloseContract, MsgClaimContractIncome, MsgBondProvider, MsgOpenContract, MsgModProvider };
 
-type sendMsgModProviderParams = {
-  value: MsgModProvider,
+type sendMsgCloseContractParams = {
+  value: MsgCloseContract,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
   fee?: StdFee,
   memo?: string
 };
@@ -33,15 +40,19 @@ type sendMsgOpenContractParams = {
   memo?: string
 };
 
-type sendMsgCloseContractParams = {
-  value: MsgCloseContract,
+type sendMsgModProviderParams = {
+  value: MsgModProvider,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgModProviderParams = {
-  value: MsgModProvider,
+type msgCloseContractParams = {
+  value: MsgCloseContract,
+};
+
+type msgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
 };
 
 type msgBondProviderParams = {
@@ -52,8 +63,8 @@ type msgOpenContractParams = {
   value: MsgOpenContract,
 };
 
-type msgCloseContractParams = {
-  value: MsgCloseContract,
+type msgModProviderParams = {
+  value: MsgModProvider,
 };
 
 
@@ -74,17 +85,31 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgModProvider({ value, fee, memo }: sendMsgModProviderParams): Promise<DeliverTxResponse> {
+		async sendMsgCloseContract({ value, fee, memo }: sendMsgCloseContractParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgModProvider: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgCloseContract: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgModProvider({ value: MsgModProvider.fromPartial(value) })
+				let msg = this.msgCloseContract({ value: MsgCloseContract.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgModProvider: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgCloseContract: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgClaimContractIncome({ value, fee, memo }: sendMsgClaimContractIncomeParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimContractIncome: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimContractIncome({ value: MsgClaimContractIncome.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimContractIncome: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -116,26 +141,34 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgCloseContract({ value, fee, memo }: sendMsgCloseContractParams): Promise<DeliverTxResponse> {
+		async sendMsgModProvider({ value, fee, memo }: sendMsgModProviderParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgCloseContract: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgModProvider: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCloseContract({ value: MsgCloseContract.fromPartial(value) })
+				let msg = this.msgModProvider({ value: MsgModProvider.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCloseContract: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgModProvider: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgModProvider({ value }: msgModProviderParams): EncodeObject {
+		msgCloseContract({ value }: msgCloseContractParams): EncodeObject {
 			try {
-				return { typeUrl: "/mercury.mercury.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
+				return { typeUrl: "/mercury.mercury.MsgCloseContract", value: MsgCloseContract.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgCloseContract: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgClaimContractIncome({ value }: msgClaimContractIncomeParams): EncodeObject {
+			try {
+				return { typeUrl: "/mercury.mercury.MsgClaimContractIncome", value: MsgClaimContractIncome.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimContractIncome: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -155,11 +188,11 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgCloseContract({ value }: msgCloseContractParams): EncodeObject {
+		msgModProvider({ value }: msgModProviderParams): EncodeObject {
 			try {
-				return { typeUrl: "/mercury.mercury.MsgCloseContract", value: MsgCloseContract.fromPartial( value ) }  
+				return { typeUrl: "/mercury.mercury.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgCloseContract: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
 			}
 		},
 		

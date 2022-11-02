@@ -38,12 +38,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return sdkerrors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
-	client, err := msg.GetClientAddress()
-	if err != nil {
-		return err
-	}
-
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, client)
+	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
 	if err != nil {
 		return err
 	}
@@ -68,17 +63,12 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 }
 
 func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseContract) error {
-	client, err := msg.GetClientAddress()
+	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
 	if err != nil {
 		return err
 	}
 
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, client)
-	if err != nil {
-		return err
-	}
-
-	_, err = k.mgr.SettleContract(ctx, contract, true)
+	_, err = k.mgr.SettleContract(ctx, contract, 0, true)
 	if err != nil {
 		return err
 	}
@@ -94,7 +84,7 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseCon
 				types.EventTypeCloseContract,
 				sdk.NewAttribute("pubkey", msg.PubKey.String()),
 				sdk.NewAttribute("chain", msg.Chain.String()),
-				sdk.NewAttribute("client", msg.Client),
+				sdk.NewAttribute("client", msg.Client.String()),
 			),
 		},
 	)
