@@ -27,7 +27,7 @@ func (ModProviderSuite) TestValidate(c *C) {
 	// happy path
 	msg := types.MsgModProvider{
 		PubKey:              provider.PubKey,
-		Chain:               provider.Chain,
+		Chain:               provider.Chain.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_Online,
@@ -60,7 +60,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 	msg := types.MsgModProvider{
 		Creator:             acct.String(),
 		PubKey:              pubkey,
-		Chain:               common.BTCChain,
+		Chain:               common.BTCChain.String(),
 		MetadataURI:         "foobar",
 		MetadataNonce:       3,
 		MinContractDuration: 10,
@@ -71,7 +71,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 	}
 	c.Assert(s.ModProviderHandle(ctx, &msg), IsNil)
 
-	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	provider, err := k.GetProvider(ctx, msg.PubKey, common.BTCChain)
 	c.Assert(err, IsNil)
 	c.Check(provider.MetadataURI, Equals, "foobar")
 	c.Check(provider.MetadataNonce, Equals, uint64(3))

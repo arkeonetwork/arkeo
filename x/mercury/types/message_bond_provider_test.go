@@ -33,7 +33,7 @@ func (MsgBondProviderSuite) TestValidateBasic(c *C) {
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidChain)
 
-	msg.Chain = common.BTCChain
+	msg.Chain = common.BTCChain.String()
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidBond)
 

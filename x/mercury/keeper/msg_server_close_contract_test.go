@@ -32,7 +32,7 @@ func (CloseContractSuite) TestValidate(c *C) {
 	// happy path
 	msg := types.MsgCloseContract{
 		PubKey:  pubkey,
-		Chain:   chain,
+		Chain:   chain.String(),
 		Creator: acc.String(),
 		Client:  acc,
 	}
@@ -71,7 +71,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	// happy path
 	msg := types.MsgCloseContract{
 		PubKey:  pubkey,
-		Chain:   chain,
+		Chain:   chain.String(),
 		Creator: acc.String(),
 		Client:  acc,
 	}

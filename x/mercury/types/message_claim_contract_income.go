@@ -13,7 +13,7 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain common.Chain, client common.PubKey, nonce, height int64) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, client common.PubKey, nonce, height int64) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator: creator,
 		PubKey:  pubkey,
@@ -84,7 +84,7 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	}
 
 	// verify chain
-	_, err = common.NewChain(msg.Chain.String())
+	_, err = common.NewChain(msg.Chain)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}

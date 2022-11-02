@@ -59,7 +59,7 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidChain)
 
-	msg.Chain = common.BTCChain
+	msg.Chain = common.BTCChain.String()
 	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Client, msg.Height, msg.Nonce))
 	msg.Signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
@@ -76,7 +76,7 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 		Creator: GetRandomBech32Addr().String(),
 		PubKey:  pubkey,
 		Client:  GetRandomPubKey(),
-		Chain:   common.BTCChain,
+		Chain:   common.BTCChain.String(),
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrProviderBadSigner)
@@ -99,7 +99,7 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 		Creator: acct.String(),
 		PubKey:  pubkey,
 		Client:  pubkey,
-		Chain:   common.BTCChain,
+		Chain:   common.BTCChain.String(),
 		Height:  100,
 		Nonce:   48,
 	}

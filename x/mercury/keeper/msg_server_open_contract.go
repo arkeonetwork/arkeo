@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -39,7 +40,11 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return sdkerrors.Wrapf(types.ErrDisabledHandler, "open contract")
 	}
 
-	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
 	if err != nil {
 		return err
 	}
@@ -73,7 +78,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return sdkerrors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
 	}
 
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
 	if err != nil {
 		return err
 	}
@@ -93,14 +98,18 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		}
 	}
 
-	contract := types.NewContract(msg.PubKey, msg.Chain, msg.Client)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	contract := types.NewContract(msg.PubKey, chain, msg.Client)
 	contract.Type = msg.CType
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
 
-	exp := types.NewContractExpiration(msg.PubKey, msg.Chain, msg.Client)
+	exp := types.NewContractExpiration(msg.PubKey, chain, msg.Client)
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	if err != nil {
 		return err

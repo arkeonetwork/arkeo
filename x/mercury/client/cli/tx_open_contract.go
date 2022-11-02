@@ -23,11 +23,6 @@ func CmdOpenContract() *cobra.Command {
 			argPubkey := args[0]
 			argChain := args[1]
 
-			chain, err := common.NewChain(argChain)
-			if err != nil {
-				return err
-			}
-
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
 				return err
@@ -54,7 +49,7 @@ func CmdOpenContract() *cobra.Command {
 			msg := types.NewMsgOpenContract(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				chain,
+				argChain,
 				types.ContractType(argCType),
 				argDuration,
 				argRate,

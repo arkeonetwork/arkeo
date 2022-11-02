@@ -9,16 +9,12 @@ type ChainSuite struct{}
 var _ = Suite(&ChainSuite{})
 
 func (s ChainSuite) TestChain(c *C) {
-	bnbChain, err := NewChain("mcy")
+	chn, err := NewChain("btc-mainnet")
 	c.Assert(err, IsNil)
-	c.Check(bnbChain.Equals(BaseChain), Equals, true)
-	c.Check(bnbChain.IsEmpty(), Equals, false)
-	c.Check(bnbChain.String(), Equals, "MCY")
+	c.Check(chn.Equals(BTCChain), Equals, true)
+	c.Check(chn.IsEmpty(), Equals, false)
+	c.Check(chn.String(), Equals, "btc-mainnet")
 
-	_, err = NewChain("B") // too short
+	_, err = NewChain("B") // invalid
 	c.Assert(err, NotNil)
-
-	chains := Chains{"BNB", "BTC"}
-	c.Check(chains.Has("BTC"), Equals, true)
-	c.Check(chains.Has("ETH"), Equals, false)
 }

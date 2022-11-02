@@ -13,7 +13,7 @@ enum ProviderStatus {
 
 message Provider {
   string pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
-  string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
+  int32 chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   string metadataURI = 3;
   uint64 metadata_nonce = 4;
   ProviderStatus status = 5;
@@ -32,7 +32,7 @@ enum ContractType {
 
 message Contract {
   string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
-  string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
+  int32 chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   string client = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
   ContractType type = 4;
   int64 height = 5;
@@ -46,7 +46,7 @@ message Contract {
 
 message ContractExpiration {
   string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
-  string chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
+  int32 chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   string client = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
 }
 

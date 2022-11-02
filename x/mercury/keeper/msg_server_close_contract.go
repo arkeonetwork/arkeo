@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -38,7 +39,11 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return sdkerrors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
 	if err != nil {
 		return err
 	}
@@ -63,7 +68,11 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 }
 
 func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseContract) error {
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
 	if err != nil {
 		return err
 	}
@@ -83,7 +92,7 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseCon
 			sdk.NewEvent(
 				types.EventTypeCloseContract,
 				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain.String()),
+				sdk.NewAttribute("chain", msg.Chain),
 				sdk.NewAttribute("client", msg.Client.String()),
 			),
 		},

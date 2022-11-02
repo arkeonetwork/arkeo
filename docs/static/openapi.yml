@@ -44271,7 +44271,8 @@ paths:
                   provider_pub_key:
                     type: string
                   chain:
-                    type: string
+                    type: integer
+                    format: int32
                   client:
                     type: string
                   type:
@@ -44349,7 +44350,8 @@ paths:
                     provider_pub_key:
                       type: string
                     chain:
-                      type: string
+                      type: integer
+                      format: int32
                     client:
                       type: string
                     type:
@@ -44533,7 +44535,8 @@ paths:
                   pub_key:
                     type: string
                   chain:
-                    type: string
+                    type: integer
+                    format: int32
                   metadataURI:
                     type: string
                   metadata_nonce:
@@ -44608,7 +44611,8 @@ paths:
                     pub_key:
                       type: string
                     chain:
-                      type: string
+                      type: integer
+                      format: int32
                     metadataURI:
                       type: string
                     metadata_nonce:
@@ -74124,7 +74128,8 @@ definitions:
       provider_pub_key:
         type: string
       chain:
-        type: string
+        type: integer
+        format: int32
       client:
         type: string
       type:
@@ -74177,7 +74182,8 @@ definitions:
       pub_key:
         type: string
       chain:
-        type: string
+        type: integer
+        format: int32
       metadataURI:
         type: string
       metadata_nonce:
@@ -74223,7 +74229,8 @@ definitions:
             provider_pub_key:
               type: string
             chain:
-              type: string
+              type: integer
+              format: int32
             client:
               type: string
             type:
@@ -74288,7 +74295,8 @@ definitions:
             pub_key:
               type: string
             chain:
-              type: string
+              type: integer
+              format: int32
             metadataURI:
               type: string
             metadata_nonce:
@@ -74352,7 +74360,8 @@ definitions:
           provider_pub_key:
             type: string
           chain:
-            type: string
+            type: integer
+            format: int32
           client:
             type: string
           type:
@@ -74389,7 +74398,8 @@ definitions:
           pub_key:
             type: string
           chain:
-            type: string
+            type: integer
+            format: int32
           metadataURI:
             type: string
           metadata_nonce:
