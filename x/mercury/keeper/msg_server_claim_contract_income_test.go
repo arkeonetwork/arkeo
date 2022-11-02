@@ -24,7 +24,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	pubkey := types.GetRandomPubKey()
 	acc := types.GetRandomBech32Addr()
 	chain := common.BTCChain
-	client := types.GetRandomBech32Addr()
+	client := types.GetRandomPubKey()
 
 	contract := types.NewContract(pubkey, chain, client)
 	contract.Duration = 100
@@ -38,7 +38,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	msg := types.MsgClaimContractIncome{
 		PubKey:  pubkey,
 		Chain:   chain,
-		Client:  client.String(),
+		Client:  client,
 		Creator: acc.String(),
 		Nonce:   20,
 		Height:  10,
@@ -67,7 +67,7 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 	acc, err := pubkey.GetMyAddress()
 	c.Assert(err, IsNil)
 	chain := common.BTCChain
-	client := types.GetRandomBech32Addr()
+	client := types.GetRandomPubKey()
 	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))), IsNil)
 	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)), IsNil)
 
@@ -83,7 +83,7 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain,
 		Creator: acc.String(),
-		Client:  client.String(),
+		Client:  client,
 		Nonce:   20,
 		Height:  ctx.BlockHeight(),
 	}
@@ -133,7 +133,7 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 	acc, err := pubkey.GetMyAddress()
 	c.Assert(err, IsNil)
 	chain := common.BTCChain
-	client := types.GetRandomBech32Addr()
+	client := types.GetRandomPubKey()
 	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))), IsNil)
 	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)), IsNil)
 
@@ -150,7 +150,7 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain,
 		Creator: acc.String(),
-		Client:  client.String(),
+		Client:  client,
 		Nonce:   20,
 		Height:  ctx.BlockHeight(),
 	}

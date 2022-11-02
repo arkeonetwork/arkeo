@@ -69,6 +69,21 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
+	// verify client
+	_, err = common.NewPubKey(msg.Client.String())
+	if err != nil {
+		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
+	}
+
+	signer := msg.MustGetSigner()
+	client, err := msg.Client.GetMyAddress()
+	if err != nil {
+		return err
+	}
+	if !signer.Equals(client) {
+		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
+	}
+
 	if msg.Duration <= 0 {
 		return sdkerrors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
 	}

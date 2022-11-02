@@ -147,103 +147,13 @@ export interface Stakingv1Beta1Validator {
   /** operator_address defines the address of the validator's operator; bech encoded in JSON. */
   operator_address?: string;
 
-  /**
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   *
-   * Example 1: Pack and unpack a message in C++.
-   *
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   *
-   * Example 2: Pack and unpack a message in Java.
-   *
-   *     Foo foo = ...;
-   *     Any any = Any.pack(foo);
-   *     ...
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *     }
-   *
-   *  Example 3: Pack and unpack a message in Python.
-   *
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     ...
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *       ...
-   *
-   *  Example 4: Pack and unpack a message in Go
-   *
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   *        ...
-   *      }
-   *
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   *
-   *
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     }
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   *     }
-   *
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *
-   *     {
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   *     }
-   */
+  /** consensus_pubkey is the consensus public key of the validator, as a Protobuf Any. */
   consensus_pubkey?: ProtobufAny;
 
   /** jailed defined whether the validator has been jailed from bonded status or not. */
   jailed?: boolean;
 
-  /**
-   * BondStatus is the status of a validator.
-   *
-   *  - BOND_STATUS_UNSPECIFIED: UNSPECIFIED defines an invalid validator status.
-   *  - BOND_STATUS_UNBONDED: UNBONDED defines a validator that is not bonded.
-   *  - BOND_STATUS_UNBONDING: UNBONDING defines a validator that is unbonding.
-   *  - BOND_STATUS_BONDED: BONDED defines a validator that is bonded.
-   */
+  /** status is the validator status (bonded/unbonding/unbonded). */
   status?: V1Beta1BondStatus;
 
   /** tokens define the delegated tokens (incl. self-delegation). */
@@ -252,7 +162,7 @@ export interface Stakingv1Beta1Validator {
   /** delegator_shares defines total shares issued to a validator's delegators. */
   delegator_shares?: string;
 
-  /** Description defines a validator description. */
+  /** description defines the description terms for the validator. */
   description?: V1Beta1Description;
 
   /**
@@ -267,7 +177,7 @@ export interface Stakingv1Beta1Validator {
    */
   unbonding_time?: string;
 
-  /** Commission defines commission parameters for a given validator. */
+  /** commission defines the commission parameters. */
   commission?: V1Beta1Commission;
 
   /**
@@ -303,13 +213,19 @@ export interface TypesHeader {
   time?: string;
   last_block_id?: TypesBlockID;
 
-  /** @format byte */
+  /**
+   * commit from validators from the last block
+   * @format byte
+   */
   last_commit_hash?: string;
 
   /** @format byte */
   data_hash?: string;
 
-  /** @format byte */
+  /**
+   * validators for the current block
+   * @format byte
+   */
   validators_hash?: string;
 
   /** @format byte */
@@ -324,7 +240,10 @@ export interface TypesHeader {
   /** @format byte */
   last_results_hash?: string;
 
-  /** @format byte */
+  /**
+   * evidence included in the block
+   * @format byte
+   */
   evidence_hash?: string;
 
   /** @format byte */
@@ -369,10 +288,7 @@ export interface V1Beta1Coin {
  * Commission defines commission parameters for a given validator.
  */
 export interface V1Beta1Commission {
-  /**
-   * CommissionRates defines the initial commission rates to be used for creating
-   * a validator.
-   */
+  /** commission_rates defines the initial commission rates to be used for creating a validator. */
   commission_rates?: V1Beta1CommissionRates;
 
   /**
@@ -613,10 +529,7 @@ export interface V1Beta1Pool {
  * QueryDelegationResponse is response type for the Query/Delegation RPC method.
  */
 export interface V1Beta1QueryDelegationResponse {
-  /**
-   * DelegationResponse is equivalent to Delegation except that it contains a
-   * balance in addition to shares which is more suitable for client responses.
-   */
+  /** delegation_responses defines the delegation info of a delegation. */
   delegation_response?: V1Beta1DelegationResponse;
 }
 
@@ -628,15 +541,7 @@ export interface V1Beta1QueryDelegatorDelegationsResponse {
   /** delegation_responses defines all the delegations' info of a delegator. */
   delegation_responses?: V1Beta1DelegationResponse[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -647,15 +552,7 @@ Query/UnbondingDelegatorDelegations RPC method.
 export interface V1Beta1QueryDelegatorUnbondingDelegationsResponse {
   unbonding_responses?: V1Beta1UnbondingDelegation[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -664,16 +561,7 @@ export interface V1Beta1QueryDelegatorUnbondingDelegationsResponse {
 Query/DelegatorValidator RPC method.
 */
 export interface V1Beta1QueryDelegatorValidatorResponse {
-  /**
-   * Validator defines a validator, together with the total amount of the
-   * Validator's bond shares and their exchange rate to coins. Slashing results in
-   * a decrease in the exchange rate, allowing correct calculation of future
-   * undelegations without iterating over delegators. When coins are delegated to
-   * this validator, the validator is credited with a delegation whose number of
-   * bond shares is based on the amount of coins delegated divided by the current
-   * exchange rate. Voting power can be calculated as total bonded shares
-   * multiplied by exchange rate.
-   */
+  /** validator defines the validator info. */
   validator?: Stakingv1Beta1Validator;
 }
 
@@ -685,15 +573,7 @@ export interface V1Beta1QueryDelegatorValidatorsResponse {
   /** validators defines the validators' info of a delegator. */
   validators?: Stakingv1Beta1Validator[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -702,12 +582,7 @@ export interface V1Beta1QueryDelegatorValidatorsResponse {
 method.
 */
 export interface V1Beta1QueryHistoricalInfoResponse {
-  /**
-   * HistoricalInfo contains header and validator information for a given block.
-   * It is stored as part of staking module's state, which persists the `n` most
-   * recent HistoricalInfo
-   * (`n` is set by the staking module's `historical_entries` parameter).
-   */
+  /** hist defines the historical info at the given height. */
   hist?: V1Beta1HistoricalInfo;
 }
 
@@ -715,7 +590,7 @@ export interface V1Beta1QueryHistoricalInfoResponse {
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */
 export interface V1Beta1QueryParamsResponse {
-  /** Params defines the parameters for the staking module. */
+  /** params holds all the parameters of this module. */
   params?: V1Beta1Params;
 }
 
@@ -723,10 +598,7 @@ export interface V1Beta1QueryParamsResponse {
  * QueryPoolResponse is response type for the Query/Pool RPC method.
  */
 export interface V1Beta1QueryPoolResponse {
-  /**
-   * Pool is used for tracking bonded and not-bonded token supply of the bond
-   * denomination.
-   */
+  /** pool defines the pool info. */
   pool?: V1Beta1Pool;
 }
 
@@ -737,15 +609,7 @@ method.
 export interface V1Beta1QueryRedelegationsResponse {
   redelegation_responses?: V1Beta1RedelegationResponse[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -754,39 +618,19 @@ export interface V1Beta1QueryRedelegationsResponse {
 RPC method.
 */
 export interface V1Beta1QueryUnbondingDelegationResponse {
-  /**
-   * UnbondingDelegation stores all of a single delegator's unbonding bonds
-   * for a single validator in an time-ordered list.
-   */
+  /** unbond defines the unbonding information of a delegation. */
   unbond?: V1Beta1UnbondingDelegation;
 }
 
 export interface V1Beta1QueryValidatorDelegationsResponse {
   delegation_responses?: V1Beta1DelegationResponse[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
 export interface V1Beta1QueryValidatorResponse {
-  /**
-   * Validator defines a validator, together with the total amount of the
-   * Validator's bond shares and their exchange rate to coins. Slashing results in
-   * a decrease in the exchange rate, allowing correct calculation of future
-   * undelegations without iterating over delegators. When coins are delegated to
-   * this validator, the validator is credited with a delegation whose number of
-   * bond shares is based on the amount of coins delegated divided by the current
-   * exchange rate. Voting power can be calculated as total bonded shares
-   * multiplied by exchange rate.
-   */
+  /** validator defines the validator info. */
   validator?: Stakingv1Beta1Validator;
 }
 
@@ -797,15 +641,7 @@ Query/ValidatorUnbondingDelegations RPC method.
 export interface V1Beta1QueryValidatorUnbondingDelegationsResponse {
   unbonding_responses?: V1Beta1UnbondingDelegation[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -813,15 +649,7 @@ export interface V1Beta1QueryValidatorsResponse {
   /** validators contains all the queried validators. */
   validators?: Stakingv1Beta1Validator[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -839,7 +667,11 @@ export interface V1Beta1Redelegation {
   /** validator_dst_address is the validator redelegation destination operator address. */
   validator_dst_address?: string;
 
-  /** entries are the redelegation entries. */
+  /**
+   * entries are the redelegation entries.
+   *
+   * redelegation entries
+   */
   entries?: V1Beta1RedelegationEntry[];
 }
 
@@ -902,7 +734,11 @@ export interface V1Beta1UnbondingDelegation {
   /** validator_address is the bech32-encoded address of the validator. */
   validator_address?: string;
 
-  /** entries are the unbonding delegation entries. */
+  /**
+   * entries are the unbonding delegation entries.
+   *
+   * unbonding delegation entries
+   */
   entries?: V1Beta1UnbondingDelegationEntry[];
 }
 

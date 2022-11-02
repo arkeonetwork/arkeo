@@ -41,12 +41,12 @@ type Keeper interface {
 	GetModuleAccAddress(module string) cosmos.AccAddress
 	GetBalance(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Coins
 	HasCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) bool
-	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 
 	// passthrough funcs
 	SendCoins(ctx cosmos.Context, from, to cosmos.AccAddress, coins cosmos.Coins) error
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
 	GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator
+	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 
 	// Keeper Interfaces
 	KeeperProvider
@@ -63,10 +63,10 @@ type KeeperProvider interface {
 
 type KeeperContract interface {
 	GetContractIterator(_ cosmos.Context) cosmos.Iterator
-	GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) (types.Contract, error)
+	GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) (types.Contract, error)
 	SetContract(_ cosmos.Context, _ types.Contract) error
-	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress) bool
-	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ cosmos.AccAddress)
+	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool
+	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey)
 
 	GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator
 	GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error)

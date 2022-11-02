@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -41,12 +40,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return sdkerrors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
-	client, err := msg.GetClientAddress()
-	if err != nil {
-		return err
-	}
-
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, client)
+	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
 	if err != nil {
 		return err
 	}
@@ -63,12 +57,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 }
 
 func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
-	client, err := msg.GetClientAddress()
-	if err != nil {
-		return err
-	}
-
-	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, client)
+	contract, err := k.GetContract(ctx, msg.PubKey, msg.Chain, msg.Client)
 	if err != nil {
 		return err
 	}

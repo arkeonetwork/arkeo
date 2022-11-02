@@ -41,14 +41,14 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 	}
 
 	for _, exp := range set.Contracts {
-		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.ClientAddress)
+		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.Client)
 		if err != nil {
-			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.ClientAddress, "error", err)
+			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
 			continue
 		}
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
-			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.ClientAddress, "error", err)
+			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
 			continue
 		}
 	}
@@ -170,7 +170,11 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 	if closed {
 		remainder := contract.Deposit.Sub(contract.Paid)
 		if !remainder.IsZero() {
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, contract.ClientAddress, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
+			client, err := contract.Client.GetMyAddress()
+			if err != nil {
+				return contract, err
+			}
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
 				return contract, err
 			}
 		}
@@ -188,7 +192,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 				types.EventTypeContractSettlement,
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
-				sdk.NewAttribute("client", contract.ClientAddress.String()),
+				sdk.NewAttribute("client", contract.Client.String()),
 				sdk.NewAttribute("paid", debt.String()),
 			),
 		},

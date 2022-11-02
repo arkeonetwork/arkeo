@@ -1,7 +1,9 @@
 package types
 
 import (
+	fmt "fmt"
 	"mercury/common"
+	"mercury/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -11,7 +13,7 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain common.Chain, client string, nonce, height int64) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain common.Chain, client common.PubKey, nonce, height int64) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator: creator,
 		PubKey:  pubkey,
@@ -31,7 +33,7 @@ func (msg *MsgClaimContractIncome) Type() string {
 }
 
 func (msg *MsgClaimContractIncome) GetClientAddress() (sdk.AccAddress, error) {
-	acc, err := sdk.AccAddressFromBech32(msg.Client)
+	acc, err := msg.Client.GetMyAddress()
 	if err == nil {
 		return acc, nil
 	}
@@ -87,10 +89,10 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
-	// verify client address
-	_, err = sdk.AccAddressFromBech32(msg.Client)
+	// verify client pubkey
+	_, err = common.NewPubKey(msg.Client.String())
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid client address (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
 	}
 
 	if msg.Height <= 0 {
@@ -101,8 +103,14 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 
-	// TODO: verify cryptographic signature of claim
+	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, msg.Client.String())
+	if err != nil {
+		return err
+	}
+	bites := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Client, msg.Height, msg.Nonce))
+	if !pk.VerifySignature(bites, msg.Signature) {
+		return sdkerrors.Wrap(ErrClaimContractIncomeInvalidSignature, "")
+	}
 
 	return nil
-
 }

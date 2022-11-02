@@ -37,7 +37,7 @@ func (k KVStore) GetContractIterator(ctx cosmos.Context) cosmos.Iterator {
 }
 
 // GetContract get the entire Contract metadata struct based on given asset
-func (k KVStore) GetContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) (types.Contract, error) {
+func (k KVStore) GetContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) (types.Contract, error) {
 	record := types.NewContract(pubkey, chain, client)
 	_, err := k.getContract(ctx, k.GetKey(ctx, prefixContract, record.Key()), &record)
 
@@ -46,7 +46,7 @@ func (k KVStore) GetContract(ctx cosmos.Context, pubkey common.PubKey, chain com
 
 // SetContract save the entire Contract metadata struct to key value store
 func (k KVStore) SetContract(ctx cosmos.Context, record types.Contract) error {
-	if record.ProviderPubKey.IsEmpty() || record.Chain.IsEmpty() || record.ClientAddress.Empty() {
+	if record.ProviderPubKey.IsEmpty() || record.Chain.IsEmpty() || record.Client.IsEmpty() {
 		return errors.New("cannot save a contract with an empty provider pubkey, chain, or client address")
 	}
 	k.setContract(ctx, k.GetKey(ctx, prefixContract, record.Key()), record)
@@ -54,12 +54,12 @@ func (k KVStore) SetContract(ctx cosmos.Context, record types.Contract) error {
 }
 
 // ContractExists check whether the given contract exist in the data store
-func (k KVStore) ContractExists(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) bool {
+func (k KVStore) ContractExists(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) bool {
 	record := types.NewContract(pubkey, chain, client)
 	return k.has(ctx, k.GetKey(ctx, prefixContract, record.Key()))
 }
 
-func (k KVStore) RemoveContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client cosmos.AccAddress) {
+func (k KVStore) RemoveContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) {
 	record := types.NewContract(pubkey, chain, client)
 	k.del(ctx, k.GetKey(ctx, prefixContract, record.Key()))
 }

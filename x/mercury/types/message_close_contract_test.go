@@ -28,6 +28,7 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 	msg = MsgCloseContract{
 		Creator: acct.String(),
 		PubKey:  pubkey,
+		Client:  pubkey,
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidChain)
@@ -40,13 +41,13 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 	msg = MsgCloseContract{
 		Creator: GetRandomBech32Addr().String(),
 		PubKey:  pubkey,
-		Client:  GetRandomBech32Addr().String(),
+		Client:  pubkey,
 		Chain:   common.BTCChain,
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrProviderBadSigner)
 
-	msg.Client = "bogus"
+	msg.Client = common.PubKey("bogus")
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
 }

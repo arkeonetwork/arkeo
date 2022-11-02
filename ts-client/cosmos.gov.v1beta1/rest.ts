@@ -372,7 +372,11 @@ export interface V1Beta1Proposal {
    */
   status?: V1Beta1ProposalStatus;
 
-  /** TallyResult defines a standard tally for a governance proposal. */
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
   final_tally_result?: V1Beta1TallyResult;
 
   /** @format date-time */
@@ -417,10 +421,7 @@ export enum V1Beta1ProposalStatus {
  * QueryDepositResponse is the response type for the Query/Deposit RPC method.
  */
 export interface V1Beta1QueryDepositResponse {
-  /**
-   * Deposit defines an amount deposited by an account address to an active
-   * proposal.
-   */
+  /** deposit defines the requested deposit. */
   deposit?: V1Beta1Deposit;
 }
 
@@ -430,15 +431,7 @@ export interface V1Beta1QueryDepositResponse {
 export interface V1Beta1QueryDepositsResponse {
   deposits?: V1Beta1Deposit[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -446,13 +439,13 @@ export interface V1Beta1QueryDepositsResponse {
  * QueryParamsResponse is the response type for the Query/Params RPC method.
  */
 export interface V1Beta1QueryParamsResponse {
-  /** VotingParams defines the params for voting on governance proposals. */
+  /** voting_params defines the parameters related to voting. */
   voting_params?: V1Beta1VotingParams;
 
-  /** DepositParams defines the params for deposits on governance proposals. */
+  /** deposit_params defines the parameters related to deposit. */
   deposit_params?: V1Beta1DepositParams;
 
-  /** TallyParams defines the params for tallying votes on governance proposals. */
+  /** tally_params defines the parameters related to tally. */
   tally_params?: V1Beta1TallyParams;
 }
 
@@ -471,15 +464,7 @@ method.
 export interface V1Beta1QueryProposalsResponse {
   proposals?: V1Beta1Proposal[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -487,7 +472,7 @@ export interface V1Beta1QueryProposalsResponse {
  * QueryTallyResultResponse is the response type for the Query/Tally RPC method.
  */
 export interface V1Beta1QueryTallyResultResponse {
-  /** TallyResult defines a standard tally for a governance proposal. */
+  /** tally defines the requested tally. */
   tally?: V1Beta1TallyResult;
 }
 
@@ -495,10 +480,7 @@ export interface V1Beta1QueryTallyResultResponse {
  * QueryVoteResponse is the response type for the Query/Vote RPC method.
  */
 export interface V1Beta1QueryVoteResponse {
-  /**
-   * Vote defines a vote on a governance proposal.
-   * A Vote consists of a proposal ID, the voter, and the vote option.
-   */
+  /** vote defined the queried vote. */
   vote?: V1Beta1Vote;
 }
 
@@ -509,15 +491,7 @@ export interface V1Beta1QueryVotesResponse {
   /** votes defined the queried votes. */
   votes?: V1Beta1Vote[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -566,13 +540,9 @@ export interface V1Beta1Vote {
   voter?: string;
 
   /**
-   * VoteOption enumerates the valid vote options for a given governance proposal.
-   *
-   *  - VOTE_OPTION_UNSPECIFIED: VOTE_OPTION_UNSPECIFIED defines a no-op vote option.
-   *  - VOTE_OPTION_YES: VOTE_OPTION_YES defines a yes vote option.
-   *  - VOTE_OPTION_ABSTAIN: VOTE_OPTION_ABSTAIN defines an abstain vote option.
-   *  - VOTE_OPTION_NO: VOTE_OPTION_NO defines a no vote option.
-   *  - VOTE_OPTION_NO_WITH_VETO: VOTE_OPTION_NO_WITH_VETO defines a no with veto vote option.
+   * Deprecated: Prefer to use `options` instead. This field is set in queries
+   * if and only if `len(options) == 1` and that option has weight 1. In all
+   * other cases, this field will default to VOTE_OPTION_UNSPECIFIED.
    */
   option?: V1Beta1VoteOption;
   options?: V1Beta1WeightedVoteOption[];

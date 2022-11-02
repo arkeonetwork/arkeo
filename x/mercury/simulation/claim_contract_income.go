@@ -2,12 +2,12 @@ package simulation
 
 import (
 	"math/rand"
+	"mercury/x/mercury/keeper"
+	"mercury/x/mercury/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"mercury/x/mercury/keeper"
-	"mercury/x/mercury/types"
 )
 
 func SimulateMsgClaimContractIncome(

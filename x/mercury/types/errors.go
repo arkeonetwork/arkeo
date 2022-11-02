@@ -30,4 +30,5 @@ var (
 	ErrClaimContractIncomeBadHeight          = sdkerrors.Register(ModuleName, 21, "height must be greater than zero")
 	ErrClaimContractIncomeBadNonce           = sdkerrors.Register(ModuleName, 22, "nonce must be non-negative")
 	ErrClaimContractIncomeClosed             = sdkerrors.Register(ModuleName, 23, "contract is closed")
+	ErrClaimContractIncomeInvalidSignature   = sdkerrors.Register(ModuleName, 24, "invalid signature")
 )

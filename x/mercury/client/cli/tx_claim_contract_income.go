@@ -1,10 +1,9 @@
 package cli
 
 import (
-	"strconv"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -48,11 +47,16 @@ func CmdClaimContractIncome() *cobra.Command {
 				return err
 			}
 
+			client, err := common.NewPubKey(argClient)
+			if err != nil {
+				return err
+			}
+
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
 				chain,
-				argClient,
+				client,
 				argNonce,
 				argHeight,
 			)

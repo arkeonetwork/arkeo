@@ -149,19 +149,10 @@ export interface V1ConnectionEnd {
    */
   versions?: V1Version[];
 
-  /**
-   * State defines if a connection is in one of the following states:
-   * INIT, TRYOPEN, OPEN or UNINITIALIZED.
-   *
-   *  - STATE_UNINITIALIZED_UNSPECIFIED: Default State
-   *  - STATE_INIT: A connection end has just started the opening handshake.
-   *  - STATE_TRYOPEN: A connection end has acknowledged the handshake step on the counterparty
-   * chain.
-   *  - STATE_OPEN: A connection end has completed the handshake.
-   */
+  /** current state of the connection end. */
   state?: V1State;
 
-  /** Counterparty defines the counterparty chain associated with a connection end. */
+  /** counterparty chain associated with this connection. */
   counterparty?: V1Counterparty;
 
   /**
@@ -188,6 +179,8 @@ export interface V1Counterparty {
    * given connection.
    */
   connection_id?: string;
+
+  /** commitment merkle prefix of the counterparty chain. */
   prefix?: V1MerklePrefix;
 }
 
@@ -313,19 +306,10 @@ export interface V1IdentifiedConnection {
   client_id?: string;
   versions?: V1Version[];
 
-  /**
-   * State defines if a connection is in one of the following states:
-   * INIT, TRYOPEN, OPEN or UNINITIALIZED.
-   *
-   *  - STATE_UNINITIALIZED_UNSPECIFIED: Default State
-   *  - STATE_INIT: A connection end has just started the opening handshake.
-   *  - STATE_TRYOPEN: A connection end has acknowledged the handshake step on the counterparty
-   * chain.
-   *  - STATE_OPEN: A connection end has completed the handshake.
-   */
+  /** current state of the connection end. */
   state?: V1State;
 
-  /** Counterparty defines the counterparty chain associated with a connection end. */
+  /** counterparty chain associated with this connection. */
   counterparty?: V1Counterparty;
 
   /**

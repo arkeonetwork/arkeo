@@ -205,15 +205,12 @@ export interface V1Beta1QueryDelegatorWithdrawAddressResponse {
  * QueryParamsResponse is the response type for the Query/Params RPC method.
  */
 export interface V1Beta1QueryParamsResponse {
-  /** Params defines the set of params for the distribution module. */
+  /** params defines the parameters of the module. */
   params?: V1Beta1Params;
 }
 
 export interface V1Beta1QueryValidatorCommissionResponse {
-  /**
-   * ValidatorAccumulatedCommission represents accumulated commission
-   * for a validator kept as a running counter, can be withdrawn at any time.
-   */
+  /** commission defines the commision the validator received. */
   commission?: V1Beta1ValidatorAccumulatedCommission;
 }
 
@@ -237,15 +234,7 @@ export interface V1Beta1QueryValidatorSlashesResponse {
   /** slashes defines the slashes the validator received. */
   slashes?: V1Beta1ValidatorSlashEvent[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 

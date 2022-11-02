@@ -211,7 +211,11 @@ export interface V1Proposal {
    */
   status?: V1ProposalStatus;
 
-  /** TallyResult defines a standard tally for a governance proposal. */
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
   final_tally_result?: V1TallyResult;
 
   /** @format date-time */
@@ -259,10 +263,7 @@ export enum V1ProposalStatus {
  * QueryDepositResponse is the response type for the Query/Deposit RPC method.
  */
 export interface V1QueryDepositResponse {
-  /**
-   * Deposit defines an amount deposited by an account address to an active
-   * proposal.
-   */
+  /** deposit defines the requested deposit. */
   deposit?: V1Deposit;
 }
 
@@ -272,15 +273,7 @@ export interface V1QueryDepositResponse {
 export interface V1QueryDepositsResponse {
   deposits?: V1Deposit[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -288,13 +281,13 @@ export interface V1QueryDepositsResponse {
  * QueryParamsResponse is the response type for the Query/Params RPC method.
  */
 export interface V1QueryParamsResponse {
-  /** VotingParams defines the params for voting on governance proposals. */
+  /** voting_params defines the parameters related to voting. */
   voting_params?: V1VotingParams;
 
-  /** DepositParams defines the params for deposits on governance proposals. */
+  /** deposit_params defines the parameters related to deposit. */
   deposit_params?: V1DepositParams;
 
-  /** TallyParams defines the params for tallying votes on governance proposals. */
+  /** tally_params defines the parameters related to tally. */
   tally_params?: V1TallyParams;
 }
 
@@ -313,15 +306,7 @@ method.
 export interface V1QueryProposalsResponse {
   proposals?: V1Proposal[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 
@@ -329,7 +314,7 @@ export interface V1QueryProposalsResponse {
  * QueryTallyResultResponse is the response type for the Query/Tally RPC method.
  */
 export interface V1QueryTallyResultResponse {
-  /** TallyResult defines a standard tally for a governance proposal. */
+  /** tally defines the requested tally. */
   tally?: V1TallyResult;
 }
 
@@ -337,10 +322,7 @@ export interface V1QueryTallyResultResponse {
  * QueryVoteResponse is the response type for the Query/Vote RPC method.
  */
 export interface V1QueryVoteResponse {
-  /**
-   * Vote defines a vote on a governance proposal.
-   * A Vote consists of a proposal ID, the voter, and the vote option.
-   */
+  /** vote defined the queried vote. */
   vote?: V1Vote;
 }
 
@@ -351,15 +333,7 @@ export interface V1QueryVotesResponse {
   /** votes defined the queried votes. */
   votes?: V1Vote[];
 
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
+  /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
 }
 

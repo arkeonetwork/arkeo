@@ -38,11 +38,15 @@ func CmdCloseContract() *cobra.Command {
 				return err
 			}
 
+			client, err := common.NewPubKey(argClient)
+			if err != nil {
+				return err
+			}
 			msg := types.NewMsgCloseContract(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
 				chain,
-				argClient,
+				client,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
