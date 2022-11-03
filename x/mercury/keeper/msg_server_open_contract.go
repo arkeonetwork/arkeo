@@ -19,6 +19,8 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"receive MsgOpenContract",
 		"pubkey", msg.PubKey,
 		"chain", msg.Chain,
+		"client", msg.Client,
+		"delegate", msg.Delegate,
 		"contract type", msg.CType,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
@@ -78,7 +80,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return sdkerrors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
 	}
 
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
 	if err != nil {
 		return err
 	}
@@ -102,14 +104,14 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	if err != nil {
 		return err
 	}
-	contract := types.NewContract(msg.PubKey, chain, msg.Client)
+	contract := types.NewContract(msg.PubKey, chain, msg.FetchSpender())
 	contract.Type = msg.CType
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
 
-	exp := types.NewContractExpiration(msg.PubKey, chain, msg.Client)
+	exp := types.NewContractExpiration(msg.PubKey, chain, msg.FetchSpender())
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	if err != nil {
 		return err
@@ -137,6 +139,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, contract types.Contract
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),
+				sdk.NewAttribute("delegate", contract.Delegate.String()),
 				sdk.NewAttribute("type", contract.Type.String()),
 				sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
 				sdk.NewAttribute("duration", strconv.FormatInt(contract.Duration, 10)),

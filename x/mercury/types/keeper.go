@@ -23,13 +23,21 @@ func NewContract(pubkey common.PubKey, chain common.Chain, client common.PubKey)
 		ProviderPubKey: pubkey,
 		Chain:          chain,
 		Client:         client,
+		Delegate:       common.EmptyPubKey,
 		Deposit:        cosmos.ZeroInt(),
 		Paid:           cosmos.ZeroInt(),
 	}
 }
 
 func (c Contract) Key() string {
-	return fmt.Sprintf("%s/%s/%s", c.ProviderPubKey, c.Chain, c.Client)
+	return fmt.Sprintf("%s/%s/%s", c.ProviderPubKey, c.Chain, c.FetchSpender())
+}
+
+func (c Contract) FetchSpender() common.PubKey {
+	if !c.Delegate.IsEmpty() {
+		return c.Delegate
+	}
+	return c.Client
 }
 
 func (c Contract) Expiration() int64 {

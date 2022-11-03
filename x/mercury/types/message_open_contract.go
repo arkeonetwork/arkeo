@@ -11,7 +11,7 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, cType ContractType, duration, rate int64) *MsgOpenContract {
+func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, delegate common.PubKey, cType ContractType, duration, rate int64) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:  creator,
 		PubKey:   pubkey,
@@ -19,6 +19,7 @@ func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, cTyp
 		CType:    cType,
 		Duration: duration,
 		Rate:     rate,
+		Delegate: delegate,
 	}
 }
 
@@ -49,6 +50,13 @@ func (msg *MsgOpenContract) MustGetSigner() sdk.AccAddress {
 func (msg *MsgOpenContract) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
+}
+
+func (msg *MsgOpenContract) FetchSpender() common.PubKey {
+	if !msg.Delegate.IsEmpty() {
+		return msg.Delegate
+	}
+	return msg.Client
 }
 
 func (msg *MsgOpenContract) ValidateBasic() error {

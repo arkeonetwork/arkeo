@@ -19,6 +19,7 @@ func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContr
 		"pubkey", msg.PubKey,
 		"chain", msg.Chain,
 		"client", msg.Client,
+		"delegate", msg.Delegate,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -43,9 +44,13 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if err != nil {
 		return err
 	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
 	if err != nil {
 		return err
+	}
+
+	if !contract.Client.Equals(msg.Client) {
+		return sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized contract client")
 	}
 
 	if contract.IsClose(ctx.BlockHeight()) {
@@ -72,7 +77,7 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 	if err != nil {
 		return err
 	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
 	if err != nil {
 		return err
 	}
@@ -94,6 +99,7 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseCon
 				sdk.NewAttribute("pubkey", msg.PubKey.String()),
 				sdk.NewAttribute("chain", msg.Chain),
 				sdk.NewAttribute("client", msg.Client.String()),
+				sdk.NewAttribute("delegate", msg.Delegate.String()),
 			),
 		},
 	)

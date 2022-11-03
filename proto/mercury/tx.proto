@@ -46,10 +46,11 @@ message MsgOpenContract {
   string pub_key = 2 [(gogoproto.casttype) = "mercury/common.PubKey"];
   string chain = 3 ;
   string client = 4 [(gogoproto.casttype) = "mercury/common.PubKey"];
-  ContractType cType = 5;
-  int64 duration = 6;
-  int64 rate = 7;
-  string deposit = 8 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string delegate = 5 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  ContractType cType = 6;
+  int64 duration = 7;
+  int64 rate = 8;
+  string deposit = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 message MsgOpenContractResponse {}
@@ -59,6 +60,7 @@ message MsgCloseContract {
   string pub_key = 2 [(gogoproto.casttype) = "mercury/common.PubKey"];
   string chain = 3 ;
   string client = 4 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  string delegate = 5 [(gogoproto.casttype) = "mercury/common.PubKey"];
 }
 
 message MsgCloseContractResponse {}
@@ -67,7 +69,7 @@ message MsgClaimContractIncome {
   string creator = 1;
   string pub_key = 2 [(gogoproto.casttype) = "mercury/common.PubKey"];
   string chain = 3 ;
-  string client = 4 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  string spender = 4 [(gogoproto.casttype) = "mercury/common.PubKey"];
   bytes signature = 5;
   int64 nonce = 6;
   int64 height = 7;

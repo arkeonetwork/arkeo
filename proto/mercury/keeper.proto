@@ -34,14 +34,15 @@ message Contract {
   string provider_pub_key = 1 [(gogoproto.casttype) = "mercury/common.PubKey"];
   int32 chain = 2 [(gogoproto.casttype) = "mercury/common.Chain"];
   string client = 3 [(gogoproto.casttype) = "mercury/common.PubKey"];
-  ContractType type = 4;
-  int64 height = 5;
-  int64 duration = 6;
-  int64 rate = 7;
-  string deposit = 8 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
-  string paid = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
-  int64 nonce = 10;
-  int64 closed_height = 11;
+  string delegate = 4 [(gogoproto.casttype) = "mercury/common.PubKey"];
+  ContractType type = 5;
+  int64 height = 6;
+  int64 duration = 7;
+  int64 rate = 8;
+  string deposit = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string paid = 10 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  int64 nonce = 11;
+  int64 closed_height = 12;
 }
 
 message ContractExpiration {

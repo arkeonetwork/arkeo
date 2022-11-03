@@ -52,7 +52,7 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	msg = MsgClaimContractIncome{
 		Creator: acct.String(),
 		PubKey:  pubkey,
-		Client:  pk,
+		Spender: pk,
 		Height:  12,
 		Nonce:   24,
 	}
@@ -60,14 +60,14 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	c.Check(err, ErrIs, ErrInvalidChain)
 
 	msg.Chain = common.BTCChain.String()
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Client, msg.Height, msg.Nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
 	msg.Signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
 
 	// check bad client
-	msg.Client = common.PubKey("bogus")
+	msg.Spender = common.PubKey("bogus")
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
 
@@ -75,7 +75,7 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	msg = MsgClaimContractIncome{
 		Creator: GetRandomBech32Addr().String(),
 		PubKey:  pubkey,
-		Client:  GetRandomPubKey(),
+		Spender: GetRandomPubKey(),
 		Chain:   common.BTCChain.String(),
 	}
 	err = msg.ValidateBasic()
@@ -98,7 +98,7 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	msg := MsgClaimContractIncome{
 		Creator: acct.String(),
 		PubKey:  pubkey,
-		Client:  pubkey,
+		Spender: pubkey,
 		Chain:   common.BTCChain.String(),
 		Height:  100,
 		Nonce:   48,
@@ -112,7 +112,7 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	c.Assert(err, IsNil)
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Client, msg.Height, msg.Nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
 	msg.Signature, pub, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 
@@ -120,7 +120,6 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 
 	pk, err := common.NewPubKeyFromCrypto(pub)
 	c.Assert(err, IsNil)
-	fmt.Println(pk)
 
 	pk2, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, pk.String())
 	c.Assert(err, IsNil)

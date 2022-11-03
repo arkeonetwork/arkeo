@@ -18,7 +18,7 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 		"receive MsgClaimContractIncome",
 		"pubkey", msg.PubKey,
 		"chain", msg.Chain,
-		"client", msg.Client,
+		"spender", msg.Spender,
 		"nonce", msg.Nonce,
 		"height", msg.Height,
 	)
@@ -45,13 +45,17 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 	if err != nil {
 		return err
 	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Spender)
 	if err != nil {
 		return err
 	}
 
 	if contract.Height != msg.Height {
 		return sdkerrors.Wrapf(types.ErrClaimContractIncomeBadHeight, "contract height (%d) doesn't match msg height (%d)", contract.Height, msg.Height)
+	}
+
+	if contract.Nonce >= msg.Nonce {
+		return sdkerrors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
 	if contract.IsClose(ctx.BlockHeight()) {
@@ -66,7 +70,7 @@ func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgC
 	if err != nil {
 		return err
 	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Client)
+	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Spender)
 	if err != nil {
 		return err
 	}
