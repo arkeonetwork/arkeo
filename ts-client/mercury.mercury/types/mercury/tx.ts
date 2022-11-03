@@ -41,6 +41,7 @@ export interface MsgOpenContract {
   pubKey: string;
   chain: string;
   client: string;
+  delegate: string;
   cType: ContractType;
   duration: number;
   rate: number;
@@ -54,6 +55,7 @@ export interface MsgCloseContract {
   pubKey: string;
   chain: string;
   client: string;
+  delegate: string;
 }
 
 export interface MsgCloseContractResponse {}
@@ -62,7 +64,7 @@ export interface MsgClaimContractIncome {
   creator: string;
   pubKey: string;
   chain: string;
-  client: string;
+  spender: string;
   signature: Uint8Array;
   nonce: number;
   height: number;
@@ -514,6 +516,7 @@ const baseMsgOpenContract: object = {
   pubKey: "",
   chain: "",
   client: "",
+  delegate: "",
   cType: 0,
   duration: 0,
   rate: 0,
@@ -534,17 +537,20 @@ export const MsgOpenContract = {
     if (message.client !== "") {
       writer.uint32(34).string(message.client);
     }
+    if (message.delegate !== "") {
+      writer.uint32(42).string(message.delegate);
+    }
     if (message.cType !== 0) {
-      writer.uint32(40).int32(message.cType);
+      writer.uint32(48).int32(message.cType);
     }
     if (message.duration !== 0) {
-      writer.uint32(48).int64(message.duration);
+      writer.uint32(56).int64(message.duration);
     }
     if (message.rate !== 0) {
-      writer.uint32(56).int64(message.rate);
+      writer.uint32(64).int64(message.rate);
     }
     if (message.deposit !== "") {
-      writer.uint32(66).string(message.deposit);
+      writer.uint32(74).string(message.deposit);
     }
     return writer;
   },
@@ -569,15 +575,18 @@ export const MsgOpenContract = {
           message.client = reader.string();
           break;
         case 5:
-          message.cType = reader.int32() as any;
+          message.delegate = reader.string();
           break;
         case 6:
-          message.duration = longToNumber(reader.int64() as Long);
+          message.cType = reader.int32() as any;
           break;
         case 7:
-          message.rate = longToNumber(reader.int64() as Long);
+          message.duration = longToNumber(reader.int64() as Long);
           break;
         case 8:
+          message.rate = longToNumber(reader.int64() as Long);
+          break;
+        case 9:
           message.deposit = reader.string();
           break;
         default:
@@ -610,6 +619,11 @@ export const MsgOpenContract = {
     } else {
       message.client = "";
     }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = String(object.delegate);
+    } else {
+      message.delegate = "";
+    }
     if (object.cType !== undefined && object.cType !== null) {
       message.cType = contractTypeFromJSON(object.cType);
     } else {
@@ -639,6 +653,7 @@ export const MsgOpenContract = {
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
     message.client !== undefined && (obj.client = message.client);
+    message.delegate !== undefined && (obj.delegate = message.delegate);
     message.cType !== undefined &&
       (obj.cType = contractTypeToJSON(message.cType));
     message.duration !== undefined && (obj.duration = message.duration);
@@ -668,6 +683,11 @@ export const MsgOpenContract = {
       message.client = object.client;
     } else {
       message.client = "";
+    }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = object.delegate;
+    } else {
+      message.delegate = "";
     }
     if (object.cType !== undefined && object.cType !== null) {
       message.cType = object.cType;
@@ -744,6 +764,7 @@ const baseMsgCloseContract: object = {
   pubKey: "",
   chain: "",
   client: "",
+  delegate: "",
 };
 
 export const MsgCloseContract = {
@@ -759,6 +780,9 @@ export const MsgCloseContract = {
     }
     if (message.client !== "") {
       writer.uint32(34).string(message.client);
+    }
+    if (message.delegate !== "") {
+      writer.uint32(42).string(message.delegate);
     }
     return writer;
   },
@@ -781,6 +805,9 @@ export const MsgCloseContract = {
           break;
         case 4:
           message.client = reader.string();
+          break;
+        case 5:
+          message.delegate = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -812,6 +839,11 @@ export const MsgCloseContract = {
     } else {
       message.client = "";
     }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = String(object.delegate);
+    } else {
+      message.delegate = "";
+    }
     return message;
   },
 
@@ -821,6 +853,7 @@ export const MsgCloseContract = {
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
     message.client !== undefined && (obj.client = message.client);
+    message.delegate !== undefined && (obj.delegate = message.delegate);
     return obj;
   },
 
@@ -845,6 +878,11 @@ export const MsgCloseContract = {
       message.client = object.client;
     } else {
       message.client = "";
+    }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = object.delegate;
+    } else {
+      message.delegate = "";
     }
     return message;
   },
@@ -906,7 +944,7 @@ const baseMsgClaimContractIncome: object = {
   creator: "",
   pubKey: "",
   chain: "",
-  client: "",
+  spender: "",
   nonce: 0,
   height: 0,
 };
@@ -925,8 +963,8 @@ export const MsgClaimContractIncome = {
     if (message.chain !== "") {
       writer.uint32(26).string(message.chain);
     }
-    if (message.client !== "") {
-      writer.uint32(34).string(message.client);
+    if (message.spender !== "") {
+      writer.uint32(34).string(message.spender);
     }
     if (message.signature.length !== 0) {
       writer.uint32(42).bytes(message.signature);
@@ -957,7 +995,7 @@ export const MsgClaimContractIncome = {
           message.chain = reader.string();
           break;
         case 4:
-          message.client = reader.string();
+          message.spender = reader.string();
           break;
         case 5:
           message.signature = reader.bytes();
@@ -993,10 +1031,10 @@ export const MsgClaimContractIncome = {
     } else {
       message.chain = "";
     }
-    if (object.client !== undefined && object.client !== null) {
-      message.client = String(object.client);
+    if (object.spender !== undefined && object.spender !== null) {
+      message.spender = String(object.spender);
     } else {
-      message.client = "";
+      message.spender = "";
     }
     if (object.signature !== undefined && object.signature !== null) {
       message.signature = bytesFromBase64(object.signature);
@@ -1019,7 +1057,7 @@ export const MsgClaimContractIncome = {
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
-    message.client !== undefined && (obj.client = message.client);
+    message.spender !== undefined && (obj.spender = message.spender);
     message.signature !== undefined &&
       (obj.signature = base64FromBytes(
         message.signature !== undefined ? message.signature : new Uint8Array()
@@ -1048,10 +1086,10 @@ export const MsgClaimContractIncome = {
     } else {
       message.chain = "";
     }
-    if (object.client !== undefined && object.client !== null) {
-      message.client = object.client;
+    if (object.spender !== undefined && object.spender !== null) {
+      message.spender = object.spender;
     } else {
-      message.client = "";
+      message.spender = "";
     }
     if (object.signature !== undefined && object.signature !== null) {
       message.signature = object.signature;

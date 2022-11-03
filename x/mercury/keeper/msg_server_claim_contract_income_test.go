@@ -30,6 +30,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	contract.Duration = 100
 	contract.Rate = 10
 	contract.Height = 10
+	contract.Nonce = 0
 	contract.Type = types.ContractType_PayAsYouGo
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	c.Assert(k.SetContract(ctx, contract), IsNil)
@@ -38,7 +39,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	msg := types.MsgClaimContractIncome{
 		PubKey:  pubkey,
 		Chain:   chain.String(),
-		Client:  client,
+		Spender: client,
 		Creator: acc.String(),
 		Nonce:   20,
 		Height:  10,
@@ -83,7 +84,7 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain.String(),
 		Creator: acc.String(),
-		Client:  client,
+		Spender: client,
 		Nonce:   20,
 		Height:  ctx.BlockHeight(),
 	}
@@ -150,7 +151,7 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 		PubKey:  pubkey,
 		Chain:   chain.String(),
 		Creator: acc.String(),
-		Client:  client,
+		Spender: client,
 		Nonce:   20,
 		Height:  ctx.BlockHeight(),
 	}

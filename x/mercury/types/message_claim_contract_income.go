@@ -13,12 +13,12 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, client common.PubKey, nonce, height int64) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, spender common.PubKey, nonce, height int64) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator: creator,
 		PubKey:  pubkey,
 		Chain:   chain,
-		Client:  client,
+		Spender: spender,
 		Nonce:   nonce,
 		Height:  height,
 	}
@@ -32,8 +32,8 @@ func (msg *MsgClaimContractIncome) Type() string {
 	return TypeMsgClaimContractIncome
 }
 
-func (msg *MsgClaimContractIncome) GetClientAddress() (sdk.AccAddress, error) {
-	acc, err := msg.Client.GetMyAddress()
+func (msg *MsgClaimContractIncome) GetSpenderAddress() (sdk.AccAddress, error) {
+	acc, err := msg.Spender.GetMyAddress()
 	if err == nil {
 		return acc, nil
 	}
@@ -89,10 +89,10 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
-	// verify client pubkey
-	_, err = common.NewPubKey(msg.Client.String())
+	// verify spender pubkey
+	_, err = common.NewPubKey(msg.Spender.String())
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid spender pubkey (%s)", err)
 	}
 
 	if msg.Height <= 0 {
@@ -103,11 +103,11 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 
-	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, msg.Client.String())
+	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, msg.Spender.String())
 	if err != nil {
 		return err
 	}
-	bites := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Client, msg.Height, msg.Nonce))
+	bites := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
 	if !pk.VerifySignature(bites, msg.Signature) {
 		return sdkerrors.Wrap(ErrClaimContractIncomeInvalidSignature, "")
 	}

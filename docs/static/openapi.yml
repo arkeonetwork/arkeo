@@ -44275,6 +44275,8 @@ paths:
                     format: int32
                   client:
                     type: string
+                  delegate:
+                    type: string
                   type:
                     type: string
                     enum:
@@ -44353,6 +44355,8 @@ paths:
                       type: integer
                       format: int32
                     client:
+                      type: string
+                    delegate:
                       type: string
                     type:
                       type: string
@@ -74132,6 +74136,8 @@ definitions:
         format: int32
       client:
         type: string
+      delegate:
+        type: string
       type:
         type: string
         enum:
@@ -74232,6 +74238,8 @@ definitions:
               type: integer
               format: int32
             client:
+              type: string
+            delegate:
               type: string
             type:
               type: string
@@ -74363,6 +74371,8 @@ definitions:
             type: integer
             format: int32
           client:
+            type: string
+          delegate:
             type: string
           type:
             type: string

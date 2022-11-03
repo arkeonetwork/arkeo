@@ -15,6 +15,7 @@ export interface MercuryContract {
   /** @format int32 */
   chain?: number;
   client?: string;
+  delegate?: string;
   type?: MercuryContractType;
 
   /** @format int64 */

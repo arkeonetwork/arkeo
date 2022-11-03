@@ -43,7 +43,6 @@ type ChainNetwork uint8
 // NewChain create a new Chain and default the siging_algo to Secp256k1
 func NewChain(chainID string) (Chain, error) {
 	chain := ChainLookup[strings.ToLower(chainID)]
-	fmt.Println(chain)
 	if chain == 0 {
 		return Chain(chain), fmt.Errorf("Chain not found (%s)", chainID)
 	}

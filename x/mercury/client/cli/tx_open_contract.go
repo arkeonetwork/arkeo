@@ -16,7 +16,7 @@ var _ = strconv.Itoa(0)
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [pubkey] [chain] [c-type] [duration] [rate]",
+		Use:   "open-contract [pubkey] [chain] [c-type] [duration] [rate] [delegation-optional]",
 		Short: "Broadcast message openContract",
 		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -41,6 +41,14 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
+			delegate := common.EmptyPubKey
+			if len(args) > 5 {
+				delegate, err = common.NewPubKey(args[5])
+				if err != nil {
+					return err
+				}
+			}
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -50,6 +58,7 @@ func CmdOpenContract() *cobra.Command {
 				clientCtx.GetFromAddress().String(),
 				pubkey,
 				argChain,
+				delegate,
 				types.ContractType(argCType),
 				argDuration,
 				argRate,

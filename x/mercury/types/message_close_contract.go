@@ -11,12 +11,13 @@ const TypeMsgCloseContract = "close_contract"
 
 var _ sdk.Msg = &MsgCloseContract{}
 
-func NewMsgCloseContract(creator string, pubkey common.PubKey, chain string, client common.PubKey) *MsgCloseContract {
+func NewMsgCloseContract(creator string, pubkey common.PubKey, chain string, client, delegate common.PubKey) *MsgCloseContract {
 	return &MsgCloseContract{
-		Creator: creator,
-		PubKey:  pubkey,
-		Chain:   chain,
-		Client:  client,
+		Creator:  creator,
+		PubKey:   pubkey,
+		Chain:    chain,
+		Client:   client,
+		Delegate: delegate,
 	}
 }
 
@@ -53,6 +54,13 @@ func (msg *MsgCloseContract) GetClientAddress() (sdk.AccAddress, error) {
 	return sdk.AccAddressFromBech32(msg.Creator)
 }
 
+func (msg *MsgCloseContract) FetchSpender() common.PubKey {
+	if !msg.Delegate.IsEmpty() {
+		return msg.Delegate
+	}
+	return msg.Client
+}
+
 func (msg *MsgCloseContract) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
@@ -77,18 +85,18 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	}
 
 	if len(msg.Client) > 0 {
-		_, err = common.NewPubKey(msg.Client.String())
+		pk, err := common.NewPubKey(msg.Client.String())
 		if err != nil {
 			return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
 		}
 
 		signer := msg.MustGetSigner()
-		provider, err := msg.PubKey.GetMyAddress()
+		client, err := pk.GetMyAddress()
 		if err != nil {
 			return err
 		}
-		if !signer.Equals(provider) {
-			return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
+		if !signer.Equals(client) {
+			return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client pubkey: %s", msg.GetSigners(), client)
 		}
 	}
 

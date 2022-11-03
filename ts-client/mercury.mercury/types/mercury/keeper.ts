@@ -86,6 +86,7 @@ export interface Contract {
   providerPubKey: string;
   chain: number;
   client: string;
+  delegate: string;
   type: ContractType;
   height: number;
   duration: number;
@@ -373,6 +374,7 @@ const baseContract: object = {
   providerPubKey: "",
   chain: 0,
   client: "",
+  delegate: "",
   type: 0,
   height: 0,
   duration: 0,
@@ -394,29 +396,32 @@ export const Contract = {
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
     }
+    if (message.delegate !== "") {
+      writer.uint32(34).string(message.delegate);
+    }
     if (message.type !== 0) {
-      writer.uint32(32).int32(message.type);
+      writer.uint32(40).int32(message.type);
     }
     if (message.height !== 0) {
-      writer.uint32(40).int64(message.height);
+      writer.uint32(48).int64(message.height);
     }
     if (message.duration !== 0) {
-      writer.uint32(48).int64(message.duration);
+      writer.uint32(56).int64(message.duration);
     }
     if (message.rate !== 0) {
-      writer.uint32(56).int64(message.rate);
+      writer.uint32(64).int64(message.rate);
     }
     if (message.deposit !== "") {
-      writer.uint32(66).string(message.deposit);
+      writer.uint32(74).string(message.deposit);
     }
     if (message.paid !== "") {
-      writer.uint32(74).string(message.paid);
+      writer.uint32(82).string(message.paid);
     }
     if (message.nonce !== 0) {
-      writer.uint32(80).int64(message.nonce);
+      writer.uint32(88).int64(message.nonce);
     }
     if (message.closedHeight !== 0) {
-      writer.uint32(88).int64(message.closedHeight);
+      writer.uint32(96).int64(message.closedHeight);
     }
     return writer;
   },
@@ -438,27 +443,30 @@ export const Contract = {
           message.client = reader.string();
           break;
         case 4:
-          message.type = reader.int32() as any;
+          message.delegate = reader.string();
           break;
         case 5:
-          message.height = longToNumber(reader.int64() as Long);
+          message.type = reader.int32() as any;
           break;
         case 6:
-          message.duration = longToNumber(reader.int64() as Long);
+          message.height = longToNumber(reader.int64() as Long);
           break;
         case 7:
-          message.rate = longToNumber(reader.int64() as Long);
+          message.duration = longToNumber(reader.int64() as Long);
           break;
         case 8:
-          message.deposit = reader.string();
+          message.rate = longToNumber(reader.int64() as Long);
           break;
         case 9:
-          message.paid = reader.string();
+          message.deposit = reader.string();
           break;
         case 10:
-          message.nonce = longToNumber(reader.int64() as Long);
+          message.paid = reader.string();
           break;
         case 11:
+          message.nonce = longToNumber(reader.int64() as Long);
+          break;
+        case 12:
           message.closedHeight = longToNumber(reader.int64() as Long);
           break;
         default:
@@ -485,6 +493,11 @@ export const Contract = {
       message.client = String(object.client);
     } else {
       message.client = "";
+    }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = String(object.delegate);
+    } else {
+      message.delegate = "";
     }
     if (object.type !== undefined && object.type !== null) {
       message.type = contractTypeFromJSON(object.type);
@@ -535,6 +548,7 @@ export const Contract = {
       (obj.providerPubKey = message.providerPubKey);
     message.chain !== undefined && (obj.chain = message.chain);
     message.client !== undefined && (obj.client = message.client);
+    message.delegate !== undefined && (obj.delegate = message.delegate);
     message.type !== undefined && (obj.type = contractTypeToJSON(message.type));
     message.height !== undefined && (obj.height = message.height);
     message.duration !== undefined && (obj.duration = message.duration);
@@ -563,6 +577,11 @@ export const Contract = {
       message.client = object.client;
     } else {
       message.client = "";
+    }
+    if (object.delegate !== undefined && object.delegate !== null) {
+      message.delegate = object.delegate;
+    } else {
+      message.delegate = "";
     }
     if (object.type !== undefined && object.type !== null) {
       message.type = object.type;
