@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-
 	"mercury/x/mercury/types"
 
 	"github.com/cosmos/cosmos-sdk/client"

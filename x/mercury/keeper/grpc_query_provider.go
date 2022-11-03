@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
 
@@ -24,7 +23,7 @@ func (k KVStore) ProviderAll(c context.Context, req *types.QueryAllProviderReque
 	store := ctx.KVStore(k.storeKey)
 	providerStore := prefix.NewStore(store, types.KeyPrefix(prefixProvider.String()))
 
-	pageRes, err := query.Paginate(providerStore, req.Pagination, func(key []byte, value []byte) error {
+	pageRes, err := query.Paginate(providerStore, req.Pagination, func(key, value []byte) error {
 		var provider types.Provider
 		if err := k.cdc.Unmarshal(value, &provider); err != nil {
 			return err
@@ -33,7 +32,6 @@ func (k KVStore) ProviderAll(c context.Context, req *types.QueryAllProviderReque
 		providers = append(providers, provider)
 		return nil
 	})
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

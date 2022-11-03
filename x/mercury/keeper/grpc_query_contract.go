@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
 
@@ -24,7 +23,7 @@ func (k KVStore) ContractAll(c context.Context, req *types.QueryAllContractReque
 	store := ctx.KVStore(k.storeKey)
 	contractStore := prefix.NewStore(store, types.KeyPrefix(prefixContract.String()))
 
-	pageRes, err := query.Paginate(contractStore, req.Pagination, func(key []byte, value []byte) error {
+	pageRes, err := query.Paginate(contractStore, req.Pagination, func(key, value []byte) error {
 		var contract types.Contract
 		if err := k.cdc.Unmarshal(value, &contract); err != nil {
 			return err
@@ -33,7 +32,6 @@ func (k KVStore) ContractAll(c context.Context, req *types.QueryAllContractReque
 		contracts = append(contracts, contract)
 		return nil
 	})
-
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
