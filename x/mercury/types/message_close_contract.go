@@ -11,7 +11,7 @@ const TypeMsgCloseContract = "close_contract"
 
 var _ sdk.Msg = &MsgCloseContract{}
 
-func NewMsgCloseContract(creator string, pubkey common.PubKey, chain common.Chain, client common.PubKey) *MsgCloseContract {
+func NewMsgCloseContract(creator string, pubkey common.PubKey, chain string, client common.PubKey) *MsgCloseContract {
 	return &MsgCloseContract{
 		Creator: creator,
 		PubKey:  pubkey,
@@ -71,7 +71,7 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	}
 
 	// verify chain
-	_, err = common.NewChain(msg.Chain.String())
+	_, err = common.NewChain(msg.Chain)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}

@@ -35,7 +35,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 	// happy path
 	msg := types.MsgOpenContract{
 		PubKey:   pubkey,
-		Chain:    chain,
+		Chain:    chain.String(),
 		Client:   acc,
 		Creator:  acc.String(),
 		CType:    types.ContractType_Subscription,
@@ -96,7 +96,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 
 	msg := types.MsgOpenContract{
 		PubKey:   pubkey,
-		Chain:    chain,
+		Chain:    chain.String(),
 		Creator:  acc.String(),
 		Client:   pubkey,
 		CType:    types.ContractType_PayAsYouGo,

@@ -33,7 +33,7 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidChain)
 
-	msg.Chain = common.BTCChain
+	msg.Chain = common.BTCChain.String()
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
 
@@ -42,7 +42,7 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 		Creator: GetRandomBech32Addr().String(),
 		PubKey:  pubkey,
 		Client:  pubkey,
-		Chain:   common.BTCChain,
+		Chain:   common.BTCChain.String(),
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrProviderBadSigner)

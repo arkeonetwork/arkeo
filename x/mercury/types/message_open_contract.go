@@ -11,7 +11,7 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, pubkey common.PubKey, chain common.Chain, cType ContractType, duration, rate int64) *MsgOpenContract {
+func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, cType ContractType, duration, rate int64) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:  creator,
 		PubKey:   pubkey,
@@ -64,7 +64,7 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 	}
 
 	// verify chain
-	_, err = common.NewChain(msg.Chain.String())
+	_, err = common.NewChain(msg.Chain)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}

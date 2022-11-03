@@ -12,7 +12,7 @@ const TypeMsgBondProvider = "bond_provider"
 
 var _ sdk.Msg = &MsgBondProvider{}
 
-func NewMsgBondProvider(creator string, pubkey common.PubKey, chain common.Chain, bond cosmos.Int) *MsgBondProvider {
+func NewMsgBondProvider(creator string, pubkey common.PubKey, chain string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
 		Creator: creator,
 		PubKey:  pubkey,
@@ -72,7 +72,7 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 	}
 
 	// verify chain
-	_, err = common.NewChain(msg.Chain.String())
+	_, err = common.NewChain(msg.Chain)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}

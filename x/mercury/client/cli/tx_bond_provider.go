@@ -30,11 +30,6 @@ func CmdBondProvider() *cobra.Command {
 				return err
 			}
 
-			chain, err := common.NewChain(argChain)
-			if err != nil {
-				return err
-			}
-
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
 				return err
@@ -48,7 +43,7 @@ func CmdBondProvider() *cobra.Command {
 			msg := types.NewMsgBondProvider(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				chain,
+				argChain,
 				bond,
 			)
 			if err := msg.ValidateBasic(); err != nil {

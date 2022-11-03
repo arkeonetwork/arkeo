@@ -37,7 +37,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		PubKey:  pubkey,
-		Chain:   chain,
+		Chain:   chain.String(),
 		Client:  client,
 		Creator: acc.String(),
 		Nonce:   20,
@@ -81,7 +81,7 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		PubKey:  pubkey,
-		Chain:   chain,
+		Chain:   chain.String(),
 		Creator: acc.String(),
 		Client:  client,
 		Nonce:   20,
@@ -148,7 +148,7 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		PubKey:  pubkey,
-		Chain:   chain,
+		Chain:   chain.String(),
 		Creator: acc.String(),
 		Client:  client,
 		Nonce:   20,

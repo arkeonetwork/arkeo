@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -51,7 +52,11 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 		}
 	}
 
-	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
 	if err != nil {
 		return err
 	}
@@ -63,7 +68,11 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 }
 
 func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvider) error {
-	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 	msg = MsgModProvider{
 		Creator:     acct.String(),
 		PubKey:      pubkey,
-		Chain:       common.BTCChain,
+		Chain:       common.BTCChain.String(),
 		MetadataURI: "http://mad.hatter.net/test?foo=baz",
 	}
 	err = msg.ValidateBasic()

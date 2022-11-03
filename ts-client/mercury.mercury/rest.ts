@@ -11,7 +11,9 @@
 
 export interface MercuryContract {
   provider_pub_key?: string;
-  chain?: string;
+
+  /** @format int32 */
+  chain?: number;
   client?: string;
   type?: MercuryContractType;
 
@@ -55,7 +57,9 @@ export type MercuryParams = object;
 
 export interface MercuryProvider {
   pub_key?: string;
-  chain?: string;
+
+  /** @format int32 */
+  chain?: number;
   metadataURI?: string;
 
   /** @format uint64 */

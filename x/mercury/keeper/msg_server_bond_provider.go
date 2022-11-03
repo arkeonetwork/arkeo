@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"mercury/common"
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
@@ -39,7 +40,11 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 }
 
 func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProvider) error {
-	provider, err := k.GetProvider(ctx, msg.PubKey, msg.Chain)
+	chain, err := common.NewChain(msg.Chain)
+	if err != nil {
+		return err
+	}
+	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
 	if err != nil {
 		return err
 	}
@@ -84,7 +89,7 @@ func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *t
 			sdk.NewEvent(
 				types.EventTypeProviderBond,
 				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain.String()),
+				sdk.NewAttribute("chain", msg.Chain),
 				sdk.NewAttribute("bond_rel", msg.Bond.String()),
 				sdk.NewAttribute("bond_abs", bond.String()),
 			),

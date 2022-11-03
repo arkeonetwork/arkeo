@@ -70,7 +70,7 @@ export function contractTypeToJSON(object: ContractType): string {
 
 export interface Provider {
   pubKey: string;
-  chain: string;
+  chain: number;
   metadataURI: string;
   metadataNonce: number;
   status: ProviderStatus;
@@ -84,7 +84,7 @@ export interface Provider {
 
 export interface Contract {
   providerPubKey: string;
-  chain: string;
+  chain: number;
   client: string;
   type: ContractType;
   height: number;
@@ -98,7 +98,7 @@ export interface Contract {
 
 export interface ContractExpiration {
   providerPubKey: string;
-  chain: string;
+  chain: number;
   client: string;
 }
 
@@ -109,7 +109,7 @@ export interface ContractExpirationSet {
 
 const baseProvider: object = {
   pubKey: "",
-  chain: "",
+  chain: 0,
   metadataURI: "",
   metadataNonce: 0,
   status: 0,
@@ -126,8 +126,8 @@ export const Provider = {
     if (message.pubKey !== "") {
       writer.uint32(10).string(message.pubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.chain !== 0) {
+      writer.uint32(16).int32(message.chain);
     }
     if (message.metadataURI !== "") {
       writer.uint32(26).string(message.metadataURI);
@@ -170,7 +170,7 @@ export const Provider = {
           message.pubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.chain = reader.int32();
           break;
         case 3:
           message.metadataURI = reader.string();
@@ -215,9 +215,9 @@ export const Provider = {
       message.pubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
+      message.chain = Number(object.chain);
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.metadataURI !== undefined && object.metadataURI !== null) {
       message.metadataURI = String(object.metadataURI);
@@ -309,7 +309,7 @@ export const Provider = {
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = object.chain;
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.metadataURI !== undefined && object.metadataURI !== null) {
       message.metadataURI = object.metadataURI;
@@ -371,7 +371,7 @@ export const Provider = {
 
 const baseContract: object = {
   providerPubKey: "",
-  chain: "",
+  chain: 0,
   client: "",
   type: 0,
   height: 0,
@@ -388,8 +388,8 @@ export const Contract = {
     if (message.providerPubKey !== "") {
       writer.uint32(10).string(message.providerPubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.chain !== 0) {
+      writer.uint32(16).int32(message.chain);
     }
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
@@ -432,7 +432,7 @@ export const Contract = {
           message.providerPubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.chain = reader.int32();
           break;
         case 3:
           message.client = reader.string();
@@ -477,9 +477,9 @@ export const Contract = {
       message.providerPubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
+      message.chain = Number(object.chain);
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.client !== undefined && object.client !== null) {
       message.client = String(object.client);
@@ -557,7 +557,7 @@ export const Contract = {
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = object.chain;
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.client !== undefined && object.client !== null) {
       message.client = object.client;
@@ -610,7 +610,7 @@ export const Contract = {
 
 const baseContractExpiration: object = {
   providerPubKey: "",
-  chain: "",
+  chain: 0,
   client: "",
 };
 
@@ -622,8 +622,8 @@ export const ContractExpiration = {
     if (message.providerPubKey !== "") {
       writer.uint32(10).string(message.providerPubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.chain !== 0) {
+      writer.uint32(16).int32(message.chain);
     }
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
@@ -642,7 +642,7 @@ export const ContractExpiration = {
           message.providerPubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.chain = reader.int32();
           break;
         case 3:
           message.client = reader.string();
@@ -663,9 +663,9 @@ export const ContractExpiration = {
       message.providerPubKey = "";
     }
     if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
+      message.chain = Number(object.chain);
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.client !== undefined && object.client !== null) {
       message.client = String(object.client);
@@ -694,7 +694,7 @@ export const ContractExpiration = {
     if (object.chain !== undefined && object.chain !== null) {
       message.chain = object.chain;
     } else {
-      message.chain = "";
+      message.chain = 0;
     }
     if (object.client !== undefined && object.client !== null) {
       message.client = object.client;

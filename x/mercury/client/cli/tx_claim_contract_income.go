@@ -37,11 +37,6 @@ func CmdClaimContractIncome() *cobra.Command {
 				return err
 			}
 
-			chain, err := common.NewChain(argChain)
-			if err != nil {
-				return err
-			}
-
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
 				return err
@@ -55,7 +50,7 @@ func CmdClaimContractIncome() *cobra.Command {
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				chain,
+				argChain,
 				client,
 				argNonce,
 				argHeight,
