@@ -65,14 +65,6 @@ func (c Contract) IsEmpty() bool {
 	return c.Height == 0
 }
 
-func (c Contract) ClientAddress() cosmos.AccAddress {
-	addr, err := c.Client.GetMyAddress()
-	if err != nil {
-		panic(err)
-	}
-	return addr
-}
-
 func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client common.PubKey) *ContractExpiration {
 	return &ContractExpiration{
 		ProviderPubKey: pubkey,

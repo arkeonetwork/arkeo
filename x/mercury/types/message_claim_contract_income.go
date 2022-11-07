@@ -92,7 +92,7 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrap(ErrClaimContractIncomeBadHeight, "")
 	}
 
-	if msg.Nonce < 0 {
+	if msg.Nonce <= 0 {
 		return sdkerrors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 

@@ -40,14 +40,14 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 	}
 
 	for _, exp := range set.Contracts {
-		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.Client)
+		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.FetchSpender())
 		if err != nil {
-			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
+			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "spender", exp.FetchSpender(), "error", err)
 			continue
 		}
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
-			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
+			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "spender", exp.FetchSpender(), "error", err)
 			continue
 		}
 	}
@@ -91,6 +91,8 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 		total = total.Add(val.Tokens)
 	}
 
+	// TODO: pay delegates of validators, maybe using vesting accounts?
+
 	for _, val := range validators {
 		if val.Status != stakingtypes.Bonded {
 			continue
@@ -129,7 +131,8 @@ func (mgr Manager) calcBlockReward(totalReserve, emissionCurve, blocksPerYear in
 }
 
 func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int64 {
-	// TODO: use ctx to fetch config overrides from the chain state
+	// TODO: create a handler for admins to be able to change configs on the
+	// fly and check them here before returning
 	return mgr.configs.GetInt64Value(name)
 }
 
