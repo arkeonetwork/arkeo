@@ -6,7 +6,6 @@ import (
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
-	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -129,22 +128,4 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 
 	k.OpenContractEvent(ctx, contract)
 	return nil
-}
-
-func (k msgServer) OpenContractEvent(ctx cosmos.Context, contract types.Contract) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeOpenContract,
-				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
-				sdk.NewAttribute("chain", contract.Chain.String()),
-				sdk.NewAttribute("client", contract.Client.String()),
-				sdk.NewAttribute("delegate", contract.Delegate.String()),
-				sdk.NewAttribute("type", contract.Type.String()),
-				sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
-				sdk.NewAttribute("duration", strconv.FormatInt(contract.Duration, 10)),
-				sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
-			),
-		},
-	)
 }
