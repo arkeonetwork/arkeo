@@ -50,6 +50,15 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
+	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
+	if provider.Bond.LT(cosmos.NewInt(minBond)) {
+		return sdkerrors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
+	}
+
+	if provider.Status != types.ProviderStatus_Online {
+		return sdkerrors.Wrapf(types.ErrOpenContractBadProviderStatus, "has status %s", provider.Status.String())
+	}
+
 	if msg.Duration > provider.MaxContractDuration {
 		return sdkerrors.Wrapf(types.ErrOpenContractDuration, "duration exceeds allowed maximum duration from provider")
 	}
@@ -74,11 +83,6 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return sdkerrors.Wrapf(types.ErrInvalidContractType, "%s", msg.CType.String())
 	}
 
-	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
-	if provider.Bond.LT(cosmos.NewInt(minBond)) {
-		return sdkerrors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
-	}
-
 	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
 	if err != nil {
 		return err
@@ -92,11 +96,15 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 }
 
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
-	cost := getCoin(k.FetchConfig(ctx, configs.OpenContractCost)).AddAmount(msg.Deposit)
-	if !cost.IsZero() {
-		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cosmos.NewCoins(cost)); err != nil {
+	openCost := k.FetchConfig(ctx, configs.OpenContractCost)
+	if openCost > 0 {
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cosmos.NewCoins(getCoin(openCost))); err != nil {
 			return nil
 		}
+	}
+
+	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, getCoins(msg.Deposit.Int64())); err != nil {
+		return nil
 	}
 
 	chain, err := common.NewChain(msg.Chain)
@@ -104,6 +112,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 	contract := types.NewContract(msg.PubKey, chain, msg.FetchSpender())
+	contract.Client = msg.Client
 	contract.Type = msg.CType
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
@@ -126,6 +135,6 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	k.OpenContractEvent(ctx, contract)
+	k.OpenContractEvent(ctx, openCost, contract)
 	return nil
 }

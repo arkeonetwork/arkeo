@@ -27,10 +27,12 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 
 	// happy path
 	msg = MsgModProvider{
-		Creator:     acct.String(),
-		PubKey:      pubkey,
-		Chain:       common.BTCChain.String(),
-		MetadataURI: "http://mad.hatter.net/test?foo=baz",
+		Creator:             acct.String(),
+		PubKey:              pubkey,
+		Chain:               common.BTCChain.String(),
+		MinContractDuration: 12,
+		MaxContractDuration: 30,
+		MetadataURI:         "http://mad.hatter.net/test?foo=baz",
 	}
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)

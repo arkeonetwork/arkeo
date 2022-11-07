@@ -36,6 +36,13 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 	if k.FetchConfig(ctx, configs.HandlerBondProvider) > 0 {
 		return sdkerrors.Wrapf(types.ErrDisabledHandler, "bond provider")
 	}
+
+	// We allow providers to unbond WHILE active contracts are underway. This
+	// is because A) users can cancel their owned contracts at any time, and B)
+	// this is the way the provider signals to the chain that they don't want
+	// to open any new contracts (as there is a min bond requirement for new
+	// contracts to be opened)
+
 	return nil
 }
 
@@ -52,17 +59,20 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	if err != nil {
 		return err
 	}
-	coins := cosmos.NewCoins(cosmos.NewCoin(configs.Denom, msg.Bond.Abs()))
+
+	coins := getCoins(msg.Bond.Abs().Int64())
 
 	switch {
 	case msg.Bond.IsPositive():
+		// provider is adding to their bond
 		if err := k.SendFromAccountToModule(ctx, addr, types.ProviderName, coins); err != nil {
 			return err
 		}
 	case msg.Bond.IsNegative():
+		// provider is withdrawing their bond
 		// ensure we provider bond is never negative
-		if provider.Bond.LT(msg.Bond.Abs()) {
-			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", msg.Bond.Int64(), provider.Bond.Int64())
+		if provider.Bond.LT(coins[0].Amount) {
+			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", coins[0].Amount.Int64(), provider.Bond.Int64())
 		}
 		if err := k.SendFromModuleToAccount(ctx, types.ProviderName, addr, coins); err != nil {
 			return err

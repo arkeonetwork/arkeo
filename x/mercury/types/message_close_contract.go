@@ -84,6 +84,8 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
+	// contract can be cancelled by provider or client, this check if the
+	// client is making the request to cancel
 	if len(msg.Client) > 0 {
 		pk, err := common.NewPubKey(msg.Client.String())
 		if err != nil {

@@ -26,6 +26,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	provider := types.NewProvider(pubkey, chain)
 	provider.Bond = cosmos.NewInt(500_00000000)
+	provider.Status = types.ProviderStatus_Online
 	provider.MaxContractDuration = 1000
 	provider.MinContractDuration = 10
 	provider.SubscriptionRate = 15

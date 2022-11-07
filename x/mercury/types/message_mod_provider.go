@@ -95,7 +95,7 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	// check durations
-	if msg.MinContractDuration < 0 {
+	if msg.MinContractDuration <= 0 {
 		return sdkerrors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contraction duration cannot be zero")
 	}
 
