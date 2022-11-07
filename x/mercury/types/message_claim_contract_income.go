@@ -74,14 +74,7 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
 	}
 
-	signer := msg.MustGetSigner()
-	provider, err := msg.PubKey.GetMyAddress()
-	if err != nil {
-		return err
-	}
-	if !signer.Equals(provider) {
-		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
-	}
+	// anyone can make the claim on a contract, but of course the payout would only happen to the provider
 
 	// verify chain
 	_, err = common.NewChain(msg.Chain)
