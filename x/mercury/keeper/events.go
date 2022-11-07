@@ -56,7 +56,7 @@ func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider types.Provider)
 	)
 }
 
-func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost cosmos.Int, contract types.Contract) {
+func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contract types.Contract) {
 	ctx.EventManager().EmitEvents(
 		sdk.Events{
 			sdk.NewEvent(

@@ -70,16 +70,6 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	msg.Spender = common.PubKey("bogus")
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
-
-	// check auth to cancel a specific contract
-	msg = MsgClaimContractIncome{
-		Creator: GetRandomBech32Addr().String(),
-		PubKey:  pubkey,
-		Spender: GetRandomPubKey(),
-		Chain:   common.BTCChain.String(),
-	}
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrProviderBadSigner)
 }
 
 func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {

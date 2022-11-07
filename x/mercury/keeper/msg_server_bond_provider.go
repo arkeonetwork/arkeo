@@ -60,7 +60,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 		return err
 	}
 
-	coins := cosmos.NewCoins(cosmos.NewCoin(configs.Denom, msg.Bond.Abs()))
+	coins := getCoins(msg.Bond.Abs().Int64())
 
 	switch {
 	case msg.Bond.IsPositive():
@@ -71,8 +71,8 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	case msg.Bond.IsNegative():
 		// provider is withdrawing their bond
 		// ensure we provider bond is never negative
-		if provider.Bond.LT(coin.Amount) {
-			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", coin.Amount.Int64(), provider.Bond.Int64())
+		if provider.Bond.LT(coins[0].Amount) {
+			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", coins[0].Amount.Int64(), provider.Bond.Int64())
 		}
 		if err := k.SendFromModuleToAccount(ctx, types.ProviderName, addr, coins); err != nil {
 			return err
