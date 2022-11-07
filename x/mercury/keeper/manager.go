@@ -6,7 +6,6 @@ import (
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -111,15 +110,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 		}
 		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", rwd)
 
-		ctx.EventManager().EmitEvents(
-			sdk.Events{
-				sdk.NewEvent(
-					types.EventTypeValidatorPayout,
-					sdk.NewAttribute("validator", acc.String()),
-					sdk.NewAttribute("paid", rwd.String()),
-				),
-			},
-		)
+		mgr.ValidatorPayoutEvent(ctx, acc, rwd)
 	}
 
 	return nil
@@ -186,17 +177,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeContractSettlement,
-				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
-				sdk.NewAttribute("chain", contract.Chain.String()),
-				sdk.NewAttribute("client", contract.Client.String()),
-				sdk.NewAttribute("paid", debt.String()),
-			),
-		},
-	)
+	mgr.ContractSettlementEvent(ctx, debt, contract)
 	return contract, nil
 }
 

@@ -6,7 +6,6 @@ import (
 	"mercury/common/cosmos"
 	"mercury/x/mercury/configs"
 	"mercury/x/mercury/types"
-	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -105,23 +104,4 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	}
 	k.ModProviderEvent(ctx, provider)
 	return nil
-}
-
-func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider types.Provider) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeProviderMod,
-				sdk.NewAttribute("pubkey", provider.PubKey.String()),
-				sdk.NewAttribute("chain", provider.Chain.String()),
-				sdk.NewAttribute("metadata_uri", provider.MetadataURI),
-				sdk.NewAttribute("metadata_nonce", strconv.FormatUint(provider.MetadataNonce, 10)),
-				sdk.NewAttribute("status", provider.Status.String()),
-				sdk.NewAttribute("min_contract_duration", strconv.FormatInt(provider.MinContractDuration, 10)),
-				sdk.NewAttribute("max_contract_duration", strconv.FormatInt(provider.MaxContractDuration, 10)),
-				sdk.NewAttribute("subscription_rate", strconv.FormatInt(provider.SubscriptionRate, 10)),
-				sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
-			),
-		},
-	)
 }

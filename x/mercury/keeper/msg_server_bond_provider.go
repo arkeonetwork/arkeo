@@ -82,17 +82,3 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	}
 	return err
 }
-
-func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeProviderBond,
-				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain),
-				sdk.NewAttribute("bond_rel", msg.Bond.String()),
-				sdk.NewAttribute("bond_abs", bond.String()),
-			),
-		},
-	)
-}

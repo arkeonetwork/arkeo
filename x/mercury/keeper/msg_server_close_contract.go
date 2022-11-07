@@ -90,17 +90,3 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 	k.CloseContractEvent(ctx, msg)
 	return nil
 }
-
-func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseContract) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			sdk.NewEvent(
-				types.EventTypeCloseContract,
-				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain),
-				sdk.NewAttribute("client", msg.Client.String()),
-				sdk.NewAttribute("delegate", msg.Delegate.String()),
-			),
-		},
-	)
-}
