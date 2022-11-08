@@ -143,7 +143,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p Proxy) Run() {
-	log.Println("Starting Switch (reverse proxy)....")
+	log.Println("Starting Sentinel (reverse proxy)....")
 	p.Config.Print()
 
 	mux := http.NewServeMux()

@@ -1,6 +1,6 @@
 *.pb.go
 generated
-switchd
+sentinel
 mercuryd
 
 vue/node_modules
