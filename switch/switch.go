@@ -8,22 +8,32 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
 
+	"mercury/common"
 	"mercury/switch/conf"
 
 	"github.com/gorilla/handlers"
 )
 
 type Proxy struct {
-	Metadata Metadata
-	Config   conf.Configuration
+	Metadata   Metadata
+	Config     conf.Configuration
+	MemStore   *MemStore
+	ClaimStore *ClaimStore
 }
 
 func NewProxy() Proxy {
 	config := conf.NewConfiguration()
+	claimStore, err := NewClaimStore(config.ClaimStoreLocation)
+	if err != nil {
+		panic(err)
+	}
 	return Proxy{
-		Metadata: NewMetadata(config),
-		Config:   config,
+		Metadata:   NewMetadata(config),
+		Config:     config,
+		MemStore:   NewStore(config.SourceChain),
+		ClaimStore: claimStore,
 	}
 }
 
@@ -49,14 +59,109 @@ func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
 	w.Write(d)
 }
 
+func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		return
+	}
+
+	providerPK, err := common.NewPubKey(parts[1])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	chain, err := common.NewChain(parts[2])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	spenderPK, err := common.NewPubKey(parts[3])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		return
+	}
+
+	key := p.MemStore.Key(providerPK.String(), chain.String(), spenderPK.String())
+	contract, err := p.MemStore.Get(key)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	d, _ := json.Marshal(contract)
+	w.Write(d)
+}
+
+func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		return
+	}
+
+	providerPK, err := common.NewPubKey(parts[1])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	chain, err := common.NewChain(parts[2])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	spenderPK, err := common.NewPubKey(parts[3])
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		return
+	}
+
+	claim := NewClaim(providerPK, chain, spenderPK, 0, 0, "")
+	claim, err = p.ClaimStore.Get(claim.Key())
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	d, _ := json.Marshal(claim)
+	w.Write(d)
+}
+
 func (p Proxy) Run() {
-	log.Printf("Starting server.... :%s", p.Config.Port)
+	log.Println("Starting Switch (reverse proxy)....")
+	p.Config.Print()
 
 	mux := http.NewServeMux()
 
 	// start server
-	mux.Handle("/", handlers.LoggingHandler(os.Stdout, handlers.ProxyHeaders(http.HandlerFunc(p.handleRequestAndRedirect))))
 	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleMetadata))))
+	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleContract))))
+	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleClaim))))
+	mux.Handle("/", auth(
+		p.Config, p.MemStore, p.ClaimStore,
+		handlers.LoggingHandler(
+			os.Stdout,
+			handlers.ProxyHeaders(
+				http.HandlerFunc(p.handleRequestAndRedirect),
+			),
+		),
+	))
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux))
 }

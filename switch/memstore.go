@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO: this should receive events from arceo chain to update its database
+// TODO: clean up contracts from memory after they expire
 type MemStore struct {
 	db          map[string]types.Contract
 	client      http.Client
@@ -24,6 +26,14 @@ func NewStore(baseURL string) *MemStore {
 		},
 		baseURL: baseURL,
 	}
+}
+
+func (k MemStore) Key(pubkey, chain, spender string) string {
+	return fmt.Sprintf("/%s/%s/%s", pubkey, chain, spender)
+}
+
+func (k MemStore) GetHeight() int64 {
+	return k.blockHeight
 }
 
 func (k MemStore) SetHeight(height int64) {
@@ -43,6 +53,8 @@ func (k MemStore) Put(key string, value types.Contract) {
 }
 
 func (k MemStore) fetchContract(key string) (types.Contract, error) {
+	// TODO: this should cache a "miss" for 5 seconds, to stop DoS/thrashing
+
 	var contract types.Contract
 	requestURL := fmt.Sprintf("%s/%s", k.baseURL, key)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
