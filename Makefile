@@ -19,7 +19,10 @@ NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
 TAG?=testnet
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=Mercury \
+ldflags = -X gitlab.com/cbarraford/mercury/config.Version=$(VERSION) \
+          -X gitlab.com/cbarraford/mercury/config.GitCommit=$(COMMIT) \
+          -X gitlab.com/cbarraford/mercury/config.BuildTime=${NOW} \
+		  -X github.com/cosmos/cosmos-sdk/version.Name=Mercury \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=mercury \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
@@ -30,7 +33,7 @@ TEST_DIR?="./..."
 BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet
 GOBIN?=${GOPATH}/bin
-BINARIES=./cmd/mercury
+BINARIES=./cmd/mercuryd ./cmd/sentinel
 
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH
@@ -62,12 +65,12 @@ format:
 
 lint:
 	@./scripts/lint.sh
-	@go run ./...
+	@go build ${BINARIES}
 	@./scripts/trunk check --no-fix --upstream origin/master
 
 lint-ci:
 	@./scripts/lint.sh
-	@go run ./...
+	@go build ${BINARIES}
 	@./scripts/trunk check --all --no-progress --monitor=false
 
 # ------------------------------ Testing ------------------------------

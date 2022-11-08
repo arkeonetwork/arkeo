@@ -13,14 +13,15 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, spender common.PubKey, nonce, height int64) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, spender common.PubKey, nonce, height int64, sig string) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
-		Creator: creator,
-		PubKey:  pubkey,
-		Chain:   chain,
-		Spender: spender,
-		Nonce:   nonce,
-		Height:  height,
+		Creator:   creator,
+		PubKey:    pubkey,
+		Chain:     chain,
+		Spender:   spender,
+		Nonce:     nonce,
+		Height:    height,
+		Signature: []byte(sig),
 	}
 }
 
