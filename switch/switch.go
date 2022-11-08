@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"mercury/common"
+	"mercury/switch/conf"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
-
-	"mercury/common"
-	"mercury/switch/conf"
 
 	"github.com/gorilla/handlers"
 )

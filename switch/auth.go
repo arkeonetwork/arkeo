@@ -3,15 +3,14 @@ package switchd
 import (
 	"fmt"
 	"log"
+	"mercury/common"
+	"mercury/common/cosmos"
 	"mercury/switch/conf"
+	"mercury/x/mercury/types"
 	"net"
 	"net/http"
 	"strconv"
 	"sync"
-
-	"mercury/common"
-	"mercury/common/cosmos"
-	"mercury/x/mercury/types"
 
 	"golang.org/x/time/rate"
 )
@@ -24,8 +23,10 @@ const (
 )
 
 // Create a map to hold the rate limiters for each visitor and a mutex.
-var visitors = make(map[string]*rate.Limiter)
-var mu sync.Mutex
+var (
+	visitors = make(map[string]*rate.Limiter)
+	mu       sync.Mutex
+)
 
 func auth(config conf.Configuration, mem *MemStore, claimStore *ClaimStore, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

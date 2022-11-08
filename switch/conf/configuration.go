@@ -2,13 +2,12 @@ package conf
 
 import (
 	"fmt"
+	"mercury/common"
 	"os"
 	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
-
-	"mercury/common"
 )
 
 type Configuration struct {
@@ -30,7 +29,7 @@ type Configuration struct {
 }
 
 // Simple helper function to read an environment or return a default value
-func getEnv(key string, defaultVal string) string {
+func getEnv(key, defaultVal string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
 	}

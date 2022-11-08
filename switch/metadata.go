@@ -5,9 +5,7 @@ import (
 	"mercury/x/mercury/configs"
 )
 
-var (
-	Version = "0.0.0"
-)
+var Version = "0.0.0"
 
 type Metadata struct {
 	Configuration conf.Configuration `json:"config"`

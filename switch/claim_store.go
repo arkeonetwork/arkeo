@@ -3,7 +3,6 @@ package switchd
 import (
 	"encoding/json"
 	"fmt"
-
 	"mercury/common"
 	"mercury/x/mercury/types"
 
