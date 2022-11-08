@@ -1,4 +1,4 @@
-package switchd
+package sentinel
 
 import (
 	"mime"

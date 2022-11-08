@@ -1,11 +1,11 @@
-package switchd
+package sentinel
 
 import (
 	"fmt"
 	"log"
 	"mercury/common"
 	"mercury/common/cosmos"
-	"mercury/switch/conf"
+	"mercury/sentinel/conf"
 	"mercury/x/mercury/types"
 	"net"
 	"net/http"

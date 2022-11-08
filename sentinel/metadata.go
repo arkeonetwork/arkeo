@@ -1,7 +1,7 @@
-package switchd
+package sentinel
 
 import (
-	"mercury/switch/conf"
+	"mercury/sentinel/conf"
 	"mercury/x/mercury/configs"
 )
 

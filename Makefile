@@ -33,7 +33,7 @@ TEST_DIR?="./..."
 BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet
 GOBIN?=${GOPATH}/bin
-BINARIES=./cmd/mercuryd ./cmd/switchd
+BINARIES=./cmd/mercuryd ./cmd/sentinel
 
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH

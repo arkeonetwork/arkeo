@@ -1,11 +1,11 @@
-package switchd
+package sentinel
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 	"mercury/common"
-	"mercury/switch/conf"
+	"mercury/sentinel/conf"
 	"net/http"
 	"net/http/httputil"
 	"net/url"

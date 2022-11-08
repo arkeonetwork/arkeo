@@ -1,10 +1,10 @@
 package main
 
 import (
-	switchd "mercury/switch"
+	"mercury/sentinel"
 )
 
 func main() {
-	proxy := switchd.NewProxy()
+	proxy := sentinel.NewProxy()
 	proxy.Run()
 }
