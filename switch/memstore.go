@@ -28,19 +28,19 @@ func NewStore(baseURL string) *MemStore {
 	}
 }
 
-func (k MemStore) Key(pubkey, chain, spender string) string {
+func (k *MemStore) Key(pubkey, chain, spender string) string {
 	return fmt.Sprintf("/%s/%s/%s", pubkey, chain, spender)
 }
 
-func (k MemStore) GetHeight() int64 {
+func (k *MemStore) GetHeight() int64 {
 	return k.blockHeight
 }
 
-func (k MemStore) SetHeight(height int64) {
+func (k *MemStore) SetHeight(height int64) {
 	k.blockHeight = height
 }
 
-func (k MemStore) Get(key string) (types.Contract, error) {
+func (k *MemStore) Get(key string) (types.Contract, error) {
 	contract := k.db[key]
 	if contract.IsClose(k.blockHeight) {
 		return k.fetchContract(key)
@@ -48,11 +48,11 @@ func (k MemStore) Get(key string) (types.Contract, error) {
 	return contract, nil
 }
 
-func (k MemStore) Put(key string, value types.Contract) {
+func (k *MemStore) Put(key string, value types.Contract) {
 	k.db[key] = value
 }
 
-func (k MemStore) fetchContract(key string) (types.Contract, error) {
+func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	// TODO: this should cache a "miss" for 5 seconds, to stop DoS/thrashing
 
 	var contract types.Contract

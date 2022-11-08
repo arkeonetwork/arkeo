@@ -86,7 +86,7 @@ func NewConfiguration() Configuration {
 		Website:                   loadVarString("WEBSITE"),
 		Description:               loadVarString("DESCRIPTION"),
 		Location:                  loadVarString("LOCATION"),
-		Port:                      loadVarString("PORT"),
+		Port:                      getEnv("PORT", "3636"),
 		ProxyHost:                 loadVarString("PROXY_HOST"),
 		SourceChain:               loadVarString("SOURCE_CHAIN"),
 		ProviderPubKey:            loadVarPubKey("PROVIDER_PUBKEY"),
@@ -102,17 +102,17 @@ func NewConfiguration() Configuration {
 
 func (c Configuration) Print() {
 	writer := tabwriter.NewWriter(os.Stdout, 0, 8, 1, '\t', tabwriter.AlignRight)
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Moniker", c.Moniker))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Website", c.Website))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Description", c.Description))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Location", c.Location))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Port", c.Port))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "ProxyHost", c.ProxyHost))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "SourceChain", c.SourceChain))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Provider PubKey", c.ProviderPubKey))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%+v", "Claim Store Location", c.ClaimStoreLocation))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%d requests per %+v", "Free Tier Rate Limit", c.FreeTierRateLimit, c.FreeTierRateLimitDuration))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%d requests per %+v", "Subscription Rate Limit", c.SubTierRateLimit, c.SubTierRateLimitDuration))
-	fmt.Fprintln(writer, fmt.Sprintf("%s\t%d requests per %+v", "Pay-As-You-Go Rate Limit", c.AsGoTierRateLimit, c.AsGoTierRateLimitDuration))
+	fmt.Fprintln(writer, "Moniker\t", c.Moniker)
+	fmt.Fprintln(writer, "Website\t", c.Website)
+	fmt.Fprintln(writer, "Description\t", c.Description)
+	fmt.Fprintln(writer, "Location\t", c.Location)
+	fmt.Fprintln(writer, "Port\t", c.Port)
+	fmt.Fprintln(writer, "ProxyHost\t", c.ProxyHost)
+	fmt.Fprintln(writer, "SourceChain\t", c.SourceChain)
+	fmt.Fprintln(writer, "Provider PubKey\t", c.ProviderPubKey)
+	fmt.Fprintln(writer, "Claim Store Location\t", c.ClaimStoreLocation)
+	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.FreeTierRateLimit, c.FreeTierRateLimitDuration))
+	fmt.Fprintln(writer, "Subscription Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.SubTierRateLimit, c.SubTierRateLimitDuration))
+	fmt.Fprintln(writer, "Pay-As-You-Go Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.AsGoTierRateLimit, c.AsGoTierRateLimitDuration))
 	writer.Flush()
 }

@@ -82,7 +82,7 @@ func freeTier(config conf.Configuration, mem *MemStore, w http.ResponseWriter, r
 		visitors[key] = limiter
 	}
 
-	if limiter.Allow() == false {
+	if !limiter.Allow() {
 		log.Printf("Entity %s has been rate limited :(", key)
 		http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
 		return false
@@ -179,7 +179,7 @@ func paidTier(height, nonce int64, spender, sig string, config conf.Configuratio
 		visitors[key] = limiter
 	}
 
-	if limiter.Allow() == false {
+	if !limiter.Allow() {
 		log.Printf("Entity %s has been rate limited :(", key)
 		http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
 		return false

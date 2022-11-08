@@ -55,7 +55,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 
 func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
 	d, _ := json.Marshal(p.Metadata)
-	w.Write(d)
+	_, _ = w.Write(d)
 }
 
 func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +97,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d, _ := json.Marshal(contract)
-	w.Write(d)
+	_, _ = w.Write(d)
 }
 
 func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
@@ -139,7 +139,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d, _ := json.Marshal(claim)
-	w.Write(d)
+	_, _ = w.Write(d)
 }
 
 func (p Proxy) Run() {

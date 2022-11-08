@@ -65,12 +65,12 @@ format:
 
 lint:
 	@./scripts/lint.sh
-	@go run ./...
+	@go build ${BINARIES}
 	@./scripts/trunk check --no-fix --upstream origin/master
 
 lint-ci:
 	@./scripts/lint.sh
-	@go run ./...
+	@go build ${BINARIES}
 	@./scripts/trunk check --all --no-progress --monitor=false
 
 # ------------------------------ Testing ------------------------------
