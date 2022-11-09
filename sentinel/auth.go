@@ -1,6 +1,7 @@
 package sentinel
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 	"mercury/common"
@@ -94,7 +95,7 @@ func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (p Proxy) paidTier(height, nonce int64, chain, spender, sig string) (int, error) {
+func (p Proxy) paidTier(height, nonce int64, chain, spender, signature string) (int, error) {
 	creator, err := p.Config.ProviderPubKey.GetMyAddress()
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
@@ -103,6 +104,11 @@ func (p Proxy) paidTier(height, nonce int64, chain, spender, sig string) (int, e
 	spenderPK, err := common.NewPubKey(spender)
 	if err != nil {
 		return http.StatusBadRequest, fmt.Errorf("Invalid spender pubkey")
+	}
+
+	sig, err := hex.DecodeString(signature)
+	if err != nil {
+		return http.StatusBadRequest, fmt.Errorf("unable to decode signature")
 	}
 
 	msg := types.NewMsgClaimContractIncome(creator.String(), p.Config.ProviderPubKey, chain, spenderPK, nonce, height, sig)
@@ -127,7 +133,7 @@ func (p Proxy) paidTier(height, nonce int64, chain, spender, sig string) (int, e
 
 	key := fmt.Sprintf("%d-%s", chainInt, spender)
 
-	claim := NewClaim(p.Config.ProviderPubKey, chainInt, spenderPK, nonce, height, sig)
+	claim := NewClaim(p.Config.ProviderPubKey, chainInt, spenderPK, nonce, height, signature)
 	if p.ClaimStore.Has(key) {
 		var err error
 		claim, err = p.ClaimStore.Get(key)
@@ -168,7 +174,7 @@ func (p Proxy) paidTier(height, nonce int64, chain, spender, sig string) (int, e
 
 	claim.Nonce = nonce
 	claim.Height = height
-	claim.Signature = sig
+	claim.Signature = signature
 	claim.Claimed = false
 	if err := p.ClaimStore.Set(claim); err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)

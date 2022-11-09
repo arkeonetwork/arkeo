@@ -44256,7 +44256,7 @@ paths:
           format: uint64
       tags:
         - Query
-  /mercury/mercury/contract/{pubkey}/{chain}/{client}:
+  /mercury/contract/{pubkey}/{chain}/{client}:
     get:
       operationId: MercuryMercuryFetchContract
       responses:
@@ -44335,7 +44335,7 @@ paths:
           type: string
       tags:
         - Query
-  /mercury/mercury/contracts:
+  /mercury/contracts:
     get:
       operationId: MercuryMercuryContractAll
       responses:
@@ -44488,7 +44488,7 @@ paths:
           type: boolean
       tags:
         - Query
-  /mercury/mercury/params:
+  /mercury/params:
     get:
       summary: Parameters queries the parameters of the module.
       operationId: MercuryMercuryParams
@@ -44524,7 +44524,7 @@ paths:
                   additionalProperties: {}
       tags:
         - Query
-  /mercury/mercury/provider/{pubkey}/{chain}:
+  /mercury/provider/{pubkey}/{chain}:
     get:
       operationId: MercuryMercuryFetchProvider
       responses:
@@ -44598,7 +44598,7 @@ paths:
           type: string
       tags:
         - Query
-  /mercury/mercury/providers:
+  /mercury/providers:
     get:
       operationId: MercuryMercuryProviderAll
       responses:

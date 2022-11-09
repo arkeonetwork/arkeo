@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/hex"
 	"mercury/common"
 	"mercury/x/mercury/types"
 	"strconv"
@@ -48,6 +49,11 @@ func CmdClaimContractIncome() *cobra.Command {
 				return err
 			}
 
+			signature, err := hex.DecodeString(argSignature)
+			if err != nil {
+				return err
+			}
+
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
@@ -55,7 +61,7 @@ func CmdClaimContractIncome() *cobra.Command {
 				client,
 				argNonce,
 				argHeight,
-				argSignature,
+				signature,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

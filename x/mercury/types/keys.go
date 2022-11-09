@@ -4,8 +4,8 @@ const (
 	// ModuleName defines the module name
 	ModuleName   = "mercury"
 	ReserveName  = "reserve"
-	ProviderName = "provider"
-	ContractName = "contract"
+	ProviderName = "providers"
+	ContractName = "contracts"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
