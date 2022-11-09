@@ -18,7 +18,7 @@ type MemStore struct {
 	blockHeight int64
 }
 
-func NewStore(baseURL string) *MemStore {
+func NewMemStore(baseURL string) *MemStore {
 	return &MemStore{
 		db: make(map[string]types.Contract),
 		client: http.Client{
@@ -29,7 +29,7 @@ func NewStore(baseURL string) *MemStore {
 }
 
 func (k *MemStore) Key(pubkey, chain, spender string) string {
-	return fmt.Sprintf("/%s/%s/%s", pubkey, chain, spender)
+	return fmt.Sprintf("%s/%s/%s", pubkey, chain, spender)
 }
 
 func (k *MemStore) GetHeight() int64 {
@@ -59,6 +59,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	requestURL := fmt.Sprintf("%s/%s", k.baseURL, key)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
+		fmt.Println(err)
 		return contract, err
 	}
 
