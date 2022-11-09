@@ -15,8 +15,8 @@ if [ -z "$3" ]; then
 	exit 1
 fi
 
-BIN="mercuryd"
-BIN_TX="mercury"
+BIN="arkeod"
+BIN_TX="arkeo"
 USER="$1"
 CHAIN="$2"
 BOND="$3"

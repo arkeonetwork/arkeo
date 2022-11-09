@@ -1,6 +1,6 @@
 version: 1
 build:
-  main: ./cmd/mercuryd
+  main: ./cmd/arkeod
   proto:
     path: proto
     third_party_paths:
@@ -9,16 +9,16 @@ build:
 accounts:
 - name: alice
   coins:
-  - 2000000000000token
+  - 2000000000000keo
   - 200000000stake
 - name: bob
   coins:
-  - 1000000000000token
+  - 1000000000000keo
   - 100000000stake
 faucet:
   name: bob
   coins:
-  - 5token
+  - 5keo
   - 100000stake
   host: 0.0.0.0:4500
 client:

@@ -16,8 +16,8 @@ if [ -z "$3" ]; then
 fi
 
 PWD=$(dirname -- "${BASH_SOURCE[0]}")
-BIN="mercuryd"
-BIN_TX="mercury"
+BIN="arkeod"
+BIN_TX="arkeo"
 USER="$1"
 CHAIN="$2"
 BOND="$3"

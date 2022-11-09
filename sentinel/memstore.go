@@ -1,10 +1,10 @@
 package sentinel
 
 import (
+	"arkeo/x/arkeo/types"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"mercury/x/mercury/types"
 	"net/http"
 	"time"
 )

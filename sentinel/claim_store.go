@@ -1,10 +1,10 @@
 package sentinel
 
 import (
+	"arkeo/common"
+	"arkeo/x/arkeo/types"
 	"encoding/json"
 	"fmt"
-	"mercury/common"
-	"mercury/x/mercury/types"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

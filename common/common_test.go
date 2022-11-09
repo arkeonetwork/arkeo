@@ -1,7 +1,7 @@
 package common
 
 import (
-	"mercury/common/cosmos"
+	"arkeo/common/cosmos"
 	"testing"
 
 	. "gopkg.in/check.v1"

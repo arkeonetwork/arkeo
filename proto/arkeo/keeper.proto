@@ -1,0 +1,57 @@
+syntax = "proto3";
+package arkeo.arkeo;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "arkeo/x/arkeo/types";
+
+enum ProviderStatus {
+  Offline = 0;
+  Online =  1;
+}
+
+message Provider {
+  string pub_key = 1 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  int32 chain = 2 [(gogoproto.casttype) = "arkeo/common.Chain"];
+  string metadataURI = 3;
+  uint64 metadata_nonce = 4;
+  ProviderStatus status = 5;
+  int64 min_contract_duration = 6;
+  int64 max_contract_duration = 7;
+  int64 subscription_rate = 8;
+  int64 pay_as_you_go_rate = 9;
+  string bond = 10 [(cosmos_proto.scalar)  = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  int64 last_update = 11;
+}
+
+enum ContractType {
+  Subscription = 0;
+  PayAsYouGo =  1;
+}
+
+message Contract {
+  string provider_pub_key = 1 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  int32 chain = 2 [(gogoproto.casttype) = "arkeo/common.Chain"];
+  string client = 3 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  string delegate = 4 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  ContractType type = 5;
+  int64 height = 6;
+  int64 duration = 7;
+  int64 rate = 8;
+  string deposit = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string paid = 10 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  int64 nonce = 11;
+  int64 closed_height = 12;
+}
+
+message ContractExpiration {
+  string provider_pub_key = 1 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  int32 chain = 2 [(gogoproto.casttype) = "arkeo/common.Chain"];
+  string client = 3 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+}
+
+message ContractExpirationSet {
+  int64 height = 1;
+  repeated ContractExpiration contracts = 2;
+}

@@ -5,8 +5,8 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-BIN="mercuryd"
-TOKEN="token"
+BIN="arkeod"
+TOKEN="keo"
 USER="$1"
 
 ADDRESS=$($BIN keys show "$USER" -a)
