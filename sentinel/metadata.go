@@ -1,8 +1,8 @@
 package sentinel
 
 import (
-	"mercury/sentinel/conf"
-	"mercury/x/mercury/configs"
+	"arkeo/sentinel/conf"
+	"arkeo/x/arkeo/configs"
 )
 
 var Version = "0.0.0"

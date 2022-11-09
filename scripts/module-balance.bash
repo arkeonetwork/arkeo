@@ -6,8 +6,8 @@ if [ -z "$1" ]; then
 fi
 
 PWD=$(dirname -- "${BASH_SOURCE[0]}")
-BIN="mercuryd"
-TOKEN="token"
+BIN="arkeod"
+TOKEN="keo"
 MODULE="$1"
 
 ADDRESS=$($BIN query auth module-accounts -o json | jq -r ".accounts[] | select(.name==\"$MODULE\") | .base_account.address")

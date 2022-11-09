@@ -1,4 +1,4 @@
-name: Mercury CI
+name: Arkeo CI
 run-name: ${{ github.actor }} is testing a code change 🚀
 on: [push]
 

@@ -1,8 +1,8 @@
 package common
 
 import (
+	"arkeo/common/cosmos"
 	"fmt"
-	"mercury/common/cosmos"
 )
 
 // GetSafeShare does the same as GetUncappedShare , but GetSafeShare will guarantee the result will not more than total

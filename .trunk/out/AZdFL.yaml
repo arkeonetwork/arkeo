@@ -1,0 +1,19 @@
+title: golangci-lint exited with exit_code=3
+report:
+  - linter:
+      command: |
+        /Users/cbarraford/.cache/trunk/linters/golangci-lint/1.46.2-2f2d4b0b33ca86f29e48a8a38cbfc7b7/bin/golangci-lint run --out-format json --timeout 10m --concurrency 1 --exclude gofmt --allow-parallel-runners --issues-exit-code 0 x/mercury/keeper
+      stdin_path: (none)
+      run_from: /Users/cbarraford/go/src/github.com/cbarraford/mercury
+      timeout: 10m
+      rerun: env -i -C /Users/cbarraford/go/src/github.com/cbarraford/mercury 'PATH=/Users/cbarraford/.cache/trunk/linters/golangci-lint/1.46.2-2f2d4b0b33ca86f29e48a8a38cbfc7b7/bin:/Users/cbarraford/.cache/trunk/linters/go/1.18.3-b94488c6023336a8b23f0e3c47562939/bin:/Users/cbarraford/.ops/bin:/Users/cbarraford/.ops/bin:/Users/cbarraford/.ops/bin:/Users/cbarraford/.yarn/bin:/Users/cbarraford/.config/yarn/global/node_modules/.bin:/usr/local/opt/findutils/libexec/gnubin:/opt/homebrew/opt/make/libexec/gnubin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:opt/homebrew/opt/libpq/bin:/opt/homebrew/opt/findutils/libexec/gnubin:/Users/cbarraford/go/bin:/usr/local/bin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/bin:/Users/cbarraford/.rvm/gems/ruby-2.6.3/bin:/Users/cbarraford/.rvm/gems/ruby-2.6.3@global/bin:/Users/cbarraford/.rvm/rubies/ruby-2.6.3/bin:/usr/local/heroku/bin:/usr/local/bin:/usr/local/heroku/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/Applications/Little Snitch.app/Contents/Components:/Library/Apple/usr/bin:/Users/cbarraford/.rvm/bin:/Users/cbarraford/bin:/Users/cbarraford/Library/Python/2.7/bin:/sbin:/usr/sbin:/usr/local/lib/luarocks/bin:/usr/local/sbin:/Users/cbarraford/Library/Python/2.7/bin:/usr/local/go/bin:/Users/cbarraford/go/bin:/Users/cbarraford/.rvm/bin' GOPATH=/Users/cbarraford/.cache/trunk/linters/golangci-lint/1.46.2-2f2d4b0b33ca86f29e48a8a38cbfc7b7 HOME=/Users/cbarraford GO111MODULE=auto GOLANGCI_LINT_CACHE=/Users/cbarraford/.cache/trunk/repos/251c238aacc4673f32ffd026cdde49fd/results/golangci-lint-current GOROOT=/Users/cbarraford/.cache/trunk/linters/go/1.18.3-b94488c6023336a8b23f0e3c47562939 CGO_ENABLED=0 /Users/cbarraford/.cache/trunk/linters/golangci-lint/1.46.2-2f2d4b0b33ca86f29e48a8a38cbfc7b7/bin/golangci-lint run --out-format json --timeout 10m --concurrency 1 --exclude gofmt --allow-parallel-runners --issues-exit-code 0 x/mercury/keeper
+      exit_status: exited
+      exit_code: 3
+      stdout: (none)
+      stderr: |
+        level=warning msg="[runner] Can't run linter goanalysis_metalinter: buildir: failed to load package types: could not load export data: no export data for \"mercury/x/mercury/types\""
+        level=warning msg="[linters context] structcheck is disabled because of go1.18. You can track the evolution of the go1.18 support by following the https://github.com/golangci/golangci-lint/issues/2649."
+        level=error msg="Running error: 1 error occurred:\n\t* can't run linter goanalysis_metalinter: buildir: failed to load package types: could not load export data: no export data for \"mercury/x/mercury/types\"\n\n"
+
+    parser: |
+      (none)

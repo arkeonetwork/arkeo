@@ -1,7 +1,7 @@
 package app_test
 
 import (
-	"mercury/app"
+	"arkeo/app"
 	"os"
 	"testing"
 

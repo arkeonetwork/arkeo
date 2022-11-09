@@ -1,0 +1,18 @@
+title: gofmt exited with exit_code=2
+report:
+  - linter:
+      command: |
+        /Users/cbarraford/.cache/trunk/linters/go/1.16.7-e06e0a5a9e14d26af2576fe90c874816/bin/gofmt x/mercury/keeper/msg_server_claim_contract_income_test.go
+      stdin_path: |
+        /private/var/folders/pl/ws2v8gqj1lg9l4j_8g0757pr0000gn/T/trunk-501/VmrCbh/x/mercury/keeper/msg_server_claim_contract_income_test.go
+      run_from: /private/var/folders/pl/ws2v8gqj1lg9l4j_8g0757pr0000gn/T/trunk-501/VmrCbh
+      timeout: 10m
+      rerun: cat /private/var/folders/pl/ws2v8gqj1lg9l4j_8g0757pr0000gn/T/trunk-501/VmrCbh/x/mercury/keeper/msg_server_claim_contract_income_test.go | env -i -C /private/var/folders/pl/ws2v8gqj1lg9l4j_8g0757pr0000gn/T/trunk-501/VmrCbh PATH=/Users/cbarraford/.cache/trunk/linters/go/1.16.7-e06e0a5a9e14d26af2576fe90c874816/bin HOME=/Users/cbarraford /Users/cbarraford/.cache/trunk/linters/go/1.16.7-e06e0a5a9e14d26af2576fe90c874816/bin/gofmt x/mercury/keeper/msg_server_claim_contract_income_test.go
+      exit_status: exited
+      exit_code: 2
+      stdout: (none)
+      stderr: |
+        x/mercury/keeper/msg_server_claim_contract_income_test.go:1:2: expected 'package', found 'EOF'
+
+    parser: |
+      (none)

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"mercury/sentinel"
-	"mercury/sentinel/conf"
+	"arkeo/sentinel"
+	"arkeo/sentinel/conf"
 )
 
 func main() {

@@ -25,8 +25,8 @@ if ! command -v signhere &>/dev/null; then
 	exit 1
 fi
 
-BIN="mercuryd"
-BIN_TX="mercury"
+BIN="arkeod"
+BIN_TX="arkeo"
 USER="$1"
 PROVIDER="$2"
 CHAIN="$3"
@@ -38,7 +38,7 @@ PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print 
 CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p | jq -r .key)
 CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-HEIGHT=$(curl -s localhost:1317/mercury/contract/"$PUBKEY"/"$CHAIN"/"$CLIENT_PUBKEY" | jq -r .contract.height)
+HEIGHT=$(curl -s localhost:1317/arkeo/contract/"$PUBKEY"/"$CHAIN"/"$CLIENT_PUBKEY" | jq -r .contract.height)
 
 if [ -z "$HEIGHT" ]; then
 	echo "No open contract to claim"

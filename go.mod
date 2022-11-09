@@ -1,4 +1,4 @@
-module mercury
+module arkeo
 
 go 1.18
 

@@ -19,11 +19,11 @@ NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
 TAG?=testnet
-ldflags = -X gitlab.com/cbarraford/mercury/config.Version=$(VERSION) \
-          -X gitlab.com/cbarraford/mercury/config.GitCommit=$(COMMIT) \
-          -X gitlab.com/cbarraford/mercury/config.BuildTime=${NOW} \
-		  -X github.com/cosmos/cosmos-sdk/version.Name=Mercury \
-		  -X github.com/cosmos/cosmos-sdk/version.AppName=mercury \
+ldflags = -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.Version=$(VERSION) \
+          -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.GitCommit=$(COMMIT) \
+          -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.BuildTime=${NOW} \
+		  -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo \
+		  -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X github.com/cosmos/cosmos-sdk/version.BuildTags=$(TAG)
@@ -33,7 +33,7 @@ TEST_DIR?="./..."
 BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet
 GOBIN?=${GOPATH}/bin
-BINARIES=./cmd/mercuryd ./cmd/sentinel
+BINARIES=./cmd/arkeod ./cmd/sentinel
 
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH

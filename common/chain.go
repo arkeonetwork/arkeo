@@ -18,16 +18,16 @@ const (
 )
 
 var ChainLookup = map[string]int32{
-	"unknown":         0,
-	"mercury-mainnet": 1,
-	"btc-mainnet":     2,
-	"eth-mainnet":     3,
+	"unknown":       0,
+	"arkeo-mainnet": 1,
+	"btc-mainnet":   2,
+	"eth-mainnet":   3,
 }
 
 func (c Chain) String() string {
 	switch c {
 	case BaseChain:
-		return "mercury-mainnet"
+		return "arkeo-mainnet"
 	case BTCChain:
 		return "btc-mainnet"
 	case ETHChain:

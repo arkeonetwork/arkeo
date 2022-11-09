@@ -1,9 +1,9 @@
 package app
 
 import (
+	"arkeo/docs"
 	"fmt"
 	"io"
-	"mercury/docs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -107,15 +107,15 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 
-	mercurymodule "mercury/x/mercury"
-	mercurymodulekeeper "mercury/x/mercury/keeper"
-	mercurymoduletypes "mercury/x/mercury/types"
+	arkeomodule "arkeo/x/arkeo"
+	arkeomodulekeeper "arkeo/x/arkeo/keeper"
+	arkeomoduletypes "arkeo/x/arkeo/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
 const (
-	AccountAddressPrefix = "hg"
-	Name                 = "mercury"
+	AccountAddressPrefix = "rko"
+	Name                 = "arkeo"
 )
 
 // this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
@@ -165,24 +165,24 @@ var (
 		transfer.AppModuleBasic{},
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-		mercurymodule.AppModuleBasic{},
+		arkeomodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:      nil,
-		distrtypes.ModuleName:           nil,
-		icatypes.ModuleName:             nil,
-		minttypes.ModuleName:            {authtypes.Minter},
-		stakingtypes.BondedPoolName:     {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName:  {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:             {authtypes.Burner},
-		ibctransfertypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
-		mercurymoduletypes.ModuleName:   {},
-		mercurymoduletypes.ReserveName:  {},
-		mercurymoduletypes.ProviderName: {},
-		mercurymoduletypes.ContractName: {},
+		authtypes.FeeCollectorName:     nil,
+		distrtypes.ModuleName:          nil,
+		icatypes.ModuleName:            nil,
+		minttypes.ModuleName:           {authtypes.Minter},
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:            {authtypes.Burner},
+		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		arkeomoduletypes.ModuleName:    {},
+		arkeomoduletypes.ReserveName:   {},
+		arkeomoduletypes.ProviderName:  {},
+		arkeomoduletypes.ContractName:  {},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -244,7 +244,7 @@ type App struct {
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
-	MercuryKeeper mercurymodulekeeper.Keeper
+	ArkeoKeeper arkeomodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -282,7 +282,7 @@ func New(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey, govtypes.StoreKey,
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey, evidencetypes.StoreKey,
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
-		mercurymoduletypes.StoreKey,
+		arkeomoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -491,17 +491,17 @@ func New(
 		govConfig,
 	)
 
-	app.MercuryKeeper = *mercurymodulekeeper.NewKVStore(
+	app.ArkeoKeeper = *arkeomodulekeeper.NewKVStore(
 		appCodec,
-		keys[mercurymoduletypes.StoreKey],
-		keys[mercurymoduletypes.MemStoreKey],
-		app.GetSubspace(mercurymoduletypes.ModuleName),
+		keys[arkeomoduletypes.StoreKey],
+		keys[arkeomoduletypes.MemStoreKey],
+		app.GetSubspace(arkeomoduletypes.ModuleName),
 		app.BankKeeper,
 		app.AccountKeeper,
 		app.StakingKeeper,
 		semver.MustParse("0.0.0"),
 	)
-	mercuryModule := mercurymodule.NewAppModule(appCodec, app.MercuryKeeper, app.AccountKeeper, app.BankKeeper)
+	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
@@ -545,7 +545,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		icaModule,
-		mercuryModule,
+		arkeoModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -575,7 +575,7 @@ func New(
 		group.ModuleName,
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
-		mercurymoduletypes.ModuleName,
+		arkeomoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -600,7 +600,7 @@ func New(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
-		mercurymoduletypes.ModuleName,
+		arkeomoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -630,7 +630,7 @@ func New(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
-		mercurymoduletypes.ModuleName,
+		arkeomoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -660,7 +660,7 @@ func New(
 		evidence.NewAppModule(app.EvidenceKeeper),
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
-		mercuryModule,
+		arkeoModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -861,10 +861,10 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(mercurymoduletypes.ModuleName)
-	paramsKeeper.Subspace(mercurymoduletypes.ReserveName)
-	paramsKeeper.Subspace(mercurymoduletypes.ProviderName)
-	paramsKeeper.Subspace(mercurymoduletypes.ContractName)
+	paramsKeeper.Subspace(arkeomoduletypes.ModuleName)
+	paramsKeeper.Subspace(arkeomoduletypes.ReserveName)
+	paramsKeeper.Subspace(arkeomoduletypes.ProviderName)
+	paramsKeeper.Subspace(arkeomoduletypes.ContractName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
