@@ -2,9 +2,11 @@ package main
 
 import (
 	"mercury/sentinel"
+	"mercury/sentinel/conf"
 )
 
 func main() {
-	proxy := sentinel.NewProxy()
+	config := conf.NewConfiguration()
+	proxy := sentinel.NewProxy(config)
 	proxy.Run()
 }

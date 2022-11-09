@@ -20,10 +20,14 @@ jobs:
         with:
           go-version: 1.18.x
           # cache: true
-      - name: Compile Protobuf
-        uses: ignite-hq/cli/actions/cli@v0.24.0 # building protobuf files pb.go
+      - name: Version
+        uses: ignite-hq/cli/actions/cli@v0.25.1 # building protobuf files pb.go
         with:
-          args: chain build --yes --proto-all-modules
+          args: version
+      - name: Compile Protobuf
+        uses: ignite-hq/cli/actions/cli@v0.25.1 # building protobuf files pb.go
+        with:
+          args: chain build --yes
       - name: Lint code
         run: |
           make lint-ci

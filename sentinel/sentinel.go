@@ -22,8 +22,7 @@ type Proxy struct {
 	ClaimStore *ClaimStore
 }
 
-func NewProxy() Proxy {
-	config := conf.NewConfiguration()
+func NewProxy(config conf.Configuration) Proxy {
 	claimStore, err := NewClaimStore(config.ClaimStoreLocation)
 	if err != nil {
 		panic(err)
@@ -31,7 +30,7 @@ func NewProxy() Proxy {
 	return Proxy{
 		Metadata:   NewMetadata(config),
 		Config:     config,
-		MemStore:   NewStore(config.SourceChain),
+		MemStore:   NewMemStore(config.SourceChain),
 		ClaimStore: claimStore,
 	}
 }
@@ -54,11 +53,14 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 }
 
 func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
+
 	d, _ := json.Marshal(p.Metadata)
 	_, _ = w.Write(d)
 }
 
 func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
@@ -101,6 +103,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
@@ -149,11 +152,10 @@ func (p Proxy) Run() {
 	mux := http.NewServeMux()
 
 	// start server
-	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleMetadata))))
-	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleContract))))
-	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, enforceJSONHandler(http.HandlerFunc(p.handleClaim))))
-	mux.Handle("/", auth(
-		p.Config, p.MemStore, p.ClaimStore,
+	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
+	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
+	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
+	mux.Handle("/", p.auth(
 		handlers.LoggingHandler(
 			os.Stdout,
 			handlers.ProxyHeaders(

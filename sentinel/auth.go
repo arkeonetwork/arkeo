@@ -5,7 +5,6 @@ import (
 	"log"
 	"mercury/common"
 	"mercury/common/cosmos"
-	"mercury/sentinel/conf"
 	"mercury/x/mercury/types"
 	"net"
 	"net/http"
@@ -20,6 +19,7 @@ const (
 	QueryNonce   = "__nonce"
 	QuerySpender = "__spender"
 	QuerySig     = "__signature"
+	QueryChain   = "__chain"
 )
 
 // Create a map to hold the rate limiters for each visitor and a mutex.
@@ -28,7 +28,7 @@ var (
 	mu       sync.Mutex
 )
 
-func auth(config conf.Configuration, mem *MemStore, claimStore *ClaimStore, next http.Handler) http.Handler {
+func (p Proxy) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		args := r.URL.Query()
 
@@ -36,9 +36,10 @@ func auth(config conf.Configuration, mem *MemStore, claimStore *ClaimStore, next
 		height, heightOK := args[QueryHeight]
 		nonce, nonceOK := args[QueryNonce]
 		spender, spenderOK := args[QuerySpender]
+		chain, chainOK := args[QueryChain]
 		sig, sigOK := args[QuerySig]
 
-		if heightOK && nonceOK && spenderOK && sigOK {
+		if heightOK && nonceOK && spenderOK && chainOK && sigOK {
 			nonceInt, err := strconv.ParseInt(nonce[0], 10, 64)
 			if err != nil {
 				log.Print(err.Error())
@@ -52,11 +53,17 @@ func auth(config conf.Configuration, mem *MemStore, claimStore *ClaimStore, next
 				return
 			}
 
-			if ok := paidTier(heightInt, nonceInt, spender[0], sig[0], config, mem, claimStore, w, r); !ok {
+			httpCode, err := p.paidTier(heightInt, nonceInt, chain[0], spender[0], sig[0])
+			if err != nil {
+				log.Printf(err.Error())
+				http.Error(w, err.Error(), httpCode)
 				return
 			}
 		} else {
-			if ok := freeTier(config, mem, w, r); !ok {
+			httpCode, err := p.freeTier(r.RemoteAddr)
+			if err != nil {
+				log.Printf(err.Error())
+				http.Error(w, err.Error(), httpCode)
 				return
 			}
 		}
@@ -64,13 +71,11 @@ func auth(config conf.Configuration, mem *MemStore, claimStore *ClaimStore, next
 	})
 }
 
-func freeTier(config conf.Configuration, mem *MemStore, w http.ResponseWriter, r *http.Request) bool {
+func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	// Get the IP address for the current user.
-	key, _, err := net.SplitHostPort(r.RemoteAddr)
+	key, _, err := net.SplitHostPort(remoteAddr)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return false
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 
 	mu.Lock()
@@ -78,99 +83,77 @@ func freeTier(config conf.Configuration, mem *MemStore, w http.ResponseWriter, r
 
 	limiter, exists := visitors[key]
 	if !exists {
-		limiter = rate.NewLimiter(rate.Every(config.FreeTierRateLimitDuration), config.FreeTierRateLimit)
+		limiter = rate.NewLimiter(rate.Every(p.Config.FreeTierRateLimitDuration), p.Config.FreeTierRateLimit)
 		visitors[key] = limiter
 	}
 
 	if !limiter.Allow() {
-		log.Printf("Entity %s has been rate limited :(", key)
-		http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
-		return false
+		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
 	}
 
-	return true
+	return http.StatusOK, nil
 }
 
-func paidTier(height, nonce int64, spender, sig string, config conf.Configuration, mem *MemStore, claimStore *ClaimStore, w http.ResponseWriter, r *http.Request) bool {
-	log.Println("Checking Authorization...")
-
-	creator, err := config.ProviderPubKey.GetMyAddress()
+func (p Proxy) paidTier(height, nonce int64, chain, spender, sig string) (int, error) {
+	creator, err := p.Config.ProviderPubKey.GetMyAddress()
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return false
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 
 	spenderPK, err := common.NewPubKey(spender)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
-		return false
+		return http.StatusBadRequest, fmt.Errorf("Invalid spender pubkey")
 	}
 
-	// TODO: fetch chain from URL
-	chain := "btc-mainnet"
-
-	msg := types.NewMsgClaimContractIncome(creator.String(), config.ProviderPubKey, chain, spenderPK, nonce, height, sig)
+	msg := types.NewMsgClaimContractIncome(creator.String(), p.Config.ProviderPubKey, chain, spenderPK, nonce, height, sig)
 	if err := msg.ValidateBasic(); err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
-		return false
+		return http.StatusBadRequest, fmt.Errorf("bad claim: %s", err)
 	}
 
-	contractKey := mem.Key(config.ProviderPubKey.String(), chain, spender)
-	contract, err := mem.Get(contractKey)
+	contractKey := p.MemStore.Key(p.Config.ProviderPubKey.String(), chain, spender)
+	contract, err := p.MemStore.Get(contractKey)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return false
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 
-	if contract.IsClose(mem.GetHeight()) {
-		http.Error(w, "open a contract", http.StatusPaymentRequired)
-		return false
+	if contract.IsClose(p.MemStore.GetHeight()) {
+		return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 	}
 
-	key := fmt.Sprintf("%s-%s", chain, spender)
-	chainInt, err := common.NewChain("btc-mainnet")
+	chainInt, err := common.NewChain(chain)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return false
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 
-	claim := NewClaim(config.ProviderPubKey, chainInt, spenderPK, nonce, height, sig)
-	if claimStore.Has(key) {
+	key := fmt.Sprintf("%d-%s", chainInt, spender)
+
+	claim := NewClaim(p.Config.ProviderPubKey, chainInt, spenderPK, nonce, height, sig)
+	if p.ClaimStore.Has(key) {
 		var err error
-		claim, err = claimStore.Get(key)
+		claim, err = p.ClaimStore.Get(key)
 		if err != nil {
-			log.Print(err.Error())
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return false
+			return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 		}
 		if claim.Height == height && contract.Height == height && claim.Nonce >= nonce {
-			log.Print(err.Error())
-			http.Error(w, fmt.Sprintf("bad nonce (%d/%d)", nonce, claim.Nonce), http.StatusBadRequest)
-			return false
+			return http.StatusBadRequest, fmt.Errorf("bad nonce (%d/%d)", nonce, claim.Nonce)
 		}
 	}
 
 	// check if we've exceed the total number of pay-as-you-go queries
 	if contract.Type == types.ContractType_PayAsYouGo {
 		if contract.Deposit.LT(cosmos.NewInt(nonce * contract.Rate)) {
-			http.Error(w, "open a contract", http.StatusPaymentRequired)
-			return false
+			return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 		}
 	}
 
 	mu.Lock()
 	defer mu.Unlock()
 
-	limitTokens := config.SubTierRateLimit
-	limitDuration := config.SubTierRateLimitDuration
+	limitTokens := p.Config.SubTierRateLimit
+	limitDuration := p.Config.SubTierRateLimitDuration
 	if contract.Type == types.ContractType_PayAsYouGo {
-		limitTokens = config.AsGoTierRateLimit
-		limitDuration = config.AsGoTierRateLimitDuration
+		limitTokens = p.Config.AsGoTierRateLimit
+		limitDuration = p.Config.AsGoTierRateLimitDuration
 	}
 
 	limiter, exists := visitors[key]
@@ -180,23 +163,19 @@ func paidTier(height, nonce int64, spender, sig string, config conf.Configuratio
 	}
 
 	if !limiter.Allow() {
-		log.Printf("Entity %s has been rate limited :(", key)
-		http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
-		return false
+		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
 	}
 
 	claim.Nonce = nonce
 	claim.Height = height
 	claim.Signature = sig
 	claim.Claimed = false
-	if err := claimStore.Set(claim); err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return false
+	if err := p.ClaimStore.Set(claim); err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 	contract.Nonce = nonce
 	contract.Height = height
-	mem.Put(contractKey, contract)
+	p.MemStore.Put(contractKey, contract)
 
-	return true
+	return http.StatusOK, nil
 }

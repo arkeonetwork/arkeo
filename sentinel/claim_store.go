@@ -112,8 +112,8 @@ func (s *ClaimStore) Has(key string) (ok bool) {
 }
 
 // Remove remove the given item from key values store
-func (s *ClaimStore) Remove(item Claim) error {
-	return s.db.Delete([]byte(item.Key()), nil)
+func (s *ClaimStore) Remove(key string) error {
+	return s.db.Delete([]byte(key), nil)
 }
 
 // List send back tx out to retry depending on arg failed only
