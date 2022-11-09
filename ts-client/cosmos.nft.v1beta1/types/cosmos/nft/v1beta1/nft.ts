@@ -1,6 +1,6 @@
 /* eslint-disable */
+import _m0 from "protobufjs/minimal";
 import { Any } from "../../../google/protobuf/any";
-import { Writer, Reader } from "protobufjs/minimal";
 
 export const protobufPackage = "cosmos.nft.v1beta1";
 
@@ -36,17 +36,12 @@ export interface NFT {
   data: Any | undefined;
 }
 
-const baseClass: object = {
-  id: "",
-  name: "",
-  symbol: "",
-  description: "",
-  uri: "",
-  uriHash: "",
-};
+function createBaseClass(): Class {
+  return { id: "", name: "", symbol: "", description: "", uri: "", uriHash: "", data: undefined };
+}
 
 export const Class = {
-  encode(message: Class, writer: Writer = Writer.create()): Writer {
+  encode(message: Class, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
@@ -71,10 +66,10 @@ export const Class = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): Class {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): Class {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseClass } as Class;
+    const message = createBaseClass();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -108,43 +103,15 @@ export const Class = {
   },
 
   fromJSON(object: any): Class {
-    const message = { ...baseClass } as Class;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.name !== undefined && object.name !== null) {
-      message.name = String(object.name);
-    } else {
-      message.name = "";
-    }
-    if (object.symbol !== undefined && object.symbol !== null) {
-      message.symbol = String(object.symbol);
-    } else {
-      message.symbol = "";
-    }
-    if (object.description !== undefined && object.description !== null) {
-      message.description = String(object.description);
-    } else {
-      message.description = "";
-    }
-    if (object.uri !== undefined && object.uri !== null) {
-      message.uri = String(object.uri);
-    } else {
-      message.uri = "";
-    }
-    if (object.uriHash !== undefined && object.uriHash !== null) {
-      message.uriHash = String(object.uriHash);
-    } else {
-      message.uriHash = "";
-    }
-    if (object.data !== undefined && object.data !== null) {
-      message.data = Any.fromJSON(object.data);
-    } else {
-      message.data = undefined;
-    }
-    return message;
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      symbol: isSet(object.symbol) ? String(object.symbol) : "",
+      description: isSet(object.description) ? String(object.description) : "",
+      uri: isSet(object.uri) ? String(object.uri) : "",
+      uriHash: isSet(object.uriHash) ? String(object.uriHash) : "",
+      data: isSet(object.data) ? Any.fromJSON(object.data) : undefined,
+    };
   },
 
   toJSON(message: Class): unknown {
@@ -152,60 +119,32 @@ export const Class = {
     message.id !== undefined && (obj.id = message.id);
     message.name !== undefined && (obj.name = message.name);
     message.symbol !== undefined && (obj.symbol = message.symbol);
-    message.description !== undefined &&
-      (obj.description = message.description);
+    message.description !== undefined && (obj.description = message.description);
     message.uri !== undefined && (obj.uri = message.uri);
     message.uriHash !== undefined && (obj.uriHash = message.uriHash);
-    message.data !== undefined &&
-      (obj.data = message.data ? Any.toJSON(message.data) : undefined);
+    message.data !== undefined && (obj.data = message.data ? Any.toJSON(message.data) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Class>): Class {
-    const message = { ...baseClass } as Class;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.name !== undefined && object.name !== null) {
-      message.name = object.name;
-    } else {
-      message.name = "";
-    }
-    if (object.symbol !== undefined && object.symbol !== null) {
-      message.symbol = object.symbol;
-    } else {
-      message.symbol = "";
-    }
-    if (object.description !== undefined && object.description !== null) {
-      message.description = object.description;
-    } else {
-      message.description = "";
-    }
-    if (object.uri !== undefined && object.uri !== null) {
-      message.uri = object.uri;
-    } else {
-      message.uri = "";
-    }
-    if (object.uriHash !== undefined && object.uriHash !== null) {
-      message.uriHash = object.uriHash;
-    } else {
-      message.uriHash = "";
-    }
-    if (object.data !== undefined && object.data !== null) {
-      message.data = Any.fromPartial(object.data);
-    } else {
-      message.data = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<Class>, I>>(object: I): Class {
+    const message = createBaseClass();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    message.symbol = object.symbol ?? "";
+    message.description = object.description ?? "";
+    message.uri = object.uri ?? "";
+    message.uriHash = object.uriHash ?? "";
+    message.data = (object.data !== undefined && object.data !== null) ? Any.fromPartial(object.data) : undefined;
     return message;
   },
 };
 
-const baseNFT: object = { classId: "", id: "", uri: "", uriHash: "" };
+function createBaseNFT(): NFT {
+  return { classId: "", id: "", uri: "", uriHash: "", data: undefined };
+}
 
 export const NFT = {
-  encode(message: NFT, writer: Writer = Writer.create()): Writer {
+  encode(message: NFT, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.classId !== "") {
       writer.uint32(10).string(message.classId);
     }
@@ -224,10 +163,10 @@ export const NFT = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): NFT {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): NFT {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseNFT } as NFT;
+    const message = createBaseNFT();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -255,33 +194,13 @@ export const NFT = {
   },
 
   fromJSON(object: any): NFT {
-    const message = { ...baseNFT } as NFT;
-    if (object.classId !== undefined && object.classId !== null) {
-      message.classId = String(object.classId);
-    } else {
-      message.classId = "";
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.uri !== undefined && object.uri !== null) {
-      message.uri = String(object.uri);
-    } else {
-      message.uri = "";
-    }
-    if (object.uriHash !== undefined && object.uriHash !== null) {
-      message.uriHash = String(object.uriHash);
-    } else {
-      message.uriHash = "";
-    }
-    if (object.data !== undefined && object.data !== null) {
-      message.data = Any.fromJSON(object.data);
-    } else {
-      message.data = undefined;
-    }
-    return message;
+    return {
+      classId: isSet(object.classId) ? String(object.classId) : "",
+      id: isSet(object.id) ? String(object.id) : "",
+      uri: isSet(object.uri) ? String(object.uri) : "",
+      uriHash: isSet(object.uriHash) ? String(object.uriHash) : "",
+      data: isSet(object.data) ? Any.fromJSON(object.data) : undefined,
+    };
   },
 
   toJSON(message: NFT): unknown {
@@ -290,49 +209,32 @@ export const NFT = {
     message.id !== undefined && (obj.id = message.id);
     message.uri !== undefined && (obj.uri = message.uri);
     message.uriHash !== undefined && (obj.uriHash = message.uriHash);
-    message.data !== undefined &&
-      (obj.data = message.data ? Any.toJSON(message.data) : undefined);
+    message.data !== undefined && (obj.data = message.data ? Any.toJSON(message.data) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<NFT>): NFT {
-    const message = { ...baseNFT } as NFT;
-    if (object.classId !== undefined && object.classId !== null) {
-      message.classId = object.classId;
-    } else {
-      message.classId = "";
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.uri !== undefined && object.uri !== null) {
-      message.uri = object.uri;
-    } else {
-      message.uri = "";
-    }
-    if (object.uriHash !== undefined && object.uriHash !== null) {
-      message.uriHash = object.uriHash;
-    } else {
-      message.uriHash = "";
-    }
-    if (object.data !== undefined && object.data !== null) {
-      message.data = Any.fromPartial(object.data);
-    } else {
-      message.data = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<NFT>, I>>(object: I): NFT {
+    const message = createBaseNFT();
+    message.classId = object.classId ?? "";
+    message.id = object.id ?? "";
+    message.uri = object.uri ?? "";
+    message.uriHash = object.uriHash ?? "";
+    message.data = (object.data !== undefined && object.data !== null) ? Any.fromPartial(object.data) : undefined;
     return message;
   },
 };
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

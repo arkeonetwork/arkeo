@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { Reader, Writer } from "protobufjs/minimal";
-import { Plan } from "../../../cosmos/upgrade/v1beta1/upgrade";
+import _m0 from "protobufjs/minimal";
+import { Plan } from "./upgrade";
 
 export const protobufPackage = "cosmos.upgrade.v1beta1";
 
@@ -23,7 +23,8 @@ export interface MsgSoftwareUpgrade {
  *
  * Since: cosmos-sdk 0.46
  */
-export interface MsgSoftwareUpgradeResponse {}
+export interface MsgSoftwareUpgradeResponse {
+}
 
 /**
  * MsgCancelUpgrade is the Msg/CancelUpgrade request type.
@@ -40,15 +41,15 @@ export interface MsgCancelUpgrade {
  *
  * Since: cosmos-sdk 0.46
  */
-export interface MsgCancelUpgradeResponse {}
+export interface MsgCancelUpgradeResponse {
+}
 
-const baseMsgSoftwareUpgrade: object = { authority: "" };
+function createBaseMsgSoftwareUpgrade(): MsgSoftwareUpgrade {
+  return { authority: "", plan: undefined };
+}
 
 export const MsgSoftwareUpgrade = {
-  encode(
-    message: MsgSoftwareUpgrade,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: MsgSoftwareUpgrade, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.authority !== "") {
       writer.uint32(10).string(message.authority);
     }
@@ -58,10 +59,10 @@ export const MsgSoftwareUpgrade = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgSoftwareUpgrade {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSoftwareUpgrade {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgSoftwareUpgrade } as MsgSoftwareUpgrade;
+    const message = createBaseMsgSoftwareUpgrade();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -80,63 +81,40 @@ export const MsgSoftwareUpgrade = {
   },
 
   fromJSON(object: any): MsgSoftwareUpgrade {
-    const message = { ...baseMsgSoftwareUpgrade } as MsgSoftwareUpgrade;
-    if (object.authority !== undefined && object.authority !== null) {
-      message.authority = String(object.authority);
-    } else {
-      message.authority = "";
-    }
-    if (object.plan !== undefined && object.plan !== null) {
-      message.plan = Plan.fromJSON(object.plan);
-    } else {
-      message.plan = undefined;
-    }
-    return message;
+    return {
+      authority: isSet(object.authority) ? String(object.authority) : "",
+      plan: isSet(object.plan) ? Plan.fromJSON(object.plan) : undefined,
+    };
   },
 
   toJSON(message: MsgSoftwareUpgrade): unknown {
     const obj: any = {};
     message.authority !== undefined && (obj.authority = message.authority);
-    message.plan !== undefined &&
-      (obj.plan = message.plan ? Plan.toJSON(message.plan) : undefined);
+    message.plan !== undefined && (obj.plan = message.plan ? Plan.toJSON(message.plan) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgSoftwareUpgrade>): MsgSoftwareUpgrade {
-    const message = { ...baseMsgSoftwareUpgrade } as MsgSoftwareUpgrade;
-    if (object.authority !== undefined && object.authority !== null) {
-      message.authority = object.authority;
-    } else {
-      message.authority = "";
-    }
-    if (object.plan !== undefined && object.plan !== null) {
-      message.plan = Plan.fromPartial(object.plan);
-    } else {
-      message.plan = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<MsgSoftwareUpgrade>, I>>(object: I): MsgSoftwareUpgrade {
+    const message = createBaseMsgSoftwareUpgrade();
+    message.authority = object.authority ?? "";
+    message.plan = (object.plan !== undefined && object.plan !== null) ? Plan.fromPartial(object.plan) : undefined;
     return message;
   },
 };
 
-const baseMsgSoftwareUpgradeResponse: object = {};
+function createBaseMsgSoftwareUpgradeResponse(): MsgSoftwareUpgradeResponse {
+  return {};
+}
 
 export const MsgSoftwareUpgradeResponse = {
-  encode(
-    _: MsgSoftwareUpgradeResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(_: MsgSoftwareUpgradeResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): MsgSoftwareUpgradeResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSoftwareUpgradeResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgSoftwareUpgradeResponse,
-    } as MsgSoftwareUpgradeResponse;
+    const message = createBaseMsgSoftwareUpgradeResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -149,10 +127,7 @@ export const MsgSoftwareUpgradeResponse = {
   },
 
   fromJSON(_: any): MsgSoftwareUpgradeResponse {
-    const message = {
-      ...baseMsgSoftwareUpgradeResponse,
-    } as MsgSoftwareUpgradeResponse;
-    return message;
+    return {};
   },
 
   toJSON(_: MsgSoftwareUpgradeResponse): unknown {
@@ -160,30 +135,28 @@ export const MsgSoftwareUpgradeResponse = {
     return obj;
   },
 
-  fromPartial(
-    _: DeepPartial<MsgSoftwareUpgradeResponse>
-  ): MsgSoftwareUpgradeResponse {
-    const message = {
-      ...baseMsgSoftwareUpgradeResponse,
-    } as MsgSoftwareUpgradeResponse;
+  fromPartial<I extends Exact<DeepPartial<MsgSoftwareUpgradeResponse>, I>>(_: I): MsgSoftwareUpgradeResponse {
+    const message = createBaseMsgSoftwareUpgradeResponse();
     return message;
   },
 };
 
-const baseMsgCancelUpgrade: object = { authority: "" };
+function createBaseMsgCancelUpgrade(): MsgCancelUpgrade {
+  return { authority: "" };
+}
 
 export const MsgCancelUpgrade = {
-  encode(message: MsgCancelUpgrade, writer: Writer = Writer.create()): Writer {
+  encode(message: MsgCancelUpgrade, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.authority !== "") {
       writer.uint32(10).string(message.authority);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgCancelUpgrade {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelUpgrade {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgCancelUpgrade } as MsgCancelUpgrade;
+    const message = createBaseMsgCancelUpgrade();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -199,13 +172,7 @@ export const MsgCancelUpgrade = {
   },
 
   fromJSON(object: any): MsgCancelUpgrade {
-    const message = { ...baseMsgCancelUpgrade } as MsgCancelUpgrade;
-    if (object.authority !== undefined && object.authority !== null) {
-      message.authority = String(object.authority);
-    } else {
-      message.authority = "";
-    }
-    return message;
+    return { authority: isSet(object.authority) ? String(object.authority) : "" };
   },
 
   toJSON(message: MsgCancelUpgrade): unknown {
@@ -214,36 +181,26 @@ export const MsgCancelUpgrade = {
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgCancelUpgrade>): MsgCancelUpgrade {
-    const message = { ...baseMsgCancelUpgrade } as MsgCancelUpgrade;
-    if (object.authority !== undefined && object.authority !== null) {
-      message.authority = object.authority;
-    } else {
-      message.authority = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<MsgCancelUpgrade>, I>>(object: I): MsgCancelUpgrade {
+    const message = createBaseMsgCancelUpgrade();
+    message.authority = object.authority ?? "";
     return message;
   },
 };
 
-const baseMsgCancelUpgradeResponse: object = {};
+function createBaseMsgCancelUpgradeResponse(): MsgCancelUpgradeResponse {
+  return {};
+}
 
 export const MsgCancelUpgradeResponse = {
-  encode(
-    _: MsgCancelUpgradeResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(_: MsgCancelUpgradeResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): MsgCancelUpgradeResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelUpgradeResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgCancelUpgradeResponse,
-    } as MsgCancelUpgradeResponse;
+    const message = createBaseMsgCancelUpgradeResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -256,10 +213,7 @@ export const MsgCancelUpgradeResponse = {
   },
 
   fromJSON(_: any): MsgCancelUpgradeResponse {
-    const message = {
-      ...baseMsgCancelUpgradeResponse,
-    } as MsgCancelUpgradeResponse;
-    return message;
+    return {};
   },
 
   toJSON(_: MsgCancelUpgradeResponse): unknown {
@@ -267,12 +221,8 @@ export const MsgCancelUpgradeResponse = {
     return obj;
   },
 
-  fromPartial(
-    _: DeepPartial<MsgCancelUpgradeResponse>
-  ): MsgCancelUpgradeResponse {
-    const message = {
-      ...baseMsgCancelUpgradeResponse,
-    } as MsgCancelUpgradeResponse;
+  fromPartial<I extends Exact<DeepPartial<MsgCancelUpgradeResponse>, I>>(_: I): MsgCancelUpgradeResponse {
+    const message = createBaseMsgCancelUpgradeResponse();
     return message;
   },
 };
@@ -284,9 +234,7 @@ export interface Msg {
    *
    * Since: cosmos-sdk 0.46
    */
-  SoftwareUpgrade(
-    request: MsgSoftwareUpgrade
-  ): Promise<MsgSoftwareUpgradeResponse>;
+  SoftwareUpgrade(request: MsgSoftwareUpgrade): Promise<MsgSoftwareUpgradeResponse>;
   /**
    * CancelUpgrade is a governance operation for cancelling a previously
    * approvid software upgrade.
@@ -300,49 +248,37 @@ export class MsgClientImpl implements Msg {
   private readonly rpc: Rpc;
   constructor(rpc: Rpc) {
     this.rpc = rpc;
+    this.SoftwareUpgrade = this.SoftwareUpgrade.bind(this);
+    this.CancelUpgrade = this.CancelUpgrade.bind(this);
   }
-  SoftwareUpgrade(
-    request: MsgSoftwareUpgrade
-  ): Promise<MsgSoftwareUpgradeResponse> {
+  SoftwareUpgrade(request: MsgSoftwareUpgrade): Promise<MsgSoftwareUpgradeResponse> {
     const data = MsgSoftwareUpgrade.encode(request).finish();
-    const promise = this.rpc.request(
-      "cosmos.upgrade.v1beta1.Msg",
-      "SoftwareUpgrade",
-      data
-    );
-    return promise.then((data) =>
-      MsgSoftwareUpgradeResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("cosmos.upgrade.v1beta1.Msg", "SoftwareUpgrade", data);
+    return promise.then((data) => MsgSoftwareUpgradeResponse.decode(new _m0.Reader(data)));
   }
 
   CancelUpgrade(request: MsgCancelUpgrade): Promise<MsgCancelUpgradeResponse> {
     const data = MsgCancelUpgrade.encode(request).finish();
-    const promise = this.rpc.request(
-      "cosmos.upgrade.v1beta1.Msg",
-      "CancelUpgrade",
-      data
-    );
-    return promise.then((data) =>
-      MsgCancelUpgradeResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("cosmos.upgrade.v1beta1.Msg", "CancelUpgrade", data);
+    return promise.then((data) => MsgCancelUpgradeResponse.decode(new _m0.Reader(data)));
   }
 }
 
 interface Rpc {
-  request(
-    service: string,
-    method: string,
-    data: Uint8Array
-  ): Promise<Uint8Array>;
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
 }
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

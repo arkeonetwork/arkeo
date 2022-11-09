@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Reader, Writer } from "protobufjs/minimal";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "cosmos.nft.v1beta1";
 
@@ -16,12 +16,15 @@ export interface MsgSend {
 }
 
 /** MsgSendResponse defines the Msg/Send response type. */
-export interface MsgSendResponse {}
+export interface MsgSendResponse {
+}
 
-const baseMsgSend: object = { classId: "", id: "", sender: "", receiver: "" };
+function createBaseMsgSend(): MsgSend {
+  return { classId: "", id: "", sender: "", receiver: "" };
+}
 
 export const MsgSend = {
-  encode(message: MsgSend, writer: Writer = Writer.create()): Writer {
+  encode(message: MsgSend, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.classId !== "") {
       writer.uint32(10).string(message.classId);
     }
@@ -37,10 +40,10 @@ export const MsgSend = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgSend {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSend {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgSend } as MsgSend;
+    const message = createBaseMsgSend();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -65,28 +68,12 @@ export const MsgSend = {
   },
 
   fromJSON(object: any): MsgSend {
-    const message = { ...baseMsgSend } as MsgSend;
-    if (object.classId !== undefined && object.classId !== null) {
-      message.classId = String(object.classId);
-    } else {
-      message.classId = "";
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.sender !== undefined && object.sender !== null) {
-      message.sender = String(object.sender);
-    } else {
-      message.sender = "";
-    }
-    if (object.receiver !== undefined && object.receiver !== null) {
-      message.receiver = String(object.receiver);
-    } else {
-      message.receiver = "";
-    }
-    return message;
+    return {
+      classId: isSet(object.classId) ? String(object.classId) : "",
+      id: isSet(object.id) ? String(object.id) : "",
+      sender: isSet(object.sender) ? String(object.sender) : "",
+      receiver: isSet(object.receiver) ? String(object.receiver) : "",
+    };
   },
 
   toJSON(message: MsgSend): unknown {
@@ -98,43 +85,29 @@ export const MsgSend = {
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgSend>): MsgSend {
-    const message = { ...baseMsgSend } as MsgSend;
-    if (object.classId !== undefined && object.classId !== null) {
-      message.classId = object.classId;
-    } else {
-      message.classId = "";
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.sender !== undefined && object.sender !== null) {
-      message.sender = object.sender;
-    } else {
-      message.sender = "";
-    }
-    if (object.receiver !== undefined && object.receiver !== null) {
-      message.receiver = object.receiver;
-    } else {
-      message.receiver = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<MsgSend>, I>>(object: I): MsgSend {
+    const message = createBaseMsgSend();
+    message.classId = object.classId ?? "";
+    message.id = object.id ?? "";
+    message.sender = object.sender ?? "";
+    message.receiver = object.receiver ?? "";
     return message;
   },
 };
 
-const baseMsgSendResponse: object = {};
+function createBaseMsgSendResponse(): MsgSendResponse {
+  return {};
+}
 
 export const MsgSendResponse = {
-  encode(_: MsgSendResponse, writer: Writer = Writer.create()): Writer {
+  encode(_: MsgSendResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgSendResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgSendResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgSendResponse } as MsgSendResponse;
+    const message = createBaseMsgSendResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -147,8 +120,7 @@ export const MsgSendResponse = {
   },
 
   fromJSON(_: any): MsgSendResponse {
-    const message = { ...baseMsgSendResponse } as MsgSendResponse;
-    return message;
+    return {};
   },
 
   toJSON(_: MsgSendResponse): unknown {
@@ -156,8 +128,8 @@ export const MsgSendResponse = {
     return obj;
   },
 
-  fromPartial(_: DeepPartial<MsgSendResponse>): MsgSendResponse {
-    const message = { ...baseMsgSendResponse } as MsgSendResponse;
+  fromPartial<I extends Exact<DeepPartial<MsgSendResponse>, I>>(_: I): MsgSendResponse {
+    const message = createBaseMsgSendResponse();
     return message;
   },
 };
@@ -172,29 +144,30 @@ export class MsgClientImpl implements Msg {
   private readonly rpc: Rpc;
   constructor(rpc: Rpc) {
     this.rpc = rpc;
+    this.Send = this.Send.bind(this);
   }
   Send(request: MsgSend): Promise<MsgSendResponse> {
     const data = MsgSend.encode(request).finish();
     const promise = this.rpc.request("cosmos.nft.v1beta1.Msg", "Send", data);
-    return promise.then((data) => MsgSendResponse.decode(new Reader(data)));
+    return promise.then((data) => MsgSendResponse.decode(new _m0.Reader(data)));
   }
 }
 
 interface Rpc {
-  request(
-    service: string,
-    method: string,
-    data: Uint8Array
-  ): Promise<Uint8Array>;
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
 }
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

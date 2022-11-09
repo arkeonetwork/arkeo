@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Writer, Reader } from "protobufjs/minimal";
+import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "ibc.applications.transfer.v1";
 
@@ -36,10 +36,12 @@ export interface Params {
   receiveEnabled: boolean;
 }
 
-const baseDenomTrace: object = { path: "", baseDenom: "" };
+function createBaseDenomTrace(): DenomTrace {
+  return { path: "", baseDenom: "" };
+}
 
 export const DenomTrace = {
-  encode(message: DenomTrace, writer: Writer = Writer.create()): Writer {
+  encode(message: DenomTrace, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.path !== "") {
       writer.uint32(10).string(message.path);
     }
@@ -49,10 +51,10 @@ export const DenomTrace = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): DenomTrace {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): DenomTrace {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseDenomTrace } as DenomTrace;
+    const message = createBaseDenomTrace();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -71,18 +73,10 @@ export const DenomTrace = {
   },
 
   fromJSON(object: any): DenomTrace {
-    const message = { ...baseDenomTrace } as DenomTrace;
-    if (object.path !== undefined && object.path !== null) {
-      message.path = String(object.path);
-    } else {
-      message.path = "";
-    }
-    if (object.baseDenom !== undefined && object.baseDenom !== null) {
-      message.baseDenom = String(object.baseDenom);
-    } else {
-      message.baseDenom = "";
-    }
-    return message;
+    return {
+      path: isSet(object.path) ? String(object.path) : "",
+      baseDenom: isSet(object.baseDenom) ? String(object.baseDenom) : "",
+    };
   },
 
   toJSON(message: DenomTrace): unknown {
@@ -92,26 +86,20 @@ export const DenomTrace = {
     return obj;
   },
 
-  fromPartial(object: DeepPartial<DenomTrace>): DenomTrace {
-    const message = { ...baseDenomTrace } as DenomTrace;
-    if (object.path !== undefined && object.path !== null) {
-      message.path = object.path;
-    } else {
-      message.path = "";
-    }
-    if (object.baseDenom !== undefined && object.baseDenom !== null) {
-      message.baseDenom = object.baseDenom;
-    } else {
-      message.baseDenom = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<DenomTrace>, I>>(object: I): DenomTrace {
+    const message = createBaseDenomTrace();
+    message.path = object.path ?? "";
+    message.baseDenom = object.baseDenom ?? "";
     return message;
   },
 };
 
-const baseParams: object = { sendEnabled: false, receiveEnabled: false };
+function createBaseParams(): Params {
+  return { sendEnabled: false, receiveEnabled: false };
+}
 
 export const Params = {
-  encode(message: Params, writer: Writer = Writer.create()): Writer {
+  encode(message: Params, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.sendEnabled === true) {
       writer.uint32(8).bool(message.sendEnabled);
     }
@@ -121,10 +109,10 @@ export const Params = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): Params {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): Params {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseParams } as Params;
+    const message = createBaseParams();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -143,52 +131,38 @@ export const Params = {
   },
 
   fromJSON(object: any): Params {
-    const message = { ...baseParams } as Params;
-    if (object.sendEnabled !== undefined && object.sendEnabled !== null) {
-      message.sendEnabled = Boolean(object.sendEnabled);
-    } else {
-      message.sendEnabled = false;
-    }
-    if (object.receiveEnabled !== undefined && object.receiveEnabled !== null) {
-      message.receiveEnabled = Boolean(object.receiveEnabled);
-    } else {
-      message.receiveEnabled = false;
-    }
-    return message;
+    return {
+      sendEnabled: isSet(object.sendEnabled) ? Boolean(object.sendEnabled) : false,
+      receiveEnabled: isSet(object.receiveEnabled) ? Boolean(object.receiveEnabled) : false,
+    };
   },
 
   toJSON(message: Params): unknown {
     const obj: any = {};
-    message.sendEnabled !== undefined &&
-      (obj.sendEnabled = message.sendEnabled);
-    message.receiveEnabled !== undefined &&
-      (obj.receiveEnabled = message.receiveEnabled);
+    message.sendEnabled !== undefined && (obj.sendEnabled = message.sendEnabled);
+    message.receiveEnabled !== undefined && (obj.receiveEnabled = message.receiveEnabled);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Params>): Params {
-    const message = { ...baseParams } as Params;
-    if (object.sendEnabled !== undefined && object.sendEnabled !== null) {
-      message.sendEnabled = object.sendEnabled;
-    } else {
-      message.sendEnabled = false;
-    }
-    if (object.receiveEnabled !== undefined && object.receiveEnabled !== null) {
-      message.receiveEnabled = object.receiveEnabled;
-    } else {
-      message.receiveEnabled = false;
-    }
+  fromPartial<I extends Exact<DeepPartial<Params>, I>>(object: I): Params {
+    const message = createBaseParams();
+    message.sendEnabled = object.sendEnabled ?? false;
+    message.receiveEnabled = object.receiveEnabled ?? false;
     return message;
   },
 };
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
