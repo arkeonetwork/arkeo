@@ -1,7 +1,7 @@
 /* eslint-disable */
-import { Params } from "../mercury/params";
-import { Provider, Contract } from "../mercury/keeper";
-import { Writer, Reader } from "protobufjs/minimal";
+import _m0 from "protobufjs/minimal";
+import { Contract, Provider } from "./keeper";
+import { Params } from "./params";
 
 export const protobufPackage = "mercury.mercury";
 
@@ -13,10 +13,12 @@ export interface GenesisState {
   contracts: Contract[];
 }
 
-const baseGenesisState: object = {};
+function createBaseGenesisState(): GenesisState {
+  return { params: undefined, providers: [], contracts: [] };
+}
 
 export const GenesisState = {
-  encode(message: GenesisState, writer: Writer = Writer.create()): Writer {
+  encode(message: GenesisState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.params !== undefined) {
       Params.encode(message.params, writer.uint32(10).fork()).ldelim();
     }
@@ -29,12 +31,10 @@ export const GenesisState = {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): GenesisState {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): GenesisState {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseGenesisState } as GenesisState;
-    message.providers = [];
-    message.contracts = [];
+    const message = createBaseGenesisState();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -56,78 +56,51 @@ export const GenesisState = {
   },
 
   fromJSON(object: any): GenesisState {
-    const message = { ...baseGenesisState } as GenesisState;
-    message.providers = [];
-    message.contracts = [];
-    if (object.params !== undefined && object.params !== null) {
-      message.params = Params.fromJSON(object.params);
-    } else {
-      message.params = undefined;
-    }
-    if (object.providers !== undefined && object.providers !== null) {
-      for (const e of object.providers) {
-        message.providers.push(Provider.fromJSON(e));
-      }
-    }
-    if (object.contracts !== undefined && object.contracts !== null) {
-      for (const e of object.contracts) {
-        message.contracts.push(Contract.fromJSON(e));
-      }
-    }
-    return message;
+    return {
+      params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
+      providers: Array.isArray(object?.providers) ? object.providers.map((e: any) => Provider.fromJSON(e)) : [],
+      contracts: Array.isArray(object?.contracts) ? object.contracts.map((e: any) => Contract.fromJSON(e)) : [],
+    };
   },
 
   toJSON(message: GenesisState): unknown {
     const obj: any = {};
-    message.params !== undefined &&
-      (obj.params = message.params ? Params.toJSON(message.params) : undefined);
+    message.params !== undefined && (obj.params = message.params ? Params.toJSON(message.params) : undefined);
     if (message.providers) {
-      obj.providers = message.providers.map((e) =>
-        e ? Provider.toJSON(e) : undefined
-      );
+      obj.providers = message.providers.map((e) => e ? Provider.toJSON(e) : undefined);
     } else {
       obj.providers = [];
     }
     if (message.contracts) {
-      obj.contracts = message.contracts.map((e) =>
-        e ? Contract.toJSON(e) : undefined
-      );
+      obj.contracts = message.contracts.map((e) => e ? Contract.toJSON(e) : undefined);
     } else {
       obj.contracts = [];
     }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<GenesisState>): GenesisState {
-    const message = { ...baseGenesisState } as GenesisState;
-    message.providers = [];
-    message.contracts = [];
-    if (object.params !== undefined && object.params !== null) {
-      message.params = Params.fromPartial(object.params);
-    } else {
-      message.params = undefined;
-    }
-    if (object.providers !== undefined && object.providers !== null) {
-      for (const e of object.providers) {
-        message.providers.push(Provider.fromPartial(e));
-      }
-    }
-    if (object.contracts !== undefined && object.contracts !== null) {
-      for (const e of object.contracts) {
-        message.contracts.push(Contract.fromPartial(e));
-      }
-    }
+  fromPartial<I extends Exact<DeepPartial<GenesisState>, I>>(object: I): GenesisState {
+    const message = createBaseGenesisState();
+    message.params = (object.params !== undefined && object.params !== null)
+      ? Params.fromPartial(object.params)
+      : undefined;
+    message.providers = object.providers?.map((e) => Provider.fromPartial(e)) || [];
+    message.contracts = object.contracts?.map((e) => Contract.fromPartial(e)) || [];
     return message;
   },
 };
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

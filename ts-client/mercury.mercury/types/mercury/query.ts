@@ -1,16 +1,14 @@
 /* eslint-disable */
-import { Reader, Writer } from "protobufjs/minimal";
-import { Params } from "../mercury/params";
-import { Provider, Contract } from "../mercury/keeper";
-import {
-  PageRequest,
-  PageResponse,
-} from "../cosmos/base/query/v1beta1/pagination";
+import _m0 from "protobufjs/minimal";
+import { PageRequest, PageResponse } from "../cosmos/base/query/v1beta1/pagination";
+import { Contract, Provider } from "./keeper";
+import { Params } from "./params";
 
 export const protobufPackage = "mercury.mercury";
 
 /** QueryParamsRequest is request type for the Query/Params RPC method. */
-export interface QueryParamsRequest {}
+export interface QueryParamsRequest {
+}
 
 /** QueryParamsResponse is response type for the Query/Params RPC method. */
 export interface QueryParamsResponse {
@@ -55,17 +53,19 @@ export interface QueryAllContractResponse {
   pagination: PageResponse | undefined;
 }
 
-const baseQueryParamsRequest: object = {};
+function createBaseQueryParamsRequest(): QueryParamsRequest {
+  return {};
+}
 
 export const QueryParamsRequest = {
-  encode(_: QueryParamsRequest, writer: Writer = Writer.create()): Writer {
+  encode(_: QueryParamsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): QueryParamsRequest {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseQueryParamsRequest } as QueryParamsRequest;
+    const message = createBaseQueryParamsRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -78,8 +78,7 @@ export const QueryParamsRequest = {
   },
 
   fromJSON(_: any): QueryParamsRequest {
-    const message = { ...baseQueryParamsRequest } as QueryParamsRequest;
-    return message;
+    return {};
   },
 
   toJSON(_: QueryParamsRequest): unknown {
@@ -87,29 +86,28 @@ export const QueryParamsRequest = {
     return obj;
   },
 
-  fromPartial(_: DeepPartial<QueryParamsRequest>): QueryParamsRequest {
-    const message = { ...baseQueryParamsRequest } as QueryParamsRequest;
+  fromPartial<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(_: I): QueryParamsRequest {
+    const message = createBaseQueryParamsRequest();
     return message;
   },
 };
 
-const baseQueryParamsResponse: object = {};
+function createBaseQueryParamsResponse(): QueryParamsResponse {
+  return { params: undefined };
+}
 
 export const QueryParamsResponse = {
-  encode(
-    message: QueryParamsResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryParamsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.params !== undefined) {
       Params.encode(message.params, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): QueryParamsResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseQueryParamsResponse } as QueryParamsResponse;
+    const message = createBaseQueryParamsResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -125,40 +123,30 @@ export const QueryParamsResponse = {
   },
 
   fromJSON(object: any): QueryParamsResponse {
-    const message = { ...baseQueryParamsResponse } as QueryParamsResponse;
-    if (object.params !== undefined && object.params !== null) {
-      message.params = Params.fromJSON(object.params);
-    } else {
-      message.params = undefined;
-    }
-    return message;
+    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
   },
 
   toJSON(message: QueryParamsResponse): unknown {
     const obj: any = {};
-    message.params !== undefined &&
-      (obj.params = message.params ? Params.toJSON(message.params) : undefined);
+    message.params !== undefined && (obj.params = message.params ? Params.toJSON(message.params) : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<QueryParamsResponse>): QueryParamsResponse {
-    const message = { ...baseQueryParamsResponse } as QueryParamsResponse;
-    if (object.params !== undefined && object.params !== null) {
-      message.params = Params.fromPartial(object.params);
-    } else {
-      message.params = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
+    const message = createBaseQueryParamsResponse();
+    message.params = (object.params !== undefined && object.params !== null)
+      ? Params.fromPartial(object.params)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryFetchProviderRequest: object = { pubkey: "", chain: "" };
+function createBaseQueryFetchProviderRequest(): QueryFetchProviderRequest {
+  return { pubkey: "", chain: "" };
+}
 
 export const QueryFetchProviderRequest = {
-  encode(
-    message: QueryFetchProviderRequest,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryFetchProviderRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.pubkey !== "") {
       writer.uint32(10).string(message.pubkey);
     }
@@ -168,15 +156,10 @@ export const QueryFetchProviderRequest = {
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryFetchProviderRequest {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryFetchProviderRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryFetchProviderRequest,
-    } as QueryFetchProviderRequest;
+    const message = createBaseQueryFetchProviderRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -195,20 +178,10 @@ export const QueryFetchProviderRequest = {
   },
 
   fromJSON(object: any): QueryFetchProviderRequest {
-    const message = {
-      ...baseQueryFetchProviderRequest,
-    } as QueryFetchProviderRequest;
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = String(object.pubkey);
-    } else {
-      message.pubkey = "";
-    }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
-    } else {
-      message.chain = "";
-    }
-    return message;
+    return {
+      pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
+      chain: isSet(object.chain) ? String(object.chain) : "",
+    };
   },
 
   toJSON(message: QueryFetchProviderRequest): unknown {
@@ -218,48 +191,30 @@ export const QueryFetchProviderRequest = {
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryFetchProviderRequest>
-  ): QueryFetchProviderRequest {
-    const message = {
-      ...baseQueryFetchProviderRequest,
-    } as QueryFetchProviderRequest;
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = object.pubkey;
-    } else {
-      message.pubkey = "";
-    }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = object.chain;
-    } else {
-      message.chain = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryFetchProviderRequest>, I>>(object: I): QueryFetchProviderRequest {
+    const message = createBaseQueryFetchProviderRequest();
+    message.pubkey = object.pubkey ?? "";
+    message.chain = object.chain ?? "";
     return message;
   },
 };
 
-const baseQueryFetchProviderResponse: object = {};
+function createBaseQueryFetchProviderResponse(): QueryFetchProviderResponse {
+  return { provider: undefined };
+}
 
 export const QueryFetchProviderResponse = {
-  encode(
-    message: QueryFetchProviderResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryFetchProviderResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.provider !== undefined) {
       Provider.encode(message.provider, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryFetchProviderResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryFetchProviderResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryFetchProviderResponse,
-    } as QueryFetchProviderResponse;
+    const message = createBaseQueryFetchProviderResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -275,60 +230,40 @@ export const QueryFetchProviderResponse = {
   },
 
   fromJSON(object: any): QueryFetchProviderResponse {
-    const message = {
-      ...baseQueryFetchProviderResponse,
-    } as QueryFetchProviderResponse;
-    if (object.provider !== undefined && object.provider !== null) {
-      message.provider = Provider.fromJSON(object.provider);
-    } else {
-      message.provider = undefined;
-    }
-    return message;
+    return { provider: isSet(object.provider) ? Provider.fromJSON(object.provider) : undefined };
   },
 
   toJSON(message: QueryFetchProviderResponse): unknown {
     const obj: any = {};
-    message.provider !== undefined &&
-      (obj.provider = message.provider
-        ? Provider.toJSON(message.provider)
-        : undefined);
+    message.provider !== undefined && (obj.provider = message.provider ? Provider.toJSON(message.provider) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryFetchProviderResponse>
-  ): QueryFetchProviderResponse {
-    const message = {
-      ...baseQueryFetchProviderResponse,
-    } as QueryFetchProviderResponse;
-    if (object.provider !== undefined && object.provider !== null) {
-      message.provider = Provider.fromPartial(object.provider);
-    } else {
-      message.provider = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryFetchProviderResponse>, I>>(object: I): QueryFetchProviderResponse {
+    const message = createBaseQueryFetchProviderResponse();
+    message.provider = (object.provider !== undefined && object.provider !== null)
+      ? Provider.fromPartial(object.provider)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryAllProviderRequest: object = {};
+function createBaseQueryAllProviderRequest(): QueryAllProviderRequest {
+  return { pagination: undefined };
+}
 
 export const QueryAllProviderRequest = {
-  encode(
-    message: QueryAllProviderRequest,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryAllProviderRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.pagination !== undefined) {
       PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): QueryAllProviderRequest {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllProviderRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryAllProviderRequest,
-    } as QueryAllProviderRequest;
+    const message = createBaseQueryAllProviderRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -344,70 +279,44 @@ export const QueryAllProviderRequest = {
   },
 
   fromJSON(object: any): QueryAllProviderRequest {
-    const message = {
-      ...baseQueryAllProviderRequest,
-    } as QueryAllProviderRequest;
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageRequest.fromJSON(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
-    return message;
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
   },
 
   toJSON(message: QueryAllProviderRequest): unknown {
     const obj: any = {};
-    message.pagination !== undefined &&
-      (obj.pagination = message.pagination
-        ? PageRequest.toJSON(message.pagination)
-        : undefined);
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryAllProviderRequest>
-  ): QueryAllProviderRequest {
-    const message = {
-      ...baseQueryAllProviderRequest,
-    } as QueryAllProviderRequest;
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageRequest.fromPartial(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryAllProviderRequest>, I>>(object: I): QueryAllProviderRequest {
+    const message = createBaseQueryAllProviderRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryAllProviderResponse: object = {};
+function createBaseQueryAllProviderResponse(): QueryAllProviderResponse {
+  return { provider: [], pagination: undefined };
+}
 
 export const QueryAllProviderResponse = {
-  encode(
-    message: QueryAllProviderResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryAllProviderResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.provider) {
       Provider.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     if (message.pagination !== undefined) {
-      PageResponse.encode(
-        message.pagination,
-        writer.uint32(18).fork()
-      ).ldelim();
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryAllProviderResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllProviderResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryAllProviderResponse,
-    } as QueryAllProviderResponse;
-    message.provider = [];
+    const message = createBaseQueryAllProviderResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -426,71 +335,40 @@ export const QueryAllProviderResponse = {
   },
 
   fromJSON(object: any): QueryAllProviderResponse {
-    const message = {
-      ...baseQueryAllProviderResponse,
-    } as QueryAllProviderResponse;
-    message.provider = [];
-    if (object.provider !== undefined && object.provider !== null) {
-      for (const e of object.provider) {
-        message.provider.push(Provider.fromJSON(e));
-      }
-    }
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageResponse.fromJSON(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
-    return message;
+    return {
+      provider: Array.isArray(object?.provider) ? object.provider.map((e: any) => Provider.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
   },
 
   toJSON(message: QueryAllProviderResponse): unknown {
     const obj: any = {};
     if (message.provider) {
-      obj.provider = message.provider.map((e) =>
-        e ? Provider.toJSON(e) : undefined
-      );
+      obj.provider = message.provider.map((e) => e ? Provider.toJSON(e) : undefined);
     } else {
       obj.provider = [];
     }
-    message.pagination !== undefined &&
-      (obj.pagination = message.pagination
-        ? PageResponse.toJSON(message.pagination)
-        : undefined);
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryAllProviderResponse>
-  ): QueryAllProviderResponse {
-    const message = {
-      ...baseQueryAllProviderResponse,
-    } as QueryAllProviderResponse;
-    message.provider = [];
-    if (object.provider !== undefined && object.provider !== null) {
-      for (const e of object.provider) {
-        message.provider.push(Provider.fromPartial(e));
-      }
-    }
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageResponse.fromPartial(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryAllProviderResponse>, I>>(object: I): QueryAllProviderResponse {
+    const message = createBaseQueryAllProviderResponse();
+    message.provider = object.provider?.map((e) => Provider.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryFetchContractRequest: object = {
-  pubkey: "",
-  chain: "",
-  client: "",
-};
+function createBaseQueryFetchContractRequest(): QueryFetchContractRequest {
+  return { pubkey: "", chain: "", client: "" };
+}
 
 export const QueryFetchContractRequest = {
-  encode(
-    message: QueryFetchContractRequest,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryFetchContractRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.pubkey !== "") {
       writer.uint32(10).string(message.pubkey);
     }
@@ -503,15 +381,10 @@ export const QueryFetchContractRequest = {
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryFetchContractRequest {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryFetchContractRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryFetchContractRequest,
-    } as QueryFetchContractRequest;
+    const message = createBaseQueryFetchContractRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -533,25 +406,11 @@ export const QueryFetchContractRequest = {
   },
 
   fromJSON(object: any): QueryFetchContractRequest {
-    const message = {
-      ...baseQueryFetchContractRequest,
-    } as QueryFetchContractRequest;
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = String(object.pubkey);
-    } else {
-      message.pubkey = "";
-    }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = String(object.chain);
-    } else {
-      message.chain = "";
-    }
-    if (object.client !== undefined && object.client !== null) {
-      message.client = String(object.client);
-    } else {
-      message.client = "";
-    }
-    return message;
+    return {
+      pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
+      chain: isSet(object.chain) ? String(object.chain) : "",
+      client: isSet(object.client) ? String(object.client) : "",
+    };
   },
 
   toJSON(message: QueryFetchContractRequest): unknown {
@@ -562,53 +421,31 @@ export const QueryFetchContractRequest = {
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryFetchContractRequest>
-  ): QueryFetchContractRequest {
-    const message = {
-      ...baseQueryFetchContractRequest,
-    } as QueryFetchContractRequest;
-    if (object.pubkey !== undefined && object.pubkey !== null) {
-      message.pubkey = object.pubkey;
-    } else {
-      message.pubkey = "";
-    }
-    if (object.chain !== undefined && object.chain !== null) {
-      message.chain = object.chain;
-    } else {
-      message.chain = "";
-    }
-    if (object.client !== undefined && object.client !== null) {
-      message.client = object.client;
-    } else {
-      message.client = "";
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryFetchContractRequest>, I>>(object: I): QueryFetchContractRequest {
+    const message = createBaseQueryFetchContractRequest();
+    message.pubkey = object.pubkey ?? "";
+    message.chain = object.chain ?? "";
+    message.client = object.client ?? "";
     return message;
   },
 };
 
-const baseQueryFetchContractResponse: object = {};
+function createBaseQueryFetchContractResponse(): QueryFetchContractResponse {
+  return { contract: undefined };
+}
 
 export const QueryFetchContractResponse = {
-  encode(
-    message: QueryFetchContractResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryFetchContractResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.contract !== undefined) {
       Contract.encode(message.contract, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryFetchContractResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryFetchContractResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryFetchContractResponse,
-    } as QueryFetchContractResponse;
+    const message = createBaseQueryFetchContractResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -624,60 +461,40 @@ export const QueryFetchContractResponse = {
   },
 
   fromJSON(object: any): QueryFetchContractResponse {
-    const message = {
-      ...baseQueryFetchContractResponse,
-    } as QueryFetchContractResponse;
-    if (object.contract !== undefined && object.contract !== null) {
-      message.contract = Contract.fromJSON(object.contract);
-    } else {
-      message.contract = undefined;
-    }
-    return message;
+    return { contract: isSet(object.contract) ? Contract.fromJSON(object.contract) : undefined };
   },
 
   toJSON(message: QueryFetchContractResponse): unknown {
     const obj: any = {};
-    message.contract !== undefined &&
-      (obj.contract = message.contract
-        ? Contract.toJSON(message.contract)
-        : undefined);
+    message.contract !== undefined && (obj.contract = message.contract ? Contract.toJSON(message.contract) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryFetchContractResponse>
-  ): QueryFetchContractResponse {
-    const message = {
-      ...baseQueryFetchContractResponse,
-    } as QueryFetchContractResponse;
-    if (object.contract !== undefined && object.contract !== null) {
-      message.contract = Contract.fromPartial(object.contract);
-    } else {
-      message.contract = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryFetchContractResponse>, I>>(object: I): QueryFetchContractResponse {
+    const message = createBaseQueryFetchContractResponse();
+    message.contract = (object.contract !== undefined && object.contract !== null)
+      ? Contract.fromPartial(object.contract)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryAllContractRequest: object = {};
+function createBaseQueryAllContractRequest(): QueryAllContractRequest {
+  return { pagination: undefined };
+}
 
 export const QueryAllContractRequest = {
-  encode(
-    message: QueryAllContractRequest,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryAllContractRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.pagination !== undefined) {
       PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): QueryAllContractRequest {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllContractRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryAllContractRequest,
-    } as QueryAllContractRequest;
+    const message = createBaseQueryAllContractRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -693,70 +510,44 @@ export const QueryAllContractRequest = {
   },
 
   fromJSON(object: any): QueryAllContractRequest {
-    const message = {
-      ...baseQueryAllContractRequest,
-    } as QueryAllContractRequest;
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageRequest.fromJSON(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
-    return message;
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
   },
 
   toJSON(message: QueryAllContractRequest): unknown {
     const obj: any = {};
-    message.pagination !== undefined &&
-      (obj.pagination = message.pagination
-        ? PageRequest.toJSON(message.pagination)
-        : undefined);
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryAllContractRequest>
-  ): QueryAllContractRequest {
-    const message = {
-      ...baseQueryAllContractRequest,
-    } as QueryAllContractRequest;
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageRequest.fromPartial(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryAllContractRequest>, I>>(object: I): QueryAllContractRequest {
+    const message = createBaseQueryAllContractRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
     return message;
   },
 };
 
-const baseQueryAllContractResponse: object = {};
+function createBaseQueryAllContractResponse(): QueryAllContractResponse {
+  return { contract: [], pagination: undefined };
+}
 
 export const QueryAllContractResponse = {
-  encode(
-    message: QueryAllContractResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
+  encode(message: QueryAllContractResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.contract) {
       Contract.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     if (message.pagination !== undefined) {
-      PageResponse.encode(
-        message.pagination,
-        writer.uint32(18).fork()
-      ).ldelim();
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): QueryAllContractResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryAllContractResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseQueryAllContractResponse,
-    } as QueryAllContractResponse;
-    message.contract = [];
+    const message = createBaseQueryAllContractResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -775,56 +566,30 @@ export const QueryAllContractResponse = {
   },
 
   fromJSON(object: any): QueryAllContractResponse {
-    const message = {
-      ...baseQueryAllContractResponse,
-    } as QueryAllContractResponse;
-    message.contract = [];
-    if (object.contract !== undefined && object.contract !== null) {
-      for (const e of object.contract) {
-        message.contract.push(Contract.fromJSON(e));
-      }
-    }
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageResponse.fromJSON(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
-    return message;
+    return {
+      contract: Array.isArray(object?.contract) ? object.contract.map((e: any) => Contract.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
   },
 
   toJSON(message: QueryAllContractResponse): unknown {
     const obj: any = {};
     if (message.contract) {
-      obj.contract = message.contract.map((e) =>
-        e ? Contract.toJSON(e) : undefined
-      );
+      obj.contract = message.contract.map((e) => e ? Contract.toJSON(e) : undefined);
     } else {
       obj.contract = [];
     }
-    message.pagination !== undefined &&
-      (obj.pagination = message.pagination
-        ? PageResponse.toJSON(message.pagination)
-        : undefined);
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<QueryAllContractResponse>
-  ): QueryAllContractResponse {
-    const message = {
-      ...baseQueryAllContractResponse,
-    } as QueryAllContractResponse;
-    message.contract = [];
-    if (object.contract !== undefined && object.contract !== null) {
-      for (const e of object.contract) {
-        message.contract.push(Contract.fromPartial(e));
-      }
-    }
-    if (object.pagination !== undefined && object.pagination !== null) {
-      message.pagination = PageResponse.fromPartial(object.pagination);
-    } else {
-      message.pagination = undefined;
-    }
+  fromPartial<I extends Exact<DeepPartial<QueryAllContractResponse>, I>>(object: I): QueryAllContractResponse {
+    const message = createBaseQueryAllContractResponse();
+    message.contract = object.contract?.map((e) => Contract.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
     return message;
   },
 };
@@ -833,103 +598,68 @@ export const QueryAllContractResponse = {
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
-  FetchProvider(
-    request: QueryFetchProviderRequest
-  ): Promise<QueryFetchProviderResponse>;
-  ProviderAll(
-    request: QueryAllProviderRequest
-  ): Promise<QueryAllProviderResponse>;
-  FetchContract(
-    request: QueryFetchContractRequest
-  ): Promise<QueryFetchContractResponse>;
-  ContractAll(
-    request: QueryAllContractRequest
-  ): Promise<QueryAllContractResponse>;
+  FetchProvider(request: QueryFetchProviderRequest): Promise<QueryFetchProviderResponse>;
+  ProviderAll(request: QueryAllProviderRequest): Promise<QueryAllProviderResponse>;
+  FetchContract(request: QueryFetchContractRequest): Promise<QueryFetchContractResponse>;
+  ContractAll(request: QueryAllContractRequest): Promise<QueryAllContractResponse>;
 }
 
 export class QueryClientImpl implements Query {
   private readonly rpc: Rpc;
   constructor(rpc: Rpc) {
     this.rpc = rpc;
+    this.Params = this.Params.bind(this);
+    this.FetchProvider = this.FetchProvider.bind(this);
+    this.ProviderAll = this.ProviderAll.bind(this);
+    this.FetchContract = this.FetchContract.bind(this);
+    this.ContractAll = this.ContractAll.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request("mercury.mercury.Query", "Params", data);
-    return promise.then((data) => QueryParamsResponse.decode(new Reader(data)));
+    return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
   }
 
-  FetchProvider(
-    request: QueryFetchProviderRequest
-  ): Promise<QueryFetchProviderResponse> {
+  FetchProvider(request: QueryFetchProviderRequest): Promise<QueryFetchProviderResponse> {
     const data = QueryFetchProviderRequest.encode(request).finish();
-    const promise = this.rpc.request(
-      "mercury.mercury.Query",
-      "FetchProvider",
-      data
-    );
-    return promise.then((data) =>
-      QueryFetchProviderResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("mercury.mercury.Query", "FetchProvider", data);
+    return promise.then((data) => QueryFetchProviderResponse.decode(new _m0.Reader(data)));
   }
 
-  ProviderAll(
-    request: QueryAllProviderRequest
-  ): Promise<QueryAllProviderResponse> {
+  ProviderAll(request: QueryAllProviderRequest): Promise<QueryAllProviderResponse> {
     const data = QueryAllProviderRequest.encode(request).finish();
-    const promise = this.rpc.request(
-      "mercury.mercury.Query",
-      "ProviderAll",
-      data
-    );
-    return promise.then((data) =>
-      QueryAllProviderResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("mercury.mercury.Query", "ProviderAll", data);
+    return promise.then((data) => QueryAllProviderResponse.decode(new _m0.Reader(data)));
   }
 
-  FetchContract(
-    request: QueryFetchContractRequest
-  ): Promise<QueryFetchContractResponse> {
+  FetchContract(request: QueryFetchContractRequest): Promise<QueryFetchContractResponse> {
     const data = QueryFetchContractRequest.encode(request).finish();
-    const promise = this.rpc.request(
-      "mercury.mercury.Query",
-      "FetchContract",
-      data
-    );
-    return promise.then((data) =>
-      QueryFetchContractResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("mercury.mercury.Query", "FetchContract", data);
+    return promise.then((data) => QueryFetchContractResponse.decode(new _m0.Reader(data)));
   }
 
-  ContractAll(
-    request: QueryAllContractRequest
-  ): Promise<QueryAllContractResponse> {
+  ContractAll(request: QueryAllContractRequest): Promise<QueryAllContractResponse> {
     const data = QueryAllContractRequest.encode(request).finish();
-    const promise = this.rpc.request(
-      "mercury.mercury.Query",
-      "ContractAll",
-      data
-    );
-    return promise.then((data) =>
-      QueryAllContractResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request("mercury.mercury.Query", "ContractAll", data);
+    return promise.then((data) => QueryAllContractResponse.decode(new _m0.Reader(data)));
   }
 }
 
 interface Rpc {
-  request(
-    service: string,
-    method: string,
-    data: Uint8Array
-  ): Promise<Uint8Array>;
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
 }
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
