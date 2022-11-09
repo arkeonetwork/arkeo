@@ -27,7 +27,7 @@ jobs:
       - name: Compile Protobuf
         uses: ignite-hq/cli/actions/cli@v0.25.1 # building protobuf files pb.go
         with:
-          args: chain build --yes --proto-all-modules
+          args: chain build --yes
       - name: Lint code
         run: |
           make lint-ci
