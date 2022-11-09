@@ -16,9 +16,9 @@ var _ = strconv.Itoa(0)
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate]",
+		Use:   "mod-provider [pubkey] [chain] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate]",
 		Short: "Broadcast message modProvider",
-		Args:  cobra.ExactArgs(7),
+		Args:  cobra.ExactArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			pubkey, err := common.NewPubKey(argPubkey)

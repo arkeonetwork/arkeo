@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"fmt"
 	"mercury/common"
+	"mercury/common/cosmos"
 	"mercury/x/mercury/types"
 	"strconv"
 
@@ -16,34 +18,46 @@ var _ = strconv.Itoa(0)
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [pubkey] [chain] [c-type] [duration] [rate] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [chain] [client_pubkey] [c-type] [deposit] [duration] [rate] [delegation-optional]",
 		Short: "Broadcast message openContract",
-		Args:  cobra.ExactArgs(5),
+		Args:  cobra.ExactArgs(7),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			argChain := args[1]
+			argClient := args[2]
+			argDeposit := args[4]
 
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
 				return err
 			}
 
-			argCType, err := cast.ToInt32E(args[2])
-			if err != nil {
-				return err
-			}
-			argDuration, err := cast.ToInt64E(args[3])
-			if err != nil {
-				return err
-			}
-			argRate, err := cast.ToInt64E(args[4])
+			cl, err := common.NewPubKey(argClient)
 			if err != nil {
 				return err
 			}
 
+			argCType, err := cast.ToInt32E(args[3])
+			if err != nil {
+				return err
+			}
+			argDuration, err := cast.ToInt64E(args[5])
+			if err != nil {
+				return err
+			}
+			argRate, err := cast.ToInt64E(args[6])
+			if err != nil {
+				return err
+			}
+
+			deposit, ok := cosmos.NewIntFromString(argDeposit)
+			if !ok {
+				return fmt.Errorf("bad deposit amount: %s", argDeposit)
+			}
+
 			delegate := common.EmptyPubKey
-			if len(args) > 5 {
-				delegate, err = common.NewPubKey(args[5])
+			if len(args) > 7 {
+				delegate, err = common.NewPubKey(args[7])
 				if err != nil {
 					return err
 				}
@@ -58,10 +72,12 @@ func CmdOpenContract() *cobra.Command {
 				clientCtx.GetFromAddress().String(),
 				pubkey,
 				argChain,
+				cl,
 				delegate,
 				types.ContractType(argCType),
 				argDuration,
 				argRate,
+				deposit,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

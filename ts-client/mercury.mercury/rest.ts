@@ -348,11 +348,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryFetchContract
-   * @request GET:/mercury/mercury/contract/{pubkey}/{chain}/{client}
+   * @request GET:/mercury/contract/{pubkey}/{chain}/{client}
    */
   queryFetchContract = (pubkey: string, chain: string, client: string, params: RequestParams = {}) =>
     this.request<MercuryQueryFetchContractResponse, RpcStatus>({
-      path: `/mercury/mercury/contract/${pubkey}/${chain}/${client}`,
+      path: `/mercury/contract/${pubkey}/${chain}/${client}`,
       method: "GET",
       format: "json",
       ...params,
@@ -363,7 +363,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryContractAll
-   * @request GET:/mercury/mercury/contracts
+   * @request GET:/mercury/contracts
    */
   queryContractAll = (
     query?: {
@@ -376,7 +376,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     params: RequestParams = {},
   ) =>
     this.request<MercuryQueryAllContractResponse, RpcStatus>({
-      path: `/mercury/mercury/contracts`,
+      path: `/mercury/contracts`,
       method: "GET",
       query: query,
       format: "json",
@@ -389,11 +389,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryParams
    * @summary Parameters queries the parameters of the module.
-   * @request GET:/mercury/mercury/params
+   * @request GET:/mercury/params
    */
   queryParams = (params: RequestParams = {}) =>
     this.request<MercuryQueryParamsResponse, RpcStatus>({
-      path: `/mercury/mercury/params`,
+      path: `/mercury/params`,
       method: "GET",
       format: "json",
       ...params,
@@ -404,11 +404,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryFetchProvider
-   * @request GET:/mercury/mercury/provider/{pubkey}/{chain}
+   * @request GET:/mercury/provider/{pubkey}/{chain}
    */
   queryFetchProvider = (pubkey: string, chain: string, params: RequestParams = {}) =>
     this.request<MercuryQueryFetchProviderResponse, RpcStatus>({
-      path: `/mercury/mercury/provider/${pubkey}/${chain}`,
+      path: `/mercury/provider/${pubkey}/${chain}`,
       method: "GET",
       format: "json",
       ...params,
@@ -419,7 +419,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryProviderAll
-   * @request GET:/mercury/mercury/providers
+   * @request GET:/mercury/providers
    */
   queryProviderAll = (
     query?: {
@@ -432,7 +432,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     params: RequestParams = {},
   ) =>
     this.request<MercuryQueryAllProviderResponse, RpcStatus>({
-      path: `/mercury/mercury/providers`,
+      path: `/mercury/providers`,
       method: "GET",
       query: query,
       format: "json",

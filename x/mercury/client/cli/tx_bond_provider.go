@@ -17,9 +17,9 @@ var _ = strconv.Itoa(0)
 
 func CmdBondProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bond-provider [pubkey] [chain] [add] [remove]",
+		Use:   "bond-provider [pubkey] [chain] [bond]",
 		Short: "Broadcast message bondProvider",
-		Args:  cobra.ExactArgs(4),
+		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			argChain := args[1]

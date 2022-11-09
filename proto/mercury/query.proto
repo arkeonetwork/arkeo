@@ -14,20 +14,20 @@ option go_package = "mercury/x/mercury/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/mercury/mercury/params";
+    option (google.api.http).get = "/mercury/params";
   }
   rpc FetchProvider(QueryFetchProviderRequest) returns (QueryFetchProviderResponse) {
-    option (google.api.http).get = "/mercury/mercury/provider/{pubkey}/{chain}";
+    option (google.api.http).get = "/mercury/provider/{pubkey}/{chain}";
   }
       rpc ProviderAll(QueryAllProviderRequest) returns (QueryAllProviderResponse) {
-        option (google.api.http).get = "/mercury/mercury/providers";
+        option (google.api.http).get = "/mercury/providers";
     }
 
   rpc FetchContract(QueryFetchContractRequest) returns (QueryFetchContractResponse) {
-    option (google.api.http).get = "/mercury/mercury/contract/{pubkey}/{chain}/{client}";
+    option (google.api.http).get = "/mercury/contract/{pubkey}/{chain}/{client}";
   }
       rpc ContractAll(QueryAllContractRequest) returns (QueryAllContractResponse) {
-        option (google.api.http).get = "/mercury/mercury/contracts";
+        option (google.api.http).get = "/mercury/contracts";
     }
   // this line is used by starport scaffolding # 2
 }

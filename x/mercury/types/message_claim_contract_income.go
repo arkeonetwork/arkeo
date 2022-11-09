@@ -13,7 +13,7 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, spender common.PubKey, nonce, height int64, sig string) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain string, spender common.PubKey, nonce, height int64, sig []byte) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator:   creator,
 		PubKey:    pubkey,
@@ -21,7 +21,7 @@ func NewMsgClaimContractIncome(creator string, pubkey common.PubKey, chain strin
 		Spender:   spender,
 		Nonce:     nonce,
 		Height:    height,
-		Signature: []byte(sig),
+		Signature: sig,
 	}
 }
 
@@ -87,6 +87,10 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	_, err = common.NewPubKey(msg.Spender.String())
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid spender pubkey (%s)", err)
+	}
+
+	if len(msg.Signature) > 100 {
+		return sdkerrors.Wrap(ErrClaimContractIncomeInvalidSignature, "too long")
 	}
 
 	if msg.Height <= 0 {
