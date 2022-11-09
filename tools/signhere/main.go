@@ -51,5 +51,6 @@ func main() {
 		log.Fatal("bad signature")
 	}
 
-	fmt.Println(hex.EncodeToString(signature[:]))
+	sig := hex.EncodeToString(signature)
+	fmt.Println(sig)
 }
