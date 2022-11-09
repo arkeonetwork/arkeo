@@ -21,11 +21,11 @@ jobs:
           go-version: 1.18.x
           # cache: true
       - name: Version
-        uses: ignite-hq/cli/actions/cli@v0.24.0 # building protobuf files pb.go
+        uses: ignite-hq/cli/actions/cli@v0.25.1 # building protobuf files pb.go
         with:
           args: version
       - name: Compile Protobuf
-        uses: ignite-hq/cli/actions/cli@v0.24.0 # building protobuf files pb.go
+        uses: ignite-hq/cli/actions/cli@v0.25.1 # building protobuf files pb.go
         with:
           args: chain build --yes --proto-all-modules
       - name: Lint code
