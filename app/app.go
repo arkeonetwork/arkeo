@@ -114,7 +114,7 @@ import (
 )
 
 const (
-	AccountAddressPrefix = "hg"
+	AccountAddressPrefix = "rko"
 	Name                 = "arkeo"
 )
 
