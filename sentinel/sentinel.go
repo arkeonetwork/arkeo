@@ -22,8 +22,7 @@ type Proxy struct {
 	ClaimStore *ClaimStore
 }
 
-func NewProxy() Proxy {
-	config := conf.NewConfiguration()
+func NewProxy(config conf.Configuration) Proxy {
 	claimStore, err := NewClaimStore(config.ClaimStoreLocation)
 	if err != nil {
 		panic(err)
@@ -156,8 +155,7 @@ func (p Proxy) Run() {
 	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
 	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
 	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
-	mux.Handle("/", auth(
-		p.Config, p.MemStore, p.ClaimStore,
+	mux.Handle("/", p.auth(
 		handlers.LoggingHandler(
 			os.Stdout,
 			handlers.ProxyHeaders(
