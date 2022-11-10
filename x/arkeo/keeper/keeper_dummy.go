@@ -162,3 +162,5 @@ func (k KVStoreDummy) FetchContract(c context.Context, req *types.QueryFetchCont
 func (k KVStoreDummy) ContractAll(c context.Context, req *types.QueryAllContractRequest) (*types.QueryAllContractResponse, error) {
 	return nil, kaboom
 }
+
+func (k KVStoreDummy) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) {}

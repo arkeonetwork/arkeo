@@ -74,7 +74,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 	)
 }
 
-func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt cosmos.Int, contract types.Contract) {
+func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt, valIncome cosmos.Int, contract types.Contract) {
 	ctx.EventManager().EmitEvents(
 		sdk.Events{
 			sdk.NewEvent(
@@ -82,7 +82,12 @@ func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt cosmos.Int, 
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),
+				sdk.NewAttribute("delegate", contract.Delegate.String()),
+				sdk.NewAttribute("type", contract.Type.String()),
+				sdk.NewAttribute("nonce", strconv.FormatInt(contract.Nonce, 10)),
+				sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
 				sdk.NewAttribute("paid", debt.String()),
+				sdk.NewAttribute("reserve", valIncome.String()),
 			),
 		},
 	)

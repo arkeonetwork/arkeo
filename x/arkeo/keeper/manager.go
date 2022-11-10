@@ -180,7 +180,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 
-	mgr.ContractSettlementEvent(ctx, debt, contract)
+	mgr.ContractSettlementEvent(ctx, debt, valIncome, contract)
 	return contract, nil
 }
 

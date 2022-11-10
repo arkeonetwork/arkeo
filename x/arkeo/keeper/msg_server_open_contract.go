@@ -25,13 +25,15 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"rate", msg.Rate,
 	)
 
-	if err := k.OpenContractValidate(ctx, msg); err != nil {
+	cacheCtx, commit := ctx.CacheContext()
+	if err := k.OpenContractValidate(cacheCtx, msg); err != nil {
 		return nil, err
 	}
 
-	if err := k.OpenContractHandle(ctx, msg); err != nil {
+	if err := k.OpenContractHandle(cacheCtx, msg); err != nil {
 		return nil, err
 	}
+	commit()
 
 	return &types.MsgOpenContractResponse{}, nil
 }
