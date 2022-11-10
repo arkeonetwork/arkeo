@@ -1,15 +1,13 @@
 package sentinel
 
 import (
-	"encoding/hex"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"time"
-
 	"arkeo/common"
 	"arkeo/sentinel/conf"
 	"arkeo/x/arkeo/types"
+	"encoding/hex"
+	"fmt"
+	"net/http"
+	"time"
 
 	. "gopkg.in/check.v1"
 
@@ -23,13 +21,11 @@ import (
 )
 
 type AuthSuite struct {
-	server *httptest.Server
 }
 
 var _ = Suite(&AuthSuite{})
 
 func (s *AuthSuite) TestFreeTier(c *C) {
-
 	config := conf.Configuration{
 		FreeTierRateLimitDuration: time.Minute,
 		FreeTierRateLimit:         1,
@@ -47,7 +43,6 @@ func (s *AuthSuite) TestFreeTier(c *C) {
 }
 
 func (s *AuthSuite) TestPaidTier(c *C) {
-
 	// setup
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
@@ -97,7 +92,6 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	contract, err = proxy.MemStore.Get(contract.Key())
 	c.Assert(err, IsNil)
 	c.Check(contract.Nonce, Equals, int64(3))
-	key = fmt.Sprintf("%d-%s", common.BTCChain, pk.String())
 	claim, err := proxy.ClaimStore.Get(contract.Key())
 	c.Assert(err, IsNil)
 	c.Check(claim.Nonce, Equals, int64(3))
@@ -111,5 +105,4 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	code, err = proxy.paidTier(height, nonce, chain, pk.String(), string("bad siggy"))
 	c.Assert(err, NotNil)
 	c.Check(code, Equals, http.StatusBadRequest)
-
 }

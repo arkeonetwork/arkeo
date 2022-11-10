@@ -1,12 +1,11 @@
 package sentinel
 
 import (
-	"fmt"
-	"strconv"
-
 	"arkeo/common"
 	"arkeo/common/cosmos"
 	"arkeo/x/arkeo/types"
+	"fmt"
+	"strconv"
 )
 
 type ProviderBondEvent struct {
@@ -16,6 +15,7 @@ type ProviderBondEvent struct {
 	BondAbsolute cosmos.Int
 }
 
+// nolint
 func parseProviderBondEvent(input map[string]string) (ProviderBondEvent, error) {
 	var err error
 	var ok bool
@@ -53,6 +53,7 @@ type ProviderModEvent struct {
 	Provider types.Provider
 }
 
+// nolint
 func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 	var err error
 	evt := ProviderModEvent{}

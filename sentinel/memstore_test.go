@@ -4,7 +4,6 @@ import (
 	"arkeo/common"
 	"arkeo/x/arkeo/types"
 	"fmt"
-
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -19,7 +18,6 @@ type MemStoreSuite struct {
 var _ = Suite(&MemStoreSuite{})
 
 func (s *MemStoreSuite) SetUpTest(c *C) {
-
 	s.server = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		switch {
 		case strings.HasPrefix(req.RequestURI, "/contract/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu/arkeo-mainnet/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu"):

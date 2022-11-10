@@ -56,14 +56,14 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 
 			httpCode, err := p.paidTier(heightInt, nonceInt, chain[0], spender[0], sig[0])
 			if err != nil {
-				log.Printf(err.Error())
+				log.Println(err.Error())
 				http.Error(w, err.Error(), httpCode)
 				return
 			}
 		} else {
 			httpCode, err := p.freeTier(r.RemoteAddr)
 			if err != nil {
-				log.Printf(err.Error())
+				log.Println(err.Error())
 				http.Error(w, err.Error(), httpCode)
 				return
 			}

@@ -53,7 +53,7 @@ func (p Proxy) EventListener(host string) {
 		logger.Error("Failed to start a client", "err", err)
 		os.Exit(1)
 	}
-	defer client.Stop()
+	defer client.Stop() // nolint
 
 	// receive height changes
 	heightOut := subscribe(client, logger, "tm.event = 'NewBlockHeader'")
@@ -74,7 +74,11 @@ func (p Proxy) EventListener(host string) {
 				}
 		*/
 		case result := <-heightOut:
-			data := result.Data.(tmtypes.EventDataNewBlockHeader)
+			data, ok := result.Data.(tmtypes.EventDataNewBlockHeader)
+			if !ok {
+				logger.Error("failed cast data")
+				continue
+			}
 			height := data.Header.Height
 			logger.Info("New height detected", "height", height)
 			p.MemStore.SetHeight(height)
@@ -141,7 +145,7 @@ func (p Proxy) EventListener(host string) {
 				}
 			}
 		case <-quit:
-			os.Exit(0)
+			break
 		}
 	}
 }

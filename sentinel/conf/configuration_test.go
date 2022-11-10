@@ -15,7 +15,6 @@ type ConfigurationSuite struct{}
 var _ = Suite(&ConfigurationSuite{})
 
 func (ConfigurationSuite) TestConfiguration(c *C) {
-
 	os.Setenv("MONIKER", "monkey")
 	os.Setenv("WEBSITE", "webby")
 	os.Setenv("DESCRIPTION", "dezy")
