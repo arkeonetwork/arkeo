@@ -3,6 +3,8 @@ generated
 sentinel
 arkeod
 
+.trunk
+
 vue/node_modules
 vue/dist
 release/
