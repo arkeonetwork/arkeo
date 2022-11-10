@@ -1,6 +1,5 @@
 *.pb.go
 generated
-sentinel
 arkeod
 
 .trunk
