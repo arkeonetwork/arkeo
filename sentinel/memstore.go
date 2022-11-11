@@ -49,6 +49,10 @@ func (k *MemStore) Get(key string) (types.Contract, error) {
 }
 
 func (k *MemStore) Put(key string, value types.Contract) {
+	if value.IsClose(k.blockHeight) {
+		delete(k.db, key)
+		return
+	}
 	k.db[key] = value
 }
 

@@ -1,6 +1,7 @@
 package sentinel
 
 import (
+	"arkeo/common"
 	"context"
 	"fmt"
 	"os"
@@ -65,6 +66,10 @@ func (p Proxy) EventListener(host string) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
+	isMyPubKey := func(pk common.PubKey) bool {
+		return pk.Equals(p.Config.ProviderPubKey)
+	}
+
 	for {
 		select {
 		/*
@@ -96,6 +101,9 @@ func (p Proxy) EventListener(host string) {
 						logger.Error("failed to get close contract event", "error", err)
 						continue
 					}
+					if !isMyPubKey(evt.Contract.ProviderPubKey) {
+						continue
+					}
 					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, evt.Contract.Delegate, evt.Contract.Nonce, evt.Contract.Height, "")
 					currClaim, err := p.ClaimStore.Get(newClaim.Key())
 					if err != nil {
@@ -116,6 +124,9 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get open contract event", "error", err)
 				continue
 			}
+			if !isMyPubKey(evt.Contract.ProviderPubKey) {
+				continue
+			}
 			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-closeContractOut:
@@ -124,12 +135,18 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get close contract event", "error", err)
 				continue
 			}
+			if !isMyPubKey(evt.Contract.ProviderPubKey) {
+				continue
+			}
 			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-claimContractOut:
 			evt, err := parseClaimContractIncome(convertEvent("contract_settlement", result.Events))
 			if err != nil {
 				logger.Error("failed to get close contract event", "error", err)
+				continue
+			}
+			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
 			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, evt.Contract.Delegate, evt.Contract.Nonce, evt.Contract.Height, "")

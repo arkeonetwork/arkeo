@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/time/rate"
 	. "gopkg.in/check.v1"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -24,6 +25,45 @@ type AuthSuite struct {
 }
 
 var _ = Suite(&AuthSuite{})
+
+func (s *AuthSuite) TestArkAuth(c *C) {
+	// setup
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
+	ctypes.RegisterInterfaces(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+
+	pubkey := types.GetRandomPubKey()
+	kb := cKeys.NewInMemory(cdc)
+	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
+	c.Assert(err, IsNil)
+	pub, err := info.GetPubKey()
+	c.Assert(err, IsNil)
+	pk, err := common.NewPubKeyFromCrypto(pub)
+	c.Assert(err, IsNil)
+
+	var signature []byte
+	height := int64(12)
+	nonce := int64(3)
+	chain := common.BTCChain.String()
+
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", pubkey.String(), chain, pk, height, nonce))
+	signature, _, err = kb.Sign("whatever", message)
+	c.Assert(err, IsNil)
+
+	sig := hex.EncodeToString(signature)
+
+	// happy path
+	raw := fmt.Sprintf("%s:%s:%s:%d:%d:%s", pubkey.String(), chain, pk, height, nonce, sig)
+	_, err = parseArkAuth(raw)
+	c.Assert(err, IsNil)
+
+	// bad signature
+	raw = fmt.Sprintf("%s:%s:%s:%d:%d:%s", pubkey.String(), chain, pk, height, nonce, "bad siggy")
+	_, err = parseArkAuth(raw)
+	c.Assert(err, NotNil)
+}
 
 func (s *AuthSuite) TestFreeTier(c *C) {
 	config := conf.Configuration{
@@ -50,6 +90,7 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	ctypes.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
+	visitors = make(map[string]*rate.Limiter) // reset visitors
 	pubkey := types.GetRandomPubKey()
 	kb := cKeys.NewInMemory(cdc)
 	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
@@ -74,6 +115,8 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 		AsGoTierRateLimit:         1,
 		SubTierRateLimitDuration:  time.Minute,
 		SubTierRateLimit:          1,
+		FreeTierRateLimitDuration: time.Minute,
+		FreeTierRateLimit:         1,
 	}
 	proxy := NewProxy(config)
 
@@ -85,8 +128,15 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	proxy.MemStore.Put(key, contract)
 
 	// happy path
-	sig := hex.EncodeToString(signature)
-	code, err := proxy.paidTier(height, nonce, chain, pk.String(), sig)
+	aa := ArkAuth{
+		Provider:  pubkey,
+		Height:    height,
+		Nonce:     nonce,
+		Chain:     common.BTCChain,
+		Spender:   pk,
+		Signature: signature,
+	}
+	code, err := proxy.paidTier(aa, "127.0.0.1:8080")
 	c.Assert(err, IsNil)
 	c.Check(code, Equals, http.StatusOK)
 	contract, err = proxy.MemStore.Get(contract.Key())
@@ -97,12 +147,7 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	c.Check(claim.Nonce, Equals, int64(3))
 
 	// rate limited
-	code, err = proxy.paidTier(height, nonce, chain, pk.String(), sig)
+	code, err = proxy.paidTier(aa, "127.0.0.1:8080")
 	c.Assert(err, NotNil)
 	c.Check(code, Equals, http.StatusTooManyRequests)
-
-	// check that a bad signature fails
-	code, err = proxy.paidTier(height, nonce, chain, pk.String(), string("bad siggy"))
-	c.Assert(err, NotNil)
-	c.Check(code, Equals, http.StatusBadRequest)
 }
