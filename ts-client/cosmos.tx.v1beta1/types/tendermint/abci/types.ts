@@ -267,6 +267,13 @@ export interface ResponseCheckTx {
   gasUsed: number;
   events: Event[];
   codespace: string;
+  sender: string;
+  priority: number;
+  /**
+   * mempool_error is set by Tendermint.
+   * ABCI applictions creating a ResponseCheckTX should not set mempool_error.
+   */
+  mempoolError: string;
 }
 
 export interface ResponseDeliverTx {
@@ -278,6 +285,7 @@ export interface ResponseDeliverTx {
   info: string;
   gasWanted: number;
   gasUsed: number;
+  /** nondeterministic */
   events: Event[];
   codespace: string;
 }
@@ -2498,7 +2506,19 @@ export const ResponseBeginBlock = {
 };
 
 function createBaseResponseCheckTx(): ResponseCheckTx {
-  return { code: 0, data: new Uint8Array(), log: "", info: "", gasWanted: 0, gasUsed: 0, events: [], codespace: "" };
+  return {
+    code: 0,
+    data: new Uint8Array(),
+    log: "",
+    info: "",
+    gasWanted: 0,
+    gasUsed: 0,
+    events: [],
+    codespace: "",
+    sender: "",
+    priority: 0,
+    mempoolError: "",
+  };
 }
 
 export const ResponseCheckTx = {
@@ -2526,6 +2546,15 @@ export const ResponseCheckTx = {
     }
     if (message.codespace !== "") {
       writer.uint32(66).string(message.codespace);
+    }
+    if (message.sender !== "") {
+      writer.uint32(74).string(message.sender);
+    }
+    if (message.priority !== 0) {
+      writer.uint32(80).int64(message.priority);
+    }
+    if (message.mempoolError !== "") {
+      writer.uint32(90).string(message.mempoolError);
     }
     return writer;
   },
@@ -2561,6 +2590,15 @@ export const ResponseCheckTx = {
         case 8:
           message.codespace = reader.string();
           break;
+        case 9:
+          message.sender = reader.string();
+          break;
+        case 10:
+          message.priority = longToNumber(reader.int64() as Long);
+          break;
+        case 11:
+          message.mempoolError = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -2579,6 +2617,9 @@ export const ResponseCheckTx = {
       gasUsed: isSet(object.gas_used) ? Number(object.gas_used) : 0,
       events: Array.isArray(object?.events) ? object.events.map((e: any) => Event.fromJSON(e)) : [],
       codespace: isSet(object.codespace) ? String(object.codespace) : "",
+      sender: isSet(object.sender) ? String(object.sender) : "",
+      priority: isSet(object.priority) ? Number(object.priority) : 0,
+      mempoolError: isSet(object.mempoolError) ? String(object.mempoolError) : "",
     };
   },
 
@@ -2597,6 +2638,9 @@ export const ResponseCheckTx = {
       obj.events = [];
     }
     message.codespace !== undefined && (obj.codespace = message.codespace);
+    message.sender !== undefined && (obj.sender = message.sender);
+    message.priority !== undefined && (obj.priority = Math.round(message.priority));
+    message.mempoolError !== undefined && (obj.mempoolError = message.mempoolError);
     return obj;
   },
 
@@ -2610,6 +2654,9 @@ export const ResponseCheckTx = {
     message.gasUsed = object.gasUsed ?? 0;
     message.events = object.events?.map((e) => Event.fromPartial(e)) || [];
     message.codespace = object.codespace ?? "";
+    message.sender = object.sender ?? "";
+    message.priority = object.priority ?? 0;
+    message.mempoolError = object.mempoolError ?? "";
     return message;
   },
 };

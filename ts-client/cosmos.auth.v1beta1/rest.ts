@@ -250,6 +250,9 @@ export interface V1Beta1Params {
   sig_verify_cost_secp256k1?: string;
 }
 
+/**
+ * Since: cosmos-sdk 0.46.2
+ */
 export interface V1Beta1QueryAccountAddressByIDResponse {
   account_address?: string;
 }
@@ -273,6 +276,71 @@ export interface V1Beta1QueryAccountsResponse {
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
+}
+
+/**
+ * QueryModuleAccountByNameResponse is the response type for the Query/ModuleAccountByName RPC method.
+ */
+export interface V1Beta1QueryModuleAccountByNameResponse {
+  /**
+   * `Any` contains an arbitrary serialized protocol buffer message along with a
+   * URL that describes the type of the serialized message.
+   *
+   * Protobuf library provides support to pack/unpack Any values in the form
+   * of utility functions or additional generated methods of the Any type.
+   * Example 1: Pack and unpack a message in C++.
+   *     Foo foo = ...;
+   *     Any any;
+   *     any.PackFrom(foo);
+   *     ...
+   *     if (any.UnpackTo(&foo)) {
+   *       ...
+   *     }
+   * Example 2: Pack and unpack a message in Java.
+   *     Any any = Any.pack(foo);
+   *     if (any.is(Foo.class)) {
+   *       foo = any.unpack(Foo.class);
+   *  Example 3: Pack and unpack a message in Python.
+   *     foo = Foo(...)
+   *     any = Any()
+   *     any.Pack(foo)
+   *     if any.Is(Foo.DESCRIPTOR):
+   *       any.Unpack(foo)
+   *  Example 4: Pack and unpack a message in Go
+   *      foo := &pb.Foo{...}
+   *      any, err := anypb.New(foo)
+   *      if err != nil {
+   *        ...
+   *      }
+   *      ...
+   *      foo := &pb.Foo{}
+   *      if err := any.UnmarshalTo(foo); err != nil {
+   * The pack methods provided by protobuf library will by default use
+   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
+   * methods only use the fully qualified type name after the last '/'
+   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
+   * name "y.z".
+   * JSON
+   * ====
+   * The JSON representation of an `Any` value uses the regular
+   * representation of the deserialized, embedded message, with an
+   * additional field `@type` which contains the type URL. Example:
+   *     package google.profile;
+   *     message Person {
+   *       string first_name = 1;
+   *       string last_name = 2;
+   *     {
+   *       "@type": "type.googleapis.com/google.profile.Person",
+   *       "firstName": <string>,
+   *       "lastName": <string>
+   * If the embedded message type is well-known and has a custom JSON
+   * representation, that representation will be embedded adding a field
+   * `value` which holds the custom JSON in addition to the `@type`
+   * field. Example (for message [google.protobuf.Duration][]):
+   *       "@type": "type.googleapis.com/google.protobuf.Duration",
+   *       "value": "1.212s"
+   */
+  account?: ProtobufAny;
 }
 
 /**
@@ -460,11 +528,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     });
 
   /**
-   * No description
+   * @description Since: cosmos-sdk 0.46.2
    *
    * @tags Query
    * @name QueryAccountAddressById
-   * @summary AccountAddressByID returns account address based on account id
+   * @summary AccountAddressByID returns account address based on account number.
    * @request GET:/cosmos/auth/v1beta1/address_by_id/{id}
    */
   queryAccountAddressById = (id: string, params: RequestParams = {}) =>
@@ -534,6 +602,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
   queryModuleAccounts = (params: RequestParams = {}) =>
     this.request<V1Beta1QueryModuleAccountsResponse, RpcStatus>({
       path: `/cosmos/auth/v1beta1/module_accounts`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryModuleAccountByName
+   * @summary ModuleAccountByName returns the module account info by module name
+   * @request GET:/cosmos/auth/v1beta1/module_accounts/{name}
+   */
+  queryModuleAccountByName = (name: string, params: RequestParams = {}) =>
+    this.request<V1Beta1QueryModuleAccountByNameResponse, RpcStatus>({
+      path: `/cosmos/auth/v1beta1/module_accounts/${name}`,
       method: "GET",
       format: "json",
       ...params,

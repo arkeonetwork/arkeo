@@ -21,13 +21,16 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 		"chain", msg.Chain,
 		"bond", msg.Bond,
 	)
-	if err := k.BondProviderValidate(ctx, msg); err != nil {
+
+	cacheCtx, commit := ctx.CacheContext()
+	if err := k.BondProviderValidate(cacheCtx, msg); err != nil {
 		return nil, err
 	}
 
-	if err := k.BondProviderHandle(ctx, msg); err != nil {
+	if err := k.BondProviderHandle(cacheCtx, msg); err != nil {
 		return nil, err
 	}
+	commit()
 
 	return &types.MsgBondProviderResponse{}, nil
 }

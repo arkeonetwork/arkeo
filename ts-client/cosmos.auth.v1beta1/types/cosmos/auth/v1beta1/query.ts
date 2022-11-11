@@ -35,20 +35,6 @@ export interface QueryAccountRequest {
   address: string;
 }
 
-/**
- * QueryModuleAccountsRequest is the request type for the Query/ModuleAccounts RPC method.
- *
- * Since: cosmos-sdk 0.46
- */
-export interface QueryModuleAccountsRequest {
-}
-
-/** QueryParamsResponse is the response type for the Query/Params RPC method. */
-export interface QueryParamsResponse {
-  /** params defines the parameters of the module. */
-  params: Params | undefined;
-}
-
 /** QueryAccountResponse is the response type for the Query/Account RPC method. */
 export interface QueryAccountResponse {
   /** account defines the account of the corresponding address. */
@@ -59,6 +45,20 @@ export interface QueryAccountResponse {
 export interface QueryParamsRequest {
 }
 
+/** QueryParamsResponse is the response type for the Query/Params RPC method. */
+export interface QueryParamsResponse {
+  /** params defines the parameters of the module. */
+  params: Params | undefined;
+}
+
+/**
+ * QueryModuleAccountsRequest is the request type for the Query/ModuleAccounts RPC method.
+ *
+ * Since: cosmos-sdk 0.46
+ */
+export interface QueryModuleAccountsRequest {
+}
+
 /**
  * QueryModuleAccountsResponse is the response type for the Query/ModuleAccounts RPC method.
  *
@@ -66,6 +66,16 @@ export interface QueryParamsRequest {
  */
 export interface QueryModuleAccountsResponse {
   accounts: Any[];
+}
+
+/** QueryModuleAccountByNameRequest is the request type for the Query/ModuleAccountByName RPC method. */
+export interface QueryModuleAccountByNameRequest {
+  name: string;
+}
+
+/** QueryModuleAccountByNameResponse is the response type for the Query/ModuleAccountByName RPC method. */
+export interface QueryModuleAccountByNameResponse {
+  account: Any | undefined;
 }
 
 /**
@@ -121,12 +131,25 @@ export interface AddressStringToBytesResponse {
   addressBytes: Uint8Array;
 }
 
-/** QueryAccountAddressByIDRequest is the request type for AccountAddressByID rpc method */
+/**
+ * QueryAccountAddressByIDRequest is the request type for AccountAddressByID rpc method
+ *
+ * Since: cosmos-sdk 0.46.2
+ */
 export interface QueryAccountAddressByIDRequest {
+  /**
+   * id is the account number of the address to be queried. This field
+   * should have been an uint64 (like all account numbers), and will be
+   * updated to uint64 in a future version of the auth query.
+   */
   id: number;
 }
 
-/** QueryAccountAddressByIDResponse is the response type for AccountAddressByID rpc method */
+/**
+ * QueryAccountAddressByIDResponse is the response type for AccountAddressByID rpc method
+ *
+ * Since: cosmos-sdk 0.46.2
+ */
 export interface QueryAccountAddressByIDResponse {
   accountAddress: string;
 }
@@ -293,94 +316,6 @@ export const QueryAccountRequest = {
   },
 };
 
-function createBaseQueryModuleAccountsRequest(): QueryModuleAccountsRequest {
-  return {};
-}
-
-export const QueryModuleAccountsRequest = {
-  encode(_: QueryModuleAccountsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryModuleAccountsRequest {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryModuleAccountsRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(_: any): QueryModuleAccountsRequest {
-    return {};
-  },
-
-  toJSON(_: QueryModuleAccountsRequest): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryModuleAccountsRequest>, I>>(_: I): QueryModuleAccountsRequest {
-    const message = createBaseQueryModuleAccountsRequest();
-    return message;
-  },
-};
-
-function createBaseQueryParamsResponse(): QueryParamsResponse {
-  return { params: undefined };
-}
-
-export const QueryParamsResponse = {
-  encode(message: QueryParamsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.params !== undefined) {
-      Params.encode(message.params, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryParamsResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.params = Params.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QueryParamsResponse {
-    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
-  },
-
-  toJSON(message: QueryParamsResponse): unknown {
-    const obj: any = {};
-    message.params !== undefined && (obj.params = message.params ? Params.toJSON(message.params) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
-    const message = createBaseQueryParamsResponse();
-    message.params = (object.params !== undefined && object.params !== null)
-      ? Params.fromPartial(object.params)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseQueryAccountResponse(): QueryAccountResponse {
   return { account: undefined };
 }
@@ -469,6 +404,94 @@ export const QueryParamsRequest = {
   },
 };
 
+function createBaseQueryParamsResponse(): QueryParamsResponse {
+  return { params: undefined };
+}
+
+export const QueryParamsResponse = {
+  encode(message: QueryParamsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.params !== undefined) {
+      Params.encode(message.params, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryParamsResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryParamsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.params = Params.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryParamsResponse {
+    return { params: isSet(object.params) ? Params.fromJSON(object.params) : undefined };
+  },
+
+  toJSON(message: QueryParamsResponse): unknown {
+    const obj: any = {};
+    message.params !== undefined && (obj.params = message.params ? Params.toJSON(message.params) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
+    const message = createBaseQueryParamsResponse();
+    message.params = (object.params !== undefined && object.params !== null)
+      ? Params.fromPartial(object.params)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryModuleAccountsRequest(): QueryModuleAccountsRequest {
+  return {};
+}
+
+export const QueryModuleAccountsRequest = {
+  encode(_: QueryModuleAccountsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryModuleAccountsRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryModuleAccountsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryModuleAccountsRequest {
+    return {};
+  },
+
+  toJSON(_: QueryModuleAccountsRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryModuleAccountsRequest>, I>>(_: I): QueryModuleAccountsRequest {
+    const message = createBaseQueryModuleAccountsRequest();
+    return message;
+  },
+};
+
 function createBaseQueryModuleAccountsResponse(): QueryModuleAccountsResponse {
   return { accounts: [] };
 }
@@ -516,6 +539,106 @@ export const QueryModuleAccountsResponse = {
   fromPartial<I extends Exact<DeepPartial<QueryModuleAccountsResponse>, I>>(object: I): QueryModuleAccountsResponse {
     const message = createBaseQueryModuleAccountsResponse();
     message.accounts = object.accounts?.map((e) => Any.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseQueryModuleAccountByNameRequest(): QueryModuleAccountByNameRequest {
+  return { name: "" };
+}
+
+export const QueryModuleAccountByNameRequest = {
+  encode(message: QueryModuleAccountByNameRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryModuleAccountByNameRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryModuleAccountByNameRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.name = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryModuleAccountByNameRequest {
+    return { name: isSet(object.name) ? String(object.name) : "" };
+  },
+
+  toJSON(message: QueryModuleAccountByNameRequest): unknown {
+    const obj: any = {};
+    message.name !== undefined && (obj.name = message.name);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryModuleAccountByNameRequest>, I>>(
+    object: I,
+  ): QueryModuleAccountByNameRequest {
+    const message = createBaseQueryModuleAccountByNameRequest();
+    message.name = object.name ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryModuleAccountByNameResponse(): QueryModuleAccountByNameResponse {
+  return { account: undefined };
+}
+
+export const QueryModuleAccountByNameResponse = {
+  encode(message: QueryModuleAccountByNameResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.account !== undefined) {
+      Any.encode(message.account, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryModuleAccountByNameResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryModuleAccountByNameResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.account = Any.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryModuleAccountByNameResponse {
+    return { account: isSet(object.account) ? Any.fromJSON(object.account) : undefined };
+  },
+
+  toJSON(message: QueryModuleAccountByNameResponse): unknown {
+    const obj: any = {};
+    message.account !== undefined && (obj.account = message.account ? Any.toJSON(message.account) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryModuleAccountByNameResponse>, I>>(
+    object: I,
+  ): QueryModuleAccountByNameResponse {
+    const message = createBaseQueryModuleAccountByNameResponse();
+    message.account = (object.account !== undefined && object.account !== null)
+      ? Any.fromPartial(object.account)
+      : undefined;
     return message;
   },
 };
@@ -908,7 +1031,11 @@ export interface Query {
   Accounts(request: QueryAccountsRequest): Promise<QueryAccountsResponse>;
   /** Account returns account details based on address. */
   Account(request: QueryAccountRequest): Promise<QueryAccountResponse>;
-  /** AccountAddressByID returns account address based on account id */
+  /**
+   * AccountAddressByID returns account address based on account number.
+   *
+   * Since: cosmos-sdk 0.46.2
+   */
   AccountAddressByID(request: QueryAccountAddressByIDRequest): Promise<QueryAccountAddressByIDResponse>;
   /** Params queries all parameters. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
@@ -918,6 +1045,8 @@ export interface Query {
    * Since: cosmos-sdk 0.46
    */
   ModuleAccounts(request: QueryModuleAccountsRequest): Promise<QueryModuleAccountsResponse>;
+  /** ModuleAccountByName returns the module account info by module name */
+  ModuleAccountByName(request: QueryModuleAccountByNameRequest): Promise<QueryModuleAccountByNameResponse>;
   /**
    * Bech32Prefix queries bech32Prefix
    *
@@ -947,6 +1076,7 @@ export class QueryClientImpl implements Query {
     this.AccountAddressByID = this.AccountAddressByID.bind(this);
     this.Params = this.Params.bind(this);
     this.ModuleAccounts = this.ModuleAccounts.bind(this);
+    this.ModuleAccountByName = this.ModuleAccountByName.bind(this);
     this.Bech32Prefix = this.Bech32Prefix.bind(this);
     this.AddressBytesToString = this.AddressBytesToString.bind(this);
     this.AddressStringToBytes = this.AddressStringToBytes.bind(this);
@@ -979,6 +1109,12 @@ export class QueryClientImpl implements Query {
     const data = QueryModuleAccountsRequest.encode(request).finish();
     const promise = this.rpc.request("cosmos.auth.v1beta1.Query", "ModuleAccounts", data);
     return promise.then((data) => QueryModuleAccountsResponse.decode(new _m0.Reader(data)));
+  }
+
+  ModuleAccountByName(request: QueryModuleAccountByNameRequest): Promise<QueryModuleAccountByNameResponse> {
+    const data = QueryModuleAccountByNameRequest.encode(request).finish();
+    const promise = this.rpc.request("cosmos.auth.v1beta1.Query", "ModuleAccountByName", data);
+    return promise.then((data) => QueryModuleAccountByNameResponse.decode(new _m0.Reader(data)));
   }
 
   Bech32Prefix(request: Bech32PrefixRequest): Promise<Bech32PrefixResponse> {

@@ -26,13 +26,17 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 		"subscription rate", msg.SubscriptionRate,
 		"pay-as-you-go rate", msg.PayAsYouGoRate,
 	)
-	if err := k.ModProviderValidate(ctx, msg); err != nil {
+
+	cacheCtx, commit := ctx.CacheContext()
+	if err := k.ModProviderValidate(cacheCtx, msg); err != nil {
 		return nil, err
 	}
 
-	if err := k.ModProviderHandle(ctx, msg); err != nil {
+	if err := k.ModProviderHandle(cacheCtx, msg); err != nil {
 		return nil, err
 	}
+
+	commit()
 
 	return &types.MsgModProviderResponse{}, nil
 }

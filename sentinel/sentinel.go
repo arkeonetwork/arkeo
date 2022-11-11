@@ -149,6 +149,8 @@ func (p Proxy) Run() {
 	log.Println("Starting Sentinel (reverse proxy)....")
 	p.Config.Print()
 
+	go p.EventListener(p.Config.EventStreamHost)
+
 	mux := http.NewServeMux()
 
 	// start server

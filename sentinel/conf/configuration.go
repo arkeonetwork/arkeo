@@ -17,7 +17,8 @@ type Configuration struct {
 	Location                  string        `json:"location"`
 	Port                      string        `json:"port"`
 	ProxyHost                 string        `json:"proxy_host"`
-	SourceChain               string        `json:"source_chain"`         // base url for arceo block chain
+	SourceChain               string        `json:"source_chain"` // base url for arceo block chain
+	EventStreamHost           string        `json:"event_stream_host"`
 	ClaimStoreLocation        string        `json:"claim_store_location"` // file location where claims are stored
 	ProviderPubKey            common.PubKey `json:"provider_pubkey"`
 	FreeTierRateLimit         int           `json:"free_tier_rate_limit"`
@@ -89,6 +90,7 @@ func NewConfiguration() Configuration {
 		Port:                      getEnv("PORT", "3636"),
 		ProxyHost:                 loadVarString("PROXY_HOST"),
 		SourceChain:               loadVarString("SOURCE_CHAIN"),
+		EventStreamHost:           loadVarString("EVENT_STREAM_HOST"),
 		ProviderPubKey:            loadVarPubKey("PROVIDER_PUBKEY"),
 		FreeTierRateLimit:         loadVarInt("FREE_RATE_LIMIT"),
 		FreeTierRateLimitDuration: loadVarDuration("FREE_RATE_LIMIT_DURATION"),
@@ -107,8 +109,9 @@ func (c Configuration) Print() {
 	fmt.Fprintln(writer, "Description\t", c.Description)
 	fmt.Fprintln(writer, "Location\t", c.Location)
 	fmt.Fprintln(writer, "Port\t", c.Port)
-	fmt.Fprintln(writer, "ProxyHost\t", c.ProxyHost)
-	fmt.Fprintln(writer, "SourceChain\t", c.SourceChain)
+	fmt.Fprintln(writer, "Proxy Host\t", c.ProxyHost)
+	fmt.Fprintln(writer, "Source Chain\t", c.SourceChain)
+	fmt.Fprintln(writer, "Event Stream Host\t", c.EventStreamHost)
 	fmt.Fprintln(writer, "Provider PubKey\t", c.ProviderPubKey)
 	fmt.Fprintln(writer, "Claim Store Location\t", c.ClaimStoreLocation)
 	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.FreeTierRateLimit, c.FreeTierRateLimitDuration))

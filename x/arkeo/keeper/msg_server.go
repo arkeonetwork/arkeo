@@ -34,25 +34,6 @@ func (k msgServer) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 	return k.configs.GetInt64Value(name)
 }
 
-/*
-func (k msgServer) getFee(ctx cosmos.Context, names ...configs.ConfigName) int64 {
-	var total int64
-	for _, name := range names {
-		total += k.FetchConfig(ctx, name)
-	}
-	return total
-}
-
-func (k msgServer) hasCoins(ctx cosmos.Context, addr cosmos.AccAddress, names ...configs.ConfigName) error {
-	total := k.getFee(ctx, names...)
-	coins := getCoins(total)
-	if !k.HasCoins(ctx, addr, coins) {
-		return sdkerrors.Wrapf(types.ErrInsufficientFunds, "insufficient funds")
-	}
-	return nil
-}
-*/
-
 // convert int64s into coins asset
 func getCoins(vals ...int64) cosmos.Coins {
 	coins := make(cosmos.Coins, len(vals))

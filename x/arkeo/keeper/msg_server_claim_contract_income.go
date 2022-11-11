@@ -28,11 +28,11 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 		return nil, err
 	}
 
-	if err := k.ClaimContractIncomeHandle(cacheCtx, msg); err != nil {
+	if err := k.ClaimContractIncomeHandle(ctx, msg); err != nil {
 		return nil, err
 	}
-
 	commit()
+
 	return &types.MsgClaimContractIncomeResponse{}, nil
 }
 
