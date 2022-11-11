@@ -22,7 +22,7 @@ func (ConfigurationSuite) TestConfiguration(c *C) {
 	os.Setenv("PORT", "4000")
 	os.Setenv("PROXY_HOST", "proxxy")
 	os.Setenv("SOURCE_CHAIN", "sourcey")
-	os.Setenv("EVNET_STREAM_HOST", "hosty")
+	os.Setenv("EVENT_STREAM_HOST", "hosty")
 	os.Setenv("PROVIDER_PUBKEY", "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	os.Setenv("FREE_RATE_LIMIT", "99")
 	os.Setenv("FREE_RATE_LIMIT_DURATION", "1h")
