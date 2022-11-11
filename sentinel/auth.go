@@ -155,25 +155,27 @@ func (p Proxy) isRateLimited(key string, ctype types.ContractType) bool {
 	return !limiter.Allow()
 }
 
-func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (int, error) {
+func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
+	key := fmt.Sprintf("%d-%s", aa.Chain, aa.Spender)
 	contractKey := p.MemStore.Key(aa.Provider.String(), aa.Chain.String(), aa.Spender.String())
 	contract, err := p.MemStore.Get(contractKey)
-	if err != nil {
-		if contract.IsEmpty() {
-			// user queried for a non-existent contract. Marking the request
-			// against their free tier so they don't thrash daemon with
-			// random/fake requests
-			return p.freeTier(remoteAddr)
-		} else {
-			return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
+
+	defer func() {
+		if err != nil {
+			if ok := p.isRateLimited(key, contract.Type); ok {
+				code = http.StatusTooManyRequests
+				err = fmt.Errorf(http.StatusText(429))
+			}
 		}
+	}()
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
 	}
 
 	if contract.IsClose(p.MemStore.GetHeight()) {
 		return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 	}
 
-	key := fmt.Sprintf("%d-%s", aa.Chain, aa.Spender)
 	sig := hex.EncodeToString(aa.Signature)
 
 	claim := NewClaim(aa.Provider, aa.Chain, aa.Spender, aa.Nonce, aa.Height, sig)
@@ -196,7 +198,6 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (int, error) {
 	}
 
 	if ok := p.isRateLimited(key, contract.Type); ok {
-		fmt.Println("GOT HEREz")
 		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
 	}
 
