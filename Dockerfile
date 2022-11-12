@@ -17,13 +17,15 @@ ENV GOPATH=/go
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl https://get.ignite.com/cli! | bash
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    curl git jq vim make protobuf-compiler xz-utils sudo python3-pip \
-    && rm -rf /var/cache/apt/lists \
-    && go install mvdan.cc/gofumpt@v0.3.0
+# nolint
+# RUN apt-get update \
+    # && apt-get install -y --no-install-recommends \
+    # curl git jq vim make protobuf-compiler xz-utils sudo python3-pip \
+    # && rm -rf /var/cache/apt/lists \
+    # && go install mvdan.cc/gofumpt@v0.3.0
 
 # Download go dependencies
 WORKDIR /app
@@ -31,13 +33,9 @@ COPY go.mod go.sum ./
 
 COPY . .
 
-ARG TAG=mainnet
 RUN ignite chain build --proto-all-modules
-# RUN ./scripts/protocgen.sh
+ARG TAG=mainnet
 RUN make install
-RUN ls 
-RUN ls /go/bin
-RUN ls /usr/bin
 
 #
 # Main
@@ -49,9 +47,8 @@ COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
 
 COPY scripts /scripts
 
-ENTRYPOINT /scripts/genesis.sh
+ENTRYPOINT ["/scripts/genesis.sh"]
 
-# default to mainnet
 ARG TAG=mainnet
 ENV NET=$TAG
 
