@@ -15,6 +15,7 @@ endif
 .PHONY: build test tools export healthcheck run-mocknet build-mocknet stop-mocknet ps-mocknet reset-mocknet logs-mocknet openapi
 
 # compiler flags
+IMAGE="arkeo"
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
@@ -101,3 +102,8 @@ test-race:
 test-watch:
 	@gow -c test ${TEST_BUILD_FLAGS} ${TEST_DIR}
 
+docker-build:
+	@docker build . --file Dockerfile -t ${IMAGE}
+
+docker-run:
+	@docker run --rm -it -p 1317:1317 -p 26657:26657 ${IMAGE}

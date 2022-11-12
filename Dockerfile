@@ -49,6 +49,8 @@ COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
 
 COPY scripts /scripts
 
+ENTRYPOINT /scripts/genesis.sh
+
 # default to mainnet
 ARG TAG=mainnet
 ENV NET=$TAG
