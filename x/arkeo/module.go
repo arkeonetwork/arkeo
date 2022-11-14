@@ -21,6 +21,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 var (
@@ -96,6 +97,7 @@ type AppModule struct {
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	bankKeeper    types.BankKeeper
+	stakingKeeper stakingkeeper.Keeper
 }
 
 func NewAppModule(
@@ -103,12 +105,14 @@ func NewAppModule(
 	keeper keeper.Keeper,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
+	stakingKeeper stakingkeeper.Keeper,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,
+		stakingKeeper:  stakingKeeper,
 	}
 }
 
@@ -125,7 +129,7 @@ func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
 
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper, am.stakingKeeper))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
 }
 
@@ -139,14 +143,6 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	cdc.MustUnmarshalJSON(gs, &genState)
 
 	InitGenesis(ctx, am.keeper, genState)
-
-	/*am.keeper.StakingSetParams(ctx, stakingtypes.Params{
-		UnbondingTime:     time.Hour * 24 * 7 * 2, // 2 weeks
-		MaxValidators:     100,
-		MaxEntries:        10,
-		HistoricalEntries: 10000,
-		BondDenom:         "stake",
-	})*/
 
 	return []abci.ValidatorUpdate{}
 }
@@ -165,7 +161,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(ctx cosmos.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	mgr := keeper.NewManager(am.keeper)
+	mgr := keeper.NewManager(am.keeper, am.stakingKeeper)
 	if err := mgr.EndBlock(ctx); err != nil {
 		ctx.Logger().Error("manager endblock error ", "error", err)
 	}

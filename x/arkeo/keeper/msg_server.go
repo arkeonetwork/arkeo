@@ -4,6 +4,8 @@ import (
 	"arkeo/common/cosmos"
 	"arkeo/x/arkeo/configs"
 	"arkeo/x/arkeo/types"
+
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 type msgServer struct {
@@ -12,19 +14,19 @@ type msgServer struct {
 	configs configs.ConfigValues
 }
 
-func newMsgServer(keeper Keeper) *msgServer {
+func newMsgServer(keeper Keeper, sk stakingkeeper.Keeper) *msgServer {
 	ver := keeper.GetVersion()
 	return &msgServer{
 		Keeper:  keeper,
-		mgr:     NewManager(keeper),
+		mgr:     NewManager(keeper, sk),
 		configs: configs.GetConfigValues(ver),
 	}
 }
 
 // NewMsgServerImpl returns an implementation of the MsgServer interface
 // for the provided Keeper.
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
-	return newMsgServer(keeper)
+func NewMsgServerImpl(keeper Keeper, sk stakingkeeper.Keeper) types.MsgServer {
+	return newMsgServer(keeper, sk)
 }
 
 var _ types.MsgServer = msgServer{}

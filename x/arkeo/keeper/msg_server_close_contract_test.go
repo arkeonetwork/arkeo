@@ -14,10 +14,10 @@ type CloseContractSuite struct{}
 var _ = Suite(&CloseContractSuite{})
 
 func (CloseContractSuite) TestValidate(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 	ctx = ctx.WithBlockHeight(14)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
@@ -45,10 +45,10 @@ func (CloseContractSuite) TestValidate(c *C) {
 }
 
 func (CloseContractSuite) TestHandle(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 	ctx = ctx.WithBlockHeight(14)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(500)), IsNil)

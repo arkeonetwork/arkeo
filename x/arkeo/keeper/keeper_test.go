@@ -142,6 +142,74 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 	return ctx, *k
 }
 
+func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper) {
+	storeKey := sdk.NewKVStoreKey(types.StoreKey)
+	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
+	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
+	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
+	keyParams := cosmos.NewKVStoreKey(paramstypes.StoreKey)
+	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
+	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+
+	db := tmdb.NewMemDB()
+	stateStore := store.NewCommitMultiStore(db)
+	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyStake, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
+	c.Assert(stateStore.LoadLatestVersion(), IsNil)
+
+	encodingConfig := simappparams.MakeTestEncodingConfig()
+	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	cdc := MakeTestMarshaler()
+	amino := encodingConfig.Amino
+
+	paramsSubspace := typesparams.NewSubspace(cdc,
+		types.Amino,
+		storeKey,
+		memStoreKey,
+		"ArkeoParams",
+	)
+
+	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+
+	pk := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
+	ak := authkeeper.NewAccountKeeper(cdc, keyAcc, pk.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+		types.ReserveName:              {},
+		types.ProviderName:             {},
+		types.ContractName:             {},
+	}, sdk.Bech32PrefixAccAddr)
+	ak.SetParams(ctx, authtypes.DefaultParams())
+
+	bk := bankkeeper.NewBaseKeeper(cdc, keyBank, ak, pk.Subspace(banktypes.ModuleName), nil)
+	bk.SetParams(ctx, banktypes.DefaultParams())
+
+	sk := stakingkeeper.NewKeeper(cdc, keyStake, ak, bk, pk.Subspace(stakingtypes.ModuleName))
+	sk.SetParams(ctx, stakingtypes.DefaultParams())
+
+	k := NewKVStore(
+		cdc,
+		storeKey,
+		memStoreKey,
+		paramsSubspace,
+		bk,
+		ak,
+		sk,
+		semver.MustParse("0.0.0"),
+	)
+
+	// Initialize params
+	k.SetParams(ctx, types.DefaultParams())
+
+	return ctx, *k, sk
+}
+
 type errIsChecker struct {
 	*CheckerInfo
 }

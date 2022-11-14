@@ -7,18 +7,20 @@ import (
 	"arkeo/x/arkeo/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 type Manager struct {
 	keeper  Keeper
+	sk      stakingkeeper.Keeper
 	configs configs.ConfigValues
 }
 
-func NewManager(k Keeper) Manager {
+func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
 	ver := k.GetVersion()
 	return Manager{
 		keeper:  k,
+		sk:      sk,
 		configs: configs.GetConfigValues(ver),
 	}
 }
@@ -70,7 +72,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	if valCycle == 0 || ctx.BlockHeight()%valCycle != 0 {
 		return nil
 	}
-	validators := mgr.keeper.GetActiveValidators(ctx)
+	validators := mgr.sk.GetBondedValidatorsByPower(ctx)
 
 	reserve := mgr.keeper.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	emissionCurve := mgr.FetchConfig(ctx, configs.EmissionCurve)
@@ -85,34 +87,52 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	// sum tokens
 	total := cosmos.ZeroInt()
 	for _, val := range validators {
-		if val.Status != stakingtypes.Bonded {
+		if !val.IsBonded() || val.IsJailed() {
 			continue
 		}
-		total = total.Add(val.Tokens)
+		total = total.Add(val.DelegatorShares.RoundInt())
 	}
 
-	// TODO: pay delegates of validators, maybe using vesting accounts?
-
 	for _, val := range validators {
-		if val.Status != stakingtypes.Bonded {
-			continue
-		}
-		acc, err := cosmos.AccAddressFromBech32(val.OperatorAddress)
-		if err != nil {
-			ctx.Logger().Error("unable to parse validator operator address", "error", err)
+		if !val.IsBonded() || val.IsJailed() {
+			ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.String())
 			continue
 		}
 
-		rwd := common.GetSafeShare(val.Tokens, total, blockReward)
-		rewards := getCoins(rwd.Int64())
+		acc := cosmos.AccAddress(val.GetOperator())
 
-		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, rewards); err != nil {
-			ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
-			continue
+		totalReward := common.GetSafeShare(val.DelegatorShares.RoundInt(), total, blockReward)
+		validatorReward := cosmos.ZeroInt()
+		rateBasisPts := val.Commission.CommissionRates.Rate.MulInt64(100).RoundInt()
+
+		delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
+		for _, delegate := range delegates {
+			delegateAcc, err := cosmos.AccAddressFromBech32(delegate.DelegatorAddress)
+			if err != nil {
+				ctx.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
+				continue
+			}
+			delegateReward := common.GetSafeShare(delegate.Shares.RoundInt(), val.DelegatorShares.RoundInt(), totalReward)
+			if acc.String() != delegate.DelegatorAddress {
+				valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
+				delegateReward = delegateReward.Sub(valFee)
+				validatorReward = validatorReward.Add(valFee)
+			}
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, delegateAcc, getCoins(delegateReward.Int64())); err != nil {
+				ctx.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
+			}
+			ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
 		}
-		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", rwd)
 
-		mgr.ValidatorPayoutEvent(ctx, acc, rwd)
+		if !validatorReward.IsZero() {
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, getCoins(validatorReward.Int64())); err != nil {
+				ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
+				continue
+			}
+			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
+		}
+
+		mgr.ValidatorPayoutEvent(ctx, acc, validatorReward)
 	}
 
 	return nil

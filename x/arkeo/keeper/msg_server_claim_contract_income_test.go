@@ -15,10 +15,10 @@ var _ = Suite(&ClaimContractIncomeSuite{})
 
 func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	var err error
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 	ctx = ctx.WithBlockHeight(20)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
@@ -59,9 +59,9 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 }
 
 func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
@@ -124,10 +124,10 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 }
 
 func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 	ctx = ctx.WithBlockHeight(20)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()

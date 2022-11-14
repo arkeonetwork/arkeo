@@ -15,9 +15,9 @@ var _ = Suite(&OpenContractSuite{})
 
 func (OpenContractSuite) TestValidate(c *C) {
 	var err error
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
@@ -84,9 +84,9 @@ func (OpenContractSuite) TestValidate(c *C) {
 }
 
 func (OpenContractSuite) TestHandle(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
