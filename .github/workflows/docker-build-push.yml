@@ -2,7 +2,7 @@ name: docker-build-push
 
 on:
   push:
-    branches: [ master, docker-ci ]
+    branches: [ master ]
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: none # [ main ]
