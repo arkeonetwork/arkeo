@@ -156,6 +156,7 @@ func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyStake, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
@@ -190,6 +191,8 @@ func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper)
 	bk.SetParams(ctx, banktypes.DefaultParams())
 
 	sk := stakingkeeper.NewKeeper(cdc, keyStake, ak, bk, pk.Subspace(stakingtypes.ModuleName))
+	sk.SetParams(ctx, stakingtypes.DefaultParams())
+
 	k := NewKVStore(
 		cdc,
 		storeKey,

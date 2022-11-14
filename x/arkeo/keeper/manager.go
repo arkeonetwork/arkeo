@@ -8,7 +8,6 @@ import (
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 type Manager struct {
@@ -88,7 +87,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 	// sum tokens
 	total := cosmos.ZeroInt()
 	for _, val := range validators {
-		if val.Status != stakingtypes.Bonded {
+		if !val.IsBonded() || val.IsJailed() {
 			continue
 		}
 		total = total.Add(val.DelegatorShares.RoundInt())
