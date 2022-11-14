@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 
 BIN="arkeod"
-TOKEN="keo"
+TOKEN="ukeo"
 USER="$1"
 
 ADDRESS=$($BIN keys show "$USER" -a)

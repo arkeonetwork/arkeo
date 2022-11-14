@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
-# Delete any existing protobuf generated files.
-find . -name "*.pb.go" -delete
-
-go install github.com/regen-network/cosmos-proto/protoc-gen-gocosmos
-
-# shellcheck disable=SC2038
-find proto/ -path -prune -o -name '*.proto' -printf '%h\n' | sort | uniq |
-	while read -r DIR; do
-		find "$DIR" -maxdepth 1 -name '*.proto' |
-			xargs protoc \
-				-I "proto" \
-				-I "third_party/proto" \
-				--gocosmos_out=plugins=interfacetype+grpc,Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types:.
+cd proto
+proto_dirs=$(find . -path -prune -o -name '*.proto' -print0 | xargs -0 -n1 dirname | sort | uniq)
+for dir in $proto_dirs; do
+	for file in $(find "${dir}" -maxdepth 1 -name '*.proto'); do
+		if grep go_package "$file" &>/dev/null; then
+			buf generate --template buf.gen.gogo.yaml "$file"
+		fi
 	done
+done
 
-# Move proto files to the right places.
-cp -r gitlab.com/thorchain/thornode/* ./
-rm -rf gitlab.com
+cd ..
+
+# after the proto files have been generated add them to the the repo
+# in the proper location. Then, remove the ephemeral tree used for generation
+cp -r arkeo/* .
+rm -rf arkeo
+
+# we need to go mod manually, because the docker image is still on go1.18
+# go mod tidy
