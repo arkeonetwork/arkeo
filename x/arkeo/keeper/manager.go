@@ -98,26 +98,11 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.String())
 			continue
 		}
-		pk, err := val.ConsPubKey()
-		if err != nil {
-			ctx.Logger().Error("unable to get validator pubkey", "error", err)
-			continue
-		}
 
-		pubkey, err := common.NewPubKeyFromCrypto(pk)
-		if err != nil {
-			ctx.Logger().Error("unable to get validator acc pubkey", "error", err)
-			continue
-		}
-
-		acc, err := pubkey.GetMyAddress()
-		if err != nil {
-			ctx.Logger().Error("unable to parse validator operator address", "error", err)
-			continue
-		}
+		acc := cosmos.AccAddress(val.GetOperator())
 
 		totalReward := common.GetSafeShare(val.DelegatorShares.RoundInt(), total, blockReward)
-		validatorReward := common.GetSafeShare(val.Tokens, total, blockReward)
+		validatorReward := cosmos.ZeroInt()
 		rateBasisPts := val.Commission.CommissionRates.Rate.MulInt64(100).RoundInt()
 
 		delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
@@ -128,20 +113,24 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 				continue
 			}
 			delegateReward := common.GetSafeShare(delegate.Shares.RoundInt(), val.DelegatorShares.RoundInt(), totalReward)
-			valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
-			delegateReward = delegateReward.Sub(valFee)
+			if acc.String() != delegate.DelegatorAddress {
+				valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
+				delegateReward = delegateReward.Sub(valFee)
+				validatorReward = validatorReward.Add(valFee)
+			}
 			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, delegateAcc, getCoins(delegateReward.Int64())); err != nil {
 				ctx.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
 			}
 			ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
-			validatorReward = validatorReward.Add(valFee)
 		}
 
-		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, getCoins(validatorReward.Int64())); err != nil {
-			ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
-			continue
+		if !validatorReward.IsZero() {
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, getCoins(validatorReward.Int64())); err != nil {
+				ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
+				continue
+			}
+			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
 		}
-		ctx.Logger().Info("validator rewarded", "validator", acc.String(), "amount", validatorReward)
 
 		mgr.ValidatorPayoutEvent(ctx, acc, validatorReward)
 	}

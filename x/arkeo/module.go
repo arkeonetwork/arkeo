@@ -144,14 +144,6 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 
 	InitGenesis(ctx, am.keeper, genState)
 
-	/*am.keeper.StakingSetParams(ctx, stakingtypes.Params{
-		UnbondingTime:     time.Hour * 24 * 7 * 2, // 2 weeks
-		MaxValidators:     100,
-		MaxEntries:        10,
-		HistoricalEntries: 10000,
-		BondDenom:         "stake",
-	})*/
-
 	return []abci.ValidatorUpdate{}
 }
 
