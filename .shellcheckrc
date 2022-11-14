@@ -1,4 +1,4 @@
 disable=SC3040
 disable=SC3020
 disable=SC1091
-
+disable=SC2044
