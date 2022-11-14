@@ -59,7 +59,7 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	vals := []stakingtypes.Validator{val1, val2, val3}
 	for _, val := range vals {
 		sk.SetValidator(ctx, val)
-		sk.SetValidatorByConsAddr(ctx, val)
+		c.Assert(sk.SetValidatorByConsAddr(ctx, val), IsNil)
 		sk.SetNewValidatorByPowerIndex(ctx, val)
 	}
 
