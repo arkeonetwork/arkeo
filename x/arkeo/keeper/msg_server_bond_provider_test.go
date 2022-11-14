@@ -17,9 +17,9 @@ func (BondProviderSuite) TestValidate(c *C) {
 }
 
 func (BondProviderSuite) TestHandle(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()

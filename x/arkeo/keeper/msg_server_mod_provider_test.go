@@ -13,9 +13,9 @@ type ModProviderSuite struct{}
 var _ = Suite(&ModProviderSuite{})
 
 func (ModProviderSuite) TestValidate(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
@@ -47,9 +47,9 @@ func (ModProviderSuite) TestValidate(c *C) {
 }
 
 func (ModProviderSuite) TestHandle(c *C) {
-	ctx, k := SetupKeeper(c)
+	ctx, k, sk := SetupKeeperWithStaking(c)
 
-	s := newMsgServer(k)
+	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()

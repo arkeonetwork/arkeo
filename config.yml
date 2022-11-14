@@ -7,9 +7,13 @@ build:
     - third_party/proto
     - proto_vendor
 accounts:
+- name: reserve
+  coins:
+  - 2000000000000000keo
+  address: rko1dheycdevq39qlkxs2a6wuuzyn4aqxhvee2kjas
 - name: alice
   coins:
-  - 2000000000000keo
+  - 200000000000000keo
   - 200000000stake
 - name: bob
   coins:

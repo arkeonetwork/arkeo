@@ -60,7 +60,7 @@ func (k *TestManagerKeeperValidatorPayout) GetActiveValidators(ctx cosmos.Contex
 }
 
 func (ManagerSuite) TestValidatorPayout(c *C) {
-	ctx, keepr := SetupKeeper(c)
+	ctx, keepr, sk := SetupKeeperWithStaking(c)
 	k := &TestManagerKeeperValidatorPayout{
 		keeper: keepr,
 	}
@@ -68,7 +68,7 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(500))), IsNil)
 	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ReserveName, getCoins(common.Tokens(500))), IsNil)
 
-	mgr := NewManager(k)
+	mgr := NewManager(k, sk)
 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
 
 	c.Assert(mgr.ValidatorEndBlock(ctx), IsNil)
