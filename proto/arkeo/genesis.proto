@@ -10,8 +10,8 @@ option go_package = "arkeo/x/arkeo/types";
 
 // GenesisState defines the arkeo module's genesis state.
 message GenesisState {
-  Params params = 1 [(gogoproto.nullable) = false];
-  repeated Provider providers = 2 [(gogoproto.nullable) = false];
-  repeated Contract contracts = 3 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
+  repeated Provider providers = 2 [ (gogoproto.nullable) = false ];
+  repeated Contract contracts = 3 [ (gogoproto.nullable) = false ];
   // this line is used by starport scaffolding # genesis/proto/state
 }

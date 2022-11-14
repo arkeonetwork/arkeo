@@ -1,6 +1,7 @@
 *.pb.go
 generated
 arkeod
+tmp-swagger-gen/
 
 .trunk
 

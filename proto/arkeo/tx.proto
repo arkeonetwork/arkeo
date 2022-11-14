@@ -13,23 +13,28 @@ service Msg {
   rpc ModProvider(MsgModProvider) returns (MsgModProviderResponse);
   rpc OpenContract(MsgOpenContract) returns (MsgOpenContractResponse);
   rpc CloseContract(MsgCloseContract) returns (MsgCloseContractResponse);
-  rpc ClaimContractIncome(MsgClaimContractIncome) returns (MsgClaimContractIncomeResponse);
-// this line is used by starport scaffolding # proto/tx/rpc
+  rpc ClaimContractIncome(MsgClaimContractIncome)
+      returns (MsgClaimContractIncomeResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
 }
 
 message MsgBondProvider {
   string creator = 1;
-  string pub_key = 2 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string chain = 3 ;
-  string bond = 4 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string pub_key = 2 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string chain = 3;
+  string bond = 4 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
 }
 
 message MsgBondProviderResponse {}
 
 message MsgModProvider {
   string creator = 1;
-  string pub_key = 2 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string chain = 3 ;
+  string pub_key = 2 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string chain = 3;
   string metadataURI = 4;
   uint64 metadataNonce = 5;
   ProviderStatus status = 6;
@@ -43,33 +48,37 @@ message MsgModProviderResponse {}
 
 message MsgOpenContract {
   string creator = 1;
-  string pub_key = 2 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string chain = 3 ;
-  string client = 4 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string delegate = 5 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  string pub_key = 2 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string chain = 3;
+  string client = 4 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
   ContractType cType = 6;
   int64 duration = 7;
   int64 rate = 8;
-  string deposit = 9 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
+  string deposit = 9 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
 }
 
 message MsgOpenContractResponse {}
 
 message MsgCloseContract {
   string creator = 1;
-  string pub_key = 2 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string chain = 3 ;
-  string client = 4 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string delegate = 5 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  string pub_key = 2 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string chain = 3;
+  string client = 4 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
   string creator = 1;
-  string pub_key = 2 [(gogoproto.casttype) = "arkeo/common.PubKey"];
-  string chain = 3 ;
-  string spender = 4 [(gogoproto.casttype) = "arkeo/common.PubKey"];
+  string pub_key = 2 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string chain = 3;
+  string spender = 4 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
   bytes signature = 5;
   int64 nonce = 6;
   int64 height = 7;
