@@ -67,6 +67,10 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	delAcc2 := types.GetRandomBech32Addr()
 	delAcc3 := types.GetRandomBech32Addr()
 
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1, valAddrs[0], cosmos.NewDec(100)))
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2, valAddrs[1], cosmos.NewDec(200)))
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3, valAddrs[2], cosmos.NewDec(500)))
+
 	del1 := stakingtypes.NewDelegation(delAcc1, valAddrs[0], cosmos.NewDec(10))
 	del2 := stakingtypes.NewDelegation(delAcc2, valAddrs[0], cosmos.NewDec(20))
 	del3 := stakingtypes.NewDelegation(delAcc3, valAddrs[1], cosmos.NewDec(20))
@@ -80,14 +84,14 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	mgr := NewManager(k, sk)
 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
 
-	blockReward := int64(237793)
+	blockReward := int64(237792)
 	c.Assert(mgr.ValidatorEndBlock(ctx), IsNil)
 	c.Check(k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), Equals, 5000000000000-blockReward)
 
 	// check validator balances
 	totalBal := cosmos.ZeroInt()
 	bal := k.GetBalance(ctx, acc1)
-	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(27985))
+	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, int64(27984))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
 
 	bal = k.GetBalance(ctx, acc2)
