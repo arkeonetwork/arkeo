@@ -6,7 +6,7 @@ services:
      - "1317:1317"
      - "26657:26657"
    volumes:
-     - "${HOME}/arkeo:/root/.arkeo:rw"
+     - "${HOME}/.arkeo:/root/.arkeo:rw"
    command: arkeod start
 
   sentinel:
@@ -31,9 +31,9 @@ services:
      SUB_RATE_LIMIT_DURATION: "1m"
      AS_GO_RATE_LIMIT: 10
      AS_GO_RATE_LIMIT_DURATION: "1m"
-     CLAIM_STORE_LOCATION: "${HOME}/arkeo/claims"
+     CLAIM_STORE_LOCATION: "${HOME}/.arkeo/claims"
    entrypoint: "/scripts/sentinel.sh"
    command: sentinel
    volumes:
-    - "${HOME}/arkeo:/root/.arkeo:rw"
+    - "${HOME}/.arkeo:/root/.arkeo:rw"
     - "./scripts:/scripts"
