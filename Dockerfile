@@ -31,7 +31,10 @@ RUN make install
 #
 FROM golang:${GO_VERSION}-alpine
 
-RUN apk add jq curl vim
+RUN apk add --no-cache \
+    jq=1.6-r1 \
+    curl=7.83.1-r4 \
+    vim=8.2.5000-r0
 
 # Copy the compiled binaries over.
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
