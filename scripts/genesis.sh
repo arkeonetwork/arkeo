@@ -3,7 +3,7 @@
 set -o pipefail
 
 CHAIN_ID="arkeo"
-STAKE="100000000000stake"
+STAKE="100000000000ukeo"
 USER="ark"
 
 if [ ! -f ~/.arkeo/config/priv_validator_key.json ]; then
@@ -21,6 +21,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	arkeod validate-genesis --trace
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
+	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 fi
 
 arkeod start

@@ -31,6 +31,8 @@ RUN make install
 #
 FROM golang:${GO_VERSION}-alpine
 
+RUN apk add jq curl vim
+
 # Copy the compiled binaries over.
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
 
