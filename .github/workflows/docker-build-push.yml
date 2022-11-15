@@ -2,8 +2,8 @@ name: docker-build-push
 
 on:
   push:
-    branches: [ master ]
-    tags: [ 'v*.*.*' ]
+    branches: [master]
+    tags: ["v*.*.*"]
   pull_request:
     branches: none # [ main ]
 
@@ -11,14 +11,12 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: arkeonetwork/arkeo 
+  IMAGE_NAME: arkeonetwork/arkeo
   # IMAGE_NAME: ${{ github.repository }} # returns HoussemDellai/github-actions-course : problem with uppercase
   IMAGE_TAG: latest
 
-
 jobs:
   build-push-docker:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,7 +48,7 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Check outputs
         run: echo ${{ steps.vars.outputs.sha_short }}
-          
+
       - name: Read VERSION file
         id: getversion
         run: echo "::set-output name=version::$(cat version)"
