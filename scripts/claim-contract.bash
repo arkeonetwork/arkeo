@@ -32,10 +32,10 @@ PROVIDER="$2"
 CHAIN="$3"
 NONCE="$4"
 
-PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p | jq -r .key)
+PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p | jq -r .key)
+CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
 HEIGHT=$(curl -s localhost:1317/arkeo/contract/"$PUBKEY"/"$CHAIN"/"$CLIENT_PUBKEY" | jq -r .contract.height)
@@ -51,4 +51,4 @@ fi
 
 SIGNATURE=$(signhere -u "$USER" -m "$PUBKEY:$CHAIN:$CLIENT_PUBKEY:$HEIGHT:$NONCE")
 
-$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --gas auto -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$NONCE" "$HEIGHT" "$SIGNATURE"
+$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$NONCE" "$HEIGHT" "$SIGNATURE"

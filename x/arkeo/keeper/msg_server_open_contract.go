@@ -27,10 +27,12 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.OpenContractValidate(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed open contract validation", "err", err)
 		return nil, err
 	}
 
 	if err := k.OpenContractHandle(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed open contract handle", "err", err)
 		return nil, err
 	}
 	commit()

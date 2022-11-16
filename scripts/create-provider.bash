@@ -22,9 +22,9 @@ USER="$1"
 CHAIN="$2"
 BOND="$3"
 
-PUBKEY_RAW=$($BIN keys show "$USER" -p | jq -r .key)
+PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
 ./"$PWD"/bond-provider.bash "$USER" "$CHAIN" "$BOND"
 
-$BIN tx $BIN_TX mod-provider -y --from "$USER" --gas auto -- "$PUBKEY" "$CHAIN" "http://localhost:3636/metadata.json" 1 1 5 50 10 10
+$BIN tx $BIN_TX mod-provider -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$CHAIN" "http://localhost:3636/metadata.json" 1 1 5 50 10 10

@@ -11,22 +11,22 @@ genesis:
   app_state:
     staking:
       params:
-        bond_denom: "ukeo"
+        bond_denom: "uarkeo"
 accounts:
 - name: reserve
   coins:
-  - 2000000000000000ukeo
-  address: rko1dheycdevq39qlkxs2a6wuuzyn4aqxhvee2kjas
+  - 2000000000000000uarkeo
+  address: arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3
 - name: alice
   coins:
-  - 200000000000000ukeo
+  - 200000000000000uarkeo
 - name: bob
   coins:
-  - 1000000000000ukeo
+  - 1000000000000uarkeo
 faucet:
   name: bob
   coins:
-  - 5keo
+  - 5uarkeo
   host: 0.0.0.0:4500
 client:
   typescript:
@@ -37,4 +37,4 @@ client:
     path: docs/static/openapi.yml
 validators:
 - name: alice
-  bonded: 100000000ukeo
+  bonded: 100000000uarkeo

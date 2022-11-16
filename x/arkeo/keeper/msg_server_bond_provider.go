@@ -24,10 +24,12 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.BondProviderValidate(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed bond provider validation", "err", err)
 		return nil, err
 	}
 
 	if err := k.BondProviderHandle(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed bond provider handle", "err", err)
 		return nil, err
 	}
 	commit()
