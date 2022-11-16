@@ -1,4 +1,5 @@
 *.pb.go
+*.pb.gw.go
 generated
 arkeod
 tmp-swagger-gen/
