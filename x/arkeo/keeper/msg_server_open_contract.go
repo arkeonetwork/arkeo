@@ -78,7 +78,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
 		}
 	case types.ContractType_PayAsYouGo:
-		if msg.Rate != provider.SubscriptionRate {
+		if msg.Rate != provider.PayAsYouGoRate {
 			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go %d (client) vs %d (provider)", msg.Rate, provider.PayAsYouGoRate)
 		}
 	default:
