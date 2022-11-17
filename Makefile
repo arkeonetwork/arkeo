@@ -86,7 +86,7 @@ coverage-report: test-coverage
 	@go tool cover -html=coverage.txt
 
 tools:
-	go install ./tools/signhere
+	go install ./tools/signhere ./tools/curleo
 
 test-coverage-sum:
 	@go run gotest.tools/gotestsum --junitfile report.xml --format testname -- ${TEST_BUILD_FLAGS} -v -coverprofile=coverage.txt -covermode count ${TEST_DIR}

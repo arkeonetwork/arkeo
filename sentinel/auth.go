@@ -94,7 +94,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			aa, err = parseArkAuth(raw[0])
 		}
 
-		if err != nil || aa.Validate(p.Config.ProviderPubKey) != nil {
+		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
 			httpCode, err := p.paidTier(aa, r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())

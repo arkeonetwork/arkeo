@@ -29,10 +29,12 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.ModProviderValidate(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed mod provider validation", "err", err)
 		return nil, err
 	}
 
 	if err := k.ModProviderHandle(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed mod provider handle", "err", err)
 		return nil, err
 	}
 

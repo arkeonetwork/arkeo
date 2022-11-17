@@ -24,10 +24,12 @@ func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContr
 
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.CloseContractValidate(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed close contract validation", "err", err)
 		return nil, err
 	}
 
 	if err := k.CloseContractHandle(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed close contract handler", "err", err)
 		return nil, err
 	}
 

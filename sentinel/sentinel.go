@@ -49,6 +49,15 @@ func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request) {
 
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
+	// remove arkauth query arg
+	values := r.URL.Query()
+	values.Del(QueryArkAuth)
+	r.URL.RawQuery = values.Encode()
+
+	parts := strings.Split(r.URL.Path, "/")
+	parts = append(parts[:1], parts[1+1:]...)
+	r.URL.Path = strings.Join(parts, "/")
+
 	p.serveReverseProxy(w, r)
 }
 
@@ -64,26 +73,26 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 4 {
+	if len(parts) < 5 {
 		http.Error(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
-	providerPK, err := common.NewPubKey(parts[1])
+	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	chain, err := common.NewChain(parts[2])
+	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	spenderPK, err := common.NewPubKey(parts[3])
+	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
@@ -107,26 +116,26 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 4 {
+	if len(parts) < 5 {
 		http.Error(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
-	providerPK, err := common.NewPubKey(parts[1])
+	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	chain, err := common.NewChain(parts[2])
+	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	spenderPK, err := common.NewPubKey(parts[3])
+	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)

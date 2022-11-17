@@ -25,10 +25,12 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.ClaimContractIncomeValidate(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed claim contract validation", "err", err)
 		return nil, err
 	}
 
 	if err := k.ClaimContractIncomeHandle(ctx, msg); err != nil {
+		ctx.Logger().Error("failed claim contract handler", "err", err)
 		return nil, err
 	}
 	commit()

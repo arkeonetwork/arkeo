@@ -6,9 +6,9 @@ if [ -z "$1" ]; then
 fi
 
 BIN="arkeod"
-TOKEN="ukeo"
+TOKEN="uarkeo"
 USER="$1"
 
-ADDRESS=$($BIN keys show "$USER" -a)
+ADDRESS=$($BIN keys show "$USER" -a --keyring-backend test)
 
 $BIN query bank balances --denom $TOKEN -o json -- "$ADDRESS"

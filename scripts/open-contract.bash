@@ -34,13 +34,13 @@ CTYPE="$4"
 DURATION="$5"
 RATE="10"
 
-PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p | jq -r .key)
+PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p | jq -r .key)
+CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
 # nolint
 DEPOSIT=$((RATE * DURATION))
 
-$BIN tx $BIN_TX open-contract -y --from "$USER" --gas auto -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
+$BIN tx $BIN_TX open-contract -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
