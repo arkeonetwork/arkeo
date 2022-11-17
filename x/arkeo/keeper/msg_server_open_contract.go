@@ -102,13 +102,13 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
 	openCost := k.FetchConfig(ctx, configs.OpenContractCost)
 	if openCost > 0 {
-		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, cosmos.NewCoins(getCoin(openCost))); err != nil {
-			return nil
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, getCoins(openCost)); err != nil {
+			return err
 		}
 	}
 
 	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, getCoins(msg.Deposit.Int64())); err != nil {
-		return nil
+		return err
 	}
 
 	chain, err := common.NewChain(msg.Chain)

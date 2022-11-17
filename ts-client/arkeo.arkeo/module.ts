@@ -7,29 +7,17 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgOpenContract } from "./types/arkeo/tx";
-import { MsgModProvider } from "./types/arkeo/tx";
-import { MsgCloseContract } from "./types/arkeo/tx";
-import { MsgBondProvider } from "./types/arkeo/tx";
 import { MsgClaimContractIncome } from "./types/arkeo/tx";
+import { MsgBondProvider } from "./types/arkeo/tx";
+import { MsgModProvider } from "./types/arkeo/tx";
+import { MsgOpenContract } from "./types/arkeo/tx";
+import { MsgCloseContract } from "./types/arkeo/tx";
 
 
-export { MsgOpenContract, MsgModProvider, MsgCloseContract, MsgBondProvider, MsgClaimContractIncome };
+export { MsgClaimContractIncome, MsgBondProvider, MsgModProvider, MsgOpenContract, MsgCloseContract };
 
-type sendMsgOpenContractParams = {
-  value: MsgOpenContract,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgModProviderParams = {
-  value: MsgModProvider,
-  fee?: StdFee,
-  memo?: string
-};
-
-type sendMsgCloseContractParams = {
-  value: MsgCloseContract,
+type sendMsgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
   fee?: StdFee,
   memo?: string
 };
@@ -40,31 +28,43 @@ type sendMsgBondProviderParams = {
   memo?: string
 };
 
-type sendMsgClaimContractIncomeParams = {
-  value: MsgClaimContractIncome,
+type sendMsgModProviderParams = {
+  value: MsgModProvider,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgOpenContractParams = {
+  value: MsgOpenContract,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgCloseContractParams = {
+  value: MsgCloseContract,
   fee?: StdFee,
   memo?: string
 };
 
 
-type msgOpenContractParams = {
-  value: MsgOpenContract,
-};
-
-type msgModProviderParams = {
-  value: MsgModProvider,
-};
-
-type msgCloseContractParams = {
-  value: MsgCloseContract,
+type msgClaimContractIncomeParams = {
+  value: MsgClaimContractIncome,
 };
 
 type msgBondProviderParams = {
   value: MsgBondProvider,
 };
 
-type msgClaimContractIncomeParams = {
-  value: MsgClaimContractIncome,
+type msgModProviderParams = {
+  value: MsgModProvider,
+};
+
+type msgOpenContractParams = {
+  value: MsgOpenContract,
+};
+
+type msgCloseContractParams = {
+  value: MsgCloseContract,
 };
 
 
@@ -85,45 +85,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgOpenContract({ value, fee, memo }: sendMsgOpenContractParams): Promise<DeliverTxResponse> {
+		async sendMsgClaimContractIncome({ value, fee, memo }: sendMsgClaimContractIncomeParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgOpenContract: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgClaimContractIncome: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgOpenContract({ value: MsgOpenContract.fromPartial(value) })
+				let msg = this.msgClaimContractIncome({ value: MsgClaimContractIncome.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgOpenContract: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgModProvider({ value, fee, memo }: sendMsgModProviderParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgModProvider: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgModProvider({ value: MsgModProvider.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgModProvider: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
-		async sendMsgCloseContract({ value, fee, memo }: sendMsgCloseContractParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgCloseContract: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgCloseContract({ value: MsgCloseContract.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgCloseContract: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgClaimContractIncome: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -141,42 +113,54 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		async sendMsgClaimContractIncome({ value, fee, memo }: sendMsgClaimContractIncomeParams): Promise<DeliverTxResponse> {
+		async sendMsgModProvider({ value, fee, memo }: sendMsgModProviderParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgClaimContractIncome: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgModProvider: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgClaimContractIncome({ value: MsgClaimContractIncome.fromPartial(value) })
+				let msg = this.msgModProvider({ value: MsgModProvider.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgClaimContractIncome: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgModProvider: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgOpenContract({ value, fee, memo }: sendMsgOpenContractParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgOpenContract: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgOpenContract({ value: MsgOpenContract.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgOpenContract: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgCloseContract({ value, fee, memo }: sendMsgCloseContractParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgCloseContract: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgCloseContract({ value: MsgCloseContract.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgCloseContract: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
 		
-		msgOpenContract({ value }: msgOpenContractParams): EncodeObject {
+		msgClaimContractIncome({ value }: msgClaimContractIncomeParams): EncodeObject {
 			try {
-				return { typeUrl: "/arkeo.arkeo.MsgOpenContract", value: MsgOpenContract.fromPartial( value ) }  
+				return { typeUrl: "/arkeo.arkeo.MsgClaimContractIncome", value: MsgClaimContractIncome.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgOpenContract: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgModProvider({ value }: msgModProviderParams): EncodeObject {
-			try {
-				return { typeUrl: "/arkeo.arkeo.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
-			}
-		},
-		
-		msgCloseContract({ value }: msgCloseContractParams): EncodeObject {
-			try {
-				return { typeUrl: "/arkeo.arkeo.MsgCloseContract", value: MsgCloseContract.fromPartial( value ) }  
-			} catch (e: any) {
-				throw new Error('TxClient:MsgCloseContract: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgClaimContractIncome: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -188,11 +172,27 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		msgClaimContractIncome({ value }: msgClaimContractIncomeParams): EncodeObject {
+		msgModProvider({ value }: msgModProviderParams): EncodeObject {
 			try {
-				return { typeUrl: "/arkeo.arkeo.MsgClaimContractIncome", value: MsgClaimContractIncome.fromPartial( value ) }  
+				return { typeUrl: "/arkeo.arkeo.MsgModProvider", value: MsgModProvider.fromPartial( value ) }  
 			} catch (e: any) {
-				throw new Error('TxClient:MsgClaimContractIncome: Could not create message: ' + e.message)
+				throw new Error('TxClient:MsgModProvider: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgOpenContract({ value }: msgOpenContractParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeo.arkeo.MsgOpenContract", value: MsgOpenContract.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgOpenContract: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgCloseContract({ value }: msgCloseContractParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeo.arkeo.MsgCloseContract", value: MsgCloseContract.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgCloseContract: Could not create message: ' + e.message)
 			}
 		},
 		
