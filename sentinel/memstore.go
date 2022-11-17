@@ -1,13 +1,20 @@
 package sentinel
 
 import (
+	"arkeo/common"
+	"arkeo/common/cosmos"
 	"arkeo/x/arkeo/types"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/cosmos/cosmos-sdk/types/module"
 )
+
+var ModuleBasics = module.NewBasicManager()
 
 // TODO: this should receive events from arceo chain to update its database
 // TODO: clean up contracts from memory after they expire
@@ -58,9 +65,29 @@ func (k *MemStore) Put(key string, value types.Contract) {
 
 func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	// TODO: this should cache a "miss" for 5 seconds, to stop DoS/thrashing
-
 	var contract types.Contract
-	requestURL := fmt.Sprintf("%s/%s", k.baseURL, key)
+
+	type fetchContract struct {
+		ProviderPubKey common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
+		Chain          common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=arkeo/common.Chain" json:"chain,omitempty"`
+		Client         common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=arkeo/common.PubKey" json:"client,omitempty"`
+		Delegate       common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=arkeo/common.PubKey" json:"delegate,omitempty"`
+		Type           types.ContractType `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
+		Height         string             `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
+		Duration       string             `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`
+		Rate           string             `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
+		Deposit        cosmos.Int         `protobuf:"bytes,9,opt,name=deposit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"deposit"`
+		Paid           cosmos.Int         `protobuf:"bytes,10,opt,name=paid,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"paid"`
+		Nonce          string             `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
+		ClosedHeight   string             `protobuf:"varint,12,opt,name=closed_height,json=closedHeight,proto3" json:"closed_height,omitempty"`
+	}
+
+	type fetch struct {
+		Contract fetchContract `json:"contract"`
+	}
+
+	var data fetch
+	requestURL := fmt.Sprintf("%s/arkeo/contract/%s", k.baseURL, key)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -69,22 +96,39 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return contract, err
 	}
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		fmt.Println(err)
 		return contract, err
 	}
 
-	err = json.Unmarshal(resBody, &contract)
+	err = json.Unmarshal(resBody, &data)
 	if err != nil {
+		fmt.Println(err)
 		return contract, err
 	}
+
+	contract.ProviderPubKey = data.Contract.ProviderPubKey
+	contract.Chain = data.Contract.Chain
+	contract.Client = data.Contract.Client
+	contract.Delegate = data.Contract.Delegate
+	contract.Type = data.Contract.Type
+	contract.Height, _ = strconv.ParseInt(data.Contract.Height, 10, 64)
+	contract.Duration, _ = strconv.ParseInt(data.Contract.Duration, 10, 64)
+	contract.Rate, _ = strconv.ParseInt(data.Contract.Rate, 10, 64)
+	contract.Deposit = data.Contract.Deposit
+	contract.Paid = data.Contract.Paid
+	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
+	contract.ClosedHeight, _ = strconv.ParseInt(data.Contract.ClosedHeight, 10, 64)
 
 	if contract.IsClose(k.blockHeight) {
+		fmt.Println("is expired")
 		delete(k.db, key) // clean up
-		return types.Contract{}, nil
+		return contract, nil
 	}
 
 	k.Put(key, contract)

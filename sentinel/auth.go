@@ -95,6 +95,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		}
 
 		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
+			fmt.Println("Paid Tier")
 			httpCode, err := p.paidTier(aa, r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())
@@ -102,6 +103,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				return
 			}
 		} else {
+			fmt.Println("Free Tier")
 			httpCode, err := p.freeTier(r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())
@@ -191,7 +193,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 
 	// check if we've exceed the total number of pay-as-you-go queries
 	if contract.Type == types.ContractType_PayAsYouGo {
-		if contract.Deposit.LT(cosmos.NewInt(aa.Nonce * contract.Rate)) {
+		if contract.Deposit.LTE(cosmos.NewInt(aa.Nonce * contract.Rate)) {
 			return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 		}
 	}
