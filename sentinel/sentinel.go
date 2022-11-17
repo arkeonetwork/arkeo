@@ -49,7 +49,6 @@ func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request) {
 
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
-
 	// remove arkauth query arg
 	values := r.URL.Query()
 	values.Del(QueryArkAuth)

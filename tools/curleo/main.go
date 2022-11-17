@@ -74,7 +74,7 @@ func main() {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // nolint
 	}
 
 	fmt.Println(string(body))
@@ -90,7 +90,7 @@ func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // nolint
 	}
 
 	var claim sentinel.Claim
@@ -111,13 +111,13 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // nolint
 	}
 
 	var meta sentinel.Metadata
 	err = json.Unmarshal(body, &meta)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // nolint
 	}
 
 	return meta
@@ -134,14 +134,14 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 
 	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatal(err)
 	}
 
 	msg := fmt.Sprintf("%s:%s:%s:%d:%d", provider, chain, spender, height, nonce)
 
 	signature, pk, err := kb.Sign(user, []byte(msg))
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatal(err)
 	}
 
 	// verify signature
@@ -164,22 +164,22 @@ func (c Curl) getSpender(user string) string {
 
 	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatal(err)
 	}
 
 	record, err := kb.Key(user)
 	if err != nil {
-		log.Fatalf("%w", err)
+		log.Fatal(err) // nolint
 	}
 
 	pub, err := record.GetPubKey()
 	if err != nil {
-		log.Fatalf("%w", err)
+		log.Fatal(err) // nolint
 	}
 
 	pk, err := common.NewPubKeyFromCrypto(pub)
 	if err != nil {
-		log.Fatalf("%w", err)
+		log.Fatal(err) // nolint
 	}
 
 	return pk.String()

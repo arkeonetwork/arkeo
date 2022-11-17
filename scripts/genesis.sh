@@ -24,7 +24,6 @@ add_module() {
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
-
 add_account() {
 	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" '.app_state.auth.accounts += [{
         "@type": "/cosmos.auth.v1beta1.BaseAccount",
