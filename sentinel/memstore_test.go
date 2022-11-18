@@ -20,22 +20,22 @@ var _ = Suite(&MemStoreSuite{})
 func (s *MemStoreSuite) SetUpTest(c *C) {
 	s.server = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		switch {
-		case strings.HasPrefix(req.RequestURI, "/contract/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu/arkeo-mainnet/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu"):
+		case strings.HasSuffix(req.RequestURI, "/arkeo/contract/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu/arkeo-mainnet/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu"):
 			httpTestHandler(c, rw, `
-			{
+{ "contract": {
 				"provider_pub_key": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"chain": 1,
 				"client": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"delegate": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"type": 0,
-				"height": 15,
-				"duration": 100,
-				"rate": 3,
+				"height": "15",
+				"duration": "100",
+				"rate": "3",
 				"deposit": "500",
 				"paid": "0",
-				"nonce": 9,
-				"closed_height": 0
-			}`)
+				"nonce": "9",
+				"closed_height": "0"
+			}}`)
 		default:
 			fmt.Println(req.RequestURI)
 			panic("could not serve request")
@@ -57,7 +57,7 @@ func httpTestHandler(c *C, rw http.ResponseWriter, content string) {
 
 func (s *MemStoreSuite) TestMemStore(c *C) {
 	var err error
-	baseURL := fmt.Sprintf("http://%s/contract", s.server.Listener.Addr().String())
+	baseURL := fmt.Sprintf("http://%s", s.server.Listener.Addr().String())
 	mem := NewMemStore(baseURL)
 
 	c.Check(mem.Key("foo", "bar", "baz"), Equals, "foo/bar/baz")

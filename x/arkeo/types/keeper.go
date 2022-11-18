@@ -3,6 +3,7 @@ package types
 import (
 	"arkeo/common"
 	"arkeo/common/cosmos"
+	"encoding/json"
 	fmt "fmt"
 )
 
@@ -79,4 +80,18 @@ func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client comm
 		Chain:          chain,
 		Client:         client,
 	}
+}
+
+func (ct *ContractType) UnmarshalJSON(b []byte) error {
+	var item interface{}
+	if err := json.Unmarshal(b, &item); err != nil {
+		return err
+	}
+	switch v := item.(type) {
+	case int:
+		*ct = ContractType(v)
+	case string:
+		*ct = ContractType(ContractType_value[v])
+	}
+	return nil
 }

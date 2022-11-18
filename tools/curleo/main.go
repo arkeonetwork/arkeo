@@ -1,6 +1,11 @@
 package main
 
 import (
+	"arkeo/app"
+	"arkeo/common"
+	"arkeo/common/cosmos"
+	"arkeo/sentinel"
+	"arkeo/x/arkeo/types"
 	"bufio"
 	"encoding/hex"
 	"encoding/json"
@@ -14,16 +19,11 @@ import (
 	"strings"
 	"time"
 
-	"arkeo/app"
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/sentinel"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/std"
-	"github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
@@ -61,8 +61,13 @@ func main() {
 	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
 	claim := curl.getClaim(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+	height := claim.Height
+	if height == 0 {
+		contract := curl.getContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+		height = contract.Height
+	}
 
-	auth := curl.sign(*user, metadata.Configuration.ProviderPubKey.String(), chain, spender, claim.Height, claim.Nonce+1)
+	auth := curl.sign(*user, metadata.Configuration.ProviderPubKey.String(), chain, spender, height, claim.Nonce+1)
 	values.Add(sentinel.QueryArkAuth, auth)
 
 	u.RawQuery = values.Encode()
@@ -78,6 +83,28 @@ func main() {
 	}
 
 	fmt.Println(string(body))
+}
+
+func (c Curl) getContract(provider, chain, spender string) types.Contract {
+	url := fmt.Sprintf("%s/contract/%s/%s/%s", c.baseURL, provider, chain, spender)
+	resp, err := c.client.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err) // nolint
+	}
+
+	var claim types.Contract
+	err = json.Unmarshal(body, &claim)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return claim
 }
 
 func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
@@ -127,7 +154,7 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
-	types.RegisterInterfaces(interfaceRegistry)
+	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	buf := bufio.NewReader(os.Stdin)
@@ -157,7 +184,7 @@ func (c Curl) getSpender(user string) string {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
-	types.RegisterInterfaces(interfaceRegistry)
+	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	buf := bufio.NewReader(os.Stdin)
