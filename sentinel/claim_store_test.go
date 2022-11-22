@@ -27,7 +27,7 @@ func (s *ClaimStoreSuite) TestStore(c *C) {
 
 	pk1 := types.GetRandomPubKey()
 	pk2 := types.GetRandomPubKey()
-	chain, err := common.NewChain("btc-mainnet")
+	chain, err := common.NewChain("btc-mainnet-fullnode")
 	c.Assert(err, IsNil)
 	claim := NewClaim(pk1, chain, pk2, 30, 10, "signature")
 

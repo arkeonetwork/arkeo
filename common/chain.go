@@ -13,25 +13,29 @@ type (
 const (
 	EmptyChain Chain = iota
 	BaseChain
+	StarWarsChain
 	BTCChain
 	ETHChain
 )
 
 var ChainLookup = map[string]int32{
-	"unknown":       0,
-	"arkeo-mainnet": 1,
-	"btc-mainnet":   2,
-	"eth-mainnet":   3,
+	"unknown":                0,
+	"swapi.dev":              1, // star wars API for development purposes
+	"arkeo-mainnet-fullnode": 2,
+	"btc-mainnet-fullnode":   3,
+	"eth-mainnet-fullnode":   4,
 }
 
 func (c Chain) String() string {
 	switch c {
 	case BaseChain:
-		return "arkeo-mainnet"
+		return "arkeo-mainnet-fullnode"
 	case BTCChain:
-		return "btc-mainnet"
+		return "btc-mainnet-fullnode"
 	case ETHChain:
-		return "eth-mainnet"
+		return "eth-mainnet-fullnode"
+	case StarWarsChain:
+		return "swapi.dev"
 	default:
 		return "unknown"
 	}
