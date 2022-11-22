@@ -36,9 +36,9 @@ func NewProxy(config conf.Configuration) Proxy {
 }
 
 // Serve a reverse proxy for a given url
-func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request) {
+func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
 	// parse the url
-	url, _ := url.Parse(p.Config.ProxyHost)
+	url, _ := url.Parse(fmt.Sprintf("http://%s", host))
 
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
@@ -55,10 +55,11 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.RawQuery = values.Encode()
 
 	parts := strings.Split(r.URL.Path, "/")
+	host := parts[1]
 	parts = append(parts[:1], parts[1+1:]...)
 	r.URL.Path = strings.Join(parts, "/")
 
-	p.serveReverseProxy(w, r)
+	p.serveReverseProxy(w, r, host)
 }
 
 func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
