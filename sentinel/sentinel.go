@@ -86,7 +86,7 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if contract.IsClose(p.MemStore.GetHeight()) {
-			p.ClaimStore.Remove(claim.Key()) // clear expired
+			_ = p.ClaimStore.Remove(claim.Key()) // clear expired
 			fmt.Println("expired")
 			continue
 		}
