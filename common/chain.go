@@ -12,8 +12,8 @@ type (
 
 const (
 	EmptyChain Chain = iota
-	BaseChain
 	StarWarsChain
+	BaseChain
 	BTCChain
 	ETHChain
 )
@@ -44,7 +44,7 @@ func (c Chain) String() string {
 // ChainNetwork is to indicate which chain environment
 type ChainNetwork uint8
 
-// NewChain create a new Chain and default the siging_algo to Secp256k1
+// NewChain create a new Chain
 func NewChain(chainID string) (Chain, error) {
 	chain := ChainLookup[strings.ToLower(chainID)]
 	if chain == 0 {

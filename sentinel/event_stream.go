@@ -104,13 +104,17 @@ func (p Proxy) EventListener(host string) {
 					if !isMyPubKey(evt.Contract.ProviderPubKey) {
 						continue
 					}
-					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, evt.Contract.Delegate, evt.Contract.Nonce, evt.Contract.Height, "")
+					spender := evt.Contract.Delegate
+					if spender.IsEmpty() {
+						spender = evt.Contract.Client
+					}
+					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 					currClaim, err := p.ClaimStore.Get(newClaim.Key())
 					if err != nil {
 						logger.Error("failed to get claim", "error", err)
 						continue
 					}
-					if currClaim.Nonce == newClaim.Height {
+					if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
 						currClaim.Claimed = true
 						if err := p.ClaimStore.Set(currClaim); err != nil {
 							logger.Error("failed to set claimed", "error", err)
@@ -127,7 +131,12 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
+
+			spender := evt.Contract.Delegate
+			if spender.IsEmpty() {
+				spender = evt.Contract.Client
+			}
+			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-closeContractOut:
 			evt, err := parseCloseContract(convertEvent("close_contract", result.Events))
@@ -138,7 +147,12 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
+
+			spender := evt.Contract.Delegate
+			if spender.IsEmpty() {
+				spender = evt.Contract.Client
+			}
+			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-claimContractOut:
 			evt, err := parseClaimContractIncome(convertEvent("contract_settlement", result.Events))
@@ -149,13 +163,17 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, evt.Contract.Delegate, evt.Contract.Nonce, evt.Contract.Height, "")
+			spender := evt.Contract.Delegate
+			if spender.IsEmpty() {
+				spender = evt.Contract.Client
+			}
+			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
 				logger.Error("failed to get claim", "error", err)
 				continue
 			}
-			if currClaim.Nonce == newClaim.Height {
+			if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
 				currClaim.Claimed = true
 				if err := p.ClaimStore.Set(currClaim); err != nil {
 					logger.Error("failed to set claimed", "error", err)
