@@ -1,11 +1,12 @@
 package crosstransfer
 
 import (
+	"arkeo/testutil/sample"
+	"arkeo/x/crosstransfer/types"
 	"math/rand"
 
-	"arkeo/testutil/sample"
 	crosstransfersimulation "arkeo/x/crosstransfer/simulation"
-	"arkeo/x/crosstransfer/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +25,7 @@ var (
 )
 
 const (
-    // this line is used by starport scaffolding # simapp/module/const
+// this line is used by starport scaffolding # simapp/module/const
 )
 
 // GenerateGenesisState creates a randomized GenState of the module
@@ -34,7 +35,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		accs[i] = acc.Address.String()
 	}
 	crosstransferGenesis := types.GenesisState{
-		Params:	types.DefaultParams(),
+		Params: types.DefaultParams(),
 		PortId: types.PortID,
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}
@@ -48,9 +49,7 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 
 // RandomizedParams creates randomized  param changes for the simulator
 func (am AppModule) RandomizedParams(_ *rand.Rand) []simtypes.ParamChange {
-	
-	return []simtypes.ParamChange{
-	}
+	return []simtypes.ParamChange{}
 }
 
 // RegisterStoreDecoder registers a decoder

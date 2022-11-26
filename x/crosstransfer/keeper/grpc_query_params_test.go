@@ -1,12 +1,13 @@
 package keeper_test
 
 import (
+	"arkeo/x/crosstransfer/types"
 	"testing"
+
+	testkeeper "arkeo/testutil/keeper"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	testkeeper 	"arkeo/testutil/keeper"
-	"arkeo/x/crosstransfer/types"
 )
 
 func TestParamsQuery(t *testing.T) {

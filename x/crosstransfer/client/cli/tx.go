@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"arkeo/x/crosstransfer/types"
 	"fmt"
 	"time"
 
@@ -8,16 +9,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
-	"arkeo/x/crosstransfer/types"
 )
 
-var (
-	DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(10) * time.Minute).Nanoseconds())
-)
+var DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(10) * time.Minute).Nanoseconds())
 
 const (
-	flagPacketTimeoutTimestamp = "packet-timeout-timestamp"
-	listSeparator              = ","
+	flagPacketTimeoutTimestamp = "packet-timeout-timestamp" // nolint
+	listSeparator              = ","                        // nolint
 )
 
 // GetTxCmd returns the transaction commands for this module
@@ -32,5 +30,5 @@ func GetTxCmd() *cobra.Command {
 
 	// this line is used by starport scaffolding # 1
 
-	return cmd 
+	return cmd
 }

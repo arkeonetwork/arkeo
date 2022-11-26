@@ -1,10 +1,9 @@
 package keeper
 
 import (
-	"testing"
-
 	"arkeo/x/crosstransfer/keeper"
 	"arkeo/x/crosstransfer/types"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -28,12 +27,15 @@ type crosstransferChannelKeeper struct{}
 func (crosstransferChannelKeeper) GetChannel(ctx sdk.Context, srcPort, srcChan string) (channel channeltypes.Channel, found bool) {
 	return channeltypes.Channel{}, false
 }
+
 func (crosstransferChannelKeeper) GetNextSequenceSend(ctx sdk.Context, portID, channelID string) (uint64, bool) {
 	return 0, false
 }
+
 func (crosstransferChannelKeeper) SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error {
 	return nil
 }
+
 func (crosstransferChannelKeeper) ChanCloseInit(ctx sdk.Context, portID, channelID string, chanCap *capabilitytypes.Capability) error {
 	return nil
 }
@@ -44,8 +46,6 @@ type crosstransferPortKeeper struct{}
 func (crosstransferPortKeeper) BindPort(ctx sdk.Context, portID string) *capabilitytypes.Capability {
 	return &capabilitytypes.Capability{}
 }
-
-
 
 func CrosstransferKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	logger := log.NewNopLogger()
@@ -70,14 +70,14 @@ func CrosstransferKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		"CrosstransferParams",
 	)
 	k := keeper.NewKeeper(
-        appCodec,
-        storeKey,
-        memStoreKey,
-        paramsSubspace,
-        crosstransferChannelKeeper{},
-        crosstransferPortKeeper{},
-        capabilityKeeper.ScopeToModule("CrosstransferScopedKeeper"),
-    )
+		appCodec,
+		storeKey,
+		memStoreKey,
+		paramsSubspace,
+		crosstransferChannelKeeper{},
+		crosstransferPortKeeper{},
+		capabilityKeeper.ScopeToModule("CrosstransferScopedKeeper"),
+	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, logger)
 

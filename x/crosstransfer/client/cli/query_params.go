@@ -1,12 +1,12 @@
 package cli
 
 import (
+	"arkeo/x/crosstransfer/types"
 	"context"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	"arkeo/x/crosstransfer/types"
 )
 
 func CmdQueryParams() *cobra.Command {

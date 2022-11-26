@@ -1,11 +1,12 @@
 package keeper_test
 
 import (
+	"arkeo/x/crosstransfer/types"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	testkeeper "arkeo/testutil/keeper"
-	"arkeo/x/crosstransfer/types"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetParams(t *testing.T) {

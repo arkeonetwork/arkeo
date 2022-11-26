@@ -1,18 +1,19 @@
 package crosstransfer_test
 
 import (
-	"testing"
-
-	keepertest "arkeo/testutil/keeper"
 	"arkeo/testutil/nullify"
 	"arkeo/x/crosstransfer"
 	"arkeo/x/crosstransfer/types"
+	"testing"
+
+	keepertest "arkeo/testutil/keeper"
+
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {
 	genesisState := types.GenesisState{
-		Params:	types.DefaultParams(),
+		Params: types.DefaultParams(),
 		PortId: types.PortID,
 		// this line is used by starport scaffolding # genesis/test/state
 	}

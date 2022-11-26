@@ -13,18 +13,16 @@ const (
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_crosstransfer"
 
-    // Version defines the current version the IBC module supports
-Version = "crosstransfer-1"
+	// Version defines the current version the IBC module supports
+	Version = "crosstransfer-1"
 
-// PortID is the default port id that module binds to
-PortID = "crosstransfer"
+	// PortID is the default port id that module binds to
+	PortID = "crosstransfer"
 )
 
-var (
-	// PortKey defines the key to store the port ID in store
-	PortKey = KeyPrefix("crosstransfer-port-")
-)
+// PortKey defines the key to store the port ID in store
+var PortKey = KeyPrefix("crosstransfer-port-")
 
 func KeyPrefix(p string) []byte {
-    return []byte(p)
+	return []byte(p)
 }
