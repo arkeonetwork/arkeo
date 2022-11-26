@@ -131,7 +131,12 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
+
+			spender := evt.Contract.Delegate
+			if spender.IsEmpty() {
+				spender = evt.Contract.Client
+			}
+			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-closeContractOut:
 			evt, err := parseCloseContract(convertEvent("close_contract", result.Events))
@@ -142,7 +147,12 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), evt.Contract.Delegate.String())
+
+			spender := evt.Contract.Delegate
+			if spender.IsEmpty() {
+				spender = evt.Contract.Client
+			}
+			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
 			p.MemStore.Put(key, evt.Contract)
 		case result := <-claimContractOut:
 			evt, err := parseClaimContractIncome(convertEvent("contract_settlement", result.Events))
