@@ -15,6 +15,12 @@ func (s ChainSuite) TestChain(c *C) {
 	c.Check(chn.IsEmpty(), Equals, false)
 	c.Check(chn.String(), Equals, "btc-mainnet-fullnode")
 
+	chn, err = NewChain("swapi.dev")
+	c.Assert(err, IsNil)
+	c.Check(chn.Equals(StarWarsChain), Equals, true)
+	c.Check(chn.IsEmpty(), Equals, false)
+	c.Check(chn.String(), Equals, "swapi.dev")
+
 	_, err = NewChain("B") // invalid
 	c.Assert(err, NotNil)
 }

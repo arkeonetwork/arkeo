@@ -94,7 +94,6 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
-	fmt.Println("Foo 2")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)

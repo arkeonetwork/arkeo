@@ -110,7 +110,7 @@ func (p Proxy) EventListener(host string) {
 						logger.Error("failed to get claim", "error", err)
 						continue
 					}
-					if currClaim.Nonce == newClaim.Height {
+					if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
 						currClaim.Claimed = true
 						if err := p.ClaimStore.Set(currClaim); err != nil {
 							logger.Error("failed to set claimed", "error", err)
@@ -155,7 +155,7 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get claim", "error", err)
 				continue
 			}
-			if currClaim.Nonce == newClaim.Height {
+			if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
 				currClaim.Claimed = true
 				if err := p.ClaimStore.Set(currClaim); err != nil {
 					logger.Error("failed to set claimed", "error", err)

@@ -69,6 +69,36 @@ func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(d)
 }
 
+func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
+
+	open_claims := make([]Claim, 0)
+	for _, claim := range p.ClaimStore.List() {
+		fmt.Printf("Claim: %+v\n", claim)
+		if claim.Claimed {
+			fmt.Println("already claimed")
+			continue
+		}
+		contract, err := p.MemStore.Get(claim.Key())
+		if err != nil {
+			fmt.Println("bad fetch")
+			continue
+		}
+
+		if contract.IsClose(p.MemStore.GetHeight()) {
+			p.ClaimStore.Remove(claim.Key()) // clear expired
+			fmt.Println("expired")
+			continue
+		}
+
+		open_claims = append(open_claims, claim)
+
+	}
+
+	d, _ := json.Marshal(open_claims)
+	_, _ = w.Write(d)
+}
+
 func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
 	path := r.URL.Path
@@ -167,6 +197,7 @@ func (p Proxy) Run() {
 	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
 	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
 	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
+	mux.Handle("/open_claims/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
 	mux.Handle("/", p.auth(
 		handlers.LoggingHandler(
 			os.Stdout,
