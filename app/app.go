@@ -110,7 +110,10 @@ import (
 	arkeomodule "arkeo/x/arkeo"
 	arkeomodulekeeper "arkeo/x/arkeo/keeper"
 	arkeomoduletypes "arkeo/x/arkeo/types"
-	// this line is used by starport scaffolding # stargate/app/moduleImport
+	crosstransfermodule "arkeo/x/crosstransfer"
+		crosstransfermodulekeeper "arkeo/x/crosstransfer/keeper"
+		crosstransfermoduletypes "arkeo/x/crosstransfer/types"
+// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
 const (
@@ -166,7 +169,8 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		arkeomodule.AppModuleBasic{},
-		// this line is used by starport scaffolding # stargate/app/moduleBasic
+		crosstransfermodule.AppModuleBasic{},
+// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
 	// module account permissions
@@ -245,7 +249,9 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	ArkeoKeeper arkeomodulekeeper.Keeper
-	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+	ScopedCrosstransferKeeper capabilitykeeper.ScopedKeeper
+		CrosstransferKeeper crosstransfermodulekeeper.Keeper
+// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
 	mm *module.Manager
@@ -283,7 +289,8 @@ func New(
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey, evidencetypes.StoreKey,
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		arkeomoduletypes.StoreKey,
-		// this line is used by starport scaffolding # stargate/app/storeKey
+		crosstransfermoduletypes.StoreKey,
+// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -503,13 +510,28 @@ func New(
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper)
 
-	// this line is used by starport scaffolding # stargate/app/keeperDefinition
+	scopedCrosstransferKeeper := app.CapabilityKeeper.ScopeToModule(crosstransfermoduletypes.ModuleName)
+app.ScopedCrosstransferKeeper = scopedCrosstransferKeeper
+		app.CrosstransferKeeper = *crosstransfermodulekeeper.NewKeeper(
+			appCodec,
+			keys[crosstransfermoduletypes.StoreKey],
+			keys[crosstransfermoduletypes.MemStoreKey],
+			app.GetSubspace(crosstransfermoduletypes.ModuleName),
+			app.IBCKeeper.ChannelKeeper,
+&app.IBCKeeper.PortKeeper,
+scopedCrosstransferKeeper,
+			)
+		crosstransferModule := crosstransfermodule.NewAppModule(appCodec, app.CrosstransferKeeper, app.AccountKeeper, app.BankKeeper)
+
+		crosstransferIBCModule := crosstransfermodule.NewIBCModule(app.CrosstransferKeeper)
+// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
-	// this line is used by starport scaffolding # ibc/app/router
+	ibcRouter.AddRoute(crosstransfermoduletypes.ModuleName, crosstransferIBCModule)
+// this line is used by starport scaffolding # ibc/app/router
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	/****  Module Options ****/
@@ -546,7 +568,8 @@ func New(
 		transferModule,
 		icaModule,
 		arkeoModule,
-		// this line is used by starport scaffolding # stargate/app/appModule
+		crosstransferModule,
+// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -576,7 +599,8 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/beginBlockers
+		crosstransfermoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -601,7 +625,8 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/endBlockers
+		crosstransfermoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -631,7 +656,8 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
-		// this line is used by starport scaffolding # stargate/app/initGenesis
+		crosstransfermoduletypes.ModuleName,
+// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
 	// Uncomment if you want to set a custom migration order here.
@@ -661,7 +687,8 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		arkeoModule,
-		// this line is used by starport scaffolding # stargate/app/appModule
+		crosstransferModule,
+// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
 
@@ -865,7 +892,8 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(arkeomoduletypes.ReserveName)
 	paramsKeeper.Subspace(arkeomoduletypes.ProviderName)
 	paramsKeeper.Subspace(arkeomoduletypes.ContractName)
-	// this line is used by starport scaffolding # stargate/app/paramSubspace
+	paramsKeeper.Subspace(crosstransfermoduletypes.ModuleName)
+// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
 }

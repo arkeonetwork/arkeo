@@ -3,6 +3,7 @@ import { Registry } from '@cosmjs/proto-signing'
 import { IgniteClient } from "./client";
 import { MissingWalletError } from "./helpers";
 import { Module as ArkeoArkeo, msgTypes as ArkeoArkeoMsgTypes } from './arkeo.arkeo'
+import { Module as ArkeoCrosstransfer, msgTypes as ArkeoCrosstransferMsgTypes } from './arkeo.crosstransfer'
 import { Module as CosmosAuthV1Beta1, msgTypes as CosmosAuthV1Beta1MsgTypes } from './cosmos.auth.v1beta1'
 import { Module as CosmosAuthzV1Beta1, msgTypes as CosmosAuthzV1Beta1MsgTypes } from './cosmos.authz.v1beta1'
 import { Module as CosmosBankV1Beta1, msgTypes as CosmosBankV1Beta1MsgTypes } from './cosmos.bank.v1beta1'
@@ -31,11 +32,12 @@ import { Module as IbcCoreConnectionV1, msgTypes as IbcCoreConnectionV1MsgTypes 
 
 
 const Client = IgniteClient.plugin([
-    ArkeoArkeo, CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1, CosmosGovV1Beta1, CosmosGroupV1, CosmosMintV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1
+    ArkeoArkeo, ArkeoCrosstransfer, CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseTendermintV1Beta1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1, CosmosGovV1Beta1, CosmosGroupV1, CosmosMintV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1
 ]);
 
 const registry = new Registry([
   ...ArkeoArkeoMsgTypes,
+  ...ArkeoCrosstransferMsgTypes,
   ...CosmosAuthV1Beta1MsgTypes,
   ...CosmosAuthzV1Beta1MsgTypes,
   ...CosmosBankV1Beta1MsgTypes,
