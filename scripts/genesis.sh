@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -o pipefail
+set -ex
 
 CHAIN_ID="arkeo"
 STAKE="100000000000uarkeo"
@@ -55,7 +56,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod collect-gentxs
 
 	USERADDR=$(arkeod keys show $USER -a --keyring-backend test)
-	add_account "$USERADDR" $TOKEN 49999900000000000 # ark, 499m
+	add_account "$USERADDR" $TOKEN 10000000000000000 # ark, 100m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		# add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m
