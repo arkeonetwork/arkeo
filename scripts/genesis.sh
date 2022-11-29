@@ -54,8 +54,8 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod gentx $USER $STAKE --chain-id $CHAIN_ID --keyring-backend test
 	arkeod collect-gentxs
 
-    USERADDR=$(arkeod keys show $USER -a --keyring-backend test)
-    add_account "$USERADDR" $TOKEN 50000000000000000 # ark, 500m
+	USERADDR=$(arkeod keys show $USER -a --keyring-backend test)
+	add_account "$USERADDR" $TOKEN 50000000000000000 # ark, 500m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		# add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m
