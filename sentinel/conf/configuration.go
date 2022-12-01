@@ -56,6 +56,7 @@ func loadVarPubKey(key string) common.PubKey {
 	if err != nil {
 		panic(fmt.Errorf("env var %s is not a pubkey: %s", key, err))
 	}
+	fmt.Println("Load PUBKEY", pk)
 	return pk
 }
 
