@@ -46,10 +46,12 @@ func loadVarString(key string) string {
 }
 
 func loadVarPubKey(key string) common.PubKey {
+	fmt.Println("Load PUBKEY", key)
 	val, ok := os.LookupEnv(key)
 	if !ok {
 		panic(fmt.Sprintf("%s env var is not set", key))
 	}
+	fmt.Println("Load PUBKEY", val)
 	pk, err := common.NewPubKey(val)
 	if err != nil {
 		panic(fmt.Errorf("env var %s is not a pubkey: %s", key, err))
