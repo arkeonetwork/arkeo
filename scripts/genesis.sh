@@ -10,12 +10,12 @@ USER="ark"
 
 add_module() {
 	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" '.app_state.auth.accounts += [{
-  	"@type": "/cosmos.auth.v1beta1.ModuleAccount",
+		"@type": "/cosmos.auth.v1beta1.ModuleAccount",
 		"base_account": {
 			"address": $ADDRESS,
 			"pub_key": null,
-				"account_number": "0",
-				"sequence": "0"
+			"account_number": "0",
+			"sequence": "0"
 		},
 		"name": "reserve",
 		"permissions": []
