@@ -39,6 +39,7 @@ func NewProxy(config conf.Configuration) Proxy {
 func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
 	// parse the url
 	url, _ := url.Parse(fmt.Sprintf("http://%s", host))
+	fmt.Println("Proxy Redirect:", url)
 
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
@@ -62,7 +63,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	switch host { // nolint
 	case "btc-mainnet-fullnode":
 		// add username/password to request
-		host = fmt.Sprintf("thorchain:password@%s", host)
+		host = fmt.Sprintf("thorchain:password@%s:8332", host)
 	}
 
 	p.serveReverseProxy(w, r, host)
