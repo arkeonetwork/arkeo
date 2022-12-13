@@ -59,6 +59,12 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	parts = append(parts[:1], parts[1+1:]...)
 	r.URL.Path = strings.Join(parts, "/")
 
+	switch host { // nolint
+	case "btc-mainnet-fullnode":
+		// add username/password to request
+		host = fmt.Sprintf("thorchain:password@%s", host)
+	}
+
 	p.serveReverseProxy(w, r, host)
 }
 

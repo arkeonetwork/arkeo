@@ -55,9 +55,9 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod gentx $USER $STAKE --chain-id $CHAIN_ID --keyring-backend test
 	arkeod collect-gentxs
 
-    arkeod keys add faucet --keyring-backend test
-    FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
-    add_account "$FAUCET" $TOKEN 50000000000000000 # faucet, 500m
+	arkeod keys add faucet --keyring-backend test
+	FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
+	add_account "$FAUCET" $TOKEN 50000000000000000 # faucet, 500m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		# add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m

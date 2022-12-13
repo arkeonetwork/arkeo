@@ -40,7 +40,7 @@ func CmdCloseContract() *cobra.Command {
 
 			delegate := common.EmptyPubKey
 			if len(args) > 3 {
-				delegate, err = common.NewPubKey(args[4])
+				delegate, err = common.NewPubKey(args[3])
 				if err != nil {
 					return err
 				}
