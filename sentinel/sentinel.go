@@ -64,6 +64,7 @@ func NewSingleHostReverseProxy(target *url.URL) *httputil.ReverseProxy {
 			req.Header.Set("User-Agent", "")
 		}
 		passwd, ok := req.URL.User.Password()
+		fmt.Printf("Password: %s, Bool: %+v\n", passwd, ok)
 		if ok {
 			req.SetBasicAuth(req.URL.User.Username(), passwd)
 		}
