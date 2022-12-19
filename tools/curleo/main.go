@@ -7,6 +7,7 @@ import (
 	"arkeo/sentinel"
 	"arkeo/x/arkeo/types"
 	"bufio"
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
@@ -39,6 +40,8 @@ type Curl struct {
 func main() {
 	// network := flag.Int("n", 0, "The network to use.")
 	user := flag.String("u", "alice", "user name")
+	data := flag.String("data", "", "POST data")
+	head := flag.String("H", "", "header")
 	flag.Parse()
 
 	c := cosmos.GetConfig()
@@ -72,7 +75,17 @@ func main() {
 
 	u.RawQuery = values.Encode()
 
-	resp, err := curl.client.Get(u.String())
+	var resp *http.Response
+
+	if len(*data) > 0 {
+		header := "application/x-www-form-urlencoded"
+		if len(*head) > 0 {
+			header = *head
+		}
+		resp, err = curl.client.Post(u.String(), header, bytes.NewBuffer([]byte(*data)))
+	} else {
+		resp, err = curl.client.Get(u.String())
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
