@@ -62,6 +62,8 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	case "btc-mainnet-fullnode":
 		// add username/password to request
 		host = fmt.Sprintf("thorchain:password@%s:8332", host)
+	case "arkeo-mainnet-fullnode":
+		host = fmt.Sprintf("arkeo:1317", host)
 	}
 
 	p.serveReverseProxy(w, r, host)
@@ -79,7 +81,6 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 
 	open_claims := make([]Claim, 0)
 	for _, claim := range p.ClaimStore.List() {
-		fmt.Printf("Claim: %+v\n", claim)
 		if claim.Claimed {
 			fmt.Println("already claimed")
 			continue
