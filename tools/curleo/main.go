@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -32,14 +32,16 @@ import (
 var ModuleBasics = module.NewBasicManager()
 
 type Curl struct {
-	client  http.Client
-	baseURL string
+	client         http.Client
+	baseURL        string
+	keyringBackend string
 }
 
 // main : Generate our pool address.
 func main() {
 	// network := flag.Int("n", 0, "The network to use.")
 	user := flag.String("u", "alice", "user name")
+	keyringBackend := flag.String("keyring-backend", "test", "Select keyring's backend (os|file|test) (default \"test\")")
 	data := flag.String("data", "", "POST data")
 	head := flag.String("H", "", "header")
 	flag.Parse()
@@ -58,8 +60,9 @@ func main() {
 	chain := parts[1]
 
 	curl := Curl{
-		client:  http.Client{Timeout: time.Duration(5) * time.Second},
-		baseURL: fmt.Sprintf("%s://%s", u.Scheme, u.Host),
+		client:         http.Client{Timeout: time.Duration(5) * time.Second},
+		baseURL:        fmt.Sprintf("%s://%s", u.Scheme, u.Host),
+		keyringBackend: *keyringBackend,
 	}
 	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
@@ -90,7 +93,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -106,7 +109,7 @@ func (c Curl) getContract(provider, chain, spender string) types.Contract {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -128,7 +131,7 @@ func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -149,7 +152,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -172,7 +175,7 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 
 	buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
+	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -202,7 +205,7 @@ func (c Curl) getSpender(user string) string {
 
 	buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
+	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -223,4 +226,9 @@ func (c Curl) getSpender(user string) string {
 	}
 
 	return pk.String()
+}
+
+func getArkeoHome() string {
+	home := os.Getenv("HOME")
+	return fmt.Sprintf("%s/.arkeo", home)
 }
