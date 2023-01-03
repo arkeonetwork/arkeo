@@ -6,7 +6,6 @@ import (
 	"arkeo/common/cosmos"
 	"arkeo/sentinel"
 	"arkeo/x/arkeo/types"
-	"bufio"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
@@ -85,11 +84,14 @@ func main() {
 		if len(*head) > 0 {
 			header = *head
 		}
+		println(fmt.Sprintf("making POST request to %s\n%s", u.String(), *data))
 		resp, err = curl.client.Post(u.String(), header, bytes.NewBuffer([]byte(*data)))
 	} else {
+		println(fmt.Sprintf("making GET request to %s", u.String()))
 		resp, err = curl.client.Get(u.String())
 	}
 	if err != nil {
+		println(fmt.Sprintf("error making http request: %+v", err))
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
@@ -98,7 +100,7 @@ func main() {
 		log.Fatal(err) // nolint
 	}
 
-	fmt.Println(string(body))
+	println(string(body))
 }
 
 func (c Curl) getContract(provider, chain, spender string) types.Contract {
@@ -173,7 +175,8 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
-	buf := bufio.NewReader(os.Stdin)
+	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
+	// buf := bufio.NewReader(os.Stdin)
 
 	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
@@ -182,10 +185,13 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 
 	msg := fmt.Sprintf("%s:%s:%s:%d:%d", provider, chain, spender, height, nonce)
 
+	println("invoking Sign...")
 	signature, pk, err := kb.Sign(user, []byte(msg))
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("error from kb.Sign: %+v", err))
+
 	}
+	println("Signed successfully")
 
 	// verify signature
 	if !pk.VerifySignature([]byte(msg), signature) {
@@ -203,7 +209,8 @@ func (c Curl) getSpender(user string) string {
 	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
-	buf := bufio.NewReader(os.Stdin)
+	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
+	// buf := bufio.NewReader(os.Stdin)
 
 	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
