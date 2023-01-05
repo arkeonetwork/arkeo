@@ -63,7 +63,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		// add username/password to request
 		host = fmt.Sprintf("thorchain:password@%s:8332", host)
 	case "arkeo-mainnet-fullnode":
-		host = fmt.Sprintf("arkeo:1317", host)
+		host = "arkeo:1317"
 	}
 
 	p.serveReverseProxy(w, r, host)
