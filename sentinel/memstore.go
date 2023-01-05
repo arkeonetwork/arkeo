@@ -112,6 +112,13 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
+	if data.Contract.Deposit == nil {
+		data.Contract.Deposit = cosmos.ZeroInt()
+	}
+	if data.Contract.Paid == nil {
+		data.Contract.Paid = cosmos.ZeroInt()
+	}
+
 	contract.ProviderPubKey = data.Contract.ProviderPubKey
 	contract.Chain = data.Contract.Chain
 	contract.Client = data.Contract.Client
