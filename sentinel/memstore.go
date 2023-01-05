@@ -112,10 +112,10 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
-	if data.Contract.Deposit == nil {
+	if data.Contract.Deposit.IsNil() {
 		data.Contract.Deposit = cosmos.ZeroInt()
 	}
-	if data.Contract.Paid == nil {
+	if data.Contract.Paid.IsNil() {
 		data.Contract.Paid = cosmos.ZeroInt()
 	}
 
