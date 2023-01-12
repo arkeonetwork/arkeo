@@ -193,7 +193,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 
 	// check if we've exceed the total number of pay-as-you-go queries
 	if contract.Type == types.ContractType_PayAsYouGo {
-		if contract.Deposit.LT(cosmos.NewInt(aa.Nonce * contract.Rate)) {
+		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate)) {
 			return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 		}
 	}
