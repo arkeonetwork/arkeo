@@ -86,4 +86,6 @@ func (s *MemStoreSuite) TestMemStore(c *C) {
 	contract, err = mem.Get(key)
 	c.Assert(err, IsNil)
 	c.Check(contract.Rate, Equals, int64(3))
+	c.Check(contract.Deposit.Int64(), Equals, int64(500))
+	c.Check(contract.Paid.Int64(), Equals, int64(0))
 }
