@@ -33,7 +33,7 @@ FROM golang:${GO_VERSION}-alpine
 
 RUN apk add --no-cache \
     jq=1.6-r2 \
-    curl=7.87.0-r0
+    curl=7.87.0-r1
 
 # Copy the compiled binaries over.
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
