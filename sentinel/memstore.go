@@ -76,8 +76,8 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		Height         string             `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
 		Duration       string             `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`
 		Rate           string             `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
-		Deposit        cosmos.Int         `protobuf:"bytes,9,opt,name=deposit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"deposit"`
-		Paid           cosmos.Int         `protobuf:"bytes,10,opt,name=paid,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"paid"`
+		Deposit        string             `protobuf:"varint,9,opt,name=deposit,proto3" json:"deposit,omitempty"`
+		Paid           string             `protobuf:"varint,10,opt,name=paid,proto3" json:"paid,omitempty"`
 		Nonce          string             `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
 		ClosedHeight   string             `protobuf:"varint,12,opt,name=closed_height,json=closedHeight,proto3" json:"closed_height,omitempty"`
 	}
@@ -112,13 +112,6 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
-	if data.Contract.Deposit.IsNil() {
-		data.Contract.Deposit = cosmos.ZeroInt()
-	}
-	if data.Contract.Paid.IsNil() {
-		data.Contract.Paid = cosmos.ZeroInt()
-	}
-
 	contract.ProviderPubKey = data.Contract.ProviderPubKey
 	contract.Chain = data.Contract.Chain
 	contract.Client = data.Contract.Client
@@ -127,8 +120,8 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Height, _ = strconv.ParseInt(data.Contract.Height, 10, 64)
 	contract.Duration, _ = strconv.ParseInt(data.Contract.Duration, 10, 64)
 	contract.Rate, _ = strconv.ParseInt(data.Contract.Rate, 10, 64)
-	contract.Deposit = data.Contract.Deposit
-	contract.Paid = data.Contract.Paid
+	contract.Deposit, _ = cosmos.NewIntFromString(data.Contract.Deposit)
+	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
 	contract.ClosedHeight, _ = strconv.ParseInt(data.Contract.ClosedHeight, 10, 64)
 
