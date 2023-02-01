@@ -1,8 +1,9 @@
 package arkeo_test
 
 import (
-	keepertest "arkeo/testutil/keeper"
 	"testing"
+
+	keepertest "github.com/ArkeoNetwork/arkeo-protocol/testutil/keeper"
 
 	"github.com/ArkeoNetwork/arkeo-protocol/testutil/nullify"
 	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo"

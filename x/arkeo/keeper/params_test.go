@@ -1,8 +1,9 @@
 package keeper_test
 
 import (
-	testkeeper "arkeo/testutil/keeper"
 	"testing"
+
+	testkeeper "github.com/ArkeoNetwork/arkeo-protocol/testutil/keeper"
 
 	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
