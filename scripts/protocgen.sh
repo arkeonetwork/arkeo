@@ -16,8 +16,9 @@ cd ..
 
 # after the proto files have been generated add them to the the repo
 # in the proper location. Then, remove the ephemeral tree used for generation
-cp -r arkeo/* .
-rm -rf arkeo
+echo "copying generated type files to repo"
+cp -r x/* .
+rm -rf x
 
 # we need to go mod manually, because the docker image is still on go1.18
 # go mod tidy
