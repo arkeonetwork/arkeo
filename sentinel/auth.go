@@ -1,9 +1,6 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -13,6 +10,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	"golang.org/x/time/rate"
 )

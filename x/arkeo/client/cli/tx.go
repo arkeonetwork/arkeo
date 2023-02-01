@@ -1,9 +1,10 @@
 package cli
 
 import (
-	"arkeo/x/arkeo/types"
 	"fmt"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	"github.com/spf13/cobra"
 

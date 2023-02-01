@@ -8,7 +8,7 @@ import "arkeo/params.proto";
 import "arkeo/keeper.proto";
 // this line is used by starport scaffolding # 1
 
-option go_package = "arkeo/x/arkeo/types";
+option go_package = "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types";
 
 // Query defines the gRPC querier service.
 service Query {

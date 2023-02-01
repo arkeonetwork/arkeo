@@ -1,9 +1,10 @@
 package types
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
 	fmt "fmt"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
 
 	. "gopkg.in/check.v1"
 

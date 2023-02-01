@@ -6,7 +6,7 @@ import "arkeo/params.proto";
 import "arkeo/keeper.proto";
 // this line is used by starport scaffolding # genesis/proto/import
 
-option go_package = "arkeo/x/arkeo/types";
+option go_package = "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types";
 
 // GenesisState defines the arkeo module's genesis state.
 message GenesisState {

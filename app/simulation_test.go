@@ -1,9 +1,10 @@
 package app_test
 
 import (
-	"arkeo/app"
 	"os"
 	"testing"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/app"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"

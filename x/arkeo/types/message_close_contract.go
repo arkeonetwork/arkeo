@@ -1,7 +1,7 @@
 package types
 
 import (
-	"arkeo/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

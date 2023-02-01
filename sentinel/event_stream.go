@@ -1,13 +1,14 @@
 package sentinel
 
 import (
-	"arkeo/common"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
 
 	"github.com/tendermint/tendermint/libs/log"
 

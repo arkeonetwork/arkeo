@@ -1,13 +1,14 @@
 package arkeo
 
 import (
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/client/cli"
-	"arkeo/x/arkeo/keeper"
-	"arkeo/x/arkeo/types"
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/client/cli"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/keeper"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	// this line is used by starport scaffolding # 1
 

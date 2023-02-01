@@ -1,10 +1,11 @@
 package types
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
 	"math/rand"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/tendermint/tendermint/crypto"

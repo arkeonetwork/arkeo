@@ -1,11 +1,12 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/configs"
-	"arkeo/x/arkeo/types"
 	"context"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/configs"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

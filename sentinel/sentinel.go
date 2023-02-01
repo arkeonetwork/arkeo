@@ -1,8 +1,6 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/sentinel/conf"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +8,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/sentinel/conf"
 
 	"github.com/gorilla/handlers"
 )

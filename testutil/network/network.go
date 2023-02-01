@@ -1,10 +1,11 @@
 package network
 
 import (
-	"arkeo/app"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/app"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"

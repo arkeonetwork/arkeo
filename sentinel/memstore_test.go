@@ -1,12 +1,13 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	. "gopkg.in/check.v1"
 )

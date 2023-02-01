@@ -1,11 +1,6 @@
 package main
 
 import (
-	"arkeo/app"
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/sentinel"
-	"arkeo/x/arkeo/types"
 	"bufio"
 	"bytes"
 	"encoding/hex"
@@ -19,6 +14,12 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/app"
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo-protocol/sentinel"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

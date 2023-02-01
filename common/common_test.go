@@ -1,8 +1,9 @@
 package common
 
 import (
-	"arkeo/common/cosmos"
 	"testing"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
 
 	. "gopkg.in/check.v1"
 )

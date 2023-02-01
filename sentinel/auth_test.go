@@ -1,13 +1,14 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/sentinel/conf"
-	"arkeo/x/arkeo/types"
 	"encoding/hex"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo-protocol/sentinel/conf"
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	"golang.org/x/time/rate"
 	. "gopkg.in/check.v1"

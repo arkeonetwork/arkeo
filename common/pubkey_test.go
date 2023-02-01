@@ -1,9 +1,10 @@
 package common
 
 import (
-	"arkeo/common/cosmos"
 	"encoding/json"
 	"fmt"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	. "gopkg.in/check.v1"

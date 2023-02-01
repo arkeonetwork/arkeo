@@ -1,8 +1,9 @@
 package cli
 
 import (
-	"arkeo/x/arkeo/types"
 	"context"
+
+	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"

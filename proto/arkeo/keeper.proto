@@ -4,7 +4,7 @@ package arkeo.arkeo;
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
 
-option go_package = "arkeo/x/arkeo/types";
+option go_package = "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types";
 
 enum ProviderStatus {
   Offline = 0;
@@ -12,8 +12,8 @@ enum ProviderStatus {
 }
 
 message Provider {
-  string pub_key = 1 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
-  int32 chain = 2 [ (gogoproto.casttype) = "arkeo/common.Chain" ];
+  string pub_key = 1 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  int32 chain = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.Chain" ];
   string metadataURI = 3;
   uint64 metadata_nonce = 4;
   ProviderStatus status = 5;
@@ -35,10 +35,10 @@ enum ContractType {
 }
 
 message Contract {
-  string provider_pub_key = 1 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
-  int32 chain = 2 [ (gogoproto.casttype) = "arkeo/common.Chain" ];
-  string client = 3 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
-  string delegate = 4 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string provider_pub_key = 1 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  int32 chain = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.Chain" ];
+  string client = 3 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string delegate = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
   ContractType type = 5;
   int64 height = 6;
   int64 duration = 7;
@@ -58,9 +58,9 @@ message Contract {
 }
 
 message ContractExpiration {
-  string provider_pub_key = 1 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
-  int32 chain = 2 [ (gogoproto.casttype) = "arkeo/common.Chain" ];
-  string client = 3 [ (gogoproto.casttype) = "arkeo/common.PubKey" ];
+  string provider_pub_key = 1 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  int32 chain = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.Chain" ];
+  string client = 3 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
 }
 
 message ContractExpirationSet {
