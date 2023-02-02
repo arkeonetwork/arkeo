@@ -7,11 +7,22 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
+import { MsgClaimEth } from "./types/arkeo/claim/tx";
 
 import { Params as typeParams} from "./types"
 
-export {  };
+export { MsgClaimEth };
 
+type sendMsgClaimEthParams = {
+  value: MsgClaimEth,
+  fee?: StdFee,
+  memo?: string
+};
+
+
+type msgClaimEthParams = {
+  value: MsgClaimEth,
+};
 
 
 export const registry = new Registry(msgTypes);
@@ -43,6 +54,28 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
+		async sendMsgClaimEth({ value, fee, memo }: sendMsgClaimEthParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimEth: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimEth({ value: MsgClaimEth.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimEth: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		
+		msgClaimEth({ value }: msgClaimEthParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgClaimEth", value: MsgClaimEth.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimEth: Could not create message: ' + e.message)
+			}
+		},
 		
 	}
 };

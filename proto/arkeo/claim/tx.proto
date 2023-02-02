@@ -1,7 +1,18 @@
 syntax = "proto3";
+
 package arkeonetwork.arkeo.claim;
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc ClaimEth (MsgClaimEth) returns (MsgClaimEthResponse);
+}
+message MsgClaimEth {
+  string creator    = 1;
+  string ethAdress  = 2;
+  string singaturec = 3;
+}
+
+message MsgClaimEthResponse {}
+

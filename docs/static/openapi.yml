@@ -45886,6 +45886,8 @@ definitions:
                   "@type": "type.googleapis.com/google.protobuf.Duration",
                   "value": "1.212s"
                 }
+  arkeonetwork.arkeo.claim.MsgClaimEthResponse:
+    type: object
   arkeonetwork.arkeo.claim.Params:
     type: object
     description: Params defines the parameters for the module.
