@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package arkeonetwork.arkeo.claim;
 
 import "gogoproto/gogo.proto";
@@ -10,17 +11,34 @@ option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Query defines the gRPC querier service.
 service Query {
+  
   // Parameters queries the parameters of the module.
-  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/arkeonetwork/arkeo/claim/params";
+  
+  }
+  
+  // Queries a list of ClaimRecord items.
+  rpc ClaimRecord (QueryClaimRecordRequest) returns (QueryClaimRecordResponse) {
+    option (google.api.http).get = "/arkeonetwork/arkeo/claim/claim_record/{address}";
+  
   }
 }
-
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
+  
   // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
+
+message QueryClaimRecordRequest {
+  string address = 1;
+}
+
+message QueryClaimRecordResponse {
+  string claimRecord = 1;
+}
+

@@ -14,7 +14,19 @@ export type ClaimMsgClaimEthResponse = object;
 /**
  * Params defines the parameters for the module.
  */
-export type ClaimParams = object;
+export interface ClaimParams {
+  /** @format date-time */
+  airdrop_start_time?: string;
+  duration_until_decay?: string;
+  duration_of_decay?: string;
+
+  /** denom of claimable asset */
+  claim_denom?: string;
+}
+
+export interface ClaimQueryClaimRecordResponse {
+  claimRecord?: string;
+}
 
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
@@ -156,10 +168,26 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title arkeo/claim/genesis.proto
+ * @title arkeo/claim/claim_record.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+  /**
+   * No description
+   *
+   * @tags Query
+   * @name QueryClaimRecord
+   * @summary Queries a list of ClaimRecord items.
+   * @request GET:/arkeonetwork/arkeo/claim/claim_record/{address}
+   */
+  queryClaimRecord = (address: string, params: RequestParams = {}) =>
+    this.request<ClaimQueryClaimRecordResponse, RpcStatus>({
+      path: `/arkeonetwork/arkeo/claim/claim_record/${address}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
   /**
    * No description
    *

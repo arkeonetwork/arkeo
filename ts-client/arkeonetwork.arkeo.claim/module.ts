@@ -9,6 +9,7 @@ import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
 import { MsgClaimEth } from "./types/arkeo/claim/tx";
 
+import { ClaimRecord as typeClaimRecord} from "./types"
 import { Params as typeParams} from "./types"
 
 export { MsgClaimEth };
@@ -99,6 +100,7 @@ class SDKModule {
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
 		this.structure =  {
+						ClaimRecord: getStructure(typeClaimRecord.fromPartial({})),
 						Params: getStructure(typeParams.fromPartial({})),
 						
 		};
