@@ -14,12 +14,12 @@ var _ = strconv.Itoa(0)
 
 func CmdClaimEth() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-eth [eth-adress] [singaturec]",
+		Use:   "claim-eth [eth-adress] [signature]",
 		Short: "Broadcast message claim-eth",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argEthAdress := args[0]
-			argSingaturec := args[1]
+			argSignature := args[1]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -29,7 +29,7 @@ func CmdClaimEth() *cobra.Command {
 			msg := types.NewMsgClaimEth(
 				clientCtx.GetFromAddress().String(),
 				argEthAdress,
-				argSingaturec,
+				argSignature,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

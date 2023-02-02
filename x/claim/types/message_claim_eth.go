@@ -9,11 +9,11 @@ const TypeMsgClaimEth = "claim_eth"
 
 var _ sdk.Msg = &MsgClaimEth{}
 
-func NewMsgClaimEth(creator string, ethAdress string, singaturec string) *MsgClaimEth {
+func NewMsgClaimEth(creator string, ethAdress string, signature string) *MsgClaimEth {
 	return &MsgClaimEth{
 		Creator:    creator,
-		EthAdress:  ethAdress,
-		Singaturec: singaturec,
+		EthAddress: ethAdress,
+		Signature:  signature,
 	}
 }
 

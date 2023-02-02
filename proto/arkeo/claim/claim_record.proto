@@ -47,8 +47,5 @@ message ClaimRecord {
 
   // true if action is completed
   // index of bool in array refers to action enum #
-  repeated bool action_completed = 4 [
-    (gogoproto.moretags) = "yaml:\"action_completed\"",
-    (gogoproto.nullable) = false
-  ];
+  repeated bool action_completed = 4 [ (gogoproto.moretags) = "yaml:\"action_completed\"" ];
 }

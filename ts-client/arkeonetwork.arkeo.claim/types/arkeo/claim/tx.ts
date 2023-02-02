@@ -6,14 +6,14 @@ export const protobufPackage = "arkeonetwork.arkeo.claim";
 export interface MsgClaimEth {
   creator: string;
   ethAdress: string;
-  singaturec: string;
+  signature: string;
 }
 
 export interface MsgClaimEthResponse {
 }
 
 function createBaseMsgClaimEth(): MsgClaimEth {
-  return { creator: "", ethAdress: "", singaturec: "" };
+  return { creator: "", ethAdress: "", signature: "" };
 }
 
 export const MsgClaimEth = {
@@ -24,8 +24,8 @@ export const MsgClaimEth = {
     if (message.ethAdress !== "") {
       writer.uint32(18).string(message.ethAdress);
     }
-    if (message.singaturec !== "") {
-      writer.uint32(26).string(message.singaturec);
+    if (message.signature !== "") {
+      writer.uint32(26).string(message.signature);
     }
     return writer;
   },
@@ -44,7 +44,7 @@ export const MsgClaimEth = {
           message.ethAdress = reader.string();
           break;
         case 3:
-          message.singaturec = reader.string();
+          message.signature = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -58,7 +58,7 @@ export const MsgClaimEth = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       ethAdress: isSet(object.ethAdress) ? String(object.ethAdress) : "",
-      singaturec: isSet(object.singaturec) ? String(object.singaturec) : "",
+      signature: isSet(object.signature) ? String(object.signature) : "",
     };
   },
 
@@ -66,7 +66,7 @@ export const MsgClaimEth = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.ethAdress !== undefined && (obj.ethAdress = message.ethAdress);
-    message.singaturec !== undefined && (obj.singaturec = message.singaturec);
+    message.signature !== undefined && (obj.signature = message.signature);
     return obj;
   },
 
@@ -74,7 +74,7 @@ export const MsgClaimEth = {
     const message = createBaseMsgClaimEth();
     message.creator = object.creator ?? "";
     message.ethAdress = object.ethAdress ?? "";
-    message.singaturec = object.singaturec ?? "";
+    message.signature = object.signature ?? "";
     return message;
   },
 };
