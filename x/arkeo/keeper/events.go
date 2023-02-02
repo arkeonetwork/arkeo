@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"strconv"
+
 	"arkeo/common/cosmos"
 	"arkeo/x/arkeo/types"
-	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -69,6 +70,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 				sdk.NewAttribute("duration", strconv.FormatInt(contract.Duration, 10)),
 				sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
 				sdk.NewAttribute("open_cost", strconv.FormatInt(openCost, 10)),
+				sdk.NewAttribute("deposit", contract.Deposit.String()),
 			),
 		},
 	)

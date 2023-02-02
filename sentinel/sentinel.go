@@ -1,8 +1,6 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/sentinel/conf"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +8,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"arkeo/common"
+	"arkeo/sentinel/conf"
 
 	"github.com/gorilla/handlers"
 )
@@ -37,10 +38,10 @@ func NewProxy(config conf.Configuration) Proxy {
 // Serve a reverse proxy for a given url
 func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
 	// parse the url
-	url, _ := url.Parse(fmt.Sprintf("http://%s", host))
+	reverseUrl, _ := url.Parse(fmt.Sprintf("http://%s", host))
 
 	// create the reverse proxy
-	proxy := common.NewSingleHostReverseProxy(url)
+	proxy := common.NewSingleHostReverseProxy(reverseUrl)
 
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, r)
@@ -63,7 +64,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		// add username/password to request
 		host = fmt.Sprintf("thorchain:password@%s:8332", host)
 	case "arkeo-mainnet-fullnode":
-		host = "arkeo:1317"
+		host = "arkeod:1317"
 	}
 
 	p.serveReverseProxy(w, r, host)
