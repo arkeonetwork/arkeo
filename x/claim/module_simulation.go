@@ -23,6 +23,7 @@ var (
 	_ = baseapp.Paramspace
 )
 
+// nolint
 const (
 	opWeightMsgClaimEth = "op_weight_msg_claim_eth"
 	// TODO: Determine the simulation weight value

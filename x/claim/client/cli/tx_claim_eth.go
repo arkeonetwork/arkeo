@@ -14,7 +14,7 @@ var _ = strconv.Itoa(0)
 
 func CmdClaimEth() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-eth [eth-adress] [signature]",
+		Use:   "claim-eth [eth-address] [signature]",
 		Short: "Broadcast message claim-eth",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

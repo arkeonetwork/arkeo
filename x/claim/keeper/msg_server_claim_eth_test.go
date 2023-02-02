@@ -20,7 +20,6 @@ func TestClaimEth(t *testing.T) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// create valid eth claimrecords
-	addrEth := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random invalid eth address
 	addrArkeo := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
 	addrEth, sigString, err := generateSignedEthClaim(addrArkeo, "100")
 	require.NoError(t, err)

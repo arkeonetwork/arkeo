@@ -64,8 +64,8 @@ func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 	keeper, ctx := testkeeper.ClaimKeeper(t)
 
 	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
-	addr2 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth addres
-	//addr3 := "thor18u55kxfudpy9q7mvhxzrh4xntjyukx420lt5fg" // random thorchain address
+	addr2 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
+	// addr3 := "thor18u55kxfudpy9q7mvhxzrh4xntjyukx420lt5fg" // random thorchain address
 
 	claimRecords := []types.ClaimRecord{
 		{
