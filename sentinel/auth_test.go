@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/sentinel/conf"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/sentinel/conf"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 
 	"golang.org/x/time/rate"
 	. "gopkg.in/check.v1"

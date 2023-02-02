@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
 
 	. "gopkg.in/check.v1"
 )

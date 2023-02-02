@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 )
 
 func (k KVStore) setContract(ctx cosmos.Context, key string, record types.Contract) {

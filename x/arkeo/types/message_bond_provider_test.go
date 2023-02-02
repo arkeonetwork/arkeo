@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
 
 	. "gopkg.in/check.v1"
 

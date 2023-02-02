@@ -3,8 +3,8 @@ package types
 import (
 	fmt "fmt"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

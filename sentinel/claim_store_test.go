@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 
 	. "gopkg.in/check.v1"
 )

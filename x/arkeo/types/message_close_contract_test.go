@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
+	"github.com/ArkeoNetwork/arkeo/common"
 
 	. "gopkg.in/check.v1"
 

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/client/cli"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/keeper"
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/client/cli"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/keeper"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 
 	// this line is used by starport scaffolding # 1
 

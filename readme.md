@@ -2,8 +2,8 @@
 
 Arkeo Protocol - Free Market Blockchain Data Infrastructure
 
-[![Arkeo CI](https://github.com/ArkeoNetwork/arkeo-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo-protocol/actions/workflows/ci.yml)
-[![Release](https://github.com/ArkeoNetwork/arkeo-protocol/actions/workflows/release.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo-protocol/actions/workflows/release.yml)
+[![Arkeo CI](https://github.com/ArkeoNetwork/arkeo/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo/actions/workflows/ci.yml)
+[![Release](https://github.com/ArkeoNetwork/arkeo/actions/workflows/release.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo/actions/workflows/release.yml)
 
 **arkeo** is a blockchain built using Cosmos SDK and Tendermint and created
 with [Ignite CLI](https://ignite.com/cli).

@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/docs"
+	"github.com/ArkeoNetwork/arkeo/docs"
 
 	"github.com/blang/semver"
 
@@ -108,9 +108,9 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 
-	arkeomodule "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo"
-	arkeomodulekeeper "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/keeper"
-	arkeomoduletypes "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	arkeomodule "github.com/ArkeoNetwork/arkeo/x/arkeo"
+	arkeomodulekeeper "github.com/ArkeoNetwork/arkeo/x/arkeo/keeper"
+	arkeomoduletypes "github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 

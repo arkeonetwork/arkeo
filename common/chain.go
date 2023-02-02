@@ -21,9 +21,9 @@ const (
 var ChainLookup = map[string]int32{
 	"unknown":   0,
 	"swapi.dev": 1, // star wars API for development purposes
-	"github.com/ArkeoNetwork/arkeo-protocol-mainnet-fullnode": 2,
-	"btc-mainnet-fullnode": 3,
-	"eth-mainnet-fullnode": 4,
+	"github.com/ArkeoNetwork/arkeo-mainnet-fullnode": 2,
+	"btc-mainnet-fullnode":                           3,
+	"eth-mainnet-fullnode":                           4,
 }
 
 func (c Chain) String() string {

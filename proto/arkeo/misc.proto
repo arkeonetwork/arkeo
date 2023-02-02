@@ -1,7 +1,7 @@
 syntax = "proto3";
 package arkeo.arkeo;
 
-option go_package = "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types";
+option go_package = "github.com/ArkeoNetwork/arkeo/x/arkeo/types";
 
 import "gogoproto/gogo.proto";
 

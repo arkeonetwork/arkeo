@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	fmt "fmt"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/common"
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
 )
 
 func NewProvider(pubkey common.PubKey, chain common.Chain) Provider {

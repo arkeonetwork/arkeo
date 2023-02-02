@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
 import "arkeo/keeper.proto";
 
-option go_package = "github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types";
+option go_package = "github.com/ArkeoNetwork/arkeo/x/arkeo/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -20,7 +20,7 @@ service Msg {
 
 message MsgBondProvider {
   string creator = 1;
-  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   string chain = 3;
   string bond = 4 [
     (cosmos_proto.scalar) = "cosmos.Int",
@@ -33,7 +33,7 @@ message MsgBondProviderResponse {}
 
 message MsgModProvider {
   string creator = 1;
-  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   string chain = 3;
   string metadataURI = 4;
   uint64 metadataNonce = 5;
@@ -48,10 +48,10 @@ message MsgModProviderResponse {}
 
 message MsgOpenContract {
   string creator = 1;
-  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   string chain = 3;
-  string client = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
-  string delegate = 5 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string client = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   ContractType cType = 6;
   int64 duration = 7;
   int64 rate = 8;
@@ -66,19 +66,19 @@ message MsgOpenContractResponse {}
 
 message MsgCloseContract {
   string creator = 1;
-  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   string chain = 3;
-  string client = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
-  string delegate = 5 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string client = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
   string creator = 1;
-  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string pub_key = 2 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   string chain = 3;
-  string spender = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo-protocol/common.PubKey" ];
+  string spender = 4 [ (gogoproto.casttype) = "github.com/ArkeoNetwork/arkeo/common.PubKey" ];
   bytes signature = 5;
   int64 nonce = 6;
   int64 height = 7;

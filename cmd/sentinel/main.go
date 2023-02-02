@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/ArkeoNetwork/arkeo-protocol/app"
-	"github.com/ArkeoNetwork/arkeo-protocol/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo-protocol/sentinel"
-	"github.com/ArkeoNetwork/arkeo-protocol/sentinel/conf"
+	"github.com/ArkeoNetwork/arkeo/app"
+	"github.com/ArkeoNetwork/arkeo/common/cosmos"
+	"github.com/ArkeoNetwork/arkeo/sentinel"
+	"github.com/ArkeoNetwork/arkeo/sentinel/conf"
 )
 
 func main() {

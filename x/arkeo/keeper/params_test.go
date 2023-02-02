@@ -3,9 +3,9 @@ package keeper_test
 import (
 	"testing"
 
-	testkeeper "github.com/ArkeoNetwork/arkeo-protocol/testutil/keeper"
+	testkeeper "github.com/ArkeoNetwork/arkeo/testutil/keeper"
 
-	"github.com/ArkeoNetwork/arkeo-protocol/x/arkeo/types"
+	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
 
 	"github.com/stretchr/testify/require"
 )
