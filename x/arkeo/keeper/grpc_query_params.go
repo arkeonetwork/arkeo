@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"

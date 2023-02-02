@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/blang/semver"
 	. "gopkg.in/check.v1"

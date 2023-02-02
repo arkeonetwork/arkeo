@@ -1,4 +1,4 @@
-module github.com/ArkeoNetwork/arkeo
+module github.com/arkeonetwork/arkeo
 
 go 1.18
 

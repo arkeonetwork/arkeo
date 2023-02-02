@@ -3,11 +3,11 @@ package arkeo_test
 import (
 	"testing"
 
-	keepertest "github.com/ArkeoNetwork/arkeo/testutil/keeper"
+	keepertest "github.com/arkeonetwork/arkeo/testutil/keeper"
 
-	"github.com/ArkeoNetwork/arkeo/testutil/nullify"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/testutil/nullify"
+	"github.com/arkeonetwork/arkeo/x/arkeo"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/stretchr/testify/require"
 )

@@ -3,10 +3,10 @@ package arkeo
 import (
 	"math/rand"
 
-	arkeosimulation "github.com/ArkeoNetwork/arkeo/x/arkeo/simulation"
+	arkeosimulation "github.com/arkeonetwork/arkeo/x/arkeo/simulation"
 
-	"github.com/ArkeoNetwork/arkeo/testutil/sample"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/testutil/sample"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"

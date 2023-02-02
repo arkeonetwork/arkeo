@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/ArkeoNetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/app"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"

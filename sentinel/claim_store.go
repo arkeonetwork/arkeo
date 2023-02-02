@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ArkeoNetwork/arkeo/common"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

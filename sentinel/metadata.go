@@ -1,8 +1,8 @@
 package sentinel
 
 import (
-	"github.com/ArkeoNetwork/arkeo/sentinel/conf"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 )
 
 var Version = "0.0.0"

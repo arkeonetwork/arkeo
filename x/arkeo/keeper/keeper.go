@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ArkeoNetwork/arkeo/common"
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/blang/semver"
 	"github.com/cosmos/cosmos-sdk/codec"

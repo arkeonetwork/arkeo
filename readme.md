@@ -2,8 +2,8 @@
 
 Arkeo Protocol - Free Market Blockchain Data Infrastructure
 
-[![Arkeo CI](https://github.com/ArkeoNetwork/arkeo/actions/workflows/ci.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo/actions/workflows/ci.yml)
-[![Release](https://github.com/ArkeoNetwork/arkeo/actions/workflows/release.yml/badge.svg)](https://github.com/ArkeoNetwork/arkeo/actions/workflows/release.yml)
+[![Arkeo CI](https://github.com/arkeonetwork/arkeo/actions/workflows/ci.yml/badge.svg)](https://github.com/arkeonetwork/arkeo/actions/workflows/ci.yml)
+[![Release](https://github.com/arkeonetwork/arkeo/actions/workflows/release.yml/badge.svg)](https://github.com/arkeonetwork/arkeo/actions/workflows/release.yml)
 
 **arkeo** is a blockchain built using Cosmos SDK and Tendermint and created
 with [Ignite CLI](https://ignite.com/cli).
@@ -44,7 +44,7 @@ following command on your machine:
 curl https://get.ignite.com/username/arkeo@latest! | sudo bash
 ```
 
-`ArkeoNetwork/arkeo` should match the `username` and `repo_name` of the Github
+`arkeonetwork/arkeo` should match the `username` and `repo_name` of the Github
 repository to which the source code was pushed. Learn more about [the install
 process](https://github.com/allinbits/starport-installer).
 

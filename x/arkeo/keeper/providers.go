@@ -3,9 +3,9 @@ package keeper
 import (
 	"errors"
 
-	"github.com/ArkeoNetwork/arkeo/common"
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func (k KVStore) setProvider(ctx cosmos.Context, key string, record types.Provider) {

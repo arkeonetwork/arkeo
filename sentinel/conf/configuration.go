@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/ArkeoNetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common"
 )
 
 type Configuration struct {

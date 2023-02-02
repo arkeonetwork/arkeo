@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ArkeoNetwork/arkeo/common"
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/tendermint/tendermint/crypto"

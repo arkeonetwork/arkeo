@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/btcsuite/btcutil/bech32"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"

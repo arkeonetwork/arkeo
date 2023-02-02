@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/configs"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )

@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/stretchr/testify/require"
 )

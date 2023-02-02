@@ -1,8 +1,8 @@
 package arkeo
 
 import (
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/keeper"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ArkeoNetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/app"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"

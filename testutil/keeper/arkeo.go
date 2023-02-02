@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ArkeoNetwork/arkeo/common/cosmos"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/keeper"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/blang/semver"
 

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 	// "strings"
-	"github.com/ArkeoNetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/spf13/cobra"
 
