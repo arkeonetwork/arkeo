@@ -22,9 +22,9 @@ NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
 TAG?=testnet
-ldflags = -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.Version=$(VERSION) \
-          -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.GitCommit=$(COMMIT) \
-          -X gitlab.com/ArkeoNetwork/arkeo-protocol/config.BuildTime=${NOW} \
+ldflags = -X gitlab.com/arkeonetwork/arkeo/config.Version=$(VERSION) \
+          -X gitlab.com/arkeonetwork/arkeo/config.GitCommit=$(COMMIT) \
+          -X gitlab.com/arkeonetwork/arkeo/config.BuildTime=${NOW} \
 		  -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \

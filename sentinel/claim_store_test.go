@@ -1,10 +1,11 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
 	"io/ioutil"
 	"os"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	. "gopkg.in/check.v1"
 )

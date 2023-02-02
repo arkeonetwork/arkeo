@@ -1,12 +1,13 @@
 package app
 
 import (
-	"arkeo/docs"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/arkeonetwork/arkeo/docs"
 
 	"github.com/blang/semver"
 
@@ -107,9 +108,9 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 
-	arkeomodule "arkeo/x/arkeo"
-	arkeomodulekeeper "arkeo/x/arkeo/keeper"
-	arkeomoduletypes "arkeo/x/arkeo/types"
+	arkeomodule "github.com/arkeonetwork/arkeo/x/arkeo"
+	arkeomodulekeeper "github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	arkeomoduletypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 

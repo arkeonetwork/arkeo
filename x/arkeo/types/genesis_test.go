@@ -1,8 +1,9 @@
 package types_test
 
 import (
-	"arkeo/x/arkeo/types"
 	"testing"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/stretchr/testify/require"
 )
