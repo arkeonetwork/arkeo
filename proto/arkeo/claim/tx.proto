@@ -1,0 +1,7 @@
+syntax = "proto3";
+package arkeonetwork.arkeo.claim;
+
+option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
+
+// Msg defines the Msg service.
+service Msg {}
