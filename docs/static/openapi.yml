@@ -498,7 +498,7 @@ paths:
           type: boolean
       tags:
         - Query
-  /arkeonetwork/arkeo/claim/claim_record/{address}:
+  /arkeonetwork/arkeo/claim/claimrecord/{address}:
     get:
       summary: Queries a list of ClaimRecord items.
       operationId: ArkeonetworkArkeoClaimClaimRecord

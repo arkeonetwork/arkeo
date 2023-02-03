@@ -178,11 +178,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryClaimRecord
    * @summary Queries a list of ClaimRecord items.
-   * @request GET:/arkeonetwork/arkeo/claim/claim_record/{address}
+   * @request GET:/arkeonetwork/arkeo/claim/claimrecord/{address}
    */
   queryClaimRecord = (address: string, params: RequestParams = {}) =>
     this.request<ClaimQueryClaimRecordResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/claim/claim_record/${address}`,
+      path: `/arkeonetwork/arkeo/claim/claimrecord/${address}`,
       method: "GET",
       format: "json",
       ...params,

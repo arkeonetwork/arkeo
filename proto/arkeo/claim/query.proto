@@ -20,7 +20,7 @@ service Query {
   
   // Queries a list of ClaimRecord items.
   rpc ClaimRecord (QueryClaimRecordRequest) returns (QueryClaimRecordResponse) {
-    option (google.api.http).get = "/arkeonetwork/arkeo/claim/claim_record/{address}";
+    option (google.api.http).get = "/arkeonetwork/arkeo/claim/claimrecord/{address}";
   
   }
 }
