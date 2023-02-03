@@ -16,7 +16,7 @@ func CmdClaimRecord() *cobra.Command {
 		Use:   "claim-record [address]",
 		Short: "Query claim-record",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			reqAddress := args[0]
 
 			clientCtx, err := client.GetClientQueryContext(cmd)
