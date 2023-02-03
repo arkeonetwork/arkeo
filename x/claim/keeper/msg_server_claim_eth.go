@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -145,5 +146,5 @@ func hexDecode(s string) ([]byte, error) {
 
 // Has0xPrefix validates str begins with '0x' or '0X'.
 func has0xPrefix(str string) bool {
-	return len(str) >= 2 && str[0] == '0' && (str[1] == 'x' || str[1] == 'X')
+	return strings.HasPrefix(str, "0x") || strings.HasPrefix(str, "0X")
 }
