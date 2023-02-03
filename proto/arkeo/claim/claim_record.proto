@@ -10,15 +10,15 @@ option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 enum Action {
   option (gogoproto.goproto_enum_prefix) = false;
 
-  ActionVote = 0;
-  ActionDelegateStake = 1;
+  ACTION_VOTE = 0;
+  ACTION_DELEGATE_STAKE = 1;
 }
 
 // actions for chains other than arkeo, limited currently to claiming
 enum ForeignChainAction {
   option (gogoproto.goproto_enum_prefix) = false;
 
-  ForeignChainActionClaim = 0;
+  FOREIGN_CHAIN_ACTION_CLAIM = 0;
 }
 
 enum Chain {

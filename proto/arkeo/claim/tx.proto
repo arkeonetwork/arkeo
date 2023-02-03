@@ -10,7 +10,7 @@ service Msg {
 }
 message MsgClaimEth {
   string creator    = 1;
-  string ethAddress = 2; // the adress the claim is for
+  string eth_address = 2; // the adress the claim is for
   string signature  = 3; // EIP712 signature that has to be signed by ethAddress
 }
 

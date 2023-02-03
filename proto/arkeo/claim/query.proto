@@ -39,6 +39,6 @@ message QueryClaimRecordRequest {
 }
 
 message QueryClaimRecordResponse {
-  string claimRecord = 1;
+  string claim_record = 1;
 }
 

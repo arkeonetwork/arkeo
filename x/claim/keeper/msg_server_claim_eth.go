@@ -28,7 +28,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	// 2. check if already claimed
-	if ethClaim.ActionCompleted[types.ForeignChainActionClaim] {
+	if ethClaim.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM] {
 		return nil, errors.Wrapf(err, "already claimed for %s", msg.EthAddress)
 	}
 
@@ -45,7 +45,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	// set eth claim to completed
-	ethClaim.ActionCompleted[types.ForeignChainActionClaim] = true
+	ethClaim.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM] = true
 	err = k.SetClaimRecord(ctx, ethClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.EthAddress)

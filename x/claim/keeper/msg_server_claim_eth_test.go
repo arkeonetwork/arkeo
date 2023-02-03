@@ -45,7 +45,7 @@ func TestClaimEth(t *testing.T) {
 	// check if claimrecord is updated
 	claimRecord, err = keeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
 	require.NoError(t, err)
-	require.True(t, claimRecord.ActionCompleted[types.ForeignChainActionClaim])
+	require.True(t, claimRecord.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM])
 
 	// confirm we have a claimrecord for arkeo
 	claimRecord, err = keeper.GetClaimRecord(sdkCtx, addrArkeo, types.ARKEO)
@@ -53,8 +53,8 @@ func TestClaimEth(t *testing.T) {
 	require.Equal(t, claimRecord.Address, addrArkeo)
 	require.Equal(t, claimRecord.Chain, types.ARKEO)
 	require.Equal(t, claimRecord.InitialClaimableAmount, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)))
-	require.False(t, claimRecord.ActionCompleted[types.ActionVote])
-	require.False(t, claimRecord.ActionCompleted[types.ActionDelegateStake])
+	require.False(t, claimRecord.ActionCompleted[types.ACTION_VOTE])
+	require.False(t, claimRecord.ActionCompleted[types.ACTION_DELEGATE_STAKE])
 }
 
 func TestIsValidClaimSignature(t *testing.T) {

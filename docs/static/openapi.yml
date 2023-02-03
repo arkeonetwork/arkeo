@@ -508,7 +508,7 @@ paths:
           schema:
             type: object
             properties:
-              claimRecord:
+              claim_record:
                 type: string
         default:
           description: An unexpected error response.
@@ -45953,7 +45953,7 @@ definitions:
   arkeonetwork.arkeo.claim.QueryClaimRecordResponse:
     type: object
     properties:
-      claimRecord:
+      claim_record:
         type: string
   arkeonetwork.arkeo.claim.QueryParamsResponse:
     type: object

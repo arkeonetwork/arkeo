@@ -244,7 +244,7 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 var (
 	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"arkeonetwork", "arkeo", "claim", "params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ClaimRecord_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeonetwork", "arkeo", "claim", "claim_record", "address"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ClaimRecord_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeonetwork", "arkeo", "claim", "claimrecord", "address"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
