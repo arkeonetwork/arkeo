@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/gogo/protobuf/proto"
 )
 
 // SetClaimRecord sets a claim record for an address in store
@@ -16,7 +15,7 @@ func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) e
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(claimRecord.Chain))
 
-	bz, err := proto.Marshal(&claimRecord)
+	bz, err := k.cdc.Marshal(&claimRecord)
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) []types.Clai
 
 		claimRecord := types.ClaimRecord{}
 
-		err := proto.Unmarshal(iterator.Value(), &claimRecord)
+		err := k.cdc.Unmarshal(iterator.Value(), &claimRecord)
 		if err != nil {
 			panic(err)
 		}
@@ -87,7 +86,7 @@ func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) 
 	bz := prefixStore.Get(addrBytes)
 
 	claimRecord := types.ClaimRecord{}
-	err := proto.Unmarshal(bz, &claimRecord)
+	err := k.cdc.Unmarshal(bz, &claimRecord)
 	if err != nil {
 		return types.ClaimRecord{}, err
 	}
