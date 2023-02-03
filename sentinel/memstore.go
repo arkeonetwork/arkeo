@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -20,6 +21,7 @@ var ModuleBasics = module.NewBasicManager()
 // TODO: this should receive events from arceo chain to update its database
 // TODO: clean up contracts from memory after they expire
 type MemStore struct {
+	storeLock   *sync.Mutex
 	db          map[string]types.Contract
 	client      http.Client
 	baseURL     string
@@ -28,7 +30,8 @@ type MemStore struct {
 
 func NewMemStore(baseURL string) *MemStore {
 	return &MemStore{
-		db: make(map[string]types.Contract),
+		storeLock: &sync.Mutex{},
+		db:        make(map[string]types.Contract),
 		client: http.Client{
 			Timeout: 10 * time.Second,
 		},
@@ -49,14 +52,26 @@ func (k *MemStore) SetHeight(height int64) {
 }
 
 func (k *MemStore) Get(key string) (types.Contract, error) {
-	contract := k.db[key]
-	if contract.IsClose(k.blockHeight) {
-		return k.fetchContract(key)
+	k.storeLock.Lock()
+	defer k.storeLock.Unlock()
+	contract, ok := k.db[key]
+	// contract is not in cache or contract expired , fetch it
+	if !ok || contract.IsClose(k.blockHeight) {
+		crtUpStream, err := k.fetchContract(key)
+		if err != nil {
+			return crtUpStream, err
+		}
+		if !crtUpStream.IsClose(k.blockHeight) {
+			k.db[key] = crtUpStream
+		}
 	}
+	// contract still valid
 	return contract, nil
 }
 
 func (k *MemStore) Put(key string, value types.Contract) {
+	k.storeLock.Lock()
+	defer k.storeLock.Unlock()
 	if value.IsClose(k.blockHeight) {
 		delete(k.db, key)
 		return
@@ -125,14 +140,6 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
 	contract.ClosedHeight, _ = strconv.ParseInt(data.Contract.ClosedHeight, 10, 64)
-
-	if contract.IsClose(k.blockHeight) {
-		fmt.Println("is expired")
-		delete(k.db, key) // clean up
-		return contract, nil
-	}
-
-	k.Put(key, contract)
 
 	return contract, nil
 }
