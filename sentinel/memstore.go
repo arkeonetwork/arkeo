@@ -1,15 +1,16 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
@@ -68,10 +69,10 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	var contract types.Contract
 
 	type fetchContract struct {
-		ProviderPubKey common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
-		Chain          common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=arkeo/common.Chain" json:"chain,omitempty"`
-		Client         common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=arkeo/common.PubKey" json:"client,omitempty"`
-		Delegate       common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=arkeo/common.PubKey" json:"delegate,omitempty"`
+		ProviderPubKey common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
+		Chain          common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=github.com/arkeonetwork/arkeo/common.Chain" json:"chain,omitempty"`
+		Client         common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
+		Delegate       common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"delegate,omitempty"`
 		Type           types.ContractType `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
 		Height         string             `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
 		Duration       string             `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`

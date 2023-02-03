@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"arkeo/common"
+	"github.com/arkeonetwork/arkeo/common"
 
 	"github.com/tendermint/tendermint/libs/log"
 

@@ -1,10 +1,12 @@
 package arkeo
 
 import (
-	"arkeo/testutil/sample"
-	arkeosimulation "arkeo/x/arkeo/simulation"
-	"arkeo/x/arkeo/types"
 	"math/rand"
+
+	arkeosimulation "github.com/arkeonetwork/arkeo/x/arkeo/simulation"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"

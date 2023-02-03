@@ -3,8 +3,8 @@ package keeper
 import (
 	"strconv"
 
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

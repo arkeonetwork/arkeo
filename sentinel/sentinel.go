@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"arkeo/common"
-	"arkeo/sentinel/conf"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
 
 	"github.com/gorilla/handlers"
 )

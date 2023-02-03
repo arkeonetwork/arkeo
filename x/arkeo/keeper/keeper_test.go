@@ -1,11 +1,12 @@
 package keeper
 
 import (
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/blang/semver"
 	. "gopkg.in/check.v1"

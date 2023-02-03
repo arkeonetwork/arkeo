@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	. "gopkg.in/check.v1"
 )

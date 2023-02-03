@@ -1,11 +1,13 @@
 package arkeo_test
 
 import (
-	keepertest "arkeo/testutil/keeper"
-	"arkeo/testutil/nullify"
-	"arkeo/x/arkeo"
-	"arkeo/x/arkeo/types"
 	"testing"
+
+	keepertest "github.com/arkeonetwork/arkeo/testutil/keeper"
+
+	"github.com/arkeonetwork/arkeo/testutil/nullify"
+	"github.com/arkeonetwork/arkeo/x/arkeo"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/stretchr/testify/require"
 )

@@ -1,6 +1,6 @@
 package configs
 
-import "arkeo/common"
+import "github.com/arkeonetwork/arkeo/common"
 
 // NewConfigValue010 get new instance of ConfigValue010
 func NewConfigValue010() *ConfigVals {

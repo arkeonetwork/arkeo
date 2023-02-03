@@ -1,13 +1,14 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/sentinel/conf"
-	"arkeo/x/arkeo/types"
 	"encoding/hex"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"golang.org/x/time/rate"
 	. "gopkg.in/check.v1"
@@ -21,8 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
-type AuthSuite struct {
-}
+type AuthSuite struct{}
 
 var _ = Suite(&AuthSuite{})
 
