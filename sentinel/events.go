@@ -166,6 +166,11 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
+		case "deposit":
+			deposit, ok := cosmos.NewIntFromString(v)
+			if ok {
+				evt.Contract.Deposit = deposit
+			}
 		}
 	}
 

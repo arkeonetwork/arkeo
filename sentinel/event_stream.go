@@ -132,7 +132,10 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-
+			if evt.Contract.Deposit.IsZero() {
+				logger.Error("contract's deposit is zero")
+				continue
+			}
 			spender := evt.Contract.Delegate
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
