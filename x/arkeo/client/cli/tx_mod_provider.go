@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"strconv"
-
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
@@ -12,8 +10,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
-
-var _ = strconv.Itoa(0)
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
