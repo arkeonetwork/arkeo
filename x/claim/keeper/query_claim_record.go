@@ -15,9 +15,12 @@ func (k Keeper) ClaimRecord(goCtx context.Context, req *types.QueryClaimRecordRe
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	claimRecord, err := k.GetClaimRecord(ctx, req.Address, req.Chain)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
 
-	// TODO: Process the query
-	_ = ctx
-
-	return &types.QueryClaimRecordResponse{}, nil
+	return &types.QueryClaimRecordResponse{
+		ClaimRecord: &claimRecord,
+	}, nil
 }

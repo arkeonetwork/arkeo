@@ -6,6 +6,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "arkeo/claim/params.proto";
+import "arkeo/claim/claim_record.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
@@ -36,9 +37,10 @@ message QueryParamsResponse {
 
 message QueryClaimRecordRequest {
   string address = 1;
+  Chain chain = 2;
 }
 
 message QueryClaimRecordResponse {
-  string claim_record = 1;
+  ClaimRecord claim_record = 1;
 }
 

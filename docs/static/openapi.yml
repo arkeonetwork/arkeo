@@ -533,6 +533,15 @@ paths:
           in: path
           required: true
           type: string
+        - name: chain
+          in: query
+          required: false
+          type: string
+          enum:
+            - ARKEO
+            - ETHEREUM
+            - THORCHAIN
+          default: ARKEO
       tags:
         - Query
   /arkeonetwork/arkeo/claim/params:
@@ -45934,6 +45943,13 @@ definitions:
                   "@type": "type.googleapis.com/google.protobuf.Duration",
                   "value": "1.212s"
                 }
+  arkeonetwork.arkeo.claim.Chain:
+    type: string
+    enum:
+      - ARKEO
+      - ETHEREUM
+      - THORCHAIN
+    default: ARKEO
   arkeonetwork.arkeo.claim.MsgClaimEthResponse:
     type: object
   arkeonetwork.arkeo.claim.Params:
