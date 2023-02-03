@@ -12,6 +12,21 @@ import (
 
 // SetClaimRecord sets a claim record for an address in store
 func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) error {
+	// validate address if valid based on chain
+	switch claimRecord.Chain {
+	case types.ETHEREUM:
+		if !types.IsValidEthAddress(claimRecord.Address) {
+			return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid eth address")
+		}
+	case types.ARKEO:
+		_, err := sdk.AccAddressFromBech32(claimRecord.Address)
+		if err != nil {
+			return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid arkeo address")
+		}
+	case types.THORCHAIN:
+		return errors.New("thorchain not supported yet")
+	}
+
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(claimRecord.Chain))
 
@@ -21,21 +36,6 @@ func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) e
 	}
 
 	addr := []byte(strings.ToLower(claimRecord.Address))
-
-	// validate address if valid based on chain
-	switch claimRecord.Chain {
-	case types.ETHEREUM:
-		if !types.IsValidEthAddress(claimRecord.Address) {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid eth address (%s)", err)
-		}
-	case types.ARKEO:
-		_, err := sdk.AccAddressFromBech32(claimRecord.Address)
-		if err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid arkeo address (%s)", err)
-		}
-	case types.THORCHAIN:
-		return errors.New("thorchain not supported yet")
-	}
 
 	prefixStore.Set(addr, bz)
 	return nil
