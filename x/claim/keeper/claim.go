@@ -1,13 +1,13 @@
 package keeper
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/pkg/errors"
 )
 
 // SetClaimRecord sets a claim record for an address in store
@@ -53,7 +53,7 @@ func (k Keeper) SetClaimRecords(ctx sdk.Context, claimRecords []types.ClaimRecor
 }
 
 // GetClaimables get claimables for genesis export
-func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) []types.ClaimRecord {
+func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.ClaimRecord, error) {
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(chain))
 
@@ -67,12 +67,11 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) []types.Clai
 
 		err := k.cdc.Unmarshal(iterator.Value(), &claimRecord)
 		if err != nil {
-			panic(err)
+			return nil, errors.Wrap(err, "failed to unmarshal claim record")
 		}
-
 		claimRecords = append(claimRecords, claimRecord)
 	}
-	return claimRecords
+	return claimRecords, nil
 }
 
 // GetClaimRecord returns the claim record for a specific address
