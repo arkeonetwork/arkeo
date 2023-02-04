@@ -3,17 +3,18 @@ package sentinel
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/tendermint/tendermint/libs/log"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
 var ModuleBasics = module.NewBasicManager()
@@ -26,9 +27,10 @@ type MemStore struct {
 	client      http.Client
 	baseURL     string
 	blockHeight int64
+	logger      log.Logger
 }
 
-func NewMemStore(baseURL string) *MemStore {
+func NewMemStore(baseURL string, logger log.Logger) *MemStore {
 	return &MemStore{
 		storeLock: &sync.Mutex{},
 		db:        make(map[string]types.Contract),
@@ -36,6 +38,7 @@ func NewMemStore(baseURL string) *MemStore {
 			Timeout: 10 * time.Second,
 		},
 		baseURL: baseURL,
+		logger:  logger,
 	}
 }
 
@@ -107,25 +110,25 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	requestURL := fmt.Sprintf("%s/arkeo/contract/%s", k.baseURL, key)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
-		fmt.Println(err)
+		k.logger.Error("fail to create http request", "error", err)
 		return contract, err
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		k.logger.Error("fail to send http request", "error", err)
 		return contract, err
 	}
 
-	resBody, err := ioutil.ReadAll(res.Body)
+	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		k.logger.Error("fail to read from response body", "error", err)
 		return contract, err
 	}
 
 	err = json.Unmarshal(resBody, &data)
 	if err != nil {
-		fmt.Println(err)
+		k.logger.Error("fail to unmarshal response", "error", err)
 		return contract, err
 	}
 

@@ -96,7 +96,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		}
 
 		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
-			fmt.Println("Paid Tier")
+			p.logger.Info("Paid Tier")
 			httpCode, err := p.paidTier(aa, r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())
@@ -104,7 +104,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				return
 			}
 		} else {
-			fmt.Println("Free Tier")
+			p.logger.Info("Free Tier")
 			httpCode, err := p.freeTier(r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())

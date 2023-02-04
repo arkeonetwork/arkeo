@@ -42,8 +42,7 @@ func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan ct
 }
 
 func (p Proxy) EventListener(host string) {
-	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
-
+	logger := p.logger
 	client, err := tmclient.New(fmt.Sprintf("tcp://%s", host), "/websocket")
 	if err != nil {
 		logger.Error("failure to create websocket cliennt", "error", err)
