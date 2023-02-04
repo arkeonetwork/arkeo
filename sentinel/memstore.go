@@ -64,6 +64,7 @@ func (k *MemStore) Get(key string) (types.Contract, error) {
 		if !crtUpStream.IsClose(k.blockHeight) {
 			k.db[key] = crtUpStream
 		}
+		return crtUpStream, nil
 	}
 	// contract still valid
 	return contract, nil
