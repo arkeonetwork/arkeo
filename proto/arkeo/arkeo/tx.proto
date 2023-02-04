@@ -3,7 +3,7 @@ package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
-import "arkeo/keeper.proto";
+import "arkeo/arkeo/keeper.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 

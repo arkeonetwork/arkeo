@@ -498,6 +498,99 @@ paths:
           type: boolean
       tags:
         - Query
+  /arkeonetwork/arkeo/claim/claimrecord/{address}:
+    get:
+      summary: Queries a list of ClaimRecord items.
+      operationId: ArkeonetworkArkeoClaimClaimRecord
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              claim_record:
+                type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: address
+          in: path
+          required: true
+          type: string
+        - name: chain
+          in: query
+          required: false
+          type: string
+          enum:
+            - ARKEO
+            - ETHEREUM
+            - THORCHAIN
+          default: ARKEO
+      tags:
+        - Query
+  /arkeonetwork/arkeo/claim/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: ArkeonetworkArkeoClaimParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+                properties:
+                  airdrop_start_time:
+                    type: string
+                    format: date-time
+                  duration_until_decay:
+                    type: string
+                  duration_of_decay:
+                    type: string
+                  claim_denom:
+                    type: string
+                    title: denom of claimable asset
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
   /cosmos/auth/v1beta1/accounts:
     get:
       summary: Accounts returns all the existing accounts
@@ -45850,6 +45943,52 @@ definitions:
                   "@type": "type.googleapis.com/google.protobuf.Duration",
                   "value": "1.212s"
                 }
+  arkeonetwork.arkeo.claim.Chain:
+    type: string
+    enum:
+      - ARKEO
+      - ETHEREUM
+      - THORCHAIN
+    default: ARKEO
+  arkeonetwork.arkeo.claim.MsgClaimEthResponse:
+    type: object
+  arkeonetwork.arkeo.claim.Params:
+    type: object
+    properties:
+      airdrop_start_time:
+        type: string
+        format: date-time
+      duration_until_decay:
+        type: string
+      duration_of_decay:
+        type: string
+      claim_denom:
+        type: string
+        title: denom of claimable asset
+    description: Params defines the parameters for the module.
+  arkeonetwork.arkeo.claim.QueryClaimRecordResponse:
+    type: object
+    properties:
+      claim_record:
+        type: string
+  arkeonetwork.arkeo.claim.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+        properties:
+          airdrop_start_time:
+            type: string
+            format: date-time
+          duration_until_decay:
+            type: string
+          duration_of_decay:
+            type: string
+          claim_denom:
+            type: string
+            title: denom of claimable asset
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
   cosmos.auth.v1beta1.AddressBytesToStringResponse:
     type: object
     properties:

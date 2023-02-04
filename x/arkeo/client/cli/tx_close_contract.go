@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"strconv"
-
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
@@ -11,8 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 )
-
-var _ = strconv.Itoa(0)
 
 func CmdCloseContract() *cobra.Command {
 	cmd := &cobra.Command{

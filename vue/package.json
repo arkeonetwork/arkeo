@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "arkeo-client-ts": "file:../ts-client",
+    "arkeonetwork-arkeo-client-ts": "file:../ts-client",
     "mercury-client-ts": "file:../ts-client"
   }
 }

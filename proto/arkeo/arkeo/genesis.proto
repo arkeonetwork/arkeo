@@ -2,8 +2,8 @@ syntax = "proto3";
 package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
-import "arkeo/params.proto";
-import "arkeo/keeper.proto";
+import "arkeo/arkeo/params.proto";
+import "arkeo/arkeo/keeper.proto";
 // this line is used by starport scaffolding # genesis/proto/import
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
