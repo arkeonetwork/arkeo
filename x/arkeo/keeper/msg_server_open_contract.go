@@ -3,13 +3,13 @@ package keeper
 import (
 	"context"
 
+	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContract) (*types.MsgOpenContractResponse, error) {
@@ -43,7 +43,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 
 func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenContract) error {
 	if k.FetchConfig(ctx, configs.HandlerOpenContract) > 0 {
-		return sdkerrors.Wrapf(types.ErrDisabledHandler, "open contract")
+		return errors.Wrapf(types.ErrDisabledHandler, "open contract")
 	}
 
 	chain, err := common.NewChain(msg.Chain)
@@ -57,35 +57,35 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 
 	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
 	if provider.Bond.LT(cosmos.NewInt(minBond)) {
-		return sdkerrors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
+		return errors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
 	}
 
 	if provider.Status != types.ProviderStatus_Online {
-		return sdkerrors.Wrapf(types.ErrOpenContractBadProviderStatus, "has status %s", provider.Status.String())
+		return errors.Wrapf(types.ErrOpenContractBadProviderStatus, "has status %s", provider.Status.String())
 	}
 
 	if msg.Duration > provider.MaxContractDuration {
-		return sdkerrors.Wrapf(types.ErrOpenContractDuration, "duration exceeds allowed maximum duration from provider")
+		return errors.Wrapf(types.ErrOpenContractDuration, "duration exceeds allowed maximum duration from provider")
 	}
 
 	if msg.Duration < provider.MinContractDuration {
-		return sdkerrors.Wrapf(types.ErrOpenContractDuration, "duration below allowed minimum duration from provider")
+		return errors.Wrapf(types.ErrOpenContractDuration, "duration below allowed minimum duration from provider")
 	}
 
 	switch msg.CType {
 	case types.ContractType_Subscription:
 		if msg.Rate != provider.SubscriptionRate {
-			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "subscription %d (client) vs %d (provider)", msg.Rate, provider.SubscriptionRate)
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "subscription %d (client) vs %d (provider)", msg.Rate, provider.SubscriptionRate)
 		}
 		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
-			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
 		}
 	case types.ContractType_PayAsYouGo:
 		if msg.Rate != provider.PayAsYouGoRate {
-			return sdkerrors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go %d (client) vs %d (provider)", msg.Rate, provider.PayAsYouGoRate)
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go %d (client) vs %d (provider)", msg.Rate, provider.PayAsYouGoRate)
 		}
 	default:
-		return sdkerrors.Wrapf(types.ErrInvalidContractType, "%s", msg.CType.String())
+		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.CType.String())
 	}
 
 	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
@@ -94,7 +94,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	}
 
 	if contract.IsOpen(ctx.BlockHeight()) {
-		return sdkerrors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", ctx.BlockHeight()-contract.Expiration())
+		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", ctx.BlockHeight()-contract.Expiration())
 	}
 
 	return nil

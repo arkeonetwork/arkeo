@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
@@ -60,7 +61,7 @@ var (
 	Bech32ifyPubKey         = legacybech32.MarshalPubKey
 	Bech32PubKeyTypeConsPub = legacybech32.ConsPK
 	Bech32PubKeyTypeAccPub  = legacybech32.AccPK
-	Wrapf                   = se.Wrapf
+	Wrapf                   = errors.Wrapf
 	MustSortJSON            = sdk.MustSortJSON
 	CodeUnauthorized        = uint32(4)
 	CodeInsufficientFunds   = uint32(5)
@@ -69,8 +70,8 @@ var (
 type (
 	Context    = sdk.Context
 	Route      = sdk.Route
-	Uint       = sdk.Uint
-	Int        = sdk.Int
+	Uint       = sdkmath.Uint
+	Int        = sdkmath.Int
 	Coin       = sdk.Coin
 	Coins      = sdk.Coins
 	AccAddress = sdk.AccAddress
@@ -90,21 +91,21 @@ type (
 var _ sdk.Address = AccAddress{}
 
 func ErrUnknownRequest(msg string) error {
-	return se.Wrap(se.ErrUnknownRequest, msg)
+	return errors.Wrap(se.ErrUnknownRequest, msg)
 }
 
 func ErrInvalidAddress(addr string) error {
-	return se.Wrap(se.ErrInvalidAddress, addr)
+	return errors.Wrap(se.ErrInvalidAddress, addr)
 }
 
 func ErrInvalidCoins(msg string) error {
-	return se.Wrap(se.ErrInvalidCoins, msg)
+	return errors.Wrap(se.ErrInvalidCoins, msg)
 }
 
 func ErrUnauthorized(msg string) error {
-	return se.Wrap(se.ErrUnauthorized, msg)
+	return errors.Wrap(se.ErrUnauthorized, msg)
 }
 
 func ErrInsufficientCoins(err error, msg string) error {
-	return se.Wrap(multierror.Append(se.ErrInsufficientFunds, err), msg)
+	return errors.Wrap(multierror.Append(se.ErrInsufficientFunds, err), msg)
 }

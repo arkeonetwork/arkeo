@@ -1,7 +1,9 @@
 package types
 
 import (
-	fmt "fmt"
+	"fmt"
+
+	"cosmossdk.io/errors"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -67,13 +69,13 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
 	// verify pubkey
 	_, err = common.NewPubKey(msg.PubKey.String())
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
 	}
 
 	// anyone can make the claim on a contract, but of course the payout would only happen to the provider
@@ -81,25 +83,25 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	// verify chain
 	_, err = common.NewChain(msg.Chain)
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
 	// verify spender pubkey
 	_, err = common.NewPubKey(msg.Spender.String())
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid spender pubkey (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid spender pubkey (%s)", err)
 	}
 
 	if len(msg.Signature) > 100 {
-		return sdkerrors.Wrap(ErrClaimContractIncomeInvalidSignature, "too long")
+		return errors.Wrap(ErrClaimContractIncomeInvalidSignature, "too long")
 	}
 
 	if msg.Height <= 0 {
-		return sdkerrors.Wrap(ErrClaimContractIncomeBadHeight, "")
+		return errors.Wrap(ErrClaimContractIncomeBadHeight, "")
 	}
 
 	if msg.Nonce <= 0 {
-		return sdkerrors.Wrap(ErrClaimContractIncomeBadNonce, "")
+		return errors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 
 	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, msg.Spender.String())
@@ -108,7 +110,7 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	}
 	bites := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
 	if !pk.VerifySignature(bites, msg.Signature) {
-		return sdkerrors.Wrap(ErrClaimContractIncomeInvalidSignature, "")
+		return errors.Wrap(ErrClaimContractIncomeInvalidSignature, "")
 	}
 
 	return nil
