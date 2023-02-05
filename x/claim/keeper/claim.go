@@ -64,6 +64,18 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 	return claimRecords, nil
 }
 
+func (k Keeper) GetAllClaimRecords(ctx sdk.Context) ([]types.ClaimRecord, error) {
+	claimRecords := []types.ClaimRecord{}
+	for chain := range types.Chain_name {
+		records, err := k.GetClaimRecords(ctx, types.Chain(chain))
+		if err != nil {
+			return nil, err
+		}
+		claimRecords = append(claimRecords, records...)
+	}
+	return claimRecords, nil
+}
+
 // GetClaimRecord returns the claim record for a specific address
 func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) (types.ClaimRecord, error) {
 	store := ctx.KVStore(k.storeKey)

@@ -162,3 +162,40 @@ func TestSetClaimRecord(t *testing.T) {
 	err = keeper.SetClaimRecord(ctx, claimRecord)
 	require.NoError(t, err)
 }
+
+func TestGetAllClaimRecords(t *testing.T) {
+	keeper, ctx := testkeeper.ClaimKeeper(t)
+
+	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr2 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr3 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
+	// addr3 := "thor18u55kxfudpy9q7mvhxzrh4xntjyukx420lt5fg" // random thorchain address
+
+	claimRecords := []types.ClaimRecord{
+		{
+			Chain:                  types.ARKEO,
+			Address:                addr1,
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			ActionCompleted:        []bool{false, false, false},
+		},
+		{
+			Chain:                  types.ARKEO,
+			Address:                addr2,
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			ActionCompleted:        []bool{false, false, false},
+		},
+		{
+			Chain:                  types.ETHEREUM,
+			Address:                addr3,
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			ActionCompleted:        []bool{false, false, false},
+		},
+	}
+	err := keeper.SetClaimRecords(ctx, claimRecords)
+	require.NoError(t, err)
+
+	// confirm all claims are returned
+	claims, err := keeper.GetAllClaimRecords(ctx)
+	require.NoError(t, err)
+	require.Equal(t, len(claims), len(claimRecords))
+}
