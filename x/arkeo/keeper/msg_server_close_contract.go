@@ -8,6 +8,7 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -40,7 +41,7 @@ func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContr
 
 func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgCloseContract) error {
 	if k.FetchConfig(ctx, configs.HandlerCloseContract) > 0 {
-		return sdkerrors.Wrapf(types.ErrDisabledHandler, "close contract")
+		return errors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
 	chain, err := common.NewChain(msg.Chain)
@@ -55,7 +56,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	// if client is provided, ensure contract client matches msg client
 	if len(msg.Client) > 0 {
 		if !contract.Client.Equals(msg.Client) {
-			return sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized contract client")
+			return errors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized contract client")
 		}
 
 		if contract.Type == types.ContractType_PayAsYouGo {
@@ -64,12 +65,12 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 			// and before the provider can claim the rewards, the client cancels
 			// the contract. We do not want providers to feel "rushed" to claim
 			// their rewards or the income is gone.
-			return sdkerrors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
+			return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
 		}
 	}
 
 	if contract.IsClose(ctx.BlockHeight()) {
-		return sdkerrors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
+		return errors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
 	}
 
 	return nil

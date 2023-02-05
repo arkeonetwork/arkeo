@@ -22,8 +22,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 )
 
-type AuthSuite struct {
-}
+type AuthSuite struct{}
 
 var _ = Suite(&AuthSuite{})
 

@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common"
-
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/arkeonetwork/arkeo/common"
 )
 
 const TypeMsgCloseContract = "close_contract"
@@ -69,19 +70,19 @@ func (msg *MsgCloseContract) GetSignBytes() []byte {
 func (msg *MsgCloseContract) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
 	// verify pubkey
 	_, err = common.NewPubKey(msg.PubKey.String())
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
 	}
 
 	// verify chain
 	_, err = common.NewChain(msg.Chain)
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
 	// contract can be cancelled by provider or client, this check if the
@@ -89,7 +90,7 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	if len(msg.Client) > 0 {
 		pk, err := common.NewPubKey(msg.Client.String())
 		if err != nil {
-			return sdkerrors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
+			return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
 		}
 
 		signer := msg.MustGetSigner()
@@ -98,7 +99,7 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 			return err
 		}
 		if !signer.Equals(client) {
-			return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client pubkey: %s", msg.GetSigners(), client)
+			return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client pubkey: %s", msg.GetSigners(), client)
 		}
 	}
 

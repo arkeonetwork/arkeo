@@ -1,13 +1,13 @@
 package keeper
 
 import (
+	"cosmossdk.io/errors"
+	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 type Manager struct {
@@ -212,7 +212,7 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	case types.ContractType_PayAsYouGo:
 		debt = cosmos.NewInt(contract.Rate * contract.Nonce).Sub(contract.Paid)
 	default:
-		return cosmos.ZeroInt(), sdkerrors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
+		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
 	}
 
 	if debt.IsNegative() {
