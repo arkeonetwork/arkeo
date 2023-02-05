@@ -28,7 +28,7 @@ func TestClaimEth(t *testing.T) {
 		Chain:                  types.ETHEREUM,
 		Address:                addrEth,
 		InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
-		ActionCompleted:        []bool{false, false},
+		ActionCompleted:        []bool{false, false, false},
 	}
 	err = keeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)

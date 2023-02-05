@@ -22,14 +22,14 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
-			ActionCompleted:        []bool{false, false},
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 200)),
-			ActionCompleted:        []bool{false, false},
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			ActionCompleted:        []bool{false, false, false},
 		},
 	}
 	err := keeper.SetClaimRecords(ctx, claimRecords)
@@ -50,7 +50,7 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 	// get rewards amount per action
 	coins4, err := keeper.GetClaimableAmountForAction(ctx, addr1, types.ACTION_VOTE, types.ARKEO)
 	require.NoError(t, err)
-	require.Equal(t, coins4.String(), sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 50)).String())
+	require.Equal(t, coins4.String(), sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)).String())
 
 	// get completed activities
 	claimRecord, err := keeper.GetClaimRecord(ctx, addr1, types.ARKEO)
@@ -71,14 +71,14 @@ func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
-			ActionCompleted:        []bool{false, false},
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ETHEREUM,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 200)),
-			ActionCompleted:        []bool{false, false},
+			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			ActionCompleted:        []bool{false, false, false},
 		},
 		// {
 		// 	Chain:                  types.THORCHAIN,

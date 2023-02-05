@@ -57,7 +57,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		Address:                msg.Creator,
 		Chain:                  types.ARKEO,
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{false, false},
+		ActionCompleted:        []bool{false, false, false},
 	}
 	err = k.SetClaimRecord(ctx, arkeoClaim)
 	if err != nil {
