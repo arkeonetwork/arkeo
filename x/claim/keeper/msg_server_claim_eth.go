@@ -57,8 +57,9 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		Address:                msg.Creator,
 		Chain:                  types.ARKEO,
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{false, false, false},
+		ActionCompleted:        []bool{true, false, false}, // trust so they do not make them claim again on arkeo.
 	}
+	// TODO: send token to arkeo address
 	err = k.SetClaimRecord(ctx, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)

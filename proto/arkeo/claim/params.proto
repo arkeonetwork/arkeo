@@ -4,6 +4,7 @@ package arkeonetwork.arkeo.claim;
 import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
@@ -26,6 +27,10 @@ message Params {
     (gogoproto.jsontag) = "duration_of_decay,omitempty",
     (gogoproto.moretags) = "yaml:\"duration_of_decay\""
   ];
+
   // denom of claimable asset
   string claim_denom = 4;  
+  // uarkeo to distribute to arkeo account for gas to make claiming easier
+  cosmos.base.v1beta1.Coin initial_gas_amount = 5  [ (gogoproto.moretags) = "yaml:\"initial_gas_amount\""];
+  ;
 }
