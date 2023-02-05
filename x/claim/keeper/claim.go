@@ -175,6 +175,18 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	return claimableCoins, nil
 }
 
+// GetModuleAccountBalance gets the airdrop coin balance of module account
+func (k Keeper) GetModuleAccountAddress(ctx sdk.Context) sdk.AccAddress {
+	return k.accountKeeper.GetModuleAddress(types.ModuleName)
+}
+
+// GetModuleAccountBalance gets the airdrop coin balance of module account
+func (k Keeper) GetModuleAccountBalance(ctx sdk.Context) sdk.Coin {
+	moduleAccAddr := k.GetModuleAccountAddress(ctx)
+	params := k.GetParams(ctx)
+	return k.bankKeeper.GetBalance(ctx, moduleAccAddr, params.ClaimDenom)
+}
+
 // // ClaimCoins remove claimable amount entry and transfer it to user's account
 // func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr sdk.AccAddress, action types.Action) (sdk.Coins, error) {
 // 	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr, action)

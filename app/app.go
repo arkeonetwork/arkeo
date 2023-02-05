@@ -514,6 +514,8 @@ func New(
 	app.ClaimKeeper = *claimmodulekeeper.NewKeeper(
 		appCodec,
 		keys[claimmoduletypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
 		keys[claimmoduletypes.MemStoreKey],
 		app.GetSubspace(claimmoduletypes.ModuleName),
 	)
