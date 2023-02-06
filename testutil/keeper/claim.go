@@ -40,6 +40,10 @@ func ClaimKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	stateStore := store.NewCommitMultiStore(db)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
+	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
+	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	registry := codectypes.NewInterfaceRegistry()
@@ -77,7 +81,7 @@ func ClaimKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 
 	// Initialize params
 
-	airdropStartTime := time.Now()
+	airdropStartTime := time.Now().UTC()
 	params := types.Params{
 		AirdropStartTime:   airdropStartTime,
 		DurationUntilDecay: types.DefaultDurationUntilDecay,

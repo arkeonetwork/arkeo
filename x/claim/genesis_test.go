@@ -2,6 +2,7 @@ package claim_test
 
 import (
 	"testing"
+	"time"
 
 	keepertest "github.com/arkeonetwork/arkeo/testutil/keeper"
 	"github.com/arkeonetwork/arkeo/testutil/nullify"
@@ -11,10 +12,16 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-	genesisState := types.GenesisState{
-		Params: types.DefaultParams(),
 
-		// this line is used by starport scaffolding # genesis/test/state
+	airdropStartTime := time.Now().UTC()
+	claimParams := types.Params{
+		AirdropStartTime:   airdropStartTime,
+		DurationUntilDecay: types.DefaultDurationUntilDecay,
+		DurationOfDecay:    types.DefaultDurationOfDecay,
+		ClaimDenom:         types.DefaultClaimDenom,
+	}
+	genesisState := types.GenesisState{
+		Params: claimParams,
 	}
 
 	k, ctx := keepertest.ClaimKeeper(t)
