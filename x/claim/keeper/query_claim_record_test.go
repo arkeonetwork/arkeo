@@ -20,13 +20,13 @@ func TestClaimRecord(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 			ActionCompleted:        []bool{false, false},
 		},
 		{
 			Chain:                  types.ETHEREUM,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 200)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 			ActionCompleted:        []bool{false, false},
 		},
 	}

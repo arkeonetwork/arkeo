@@ -78,10 +78,10 @@ func ClaimKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
-
+	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
 	// Initialize params
 
-	airdropStartTime := time.Now().UTC()
+	airdropStartTime := time.Now().UTC().Add(-time.Hour) // started an hour ago
 	params := types.Params{
 		AirdropStartTime:   airdropStartTime,
 		DurationUntilDecay: types.DefaultDurationUntilDecay,

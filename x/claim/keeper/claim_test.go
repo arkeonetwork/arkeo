@@ -22,13 +22,13 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 300),
 			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 600),
 			ActionCompleted:        []bool{false, false, false},
 		},
 	}
@@ -45,7 +45,7 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 
 	coins3, err := keeper.GetUserTotalClaimable(ctx, addr3, types.ARKEO)
 	require.NoError(t, err)
-	require.Equal(t, coins3, sdk.Coins{})
+	require.Equal(t, coins3, sdk.Coin{})
 
 	// get rewards amount per action
 	coins4, err := keeper.GetClaimableAmountForAction(ctx, addr1, types.ACTION_VOTE, types.ARKEO)
@@ -71,13 +71,13 @@ func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 300),
 			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ETHEREUM,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 600),
 			ActionCompleted:        []bool{false, false, false},
 		},
 		// {
@@ -97,10 +97,10 @@ func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 	// user 1 should have no eth claim with an arkeo addy nor thor claims
 	coins1, err = keeper.GetUserTotalClaimable(ctx, addr1, types.ETHEREUM)
 	require.NoError(t, err)
-	require.Equal(t, coins1, sdk.Coins{})
+	require.Equal(t, coins1, sdk.Coin{})
 	coins1, err = keeper.GetUserTotalClaimable(ctx, addr1, types.THORCHAIN)
 	require.NoError(t, err)
-	require.Equal(t, coins1, sdk.Coins{})
+	require.Equal(t, coins1, sdk.Coin{})
 
 	// user 2 should have no arkeo claim nor thor claims, only eth
 	coins2, err := keeper.GetUserTotalClaimable(ctx, addr2, types.ETHEREUM)
@@ -109,10 +109,10 @@ func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 
 	coins2, err = keeper.GetUserTotalClaimable(ctx, addr2, types.ARKEO)
 	require.NoError(t, err)
-	require.Equal(t, coins2, sdk.Coins{})
+	require.Equal(t, coins2, sdk.Coin{})
 	coins2, err = keeper.GetUserTotalClaimable(ctx, addr2, types.THORCHAIN)
 	require.NoError(t, err)
-	require.Equal(t, coins2, sdk.Coins{})
+	require.Equal(t, coins2, sdk.Coin{})
 
 	// user 3 should have no arkeo claim nor eth claims, only thor
 	// coins3, err := keeper.GetUserTotalClaimable(ctx, addr3, types.ARKEO)
@@ -136,7 +136,7 @@ func TestSetClaimRecord(t *testing.T) {
 	claimRecord := types.ClaimRecord{
 		Chain:                  types.ETHEREUM,
 		Address:                addr1Invalid,
-		InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
+		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		ActionCompleted:        []bool{false, false},
 	}
 	err := keeper.SetClaimRecord(ctx, claimRecord)
@@ -152,7 +152,7 @@ func TestSetClaimRecord(t *testing.T) {
 	claimRecord = types.ClaimRecord{
 		Chain:                  types.ARKEO,
 		Address:                addr2Invalid,
-		InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
+		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		ActionCompleted:        []bool{false, false},
 	}
 	err = keeper.SetClaimRecord(ctx, claimRecord)
@@ -175,19 +175,19 @@ func TestGetAllClaimRecords(t *testing.T) {
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 300),
 			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ARKEO,
 			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 300)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 300),
 			ActionCompleted:        []bool{false, false, false},
 		},
 		{
 			Chain:                  types.ETHEREUM,
 			Address:                addr3,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 600)),
+			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 600),
 			ActionCompleted:        []bool{false, false, false},
 		},
 	}

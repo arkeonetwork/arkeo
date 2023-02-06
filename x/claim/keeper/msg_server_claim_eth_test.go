@@ -27,7 +27,7 @@ func TestClaimEth(t *testing.T) {
 	claimRecord := types.ClaimRecord{
 		Chain:                  types.ETHEREUM,
 		Address:                addrEth,
-		InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
+		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		ActionCompleted:        []bool{false, false, false},
 	}
 	err = keeper.SetClaimRecord(sdkCtx, claimRecord)
@@ -52,7 +52,7 @@ func TestClaimEth(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, claimRecord.Address, addrArkeo)
 	require.Equal(t, claimRecord.Chain, types.ARKEO)
-	require.Equal(t, claimRecord.InitialClaimableAmount, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)))
+	require.Equal(t, claimRecord.InitialClaimableAmount, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
 	require.False(t, claimRecord.ActionCompleted[types.ACTION_VOTE])
 	require.False(t, claimRecord.ActionCompleted[types.ACTION_DELEGATE_STAKE])
 }

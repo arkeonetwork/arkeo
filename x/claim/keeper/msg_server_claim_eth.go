@@ -35,7 +35,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 
 	// 3. validate signature
 	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
-		ethClaim.InitialClaimableAmount.AmountOf(types.DefaultClaimDenom).String(), msg.Signature)
+		ethClaim.InitialClaimableAmount.Amount.String(), msg.Signature)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate signature for %s", msg.EthAddress)
 	}
