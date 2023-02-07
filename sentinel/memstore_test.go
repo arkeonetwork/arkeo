@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
+
+	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -59,7 +62,7 @@ func httpTestHandler(c *C, rw http.ResponseWriter, content string) {
 func (s *MemStoreSuite) TestMemStore(c *C) {
 	var err error
 	baseURL := fmt.Sprintf("http://%s", s.server.Listener.Addr().String())
-	mem := NewMemStore(baseURL)
+	mem := NewMemStore(baseURL, log.NewTMLogger(log.NewSyncWriter(os.Stdout)))
 
 	c.Check(mem.Key("foo", "bar", "baz"), Equals, "foo/bar/baz")
 
