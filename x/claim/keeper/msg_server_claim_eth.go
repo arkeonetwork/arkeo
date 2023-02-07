@@ -59,11 +59,22 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
 		ActionCompleted:        []bool{true, false, false}, // trust so they do not make them claim again on arkeo.
 	}
-	// TODO: send token to arkeo address
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeClaimFromThorchain,
+			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.EthAddress)),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, ethClaim.InitialClaimableAmount.String()),
+		),
+	})
+
 	err = k.SetClaimRecord(ctx, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
 	}
+
+	// call claim on arkeo to claim arkeo
+	k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
 
 	return &types.MsgClaimEthResponse{}, nil
 }
