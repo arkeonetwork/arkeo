@@ -23,7 +23,8 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis.ModuleAccountBalance = k.GetModuleAccountBalance(ctx)
 	claimRecords, err := k.GetAllClaimRecords(ctx)
 	if err != nil {
-		panic(err)
+		k.Logger(ctx).Error("failed to get claim records", "error", err)
+		return genesis
 	}
 	genesis.ClaimRecords = claimRecords
 	return genesis
