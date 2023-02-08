@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pkg/errors"
 )
 
@@ -181,44 +182,47 @@ func (k Keeper) GetModuleAccountBalance(ctx sdk.Context) sdk.Coin {
 	return k.bankKeeper.GetBalance(ctx, moduleAccAddr, params.ClaimDenom)
 }
 
-// // ClaimCoins remove claimable amount entry and transfer it to user's account
-// func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr sdk.AccAddress, action types.Action) (sdk.Coins, error) {
-// 	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr, action)
-// 	if err != nil {
-// 		return claimableAmount, err
-// 	}
+// ClaimCoins remove claimable amount entry and transfer it to user's account
+func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.Action) (sdk.Coin, error) {
+	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr, action, types.ARKEO)
+	if err != nil {
+		return claimableAmount, err
+	}
 
-// 	if claimableAmount.Empty() {
-// 		return claimableAmount, nil
-// 	}
+	if claimableAmount.IsNil() {
+		return claimableAmount, nil
+	}
 
-// 	claimRecord, err := k.GetClaimRecord(ctx, addr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	claimRecord, err := k.GetClaimRecord(ctx, addr, types.ARKEO)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	accountAddress, err := sdk.AccAddressFromBech32(addr)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, accountAddress, sdk.NewCoins(claimableAmount))
+	if err != nil {
+		return sdk.Coin{}, err
+	}
 
-// 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, claimableAmount)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	claimRecord.ActionCompleted[action] = true
 
-// 	claimRecord.ActionCompleted[action] = true
+	err = k.SetClaimRecord(ctx, claimRecord)
+	if err != nil {
+		return claimableAmount, err
+	}
 
-// 	err = k.SetClaimRecord(ctx, claimRecord)
-// 	if err != nil {
-// 		return claimableAmount, err
-// 	}
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeClaim,
+			sdk.NewAttribute(sdk.AttributeKeySender, addr),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, claimableAmount.String()),
+		),
+	})
 
-// 	ctx.EventManager().EmitEvents(sdk.Events{
-// 		sdk.NewEvent(
-// 			types.EventTypeClaim,
-// 			sdk.NewAttribute(sdk.AttributeKeySender, addr.String()),
-// 			sdk.NewAttribute(sdk.AttributeKeyAmount, claimableAmount.String()),
-// 		),
-// 	})
-
-// 	return claimableAmount, nil
-// }
+	return claimableAmount, nil
+}
 
 // // FundRemainingsToCommunity fund remainings to the community when airdrop period end
 // func (k Keeper) fundRemainingsToCommunity(ctx sdk.Context) error {
@@ -226,6 +230,13 @@ func (k Keeper) GetModuleAccountBalance(ctx sdk.Context) sdk.Coin {
 // 	amt := k.GetModuleAccountBalance(ctx)
 // 	return k.distrKeeper.FundCommunityPool(ctx, sdk.NewCoins(amt), moduleAccAddr)
 // }
+
+// SetModuleAccountBalance set balance of airdrop module
+func (k Keeper) CreateModuleAccount(ctx sdk.Context, amount sdk.Coin) {
+	moduleAcc := authtypes.NewEmptyModuleAccount(types.ModuleName, authtypes.Minter)
+	k.accountKeeper.SetModuleAccount(ctx, moduleAcc)
+	k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(amount))
+}
 
 func chainToStorePrefix(chain types.Chain) []byte {
 	switch chain {
