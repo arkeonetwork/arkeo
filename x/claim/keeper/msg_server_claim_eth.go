@@ -57,12 +57,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		Address:                msg.Creator,
 		Chain:                  types.ARKEO,
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{true, false, false}, // trust so they do not make them claim again on arkeo.
+		ActionCompleted:        []bool{true, false, false}, // true so they do not make them claim again on arkeo.
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeClaimFromThorchain,
+			types.EventTypeClaimFromEth,
 			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.EthAddress)),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, ethClaim.InitialClaimableAmount.String()),
 		),

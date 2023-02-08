@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	testkeeper "github.com/arkeonetwork/arkeo/testutil/keeper"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/arkeonetwork/arkeo/testutil/utils"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,9 +14,9 @@ import (
 func TestGetClaimRecordForArkeo(t *testing.T) {
 	keeper, ctx := testkeeper.ClaimKeeper(t)
 
-	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
-	addr2 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
-	addr3 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr1 := utils.GetRandomArkeoAddress().String()
+	addr2 := utils.GetRandomArkeoAddress().String()
+	addr3 := utils.GetRandomArkeoAddress().String()
 
 	claimRecords := []types.ClaimRecord{
 		{
@@ -63,7 +63,7 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 func TestGetClaimRecordForMutlipleChains(t *testing.T) {
 	keeper, ctx := testkeeper.ClaimKeeper(t)
 
-	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr1 := utils.GetRandomArkeoAddress().String()
 	addr2 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
 	// addr3 := "thor18u55kxfudpy9q7mvhxzrh4xntjyukx420lt5fg" // random thorchain address
 
@@ -137,7 +137,7 @@ func TestSetClaimRecord(t *testing.T) {
 		Chain:                  types.ETHEREUM,
 		Address:                addr1Invalid,
 		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		ActionCompleted:        []bool{false, false},
+		ActionCompleted:        []bool{false, false, false},
 	}
 	err := keeper.SetClaimRecord(ctx, claimRecord)
 	require.Error(t, err)
@@ -148,12 +148,12 @@ func TestSetClaimRecord(t *testing.T) {
 
 	// confirm setting a claim record with a bad arkeo address fails
 	addr2Invalid := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address (should fail)
-	addr2Valid := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr2Valid := utils.GetRandomArkeoAddress().String()
 	claimRecord = types.ClaimRecord{
 		Chain:                  types.ARKEO,
 		Address:                addr2Invalid,
 		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		ActionCompleted:        []bool{false, false},
+		ActionCompleted:        []bool{false, false, false},
 	}
 	err = keeper.SetClaimRecord(ctx, claimRecord)
 	require.Error(t, err)
@@ -161,13 +161,32 @@ func TestSetClaimRecord(t *testing.T) {
 	claimRecord.Address = addr2Valid
 	err = keeper.SetClaimRecord(ctx, claimRecord)
 	require.NoError(t, err)
+
+	// confirm setting a claim record with a bad length of ActionCompleted fails
+	claimRecord = types.ClaimRecord{
+		Chain:                  types.ARKEO,
+		Address:                addr2Valid,
+		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		ActionCompleted:        []bool{false, false},
+	}
+	err = keeper.SetClaimRecord(ctx, claimRecord)
+	require.Error(t, err)
+	claimRecord.ActionCompleted = []bool{false, false, false, false}
+	err = keeper.SetClaimRecord(ctx, claimRecord)
+	require.Error(t, err)
+	claimRecord.ActionCompleted = []bool{}
+	err = keeper.SetClaimRecord(ctx, claimRecord)
+	require.Error(t, err)
+	claimRecord.ActionCompleted = []bool{false, false, false}
+	err = keeper.SetClaimRecord(ctx, claimRecord)
+	require.NoError(t, err)
 }
 
 func TestGetAllClaimRecords(t *testing.T) {
 	keeper, ctx := testkeeper.ClaimKeeper(t)
 
-	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
-	addr2 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr1 := utils.GetRandomArkeoAddress().String()
+	addr2 := utils.GetRandomArkeoAddress().String()
 	addr3 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
 	// addr3 := "thor18u55kxfudpy9q7mvhxzrh4xntjyukx420lt5fg" // random thorchain address
 

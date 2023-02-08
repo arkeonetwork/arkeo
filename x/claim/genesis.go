@@ -12,7 +12,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	k.SetParams(ctx, genState.Params)
 	err := k.SetClaimRecords(ctx, genState.ClaimRecords)
 	if err != nil {
-		panic(err) // if genesis fails, is panic the correct action?
+		panic(err) // if genesis fails we should panic
 	}
 }
 
@@ -23,8 +23,7 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis.ModuleAccountBalance = k.GetModuleAccountBalance(ctx)
 	claimRecords, err := k.GetAllClaimRecords(ctx)
 	if err != nil {
-		k.Logger(ctx).Error("failed to get claim records", "error", err)
-		return genesis
+		panic(err)
 	}
 	genesis.ClaimRecords = claimRecords
 	return genesis

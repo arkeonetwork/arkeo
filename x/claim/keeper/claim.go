@@ -18,6 +18,10 @@ func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) e
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address for chain %s", claimRecord.Chain.String())
 	}
 
+	if len(claimRecord.ActionCompleted) != len(types.Action_name) {
+		return errors.New("claim record not properly initialized, length of ActionCompleted must match the length of Actions")
+	}
+
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(claimRecord.Chain))
 
@@ -131,6 +135,10 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 		return sdk.Coin{}, nil
 	}
 
+	if len(claimRecord.ActionCompleted) != len(types.Action_name) {
+		return sdk.Coin{}, errors.New("claim record is not initialized")
+	}
+
 	// if action already completed, nothing is claimable
 	if claimRecord.ActionCompleted[action] {
 		return sdk.Coin{}, nil
@@ -210,7 +218,7 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 
 	err = k.SetClaimRecord(ctx, claimRecord)
 	if err != nil {
-		return claimableAmount, err
+		return sdk.Coin{}, err
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -231,7 +239,7 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 // 	return k.distrKeeper.FundCommunityPool(ctx, sdk.NewCoins(amt), moduleAccAddr)
 // }
 
-// SetModuleAccountBalance set balance of airdrop module
+// CreateModuleAccount creates module account and mint coins to it
 func (k Keeper) CreateModuleAccount(ctx sdk.Context, amount sdk.Coin) {
 	moduleAcc := authtypes.NewEmptyModuleAccount(types.ModuleName, authtypes.Minter)
 	k.accountKeeper.SetModuleAccount(ctx, moduleAcc)

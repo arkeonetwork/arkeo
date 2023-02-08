@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -20,7 +20,7 @@ func TestClaimEth(t *testing.T) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// create valid eth claimrecords
-	addrArkeo := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addrArkeo := utils.GetRandomArkeoAddress().String()
 	addrEth, sigString, err := generateSignedEthClaim(addrArkeo, "100")
 	require.NoError(t, err)
 
@@ -59,7 +59,7 @@ func TestClaimEth(t *testing.T) {
 
 func TestIsValidClaimSignature(t *testing.T) {
 	// generate a random eth address
-	addrArkeo := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addrArkeo := utils.GetRandomArkeoAddress().String()
 	addressEth, sigString, err := generateSignedEthClaim(addrArkeo, "5000")
 	require.NoError(t, err)
 
@@ -73,7 +73,7 @@ func TestIsValidClaimSignature(t *testing.T) {
 	require.Error(t, err)
 
 	// if we modify the arkeo address, signature should be invalid
-	addrArkeo2 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addrArkeo2 := utils.GetRandomArkeoAddress().String()
 	_, err = keeper.IsValidClaimSignature(addressEth, addrArkeo2, "5000", sigString)
 	require.Error(t, err)
 
