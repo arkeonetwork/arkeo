@@ -74,7 +74,10 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	// call claim on arkeo to claim arkeo
-	k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
+	_, err = k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
+	}
 
 	return &types.MsgClaimEthResponse{}, nil
 }

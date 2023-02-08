@@ -10,7 +10,10 @@ import (
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	// this line is used by starport scaffolding # genesis/module/init
 	k.SetParams(ctx, genState.Params)
-	k.SetClaimRecords(ctx, genState.ClaimRecords)
+	err := k.SetClaimRecords(ctx, genState.ClaimRecords)
+	if err != nil {
+		panic(err) // if genesis fails, is panic the correct action?
+	}
 }
 
 // ExportGenesis returns the module's exported genesis

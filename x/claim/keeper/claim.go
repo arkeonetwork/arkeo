@@ -235,7 +235,10 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 func (k Keeper) CreateModuleAccount(ctx sdk.Context, amount sdk.Coin) {
 	moduleAcc := authtypes.NewEmptyModuleAccount(types.ModuleName, authtypes.Minter)
 	k.accountKeeper.SetModuleAccount(ctx, moduleAcc)
-	k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(amount))
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(amount))
+	if err != nil {
+		panic(err) // module can not be set up correctly, should panic?
+	}
 }
 
 func chainToStorePrefix(chain types.Chain) []byte {
