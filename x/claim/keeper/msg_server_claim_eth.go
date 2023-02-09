@@ -57,7 +57,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		Address:                msg.Creator,
 		Chain:                  types.ARKEO,
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{true, false, false}, // true so they do not make them claim again on arkeo.
+		ActionCompleted:        []bool{false, false, false},
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
