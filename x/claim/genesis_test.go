@@ -25,8 +25,8 @@ func TestGenesis(t *testing.T) {
 	}
 
 	k, ctx := keepertest.ClaimKeeper(t)
-	claim.InitGenesis(ctx, *k, genesisState)
-	got := claim.ExportGenesis(ctx, *k)
+	claim.InitGenesis(ctx, k, genesisState)
+	got := claim.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
 	nullify.Fill(&genesisState)

@@ -28,7 +28,7 @@ import (
 	tmdb "github.com/tendermint/tm-db"
 )
 
-func ClaimKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
+func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := sdk.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := sdk.NewKVStoreKey(banktypes.StoreKey)
