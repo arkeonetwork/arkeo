@@ -42,8 +42,6 @@ func TestClaimEth(t *testing.T) {
 	// 	Signature:  sigString,
 	// }
 
-	//_, err = msgServer.ClaimEth(ctx, &claimMessage)
-
 	// require.NoError(t, err)
 
 	// // check if claimrecord is updated
