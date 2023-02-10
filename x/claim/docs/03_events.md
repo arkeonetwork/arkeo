@@ -13,13 +13,12 @@ order: 3
 | claim | sender        | {receiver}      |
 | claim | amount        | {claim_amount}  |
 
-
-| Type  | Attribute Key | Attribute Value |
-| ----- | ------------- | --------------- |
+| Type           | Attribute Key | Attribute Value |
+| -------------- | ------------- | --------------- |
 | claim_from_eth | sender        | {receiver}      |
 | claim_from_eth | amount        | {claim_amount}  |
 
-| Type  | Attribute Key | Attribute Value |
-| ----- | ------------- | --------------- |
+| Type                 | Attribute Key | Attribute Value |
+| -------------------- | ------------- | --------------- |
 | claim_from_thorchain | sender        | {receiver}      |
 | claim_from_thorchain | amount        | {claim_amount}  |

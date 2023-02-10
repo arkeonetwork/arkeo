@@ -26,6 +26,7 @@ message ClaimRecord {
   repeated bool action_completed = 4 [ (gogoproto.moretags) = "yaml:\"action_completed\"" ];
 }
 ```
+
 ClaimRecords will be populated on genesis for all users and updated as a users takes actions to recieve additional airdrop tokens.
 
 ### State
@@ -33,13 +34,13 @@ ClaimRecords will be populated on genesis for all users and updated as a users t
 ```protobuf
 // GenesisState defines the claim module's genesis state.
 message GenesisState {
-  
+
   // balance of the claim module's account
   cosmos.base.v1beta1.Coin module_account_balance = 1 [
     (gogoproto.moretags) = "yaml:\"module_account_balance\"",
     (gogoproto.nullable) = false
   ];
-  
+
   Params params = 2 [(gogoproto.nullable) = false];
 
   // list of claim records, one for every airdrop recipient

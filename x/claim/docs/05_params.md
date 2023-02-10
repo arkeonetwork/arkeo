@@ -29,7 +29,7 @@ message Params {
   ];
 
   // denom of claimable asset
-  string claim_denom = 4;  
+  string claim_denom = 4;
   // uarkeo to distribute to arkeo account for gas to make claiming easier
   cosmos.base.v1beta1.Coin initial_gas_amount = 5  [ (gogoproto.moretags) = "yaml:\"initial_gas_amount\""];
   ;

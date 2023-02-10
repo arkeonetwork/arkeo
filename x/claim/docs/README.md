@@ -2,11 +2,11 @@
 
 ## Abstract
 
-The Arkeo claims module creates functionality to allow users to recieve airdroppped tokens. Native arkeo addresses 
+The Arkeo claims module creates functionality to allow users to recieve airdroppped tokens. Native arkeo addresses
 that are to recieve the airdrop will have a small amount of arkeo in their accounts on genesis. This will be enough to pay for the gas fees of claiming their initial airdrop.
 
-Users of chains with differing address structures or derivation paths, specifically ethereum and thorchain, will be able to claim on arkeo using a signed message that transfers their airdrop from the designated Ethereum or Thorchain address to their Arkeo address.  These users will either need to either use 
-a faucet to recieve a small amount of arkeo to pay for the gas fees of claiming their initial airdrop or we will need to determine another mechanism to 
+Users of chains with differing address structures or derivation paths, specifically ethereum and thorchain, will be able to claim on arkeo using a signed message that transfers their airdrop from the designated Ethereum or Thorchain address to their Arkeo address. These users will either need to either use
+a faucet to recieve a small amount of arkeo to pay for the gas fees of claiming their initial airdrop or we will need to determine another mechanism to
 make this process as easy as possible.
 
 Arkeo airdrop amounts 'expire' if not claimed. Users have three months (`DurationUntilDecay`) to claim their full airdrop amount.
@@ -19,8 +19,8 @@ After 6 months from launch, all unclaimed tokens get sent to the community pool.
 1. **[Concept](01_concepts.md)**
 2. **[State](02_state.md)**
 3. **[Events](03_events.md)**
-5. **[Hooks](04_hooks.md)**  
-7. **[Params](05_params.md)**
+4. **[Hooks](04_hooks.md)**
+5. **[Params](05_params.md)**
 
 ## Genesis State
 
@@ -48,7 +48,7 @@ Every action must be performed to claim the full amount.
 
 A claim record is a struct that contains data about the claims process of each airdrop recipient.
 
-It contains the chain, an address, the initial claimable airdrop amount, and an array of bools representing 
+It contains the chain, an address, the initial claimable airdrop amount, and an array of bools representing
 whether each action has been completed. The position in the array refers to enum number of the action.
 
 So for example, `[true, true, false]` means that `ACTION_CLAIM` and `ACTION_VOTE` are completed.

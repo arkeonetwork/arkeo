@@ -21,5 +21,6 @@ lint:
         - "ts-client"
         - "docs"
         - "config.yml"
+        - "x/claim/docs/**"
     - linters:
         - prettier
