@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -33,14 +32,16 @@ import (
 var ModuleBasics = module.NewBasicManager()
 
 type Curl struct {
-	client  http.Client
-	baseURL string
+	client         http.Client
+	baseURL        string
+	keyringBackend string
 }
 
 // main : Generate our pool address.
 func main() {
 	// network := flag.Int("n", 0, "The network to use.")
 	user := flag.String("u", "alice", "user name")
+	keyringBackend := flag.String("keyring-backend", "test", "Select keyring's backend (os|file|test) (default \"test\")")
 	data := flag.String("data", "", "POST data")
 	head := flag.String("H", "", "header")
 	flag.Parse()
@@ -59,8 +60,9 @@ func main() {
 	chain := parts[1]
 
 	curl := Curl{
-		client:  http.Client{Timeout: time.Duration(5) * time.Second},
-		baseURL: fmt.Sprintf("%s://%s", u.Scheme, u.Host),
+		client:         http.Client{Timeout: time.Duration(5) * time.Second},
+		baseURL:        fmt.Sprintf("%s://%s", u.Scheme, u.Host),
+		keyringBackend: *keyringBackend,
 	}
 	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
@@ -83,20 +85,23 @@ func main() {
 		if len(*head) > 0 {
 			header = *head
 		}
+		println(fmt.Sprintf("making POST request to %s\n%s", u.String(), *data))
 		resp, err = curl.client.Post(u.String(), header, bytes.NewBuffer([]byte(*data)))
 	} else {
+		println(fmt.Sprintf("making GET request to %s", u.String()))
 		resp, err = curl.client.Get(u.String())
 	}
 	if err != nil {
+		println(fmt.Sprintf("error making http request: %+v", err))
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
 
-	fmt.Println(string(body))
+	println(string(body))
 }
 
 func (c Curl) getContract(provider, chain, spender string) types.Contract {
@@ -107,7 +112,7 @@ func (c Curl) getContract(provider, chain, spender string) types.Contract {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -129,7 +134,7 @@ func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -150,7 +155,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
 	}
@@ -171,19 +176,23 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
-	buf := bufio.NewReader(os.Stdin)
+	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
+	// buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
+	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	msg := fmt.Sprintf("%s:%s:%s:%d:%d", provider, chain, spender, height, nonce)
 
+	println("invoking Sign...")
 	signature, pk, err := kb.Sign(user, []byte(msg))
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("error from kb.Sign: %+v", err))
+
 	}
+	println("Signed successfully")
 
 	// verify signature
 	if !pk.VerifySignature([]byte(msg), signature) {
@@ -201,9 +210,10 @@ func (c Curl) getSpender(user string) string {
 	sdk.RegisterInterfaces(interfaceRegistry)
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
-	buf := bufio.NewReader(os.Stdin)
+	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
+	// buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", cKeys.BackendTest, "~/.arkeo", buf, cdc)
+	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -224,4 +234,9 @@ func (c Curl) getSpender(user string) string {
 	}
 
 	return pk.String()
+}
+
+func getArkeoHome() string {
+	home := os.Getenv("HOME")
+	return fmt.Sprintf("%s/.arkeo", home)
 }
