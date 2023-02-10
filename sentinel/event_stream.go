@@ -1,13 +1,14 @@
 package sentinel
 
 import (
-	"arkeo/common"
 	"context"
 	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/arkeonetwork/arkeo/common"
 
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -41,8 +42,7 @@ func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan ct
 }
 
 func (p Proxy) EventListener(host string) {
-	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
-
+	logger := p.logger
 	client, err := tmclient.New(fmt.Sprintf("tcp://%s", host), "/websocket")
 	if err != nil {
 		logger.Error("failure to create websocket cliennt", "error", err)
@@ -131,7 +131,10 @@ func (p Proxy) EventListener(host string) {
 			if !isMyPubKey(evt.Contract.ProviderPubKey) {
 				continue
 			}
-
+			if evt.Contract.Deposit.IsZero() {
+				logger.Error("contract's deposit is zero")
+				continue
+			}
 			spender := evt.Contract.Delegate
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client

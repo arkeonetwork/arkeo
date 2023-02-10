@@ -1,15 +1,17 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/sentinel/conf"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
 
 	"github.com/gorilla/handlers"
 )
@@ -19,9 +21,11 @@ type Proxy struct {
 	Config     conf.Configuration
 	MemStore   *MemStore
 	ClaimStore *ClaimStore
+	logger     log.Logger
 }
 
 func NewProxy(config conf.Configuration) Proxy {
+	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
 	claimStore, err := NewClaimStore(config.ClaimStoreLocation)
 	if err != nil {
 		panic(err)
@@ -29,18 +33,19 @@ func NewProxy(config conf.Configuration) Proxy {
 	return Proxy{
 		Metadata:   NewMetadata(config),
 		Config:     config,
-		MemStore:   NewMemStore(config.SourceChain),
+		MemStore:   NewMemStore(config.SourceChain, logger),
 		ClaimStore: claimStore,
+		logger:     logger,
 	}
 }
 
 // Serve a reverse proxy for a given url
 func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
 	// parse the url
-	url, _ := url.Parse(fmt.Sprintf("http://%s", host))
+	reverseUrl, _ := url.Parse(fmt.Sprintf("http://%s", host))
 
 	// create the reverse proxy
-	proxy := common.NewSingleHostReverseProxy(url)
+	proxy := common.NewSingleHostReverseProxy(reverseUrl)
 
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, r)
@@ -63,7 +68,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		// add username/password to request
 		host = fmt.Sprintf("thorchain:password@%s:8332", host)
 	case "arkeo-mainnet-fullnode":
-		host = fmt.Sprintf("arkeo:1317", host)
+		host = "arkeod:1317"
 	}
 
 	p.serveReverseProxy(w, r, host)
@@ -82,18 +87,18 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 	open_claims := make([]Claim, 0)
 	for _, claim := range p.ClaimStore.List() {
 		if claim.Claimed {
-			fmt.Println("already claimed")
+			p.logger.Info("already claimed")
 			continue
 		}
 		contract, err := p.MemStore.Get(claim.Key())
 		if err != nil {
-			fmt.Println("bad fetch")
+			p.logger.Error("bad fetch")
 			continue
 		}
 
 		if contract.IsClose(p.MemStore.GetHeight()) {
 			_ = p.ClaimStore.Remove(claim.Key()) // clear expired
-			fmt.Println("expired")
+			p.logger.Info("claim expired")
 			continue
 		}
 
@@ -117,21 +122,21 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
 		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
@@ -139,7 +144,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	key := p.MemStore.Key(providerPK.String(), chain.String(), spenderPK.String())
 	contract, err := p.MemStore.Get(key)
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to get contract from memstore", "error", err, "key", key)
 		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -160,21 +165,21 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
 		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
 		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
@@ -182,7 +187,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	claim := NewClaim(providerPK, chain, spenderPK, 0, 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
-		log.Print(err.Error())
+		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())
 		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -192,7 +197,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p Proxy) Run() {
-	log.Println("Starting Sentinel (reverse proxy)....")
+	p.logger.Info("Starting Sentinel (reverse proxy)....")
 	p.Config.Print()
 
 	go p.EventListener(p.Config.EventStreamHost)
@@ -213,5 +218,7 @@ func (p Proxy) Run() {
 		),
 	))
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux))
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux); err != nil {
+		panic(err)
+	}
 }

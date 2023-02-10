@@ -1,17 +1,14 @@
 package cli
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
-	"strconv"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 )
-
-var _ = strconv.Itoa(0)
 
 func CmdCloseContract() *cobra.Command {
 	cmd := &cobra.Command{

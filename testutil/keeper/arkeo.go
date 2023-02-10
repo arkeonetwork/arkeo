@@ -1,14 +1,15 @@
 package keeper
 
 import (
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/keeper"
-	"arkeo/x/arkeo/types"
 	"io/ioutil"
 	"path"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/blang/semver"
 

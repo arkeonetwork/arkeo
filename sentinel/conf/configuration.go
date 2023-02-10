@@ -1,13 +1,14 @@
 package conf
 
 import (
-	"arkeo/common"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
+
+	"github.com/arkeonetwork/arkeo/common"
 )
 
 type Configuration struct {

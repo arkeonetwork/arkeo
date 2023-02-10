@@ -1,12 +1,13 @@
 package app
 
 import (
-	"arkeo/docs"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/arkeonetwork/arkeo/docs"
 
 	"github.com/blang/semver"
 
@@ -107,9 +108,12 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 
-	arkeomodule "arkeo/x/arkeo"
-	arkeomodulekeeper "arkeo/x/arkeo/keeper"
-	arkeomoduletypes "arkeo/x/arkeo/types"
+	arkeomodule "github.com/arkeonetwork/arkeo/x/arkeo"
+	arkeomodulekeeper "github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	arkeomoduletypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
+	claimmodule "github.com/arkeonetwork/arkeo/x/claim"
+	claimmodulekeeper "github.com/arkeonetwork/arkeo/x/claim/keeper"
+	claimmoduletypes "github.com/arkeonetwork/arkeo/x/claim/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
@@ -166,6 +170,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		arkeomodule.AppModuleBasic{},
+		claimmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -245,6 +250,8 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	ArkeoKeeper arkeomodulekeeper.Keeper
+
+	ClaimKeeper claimmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -283,6 +290,7 @@ func New(
 		paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey, evidencetypes.StoreKey,
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		arkeomoduletypes.StoreKey,
+		claimmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -503,6 +511,14 @@ func New(
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper)
 
+	app.ClaimKeeper = *claimmodulekeeper.NewKeeper(
+		appCodec,
+		keys[claimmoduletypes.StoreKey],
+		keys[claimmoduletypes.MemStoreKey],
+		app.GetSubspace(claimmoduletypes.ModuleName),
+	)
+	claimModule := claimmodule.NewAppModule(appCodec, app.ClaimKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	// Create static IBC router, add transfer route, then set and seal it
@@ -546,6 +562,7 @@ func New(
 		transferModule,
 		icaModule,
 		arkeoModule,
+		claimModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -576,6 +593,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
+		claimmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -601,6 +619,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
+		claimmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -631,6 +650,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		arkeomoduletypes.ModuleName,
+		claimmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -661,6 +681,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		arkeoModule,
+		claimModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -865,6 +886,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(arkeomoduletypes.ReserveName)
 	paramsKeeper.Subspace(arkeomoduletypes.ProviderName)
 	paramsKeeper.Subspace(arkeomoduletypes.ContractName)
+	paramsKeeper.Subspace(claimmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

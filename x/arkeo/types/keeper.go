@@ -1,10 +1,11 @@
 package types
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
 	"encoding/json"
 	fmt "fmt"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 func NewProvider(pubkey common.PubKey, chain common.Chain) Provider {

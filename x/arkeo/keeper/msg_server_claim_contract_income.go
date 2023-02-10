@@ -1,14 +1,15 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/configs"
-	"arkeo/x/arkeo/types"
 	"context"
 
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClaimContractIncome) (*types.MsgClaimContractIncomeResponse, error) {
@@ -40,7 +41,7 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 
 func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
 	if k.FetchConfig(ctx, configs.HandlerCloseContract) > 0 {
-		return sdkerrors.Wrapf(types.ErrDisabledHandler, "close contract")
+		return errors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
 	chain, err := common.NewChain(msg.Chain)
@@ -53,15 +54,15 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 	}
 
 	if contract.Height != msg.Height {
-		return sdkerrors.Wrapf(types.ErrClaimContractIncomeBadHeight, "contract height (%d) doesn't match msg height (%d)", contract.Height, msg.Height)
+		return errors.Wrapf(types.ErrClaimContractIncomeBadHeight, "contract height (%d) doesn't match msg height (%d)", contract.Height, msg.Height)
 	}
 
 	if contract.Nonce >= msg.Nonce {
-		return sdkerrors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
+		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
 	if contract.IsClose(ctx.BlockHeight()) {
-		return sdkerrors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
+		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
 	}
 
 	return nil

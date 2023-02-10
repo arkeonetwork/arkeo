@@ -1,12 +1,16 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
+
+	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	. "gopkg.in/check.v1"
 )
@@ -58,7 +62,7 @@ func httpTestHandler(c *C, rw http.ResponseWriter, content string) {
 func (s *MemStoreSuite) TestMemStore(c *C) {
 	var err error
 	baseURL := fmt.Sprintf("http://%s", s.server.Listener.Addr().String())
-	mem := NewMemStore(baseURL)
+	mem := NewMemStore(baseURL, log.NewTMLogger(log.NewSyncWriter(os.Stdout)))
 
 	c.Check(mem.Key("foo", "bar", "baz"), Equals, "foo/bar/baz")
 
@@ -86,4 +90,6 @@ func (s *MemStoreSuite) TestMemStore(c *C) {
 	contract, err = mem.Get(key)
 	c.Assert(err, IsNil)
 	c.Check(contract.Rate, Equals, int64(3))
+	c.Check(contract.Deposit.Int64(), Equals, int64(500))
+	c.Check(contract.Paid.Int64(), Equals, int64(0))
 }

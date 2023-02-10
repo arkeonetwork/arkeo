@@ -10,6 +10,10 @@ import { Api } from "./rest";
 import { MsgRevokeAllowance } from "./types/cosmos/feegrant/v1beta1/tx";
 import { MsgGrantAllowance } from "./types/cosmos/feegrant/v1beta1/tx";
 
+import { BasicAllowance as typeBasicAllowance} from "./types"
+import { PeriodicAllowance as typePeriodicAllowance} from "./types"
+import { AllowedMsgAllowance as typeAllowedMsgAllowance} from "./types"
+import { Grant as typeGrant} from "./types"
 
 export { MsgRevokeAllowance, MsgGrantAllowance };
 
@@ -37,6 +41,18 @@ type msgGrantAllowanceParams = {
 
 export const registry = new Registry(msgTypes);
 
+type Field = {
+	name: string;
+	type: unknown;
+}
+function getStructure(template) {
+	const structure: {fields: Field[]} = { fields: [] }
+	for (let [key, value] of Object.entries(template)) {
+		let field = { name: key, type: typeof value }
+		structure.fields.push(field)
+	}
+	return structure
+}
 const defaultFee = {
   amount: [],
   gas: "200000",
@@ -111,13 +127,20 @@ export const queryClient = ({ addr: addr }: QueryClientOptions = { addr: "http:/
 class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
-	
+	public structure: Record<string,unknown>;
 	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
+		this.structure =  {
+						BasicAllowance: getStructure(typeBasicAllowance.fromPartial({})),
+						PeriodicAllowance: getStructure(typePeriodicAllowance.fromPartial({})),
+						AllowedMsgAllowance: getStructure(typeAllowedMsgAllowance.fromPartial({})),
+						Grant: getStructure(typeGrant.fromPartial({})),
+						
+		};
 		client.on('signer-changed',(signer) => {			
 		 this.updateTX(client);
 		})

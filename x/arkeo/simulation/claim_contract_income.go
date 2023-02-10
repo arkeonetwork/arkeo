@@ -1,9 +1,10 @@
 package simulation
 
 import (
-	"arkeo/x/arkeo/keeper"
-	"arkeo/x/arkeo/types"
 	"math/rand"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"

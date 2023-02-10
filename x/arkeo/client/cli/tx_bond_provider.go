@@ -1,19 +1,17 @@
 package cli
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"fmt"
-	"strconv"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 )
-
-var _ = strconv.Itoa(0)
 
 func CmdBondProvider() *cobra.Command {
 	cmd := &cobra.Command{

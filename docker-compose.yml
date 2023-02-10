@@ -2,6 +2,8 @@ version: "3"
 services:
   arkeod:
     image: arkeo
+    build:
+      dockerfile: ./Dockerfile
     ports:
       - "1317:1317"
       - "26657:26657"
@@ -13,6 +15,8 @@ services:
 
   sentinel:
     image: arkeo
+    build:
+      dockerfile: ./Dockerfile
     depends_on:
       - "arkeod"
     ports:

@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"arkeo/common"
-	"arkeo/x/arkeo/types"
 	"encoding/hex"
-	"strconv"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -12,8 +12,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
-
-var _ = strconv.Itoa(0)
 
 func CmdClaimContractIncome() *cobra.Command {
 	cmd := &cobra.Command{

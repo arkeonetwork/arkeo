@@ -1,15 +1,16 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/configs"
-	"arkeo/x/arkeo/types"
 	"context"
 	"fmt"
 
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvider) (*types.MsgBondProviderResponse, error) {
@@ -39,7 +40,7 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 
 func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondProvider) error {
 	if k.FetchConfig(ctx, configs.HandlerBondProvider) > 0 {
-		return sdkerrors.Wrapf(types.ErrDisabledHandler, "bond provider")
+		return errors.Wrapf(types.ErrDisabledHandler, "bond provider")
 	}
 
 	// We allow providers to unbond WHILE active contracts are underway. This
@@ -77,7 +78,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 		// provider is withdrawing their bond
 		// ensure we provider bond is never negative
 		if provider.Bond.LT(coins[0].Amount) {
-			return sdkerrors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", coins[0].Amount.Int64(), provider.Bond.Int64())
+			return errors.Wrapf(types.ErrInsufficientFunds, "not enough bond to satisfy bond request: %d/%d", coins[0].Amount.Int64(), provider.Bond.Int64())
 		}
 		if err := k.SendFromModuleToAccount(ctx, types.ProviderName, addr, coins); err != nil {
 			return err

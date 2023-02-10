@@ -1,14 +1,15 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/configs"
-	"arkeo/x/arkeo/types"
 	"context"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider) (*types.MsgModProviderResponse, error) {
@@ -45,15 +46,15 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 
 func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProvider) error {
 	if k.FetchConfig(ctx, configs.HandlerModProvider) > 0 {
-		return sdkerrors.Wrapf(types.ErrDisabledHandler, "mod provider")
+		return errors.Wrapf(types.ErrDisabledHandler, "mod provider")
 	}
 	maxContractDuration := k.FetchConfig(ctx, configs.MaxContractLength)
 	if maxContractDuration > 0 {
 		if msg.MaxContractDuration > maxContractDuration {
-			return sdkerrors.Wrapf(types.ErrInvalidModProviderMaxContractDuration, "max contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
+			return errors.Wrapf(types.ErrInvalidModProviderMaxContractDuration, "max contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
 		}
 		if msg.MinContractDuration > maxContractDuration {
-			return sdkerrors.Wrapf(types.ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
+			return errors.Wrapf(types.ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, maxContractDuration)
 		}
 	}
 
@@ -66,7 +67,7 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 		return err
 	}
 	if provider.Bond.IsZero() {
-		return sdkerrors.Wrapf(types.ErrInvalidModProviderNoBond, "bond cannot be zero")
+		return errors.Wrapf(types.ErrInvalidModProviderNoBond, "bond cannot be zero")
 	}
 
 	return nil

@@ -1,9 +1,10 @@
 package types
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	fmt "fmt"
+	"cosmossdk.io/errors"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -66,50 +67,42 @@ func (msg *MsgOpenContract) FetchSpender() common.PubKey {
 func (msg *MsgOpenContract) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		fmt.Println("Bar 1")
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
 	// verify pubkey
 	_, err = common.NewPubKey(msg.PubKey.String())
 	if err != nil {
-		fmt.Println("Bar 2")
-		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
 	// verify chain
 	_, err = common.NewChain(msg.Chain)
 	if err != nil {
-		fmt.Println("Bar 3")
-		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
 	// verify client
 	_, err = common.NewPubKey(msg.Client.String())
 	if err != nil {
-		fmt.Println("Bar 4")
-		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
 	signer := msg.MustGetSigner()
 	client, err := msg.Client.GetMyAddress()
 	if err != nil {
-		fmt.Println("Bar 5")
 		return err
 	}
 	if !signer.Equals(client) {
-		fmt.Println("Bar 6")
-		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
+		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
 	}
 
 	if msg.Duration <= 0 {
-		fmt.Println("Bar 7")
-		return sdkerrors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
+		return errors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
 	}
 
 	if msg.Rate <= 0 {
-		fmt.Println("Bar 8")
-		return sdkerrors.Wrapf(ErrOpenContractRate, "contract rate cannot be zero")
+		return errors.Wrapf(ErrOpenContractRate, "contract rate cannot be zero")
 	}
 
 	return nil

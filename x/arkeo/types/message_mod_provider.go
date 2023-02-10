@@ -1,7 +1,9 @@
 package types
 
 import (
-	"arkeo/common"
+	"cosmossdk.io/errors"
+
+	"github.com/arkeonetwork/arkeo/common"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -58,19 +60,19 @@ func (msg *MsgModProvider) GetSignBytes() []byte {
 func (msg *MsgModProvider) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 
 	// verify pubkey
 	_, err = common.NewPubKey(msg.PubKey.String())
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
 	}
 
 	// verify chain
 	_, err = common.NewChain(msg.Chain)
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
 	}
 
 	signer := msg.MustGetSigner()
@@ -79,28 +81,28 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		return err
 	}
 	if !signer.Equals(provider) {
-		return sdkerrors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
+		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
 	// test metadataURI
 	/*
 		Disabling URI parsing check due to a potential that the underlying golang code may change its behavior between golang versions. We can assume data providers are giving valid URIs, because if they aren't, they won't be able to make income
 		if _, err := url.ParseRequestURI(msg.MetadataURI); err != nil {
-			return sdkerrors.Wrapf(ErrInvalidModProviderMetdataURI, "(%s)", err)
+			return errors.Wrapf(ErrInvalidModProviderMetdataURI, "(%s)", err)
 		}
 	*/
 	// Ensure URIs don't get too long and cause chain bloat
 	if len(msg.MetadataURI) > 100 {
-		return sdkerrors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataURI))
+		return errors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataURI))
 	}
 
 	// check durations
 	if msg.MinContractDuration <= 0 {
-		return sdkerrors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contraction duration cannot be zero")
+		return errors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contraction duration cannot be zero")
 	}
 
 	if msg.MinContractDuration > msg.MaxContractDuration {
-		return sdkerrors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, msg.MaxContractDuration)
+		return errors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, msg.MaxContractDuration)
 	}
 
 	return nil

@@ -1,9 +1,6 @@
 package sentinel
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"encoding/hex"
 	"fmt"
 	"log"
@@ -13,6 +10,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"golang.org/x/time/rate"
 )
@@ -95,7 +96,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		}
 
 		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
-			fmt.Println("Paid Tier")
+			p.logger.Info("Paid Tier")
 			httpCode, err := p.paidTier(aa, r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())
@@ -103,7 +104,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				return
 			}
 		} else {
-			fmt.Println("Free Tier")
+			p.logger.Info("Free Tier")
 			httpCode, err := p.freeTier(r.RemoteAddr)
 			if err != nil {
 				log.Println(err.Error())
@@ -193,8 +194,8 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 
 	// check if we've exceed the total number of pay-as-you-go queries
 	if contract.Type == types.ContractType_PayAsYouGo {
-		if contract.Deposit.LT(cosmos.NewInt(aa.Nonce * contract.Rate)) {
-			return http.StatusPaymentRequired, fmt.Errorf("open a contract")
+		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate)) {
+			return http.StatusPaymentRequired, fmt.Errorf("contract spent")
 		}
 	}
 

@@ -1,13 +1,11 @@
 package keeper
 
 import (
-	"arkeo/common"
-	"arkeo/common/cosmos"
-	"arkeo/x/arkeo/types"
 	"context"
 	"fmt"
 	"strings"
 
+	"cosmossdk.io/errors"
 	"github.com/blang/semver"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -19,6 +17,10 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/tendermint/tendermint/libs/log"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type dbPrefix string
@@ -227,7 +229,7 @@ func (k KVStore) AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosm
 // SendFromAccountToModule transfer fund from one account to a module
 func (k KVStore) SendFromAccountToModule(ctx cosmos.Context, from cosmos.AccAddress, to string, coins cosmos.Coins) error {
 	if !k.HasCoins(ctx, from, coins) {
-		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
 	}
 	return k.coinKeeper.SendCoinsFromAccountToModule(ctx, from, to, coins)
 }
