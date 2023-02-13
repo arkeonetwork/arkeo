@@ -3,10 +3,25 @@ package arkeonetwork.arkeo.claim;
 
 import "gogoproto/gogo.proto";
 import "arkeo/claim/params.proto";
+import "arkeo/claim/claim_record.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // GenesisState defines the claim module's genesis state.
 message GenesisState {
-  Params params = 1 [(gogoproto.nullable) = false];
+  
+  // balance of the claim module's account
+  cosmos.base.v1beta1.Coin module_account_balance = 1 [
+    (gogoproto.moretags) = "yaml:\"module_account_balance\"",
+    (gogoproto.nullable) = false
+  ];
+  
+  Params params = 2 [(gogoproto.nullable) = false];
+
+  // list of claim records, one for every airdrop recipient
+  repeated ClaimRecord claim_records = 3 [
+    (gogoproto.moretags) = "yaml:\"claim_records\"",
+    (gogoproto.nullable) = false
+  ];
 }

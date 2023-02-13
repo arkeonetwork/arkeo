@@ -35,7 +35,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 
 	// 3. validate signature
 	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
-		ethClaim.InitialClaimableAmount.AmountOf(types.DefaultClaimDenom).String(), msg.Signature)
+		ethClaim.InitialClaimableAmount.Amount.String(), msg.Signature)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate signature for %s", msg.EthAddress)
 	}
@@ -57,11 +57,26 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		Address:                msg.Creator,
 		Chain:                  types.ARKEO,
 		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{false, false},
+		ActionCompleted:        []bool{false, false, false},
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeClaimFromEth,
+			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.EthAddress)),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, ethClaim.InitialClaimableAmount.String()),
+		),
+	})
+
 	err = k.SetClaimRecord(ctx, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
+	}
+
+	// call claim on arkeo to claim arkeo
+	_, err = k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
 	}
 
 	return &types.MsgClaimEthResponse{}, nil

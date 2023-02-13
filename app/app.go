@@ -511,9 +511,11 @@ func New(
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper)
 
-	app.ClaimKeeper = *claimmodulekeeper.NewKeeper(
+	app.ClaimKeeper = claimmodulekeeper.NewKeeper(
 		appCodec,
 		keys[claimmoduletypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
 		keys[claimmoduletypes.MemStoreKey],
 		app.GetSubspace(claimmoduletypes.ModuleName),
 	)
