@@ -3,7 +3,6 @@ package sentinel
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"strconv"
@@ -75,7 +74,7 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 func (aa ArkAuth) Validate(provider common.PubKey) error {
 	creator, err := provider.GetMyAddress()
 	if err != nil {
-		return fmt.Errorf("Internal Server Error: %s", err)
+		return fmt.Errorf("internal server error: %w", err)
 	}
 	if !provider.Equals(aa.Provider) {
 		return fmt.Errorf("provider pubkey does not match provider")
@@ -94,20 +93,20 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		if aaOK {
 			aa, err = parseArkAuth(raw[0])
 		}
-
+		remoteAddr := p.getRemoteAddr(r)
 		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
-			p.logger.Info("Paid Tier")
-			httpCode, err := p.paidTier(aa, r.RemoteAddr)
+			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
+			httpCode, err := p.paidTier(aa, remoteAddr)
 			if err != nil {
-				log.Println(err.Error())
+				p.logger.Error("failed to serve paid tier request", "error", err)
 				http.Error(w, err.Error(), httpCode)
 				return
 			}
 		} else {
-			p.logger.Info("Free Tier")
-			httpCode, err := p.freeTier(r.RemoteAddr)
+			p.logger.Info("serving paid tier requests", "remote-addr", remoteAddr)
+			httpCode, err := p.freeTier(remoteAddr)
 			if err != nil {
-				log.Println(err.Error())
+				p.logger.Error("failed to serve free tier request", "error", err)
 				http.Error(w, err.Error(), httpCode)
 				return
 			}
@@ -116,11 +115,28 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 	})
 }
 
+const (
+	forwardHeaderName = `X-Forwarded-For`
+	xRealIPName       = `X-Real-Ip`
+)
+
+func (p Proxy) getRemoteAddr(r *http.Request) string {
+	realIP := r.Header.Get(xRealIPName)
+	if realIP != "" {
+		return realIP
+	}
+	forwardIP := r.Header.Get(forwardHeaderName)
+	if forwardIP != "" {
+		return forwardIP
+	}
+	return r.RemoteAddr
+}
+
 func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	// Get the IP address for the current user.
 	key, _, err := net.SplitHostPort(remoteAddr)
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
+		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
 	if ok := p.isRateLimited(key, -1); ok {
@@ -161,17 +177,8 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	key := fmt.Sprintf("%d-%s", aa.Chain, aa.Spender)
 	contractKey := p.MemStore.Key(aa.Provider.String(), aa.Chain.String(), aa.Spender.String())
 	contract, err := p.MemStore.Get(contractKey)
-
-	defer func() {
-		if err != nil {
-			if ok := p.isRateLimited(key, contract.Type); ok {
-				code = http.StatusTooManyRequests
-				err = fmt.Errorf(http.StatusText(429))
-			}
-		}
-	}()
 	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
+		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
 	if contract.IsClose(p.MemStore.GetHeight()) {
@@ -179,13 +186,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	sig := hex.EncodeToString(aa.Signature)
-
 	claim := NewClaim(aa.Provider, aa.Chain, aa.Spender, aa.Nonce, aa.Height, sig)
 	if p.ClaimStore.Has(key) {
 		var err error
 		claim, err = p.ClaimStore.Get(key)
 		if err != nil {
-			return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
+			return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 		}
 		if claim.Height == aa.Height && contract.Height == aa.Height && claim.Nonce >= aa.Nonce {
 			return http.StatusBadRequest, fmt.Errorf("bad nonce (%d/%d)", aa.Nonce, claim.Nonce)
@@ -200,7 +206,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	if ok := p.isRateLimited(key, contract.Type); ok {
-		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
+		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
 	}
 
 	claim.Nonce = aa.Nonce
@@ -208,11 +214,10 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	claim.Signature = sig
 	claim.Claimed = false
 	if err := p.ClaimStore.Set(claim); err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("Internal Server Error: %s", err)
+		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 	contract.Nonce = aa.Nonce
 	contract.Height = aa.Height
 	p.MemStore.Put(contractKey, contract)
-
 	return http.StatusOK, nil
 }
