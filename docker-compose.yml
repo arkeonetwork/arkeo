@@ -1,6 +1,7 @@
 version: "3"
 services:
   arkeod:
+    hostname: arkeod
     image: arkeo
     build:
       dockerfile: ./Dockerfile
@@ -11,6 +12,19 @@ services:
       - "${HOME}/.arkeo:/root/.arkeo:rw"
     environment:
       NET: "mocknet"
+    command: arkeod start
+
+  arkeod-1:
+    image: arkeo
+    build:
+      dockerfile: ./Dockerfile
+    ports:
+      - "1317"
+      - "26657"
+    environment:
+      NET: "mocknet"
+      PEER: arkeod
+    entrypoint: /scripts/validator.sh
     command: arkeod start
 
   sentinel:

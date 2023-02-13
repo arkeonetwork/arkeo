@@ -20,9 +20,8 @@ ENV GOOS=linux
 # Download go dependencies
 WORKDIR /app
 COPY go.mod go.sum ./
-
+RUN go mod download
 COPY . .
-
 ARG TAG=mainnet
 RUN make install
 
