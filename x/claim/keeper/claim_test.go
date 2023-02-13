@@ -49,6 +49,10 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, coins3, sdk.Coin{})
 
+	claimRecord, err := keeper.GetClaimRecord(ctx, addr3, types.ARKEO)
+	require.NoError(t, err)
+	require.Equal(t, claimRecord, types.ClaimRecord{})
+
 	// get rewards amount per action
 	coins4, err := keeper.GetClaimableAmountForAction(ctx, addr1, types.ACTION_VOTE, types.ARKEO)
 	require.NoError(t, err)

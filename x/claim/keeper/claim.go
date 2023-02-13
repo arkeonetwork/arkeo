@@ -193,6 +193,7 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 	if err != nil {
 		return sdk.Coin{}, err
 	}
+
 	accountAddress, err := sdk.AccAddressFromBech32(addr)
 	if err != nil {
 		return sdk.Coin{}, err
