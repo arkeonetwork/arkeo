@@ -14,7 +14,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
   arkeod init local --chain-id "$CHAIN_ID"
 
-  rm -rf ~/.arkeo/config/genesis.json # set in thornode render-config
+  rm -rf ~/.arkeo/config/genesis.json
 
     if [ "$PEER" = "none" ]; then
       echo "Missing PEER"
