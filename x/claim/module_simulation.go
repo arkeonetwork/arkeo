@@ -29,6 +29,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgClaimEth int = 100
 
+	opWeightMsgClaimArkeo = "op_weight_msg_claim_arkeo"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgClaimArkeo int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -71,6 +75,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	operations = append(operations, simulation.NewWeightedOperation(
 		weightMsgClaimEth,
 		claimsimulation.SimulateMsgClaimEth(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgClaimArkeo int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgClaimArkeo, &weightMsgClaimArkeo, nil,
+		func(_ *rand.Rand) {
+			weightMsgClaimArkeo = defaultWeightMsgClaimArkeo
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgClaimArkeo,
+		claimsimulation.SimulateMsgClaimArkeo(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
 	// this line is used by starport scaffolding # simapp/module/operation

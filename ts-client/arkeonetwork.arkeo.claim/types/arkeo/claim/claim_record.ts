@@ -6,19 +6,23 @@ export const protobufPackage = "arkeonetwork.arkeo.claim";
 
 /** actions for arkeo chain */
 export enum Action {
-  ActionVote = 0,
-  ActionDelegateStake = 1,
+  ACTION_CLAIM = 0,
+  ACTION_VOTE = 1,
+  ACTION_DELEGATE = 2,
   UNRECOGNIZED = -1,
 }
 
 export function actionFromJSON(object: any): Action {
   switch (object) {
     case 0:
-    case "ActionVote":
-      return Action.ActionVote;
+    case "ACTION_CLAIM":
+      return Action.ACTION_CLAIM;
     case 1:
-    case "ActionDelegateStake":
-      return Action.ActionDelegateStake;
+    case "ACTION_VOTE":
+      return Action.ACTION_VOTE;
+    case 2:
+    case "ACTION_DELEGATE":
+      return Action.ACTION_DELEGATE;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -28,39 +32,13 @@ export function actionFromJSON(object: any): Action {
 
 export function actionToJSON(object: Action): string {
   switch (object) {
-    case Action.ActionVote:
-      return "ActionVote";
-    case Action.ActionDelegateStake:
-      return "ActionDelegateStake";
+    case Action.ACTION_CLAIM:
+      return "ACTION_CLAIM";
+    case Action.ACTION_VOTE:
+      return "ACTION_VOTE";
+    case Action.ACTION_DELEGATE:
+      return "ACTION_DELEGATE";
     case Action.UNRECOGNIZED:
-    default:
-      return "UNRECOGNIZED";
-  }
-}
-
-/** actions for chains other than arkeo, limited currently to claiming */
-export enum ForeignChainAction {
-  ForeignChainActionClaim = 0,
-  UNRECOGNIZED = -1,
-}
-
-export function foreignChainActionFromJSON(object: any): ForeignChainAction {
-  switch (object) {
-    case 0:
-    case "ForeignChainActionClaim":
-      return ForeignChainAction.ForeignChainActionClaim;
-    case -1:
-    case "UNRECOGNIZED":
-    default:
-      return ForeignChainAction.UNRECOGNIZED;
-  }
-}
-
-export function foreignChainActionToJSON(object: ForeignChainAction): string {
-  switch (object) {
-    case ForeignChainAction.ForeignChainActionClaim:
-      return "ForeignChainActionClaim";
-    case ForeignChainAction.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -110,17 +88,14 @@ export interface ClaimRecord {
   chain: Chain;
   /** arkeo address of claim user */
   address: string;
-  /** total initial claimable amount for the user */
-  initialClaimableAmount: Coin[];
-  /**
-   * true if action is completed
-   * index of bool in array refers to action enum #
-   */
-  actionCompleted: boolean[];
+  /** claimable amount per action (claim, vote, delegate - changed to 0 after action completed) */
+  amountClaim: Coin | undefined;
+  amountVote: Coin | undefined;
+  amountDelegate: Coin | undefined;
 }
 
 function createBaseClaimRecord(): ClaimRecord {
-  return { chain: 0, address: "", initialClaimableAmount: [], actionCompleted: [] };
+  return { chain: 0, address: "", amountClaim: undefined, amountVote: undefined, amountDelegate: undefined };
 }
 
 export const ClaimRecord = {
@@ -131,14 +106,15 @@ export const ClaimRecord = {
     if (message.address !== "") {
       writer.uint32(18).string(message.address);
     }
-    for (const v of message.initialClaimableAmount) {
-      Coin.encode(v!, writer.uint32(26).fork()).ldelim();
+    if (message.amountClaim !== undefined) {
+      Coin.encode(message.amountClaim, writer.uint32(26).fork()).ldelim();
     }
-    writer.uint32(34).fork();
-    for (const v of message.actionCompleted) {
-      writer.bool(v);
+    if (message.amountVote !== undefined) {
+      Coin.encode(message.amountVote, writer.uint32(34).fork()).ldelim();
     }
-    writer.ldelim();
+    if (message.amountDelegate !== undefined) {
+      Coin.encode(message.amountDelegate, writer.uint32(42).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -156,17 +132,13 @@ export const ClaimRecord = {
           message.address = reader.string();
           break;
         case 3:
-          message.initialClaimableAmount.push(Coin.decode(reader, reader.uint32()));
+          message.amountClaim = Coin.decode(reader, reader.uint32());
           break;
         case 4:
-          if ((tag & 7) === 2) {
-            const end2 = reader.uint32() + reader.pos;
-            while (reader.pos < end2) {
-              message.actionCompleted.push(reader.bool());
-            }
-          } else {
-            message.actionCompleted.push(reader.bool());
-          }
+          message.amountVote = Coin.decode(reader, reader.uint32());
+          break;
+        case 5:
+          message.amountDelegate = Coin.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -180,10 +152,9 @@ export const ClaimRecord = {
     return {
       chain: isSet(object.chain) ? chainFromJSON(object.chain) : 0,
       address: isSet(object.address) ? String(object.address) : "",
-      initialClaimableAmount: Array.isArray(object?.initialClaimableAmount)
-        ? object.initialClaimableAmount.map((e: any) => Coin.fromJSON(e))
-        : [],
-      actionCompleted: Array.isArray(object?.actionCompleted) ? object.actionCompleted.map((e: any) => Boolean(e)) : [],
+      amountClaim: isSet(object.amountClaim) ? Coin.fromJSON(object.amountClaim) : undefined,
+      amountVote: isSet(object.amountVote) ? Coin.fromJSON(object.amountVote) : undefined,
+      amountDelegate: isSet(object.amountDelegate) ? Coin.fromJSON(object.amountDelegate) : undefined,
     };
   },
 
@@ -191,16 +162,12 @@ export const ClaimRecord = {
     const obj: any = {};
     message.chain !== undefined && (obj.chain = chainToJSON(message.chain));
     message.address !== undefined && (obj.address = message.address);
-    if (message.initialClaimableAmount) {
-      obj.initialClaimableAmount = message.initialClaimableAmount.map((e) => e ? Coin.toJSON(e) : undefined);
-    } else {
-      obj.initialClaimableAmount = [];
-    }
-    if (message.actionCompleted) {
-      obj.actionCompleted = message.actionCompleted.map((e) => e);
-    } else {
-      obj.actionCompleted = [];
-    }
+    message.amountClaim !== undefined
+      && (obj.amountClaim = message.amountClaim ? Coin.toJSON(message.amountClaim) : undefined);
+    message.amountVote !== undefined
+      && (obj.amountVote = message.amountVote ? Coin.toJSON(message.amountVote) : undefined);
+    message.amountDelegate !== undefined
+      && (obj.amountDelegate = message.amountDelegate ? Coin.toJSON(message.amountDelegate) : undefined);
     return obj;
   },
 
@@ -208,8 +175,15 @@ export const ClaimRecord = {
     const message = createBaseClaimRecord();
     message.chain = object.chain ?? 0;
     message.address = object.address ?? "";
-    message.initialClaimableAmount = object.initialClaimableAmount?.map((e) => Coin.fromPartial(e)) || [];
-    message.actionCompleted = object.actionCompleted?.map((e) => e) || [];
+    message.amountClaim = (object.amountClaim !== undefined && object.amountClaim !== null)
+      ? Coin.fromPartial(object.amountClaim)
+      : undefined;
+    message.amountVote = (object.amountVote !== undefined && object.amountVote !== null)
+      ? Coin.fromPartial(object.amountVote)
+      : undefined;
+    message.amountDelegate = (object.amountDelegate !== undefined && object.amountDelegate !== null)
+      ? Coin.fromPartial(object.amountDelegate)
+      : undefined;
     return message;
   },
 };

@@ -5,15 +5,24 @@ export const protobufPackage = "arkeonetwork.arkeo.claim";
 
 export interface MsgClaimEth {
   creator: string;
-  ethAdress: string;
+  /** the adress the claim is for */
+  ethAddress: string;
+  /** EIP712 signature that has to be signed by ethAddress */
   signature: string;
 }
 
 export interface MsgClaimEthResponse {
 }
 
+export interface MsgClaimArkeo {
+  creator: string;
+}
+
+export interface MsgClaimArkeoResponse {
+}
+
 function createBaseMsgClaimEth(): MsgClaimEth {
-  return { creator: "", ethAdress: "", signature: "" };
+  return { creator: "", ethAddress: "", signature: "" };
 }
 
 export const MsgClaimEth = {
@@ -21,8 +30,8 @@ export const MsgClaimEth = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.ethAdress !== "") {
-      writer.uint32(18).string(message.ethAdress);
+    if (message.ethAddress !== "") {
+      writer.uint32(18).string(message.ethAddress);
     }
     if (message.signature !== "") {
       writer.uint32(26).string(message.signature);
@@ -41,7 +50,7 @@ export const MsgClaimEth = {
           message.creator = reader.string();
           break;
         case 2:
-          message.ethAdress = reader.string();
+          message.ethAddress = reader.string();
           break;
         case 3:
           message.signature = reader.string();
@@ -57,7 +66,7 @@ export const MsgClaimEth = {
   fromJSON(object: any): MsgClaimEth {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      ethAdress: isSet(object.ethAdress) ? String(object.ethAdress) : "",
+      ethAddress: isSet(object.ethAddress) ? String(object.ethAddress) : "",
       signature: isSet(object.signature) ? String(object.signature) : "",
     };
   },
@@ -65,7 +74,7 @@ export const MsgClaimEth = {
   toJSON(message: MsgClaimEth): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.ethAdress !== undefined && (obj.ethAdress = message.ethAdress);
+    message.ethAddress !== undefined && (obj.ethAddress = message.ethAddress);
     message.signature !== undefined && (obj.signature = message.signature);
     return obj;
   },
@@ -73,7 +82,7 @@ export const MsgClaimEth = {
   fromPartial<I extends Exact<DeepPartial<MsgClaimEth>, I>>(object: I): MsgClaimEth {
     const message = createBaseMsgClaimEth();
     message.creator = object.creator ?? "";
-    message.ethAdress = object.ethAdress ?? "";
+    message.ethAddress = object.ethAddress ?? "";
     message.signature = object.signature ?? "";
     return message;
   },
@@ -118,9 +127,96 @@ export const MsgClaimEthResponse = {
   },
 };
 
+function createBaseMsgClaimArkeo(): MsgClaimArkeo {
+  return { creator: "" };
+}
+
+export const MsgClaimArkeo = {
+  encode(message: MsgClaimArkeo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgClaimArkeo {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgClaimArkeo();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgClaimArkeo {
+    return { creator: isSet(object.creator) ? String(object.creator) : "" };
+  },
+
+  toJSON(message: MsgClaimArkeo): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgClaimArkeo>, I>>(object: I): MsgClaimArkeo {
+    const message = createBaseMsgClaimArkeo();
+    message.creator = object.creator ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgClaimArkeoResponse(): MsgClaimArkeoResponse {
+  return {};
+}
+
+export const MsgClaimArkeoResponse = {
+  encode(_: MsgClaimArkeoResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgClaimArkeoResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgClaimArkeoResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgClaimArkeoResponse {
+    return {};
+  },
+
+  toJSON(_: MsgClaimArkeoResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgClaimArkeoResponse>, I>>(_: I): MsgClaimArkeoResponse {
+    const message = createBaseMsgClaimArkeoResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse>;
+  ClaimArkeo(request: MsgClaimArkeo): Promise<MsgClaimArkeoResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -128,11 +224,18 @@ export class MsgClientImpl implements Msg {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.ClaimEth = this.ClaimEth.bind(this);
+    this.ClaimArkeo = this.ClaimArkeo.bind(this);
   }
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse> {
     const data = MsgClaimEth.encode(request).finish();
     const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "ClaimEth", data);
     return promise.then((data) => MsgClaimEthResponse.decode(new _m0.Reader(data)));
+  }
+
+  ClaimArkeo(request: MsgClaimArkeo): Promise<MsgClaimArkeoResponse> {
+    const data = MsgClaimArkeo.encode(request).finish();
+    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "ClaimArkeo", data);
+    return promise.then((data) => MsgClaimArkeoResponse.decode(new _m0.Reader(data)));
   }
 }
 
