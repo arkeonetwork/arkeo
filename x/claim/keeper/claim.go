@@ -18,10 +18,6 @@ func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) e
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address for chain %s", claimRecord.Chain.String())
 	}
 
-	if len(claimRecord.ActionCompleted) != len(types.Action_name) {
-		return errors.New("claim record not properly initialized, length of ActionCompleted must match the length of Actions")
-	}
-
 	store := ctx.KVStore(k.storeKey)
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(claimRecord.Chain))
 
@@ -100,7 +96,7 @@ func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) 
 	return claimRecord, nil
 }
 
-// GetUserTotalClaimable returns the total claimable amount for an address
+// GetUserTotalClaimable returns the total claimable amount for an address across all actions
 func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.Chain) (sdk.Coin, error) {
 	claimRecord, err := k.GetClaimRecord(ctx, addr, chain)
 	if err != nil {
@@ -110,7 +106,7 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 		return sdk.Coin{}, nil
 	}
 
-	totalClaimable := sdk.NewCoin(claimRecord.InitialClaimableAmount.Denom, sdk.ZeroInt())
+	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, sdk.ZeroInt())
 	for action := range types.Action_name {
 		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, types.Action(action), chain)
 		if err != nil {
@@ -134,16 +130,6 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	if claimRecord.Address == "" {
 		return sdk.Coin{}, nil
 	}
-
-	if len(claimRecord.ActionCompleted) != len(types.Action_name) {
-		return sdk.Coin{}, errors.New("claim record is not initialized")
-	}
-
-	// if action already completed, nothing is claimable
-	if claimRecord.ActionCompleted[action] {
-		return sdk.Coin{}, nil
-	}
-
 	params := k.GetParams(ctx)
 
 	// If we are before the start time, do nothing.
@@ -153,8 +139,10 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 		return sdk.Coin{}, nil
 	}
 
-	initalClaimableAmount := sdk.NewCoin(claimRecord.InitialClaimableAmount.Denom,
-		claimRecord.InitialClaimableAmount.Amount.QuoRaw(int64(len(types.Action_name))))
+	initalClaimableAmount := getInitialClaimableAmount(claimRecord, action)
+	if initalClaimableAmount.IsNil() || initalClaimableAmount.Amount.IsZero() {
+		return sdk.Coin{}, nil
+	}
 
 	elapsedAirdropTime := ctx.BlockTime().Sub(params.AirdropStartTime)
 	// Are we early enough in the airdrop s.t. theres no decay?
@@ -214,8 +202,7 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 		return sdk.Coin{}, err
 	}
 
-	claimRecord.ActionCompleted[action] = true
-
+	claimRecord = setClaimableAmountForAction(claimRecord, action, sdk.Coin{}) // set to nil/zero to mark as completed.
 	err = k.SetClaimRecord(ctx, claimRecord)
 	if err != nil {
 		return sdk.Coin{}, err
@@ -260,4 +247,37 @@ func chainToStorePrefix(chain types.Chain) []byte {
 	default:
 		return []byte{}
 	}
+}
+
+func getInitialClaimableAmountTotal(claim types.ClaimRecord) sdk.Coin {
+	totalAmount := sdk.NewCoin(claim.AmountClaim.Denom, sdk.ZeroInt())
+	totalAmount = totalAmount.Add(claim.AmountClaim)
+	totalAmount = totalAmount.Add(claim.AmountDelegate)
+	totalAmount = totalAmount.Add(claim.AmountVote)
+	return totalAmount
+}
+
+func getInitialClaimableAmount(claim types.ClaimRecord, action types.Action) sdk.Coin {
+	switch action {
+	case types.ACTION_CLAIM:
+		return claim.AmountClaim
+	case types.ACTION_DELEGATE:
+		return claim.AmountDelegate
+	case types.ACTION_VOTE:
+		return claim.AmountVote
+	default:
+		return sdk.Coin{}
+	}
+}
+
+func setClaimableAmountForAction(claim types.ClaimRecord, action types.Action, amount sdk.Coin) types.ClaimRecord {
+	switch action {
+	case types.ACTION_CLAIM:
+		claim.AmountClaim = amount
+	case types.ACTION_DELEGATE:
+		claim.AmountDelegate = amount
+	case types.ACTION_VOTE:
+		claim.AmountVote = amount
+	}
+	return claim
 }

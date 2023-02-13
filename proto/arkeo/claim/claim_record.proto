@@ -12,14 +12,7 @@ enum Action {
 
   ACTION_CLAIM = 0;
   ACTION_VOTE = 1;
-  ACTION_DELEGATE_STAKE = 2;
-}
-
-// actions for chains other than arkeo, limited currently to claiming
-enum ForeignChainAction {
-  option (gogoproto.goproto_enum_prefix) = false;
-
-  FOREIGN_CHAIN_ACTION_CLAIM = 0;
+  ACTION_DELEGATE = 2;
 }
 
 enum Chain {
