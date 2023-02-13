@@ -65,7 +65,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		),
 	})
 
-	// see if there is an existing arkeo claim!
+	// see if there is an existing arkeo claim so we can merge it
 	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.Creator, types.ARKEO)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.Creator)
