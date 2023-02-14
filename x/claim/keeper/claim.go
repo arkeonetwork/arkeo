@@ -102,7 +102,7 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 	if err != nil {
 		return sdk.Coin{}, err
 	}
-	if claimRecord.Address == "" {
+	if claimRecord.IsEmpty() {
 		return sdk.Coin{}, nil
 	}
 
@@ -127,9 +127,10 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 		return sdk.Coin{}, err
 	}
 
-	if claimRecord.Address == "" {
+	if claimRecord.IsEmpty() {
 		return sdk.Coin{}, nil
 	}
+
 	params := k.GetParams(ctx)
 
 	// If we are before the start time, do nothing.
@@ -185,7 +186,7 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 		return claimableAmount, err
 	}
 
-	if claimableAmount.IsNil() {
+	if claimableAmount.IsNil() || claimableAmount.IsZero() {
 		return claimableAmount, nil
 	}
 

@@ -24,7 +24,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.EthAddress)
 	}
 
-	if ethClaim == (types.ClaimRecord{}) || ethClaim.AmountClaim.IsNil() || ethClaim.AmountClaim.IsZero() {
+	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(err, "no claimable amount for %s", msg.EthAddress)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
@@ -173,11 +173,11 @@ func has0xPrefix(str string) bool {
 }
 
 func mergeClaimRecords(claimA types.ClaimRecord, claimB types.ClaimRecord) (types.ClaimRecord, error) {
-	if claimA == (types.ClaimRecord{}) {
+	if claimA.IsEmpty() {
 		return claimB, nil
 	}
 
-	if claimB == (types.ClaimRecord{}) {
+	if claimB.IsEmpty() {
 		return claimA, nil
 	}
 
