@@ -50,3 +50,18 @@ func NewKeeper(
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
+
+func (k Keeper) AfterProposalVote(ctx sdk.Context, proposalID uint64, voterAddr sdk.AccAddress) {
+	_, err := k.ClaimCoinsForAction(ctx, voterAddr.String(), types.ACTION_VOTE)
+	if err != nil {
+		k.Logger(ctx).Error("failed to claim coins for vote", "error", err.Error())
+	}
+}
+
+func (k Keeper) AfterDelegationModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
+	_, err := k.ClaimCoinsForAction(ctx, delAddr.String(), types.ACTION_DELEGATE)
+	if err != nil {
+		k.Logger(ctx).Error("failed to claim coins for delegate", "error", err.Error())
+	}
+	return nil
+}

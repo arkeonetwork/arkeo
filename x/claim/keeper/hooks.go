@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -19,21 +18,6 @@ func (k Keeper) Hooks() Hooks {
 
 var _ govtypes.GovHooks = Hooks{}
 var _ stakingtypes.StakingHooks = Hooks{}
-
-func (k Keeper) AfterProposalVote(ctx sdk.Context, proposalID uint64, voterAddr sdk.AccAddress) {
-	_, err := k.ClaimCoinsForAction(ctx, voterAddr.String(), types.ACTION_VOTE)
-	if err != nil {
-		k.Logger(ctx).Error("failed to claim coins for vote", "error", err.Error())
-	}
-}
-
-func (k Keeper) AfterDelegationModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
-	_, err := k.ClaimCoinsForAction(ctx, delAddr.String(), types.ACTION_DELEGATE)
-	if err != nil {
-		k.Logger(ctx).Error("failed to claim coins for delegate", "error", err.Error())
-	}
-	return nil
-}
 
 // governance hooks
 func (h Hooks) AfterProposalSubmission(ctx sdk.Context, proposalID uint64) {}
