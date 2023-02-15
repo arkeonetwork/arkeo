@@ -16,11 +16,14 @@ func (k Keeper) Hooks() Hooks {
 	return Hooks{k}
 }
 
-var _ govtypes.GovHooks = Hooks{}
-var _ stakingtypes.StakingHooks = Hooks{}
+var (
+	_ govtypes.GovHooks         = Hooks{}
+	_ stakingtypes.StakingHooks = Hooks{}
+)
 
 // governance hooks
 func (h Hooks) AfterProposalSubmission(ctx sdk.Context, proposalID uint64) {}
+
 func (h Hooks) AfterProposalDeposit(ctx sdk.Context, proposalID uint64, depositorAddr sdk.AccAddress) {
 }
 
@@ -34,9 +37,11 @@ func (h Hooks) AfterProposalVotingPeriodEnded(ctx sdk.Context, proposalID uint64
 func (h Hooks) AfterValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) BeforeValidatorModified(ctx sdk.Context, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) AfterValidatorRemoved(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
@@ -44,22 +49,28 @@ func (h Hooks) AfterValidatorRemoved(ctx sdk.Context, consAddr sdk.ConsAddress, 
 func (h Hooks) AfterValidatorBonded(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) AfterValidatorBeginUnbonding(ctx sdk.Context, consAddr sdk.ConsAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) BeforeDelegationCreated(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) BeforeDelegationSharesModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) BeforeDelegationRemoved(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	return nil
 }
+
 func (h Hooks) AfterDelegationModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	_ = h.k.AfterDelegationModified(ctx, delAddr, valAddr)
 	return nil
 }
+
 func (h Hooks) BeforeValidatorSlashed(ctx sdk.Context, valAddr sdk.ValAddress, fraction sdk.Dec) error {
 	return nil
 }

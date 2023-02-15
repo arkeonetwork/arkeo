@@ -57,7 +57,6 @@ func TestGetClaimRecordForArkeo(t *testing.T) {
 	coins4, err := keepers.ClaimKeeper.GetClaimableAmountForAction(ctx, addr1, types.ACTION_VOTE, types.ARKEO)
 	require.NoError(t, err)
 	require.Equal(t, coins4.String(), sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)).String())
-
 }
 
 func TestGetClaimRecordForMutlipleChains(t *testing.T) {

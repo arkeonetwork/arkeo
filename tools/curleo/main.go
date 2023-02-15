@@ -190,7 +190,6 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	signature, pk, err := kb.Sign(user, []byte(msg))
 	if err != nil {
 		panic(fmt.Sprintf("error from kb.Sign: %+v", err))
-
 	}
 	println("Signed successfully")
 
