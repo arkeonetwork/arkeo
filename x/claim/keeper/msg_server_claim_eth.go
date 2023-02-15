@@ -51,7 +51,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	// set eth claim to completed
-	ethClaim = setClaimableAmountForAction(ethClaim, types.ACTION_CLAIM, sdk.Coin{})
+	ethClaim = setClaimableAmountForAllActions(ethClaim, sdk.Coin{})
 	err = k.SetClaimRecord(ctx, ethClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.EthAddress)

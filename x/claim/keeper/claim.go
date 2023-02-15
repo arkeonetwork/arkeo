@@ -283,3 +283,10 @@ func setClaimableAmountForAction(claim types.ClaimRecord, action types.Action, a
 	}
 	return claim
 }
+
+func setClaimableAmountForAllActions(claim types.ClaimRecord, amount sdk.Coin) types.ClaimRecord {
+	claim.AmountClaim = amount
+	claim.AmountDelegate = amount
+	claim.AmountVote = amount
+	return claim
+}
