@@ -82,7 +82,6 @@ type KeeperContract interface {
 	SetContract(_ cosmos.Context, _ types.Contract) error
 	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool
 	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey)
-
 	GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator
 	GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error)
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error

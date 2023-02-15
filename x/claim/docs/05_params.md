@@ -1,12 +1,12 @@
-syntax = "proto3";
-package arkeonetwork.arkeo.claim;
+<!--
+order: 7
+-->
 
-import "gogoproto/gogo.proto";
-import "google/protobuf/duration.proto";
-import "google/protobuf/timestamp.proto";
-import "cosmos/base/v1beta1/coin.proto";
+# Params
 
-option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
+Claim module provides below params
+
+```protobuf
 
 // Params defines the parameters for the module.
 message Params {
@@ -29,8 +29,15 @@ message Params {
   ];
 
   // denom of claimable asset
-  string claim_denom = 4;  
+  string claim_denom = 4;
   // uarkeo to distribute to arkeo account for gas to make claiming easier
   cosmos.base.v1beta1.Coin initial_gas_amount = 5  [ (gogoproto.moretags) = "yaml:\"initial_gas_amount\""];
   ;
 }
+```
+
+1. `airdrop_start_time` refers to the time when user can start to claim airdrop.
+2. `duration_until_decay` refers to the duration from start time to decay start time.
+3. `duration_of_decay` refers to the duration from decay start time to claim end time. Users are not able to claim airdrop after this.
+4. `claim_denom` refers to the denomination of claiming tokens. As a default, it's `uarkeo`.
+5. `initial_gas_amount` refers to the amount of `uarkeo` to distribute to arkeo accounts for gas to make claiming easier.

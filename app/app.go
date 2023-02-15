@@ -425,10 +425,20 @@ func New(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
+	app.ClaimKeeper = claimmodulekeeper.NewKeeper(
+		appCodec,
+		keys[claimmoduletypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
+		keys[claimmoduletypes.MemStoreKey],
+		app.GetSubspace(claimmoduletypes.ModuleName),
+	)
+	claimModule := claimmodule.NewAppModule(appCodec, app.ClaimKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 	app.StakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks()),
+		stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(), app.ClaimKeeper.Hooks()),
 	)
 
 	// ... other modules keepers
@@ -499,6 +509,12 @@ func New(
 		govConfig,
 	)
 
+	app.GovKeeper = *app.GovKeeper.SetHooks(
+		govtypes.NewMultiGovHooks(
+			app.ClaimKeeper.Hooks(),
+		),
+	)
+
 	app.ArkeoKeeper = *arkeomodulekeeper.NewKVStore(
 		appCodec,
 		keys[arkeomoduletypes.StoreKey],
@@ -510,14 +526,6 @@ func New(
 		semver.MustParse("0.0.0"),
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper)
-
-	app.ClaimKeeper = *claimmodulekeeper.NewKeeper(
-		appCodec,
-		keys[claimmoduletypes.StoreKey],
-		keys[claimmoduletypes.MemStoreKey],
-		app.GetSubspace(claimmoduletypes.ModuleName),
-	)
-	claimModule := claimmodule.NewAppModule(appCodec, app.ClaimKeeper, app.AccountKeeper, app.BankKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 

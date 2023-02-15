@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Chain, chainFromJSON, chainToJSON, ClaimRecord } from "./claim_record";
 import { Params } from "./params";
 
 export const protobufPackage = "arkeonetwork.arkeo.claim";
@@ -16,10 +17,11 @@ export interface QueryParamsResponse {
 
 export interface QueryClaimRecordRequest {
   address: string;
+  chain: Chain;
 }
 
 export interface QueryClaimRecordResponse {
-  claimRecord: string;
+  claimRecord: ClaimRecord | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -111,13 +113,16 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryClaimRecordRequest(): QueryClaimRecordRequest {
-  return { address: "" };
+  return { address: "", chain: 0 };
 }
 
 export const QueryClaimRecordRequest = {
   encode(message: QueryClaimRecordRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
+    }
+    if (message.chain !== 0) {
+      writer.uint32(16).int32(message.chain);
     }
     return writer;
   },
@@ -132,6 +137,9 @@ export const QueryClaimRecordRequest = {
         case 1:
           message.address = reader.string();
           break;
+        case 2:
+          message.chain = reader.int32() as any;
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -141,30 +149,35 @@ export const QueryClaimRecordRequest = {
   },
 
   fromJSON(object: any): QueryClaimRecordRequest {
-    return { address: isSet(object.address) ? String(object.address) : "" };
+    return {
+      address: isSet(object.address) ? String(object.address) : "",
+      chain: isSet(object.chain) ? chainFromJSON(object.chain) : 0,
+    };
   },
 
   toJSON(message: QueryClaimRecordRequest): unknown {
     const obj: any = {};
     message.address !== undefined && (obj.address = message.address);
+    message.chain !== undefined && (obj.chain = chainToJSON(message.chain));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryClaimRecordRequest>, I>>(object: I): QueryClaimRecordRequest {
     const message = createBaseQueryClaimRecordRequest();
     message.address = object.address ?? "";
+    message.chain = object.chain ?? 0;
     return message;
   },
 };
 
 function createBaseQueryClaimRecordResponse(): QueryClaimRecordResponse {
-  return { claimRecord: "" };
+  return { claimRecord: undefined };
 }
 
 export const QueryClaimRecordResponse = {
   encode(message: QueryClaimRecordResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.claimRecord !== "") {
-      writer.uint32(10).string(message.claimRecord);
+    if (message.claimRecord !== undefined) {
+      ClaimRecord.encode(message.claimRecord, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
@@ -177,7 +190,7 @@ export const QueryClaimRecordResponse = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.claimRecord = reader.string();
+          message.claimRecord = ClaimRecord.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -188,18 +201,21 @@ export const QueryClaimRecordResponse = {
   },
 
   fromJSON(object: any): QueryClaimRecordResponse {
-    return { claimRecord: isSet(object.claimRecord) ? String(object.claimRecord) : "" };
+    return { claimRecord: isSet(object.claimRecord) ? ClaimRecord.fromJSON(object.claimRecord) : undefined };
   },
 
   toJSON(message: QueryClaimRecordResponse): unknown {
     const obj: any = {};
-    message.claimRecord !== undefined && (obj.claimRecord = message.claimRecord);
+    message.claimRecord !== undefined
+      && (obj.claimRecord = message.claimRecord ? ClaimRecord.toJSON(message.claimRecord) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryClaimRecordResponse>, I>>(object: I): QueryClaimRecordResponse {
     const message = createBaseQueryClaimRecordResponse();
-    message.claimRecord = object.claimRecord ?? "";
+    message.claimRecord = (object.claimRecord !== undefined && object.claimRecord !== null)
+      ? ClaimRecord.fromPartial(object.claimRecord)
+      : undefined;
     return message;
   },
 };

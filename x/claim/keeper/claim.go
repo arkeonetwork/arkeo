@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pkg/errors"
 )
 
@@ -64,6 +65,18 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 	return claimRecords, nil
 }
 
+func (k Keeper) GetAllClaimRecords(ctx sdk.Context) ([]types.ClaimRecord, error) {
+	claimRecords := []types.ClaimRecord{}
+	for chain := range types.Chain_name {
+		records, err := k.GetClaimRecords(ctx, types.Chain(chain))
+		if err != nil {
+			return nil, err
+		}
+		claimRecords = append(claimRecords, records...)
+	}
+	return claimRecords, nil
+}
+
 // GetClaimRecord returns the claim record for a specific address
 func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) (types.ClaimRecord, error) {
 	store := ctx.KVStore(k.storeKey)
@@ -83,41 +96,39 @@ func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) 
 	return claimRecord, nil
 }
 
-// GetUserTotalClaimable returns the total claimable amount for an address
-func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.Chain) (sdk.Coins, error) {
+// GetUserTotalClaimable returns the total claimable amount for an address across all actions
+func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.Chain) (sdk.Coin, error) {
 	claimRecord, err := k.GetClaimRecord(ctx, addr, chain)
 	if err != nil {
-		return sdk.Coins{}, err
+		return sdk.Coin{}, err
 	}
-	if claimRecord.Address == "" {
-		return sdk.Coins{}, nil
+	if claimRecord.IsEmpty() {
+		return sdk.Coin{}, nil
 	}
 
-	totalClaimable := sdk.Coins{}
+	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, sdk.ZeroInt())
 	for action := range types.Action_name {
 		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, types.Action(action), chain)
 		if err != nil {
-			return sdk.Coins{}, err
+			return sdk.Coin{}, err
 		}
-		totalClaimable = totalClaimable.Add(claimableForAction...)
+		if claimableForAction.IsNil() {
+			continue
+		}
+		totalClaimable = totalClaimable.AddAmount(claimableForAction.Amount)
 	}
 	return totalClaimable, nil
 }
 
 // GetClaimable returns claimable amount for a specific action done by an address
-func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action types.Action, chain types.Chain) (sdk.Coins, error) {
+func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action types.Action, chain types.Chain) (sdk.Coin, error) {
 	claimRecord, err := k.GetClaimRecord(ctx, addr, chain)
 	if err != nil {
-		return nil, err
+		return sdk.Coin{}, err
 	}
 
-	if claimRecord.Address == "" {
-		return sdk.Coins{}, nil
-	}
-
-	// if action already completed, nothing is claimable
-	if claimRecord.ActionCompleted[action] {
-		return sdk.Coins{}, nil
+	if claimRecord.IsEmpty() {
+		return sdk.Coin{}, nil
 	}
 
 	params := k.GetParams(ctx)
@@ -126,27 +137,23 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	// This case _shouldn't_ occur on chain, since the
 	// start time ought to be chain start time.
 	if ctx.BlockTime().Before(params.AirdropStartTime) {
-		return sdk.Coins{}, nil
+		return sdk.Coin{}, nil
 	}
 
-	InitialClaimablePerAction := sdk.Coins{}
-	for _, coin := range claimRecord.InitialClaimableAmount {
-		InitialClaimablePerAction = InitialClaimablePerAction.Add(
-			sdk.NewCoin(coin.Denom,
-				coin.Amount.QuoRaw(int64(len(types.Action_name))),
-			),
-		)
+	initalClaimableAmount := getInitialClaimableAmount(claimRecord, action)
+	if initalClaimableAmount.IsNil() || initalClaimableAmount.Amount.IsZero() {
+		return sdk.Coin{}, nil
 	}
 
 	elapsedAirdropTime := ctx.BlockTime().Sub(params.AirdropStartTime)
 	// Are we early enough in the airdrop s.t. theres no decay?
 	if elapsedAirdropTime <= params.DurationUntilDecay {
-		return InitialClaimablePerAction, nil
+		return initalClaimableAmount, nil
 	}
 
 	// The entire airdrop has completed
 	if elapsedAirdropTime > params.DurationUntilDecay+params.DurationOfDecay {
-		return sdk.Coins{}, nil
+		return sdk.Coin{}, nil
 	}
 
 	// Positive, since goneTime > params.DurationUntilDecay
@@ -154,53 +161,65 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	decayPercent := sdk.NewDec(decayTime.Nanoseconds()).QuoInt64(params.DurationOfDecay.Nanoseconds())
 	claimablePercent := sdk.OneDec().Sub(decayPercent)
 
-	claimableCoins := sdk.Coins{}
-	for _, coin := range InitialClaimablePerAction {
-		claimableAmount := coin.Amount.Mul(claimablePercent.Mul(sdk.NewDec(10000)).RoundInt()).QuoRaw(10000)
-		claimableCoins = claimableCoins.Add(sdk.NewCoin(coin.Denom, claimableAmount))
-	}
+	claimableAmount := initalClaimableAmount.Amount.Mul(claimablePercent.Mul(sdk.NewDec(10000)).RoundInt()).QuoRaw(10000)
+	claimableCoin := sdk.NewCoin(initalClaimableAmount.Denom, claimableAmount)
 
-	return claimableCoins, nil
+	return claimableCoin, nil
 }
 
-// // ClaimCoins remove claimable amount entry and transfer it to user's account
-// func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr sdk.AccAddress, action types.Action) (sdk.Coins, error) {
-// 	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr, action)
-// 	if err != nil {
-// 		return claimableAmount, err
-// 	}
+// GetModuleAccountBalance gets the airdrop coin balance of module account
+func (k Keeper) GetModuleAccountAddress(ctx sdk.Context) sdk.AccAddress {
+	return k.accountKeeper.GetModuleAddress(types.ModuleName)
+}
 
-// 	if claimableAmount.Empty() {
-// 		return claimableAmount, nil
-// 	}
+// GetModuleAccountBalance gets the airdrop coin balance of module account
+func (k Keeper) GetModuleAccountBalance(ctx sdk.Context) sdk.Coin {
+	moduleAccAddr := k.GetModuleAccountAddress(ctx)
+	params := k.GetParams(ctx)
+	return k.bankKeeper.GetBalance(ctx, moduleAccAddr, params.ClaimDenom)
+}
 
-// 	claimRecord, err := k.GetClaimRecord(ctx, addr)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+// ClaimCoins remove claimable amount entry and transfer it to user's account
+func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.Action) (sdk.Coin, error) {
+	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr, action, types.ARKEO)
+	if err != nil {
+		return claimableAmount, err
+	}
 
-// 	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, claimableAmount)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	if claimableAmount.IsNil() || claimableAmount.IsZero() {
+		return claimableAmount, nil
+	}
 
-// 	claimRecord.ActionCompleted[action] = true
+	claimRecord, err := k.GetClaimRecord(ctx, addr, types.ARKEO)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
 
-// 	err = k.SetClaimRecord(ctx, claimRecord)
-// 	if err != nil {
-// 		return claimableAmount, err
-// 	}
+	accountAddress, err := sdk.AccAddressFromBech32(addr)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, accountAddress, sdk.NewCoins(claimableAmount))
+	if err != nil {
+		return sdk.Coin{}, err
+	}
 
-// 	ctx.EventManager().EmitEvents(sdk.Events{
-// 		sdk.NewEvent(
-// 			types.EventTypeClaim,
-// 			sdk.NewAttribute(sdk.AttributeKeySender, addr.String()),
-// 			sdk.NewAttribute(sdk.AttributeKeyAmount, claimableAmount.String()),
-// 		),
-// 	})
+	claimRecord = setClaimableAmountForAction(claimRecord, action, sdk.Coin{}) // set to nil/zero to mark as completed.
+	err = k.SetClaimRecord(ctx, claimRecord)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
 
-// 	return claimableAmount, nil
-// }
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeClaim,
+			sdk.NewAttribute(sdk.AttributeKeySender, addr),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, claimableAmount.String()),
+		),
+	})
+
+	return claimableAmount, nil
+}
 
 // // FundRemainingsToCommunity fund remainings to the community when airdrop period end
 // func (k Keeper) fundRemainingsToCommunity(ctx sdk.Context) error {
@@ -208,6 +227,16 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 // 	amt := k.GetModuleAccountBalance(ctx)
 // 	return k.distrKeeper.FundCommunityPool(ctx, sdk.NewCoins(amt), moduleAccAddr)
 // }
+
+// CreateModuleAccount creates module account and mint coins to it
+func (k Keeper) CreateModuleAccount(ctx sdk.Context, amount sdk.Coin) {
+	moduleAcc := authtypes.NewEmptyModuleAccount(types.ModuleName, authtypes.Minter)
+	k.accountKeeper.SetModuleAccount(ctx, moduleAcc)
+	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(amount))
+	if err != nil {
+		panic(err) // module can not be set up correctly, should panic?
+	}
+}
 
 func chainToStorePrefix(chain types.Chain) []byte {
 	switch chain {
@@ -220,4 +249,44 @@ func chainToStorePrefix(chain types.Chain) []byte {
 	default:
 		return []byte{}
 	}
+}
+
+func getInitialClaimableAmountTotal(claim types.ClaimRecord) sdk.Coin {
+	totalAmount := sdk.NewCoin(claim.AmountClaim.Denom, sdk.ZeroInt())
+	totalAmount = totalAmount.Add(claim.AmountClaim)
+	totalAmount = totalAmount.Add(claim.AmountDelegate)
+	totalAmount = totalAmount.Add(claim.AmountVote)
+	return totalAmount
+}
+
+func getInitialClaimableAmount(claim types.ClaimRecord, action types.Action) sdk.Coin {
+	switch action {
+	case types.ACTION_CLAIM:
+		return claim.AmountClaim
+	case types.ACTION_DELEGATE:
+		return claim.AmountDelegate
+	case types.ACTION_VOTE:
+		return claim.AmountVote
+	default:
+		return sdk.Coin{}
+	}
+}
+
+func setClaimableAmountForAction(claim types.ClaimRecord, action types.Action, amount sdk.Coin) types.ClaimRecord {
+	switch action {
+	case types.ACTION_CLAIM:
+		claim.AmountClaim = amount
+	case types.ACTION_DELEGATE:
+		claim.AmountDelegate = amount
+	case types.ACTION_VOTE:
+		claim.AmountVote = amount
+	}
+	return claim
+}
+
+func setClaimableAmountForAllActions(claim types.ClaimRecord, amount sdk.Coin) types.ClaimRecord {
+	claim.AmountClaim = amount
+	claim.AmountDelegate = amount
+	claim.AmountVote = amount
+	return claim
 }

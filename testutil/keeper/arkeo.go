@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
@@ -33,17 +34,6 @@ import (
 	tmdb "github.com/tendermint/tm-db"
 )
 
-// create a codec used only for testing
-func MakeTestCodec() *codec.LegacyAmino {
-	cdc := codec.NewLegacyAmino()
-	banktypes.RegisterLegacyAminoCodec(cdc)
-	authtypes.RegisterLegacyAminoCodec(cdc)
-	types.RegisterCodec(cdc)
-	cosmos.RegisterCodec(cdc)
-	// codec.RegisterCrypto(cdc)
-	return cdc
-}
-
 func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
@@ -61,7 +51,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
-	legacyCodec := MakeTestCodec()
+	legacyCodec := utils.MakeTestCodec()
 
 	paramsSubspace := typesparams.NewSubspace(cdc,
 		types.Amino,

@@ -11,8 +11,8 @@ import (
 func TestGetParams(t *testing.T) {
 	k, ctx := testkeeper.ClaimKeeper(t)
 	params := types.DefaultParams()
-
+	params.ClaimDenom = "Test!"
 	k.SetParams(ctx, params)
-
-	require.EqualValues(t, params, k.GetParams(ctx))
+	got := k.GetParams(ctx)
+	require.EqualValues(t, params, got)
 }

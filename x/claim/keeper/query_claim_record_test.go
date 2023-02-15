@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	testkeeper "github.com/arkeonetwork/arkeo/testutil/keeper"
+	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -13,21 +13,23 @@ import (
 func TestClaimRecord(t *testing.T) {
 	keeper, ctx := testkeeper.ClaimKeeper(t)
 
-	addr1 := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address()).String()
+	addr1 := utils.GetRandomArkeoAddress().String()
 	addr2 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
 
 	claimRecords := []types.ClaimRecord{
 		{
-			Chain:                  types.ARKEO,
-			Address:                addr1,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)),
-			ActionCompleted:        []bool{false, false},
+			Chain:          types.ARKEO,
+			Address:        addr1,
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		},
 		{
-			Chain:                  types.ETHEREUM,
-			Address:                addr2,
-			InitialClaimableAmount: sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 200)),
-			ActionCompleted:        []bool{false, false},
+			Chain:          types.ETHEREUM,
+			Address:        addr2,
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		},
 	}
 	err := keeper.SetClaimRecords(ctx, claimRecords)

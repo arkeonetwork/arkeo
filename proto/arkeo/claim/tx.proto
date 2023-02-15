@@ -6,13 +6,20 @@ option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc ClaimEth (MsgClaimEth) returns (MsgClaimEthResponse);
+  rpc ClaimEth   (MsgClaimEth  ) returns (MsgClaimEthResponse  );
+  rpc ClaimArkeo (MsgClaimArkeo) returns (MsgClaimArkeoResponse);
 }
 message MsgClaimEth {
-  string creator    = 1;
+  string creator     = 1;
   string eth_address = 2; // the adress the claim is for
-  string signature  = 3; // EIP712 signature that has to be signed by ethAddress
+  string signature   = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
 message MsgClaimEthResponse {}
+
+message MsgClaimArkeo {
+  string creator = 1;
+}
+
+message MsgClaimArkeoResponse {}
 
