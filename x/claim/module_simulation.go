@@ -3,15 +3,16 @@ package claim
 import (
 	"math/rand"
 
-	"github.com/arkeonetwork/arkeo/testutil/sample"
-	claimsimulation "github.com/arkeonetwork/arkeo/x/claim/simulation"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
+	claimsimulation "github.com/arkeonetwork/arkeo/x/claim/simulation"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 // avoid unused import issue
@@ -52,7 +53,6 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 
 // RandomizedParams creates randomized  param changes for the simulator
 func (am AppModule) RandomizedParams(_ *rand.Rand) []simtypes.ParamChange {
-
 	return []simtypes.ParamChange{}
 }
 
