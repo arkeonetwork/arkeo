@@ -25,7 +25,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
-		return nil, errors.Wrapf(err, "no claimable amount for %s", msg.EthAddress)
+		return nil, errors.Errorf("no claimable amount for %s", msg.EthAddress)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
 
@@ -189,8 +189,23 @@ func mergeClaimRecords(claimA types.ClaimRecord, claimB types.ClaimRecord) (type
 		return types.ClaimRecord{}, errors.New("cannot merge claims for different chains")
 	}
 
-	claimA.AmountClaim = claimA.AmountClaim.Add(claimB.AmountClaim)
-	claimA.AmountDelegate = claimA.AmountDelegate.Add(claimB.AmountDelegate)
-	claimA.AmountVote = claimA.AmountVote.Add(claimB.AmountVote)
+	if claimA.AmountClaim.IsNil() || !claimA.AmountClaim.IsValid() {
+		claimA.AmountClaim = claimB.AmountClaim
+	} else {
+		claimA.AmountClaim = claimA.AmountClaim.Add(claimB.AmountClaim)
+	}
+
+	if claimA.AmountDelegate.IsNil() || !claimA.AmountDelegate.IsValid() {
+		claimA.AmountDelegate = claimB.AmountDelegate
+	} else {
+		claimA.AmountDelegate = claimA.AmountDelegate.Add(claimB.AmountDelegate)
+	}
+
+	if claimA.AmountVote.IsNil() || !claimA.AmountVote.IsValid() {
+		claimA.AmountVote = claimB.AmountVote
+	} else {
+		claimA.AmountVote = claimA.AmountVote.Add(claimB.AmountVote)
+	}
+
 	return claimA, nil
 }

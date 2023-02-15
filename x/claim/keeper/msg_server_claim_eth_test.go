@@ -16,12 +16,12 @@ import (
 )
 
 func TestClaimEth(t *testing.T) {
-	_, keeper, ctx := setupMsgServer(t)
+	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// create valid eth claimrecords
-	addrArkeo := utils.GetRandomArkeoAddress().String()
-	addrEth, _, err := generateSignedEthClaim(addrArkeo, "300")
+	addrArkeo := utils.GetRandomArkeoAddress()
+	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "300")
 	require.NoError(t, err)
 
 	claimRecord := types.ClaimRecord{
@@ -31,33 +31,175 @@ func TestClaimEth(t *testing.T) {
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 	}
-	err = keeper.SetClaimRecord(sdkCtx, claimRecord)
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)
 
-	// currently the below test will fail do the module account not being funded.
-	// need to work on a better integration test to handle this.
+	// mint coins to module account
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
+	require.NoError(t, err)
 
-	// claimMessage := types.MsgClaimEth{
-	// 	Creator:    addrArkeo,
-	// 	EthAddress: addrEth,
-	// 	Signature:  sigString,
-	// }
+	// get balance of arkeo address before claim
+	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
-	// require.NoError(t, err)
+	claimMessage := types.MsgClaimEth{
+		Creator:    addrArkeo.String(),
+		EthAddress: addrEth,
+		Signature:  sigString,
+	}
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.NoError(t, err)
 
-	// // check if claimrecord is updated
-	// claimRecord, err = keeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
-	// require.NoError(t, err)
-	// require.True(t, claimRecord.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM])
+	// check if claimrecord is updated
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
+	require.NoError(t, err)
+	require.True(t, claimRecord.IsEmpty())
 
-	// // confirm we have a claimrecord for arkeo
-	// claimRecord, err = keeper.GetClaimRecord(sdkCtx, addrArkeo, types.ARKEO)
-	// require.NoError(t, err)
-	// require.Equal(t, claimRecord.Address, addrArkeo)
-	// require.Equal(t, claimRecord.Chain, types.ARKEO)
-	// require.Equal(t, claimRecord.InitialClaimableAmount, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
-	// require.False(t, claimRecord.ActionCompleted[types.ACTION_VOTE])
-	// require.False(t, claimRecord.ActionCompleted[types.ACTION_DELEGATE_STAKE])
+	// confirm we have a claimrecord for arkeo
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
+	require.NoError(t, err)
+	require.Equal(t, claimRecord.Address, addrArkeo.String())
+	require.Equal(t, claimRecord.Chain, types.ARKEO)
+	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
+	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+
+	// confirm balance increased by expected amount.
+	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+
+	// attempt to claim again to ensure it fails.
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.Error(t, err)
+
+	// attempt to claim from arkeo should also fail!
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
+	require.Error(t, err)
+}
+
+func TestClaimEthWithInvalidSignature(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// create valid eth claimrecords
+	addrArkeo := utils.GetRandomArkeoAddress()
+	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "200")
+	require.NoError(t, err)
+
+	claimRecord := types.ClaimRecord{
+		Chain:          types.ETHEREUM,
+		Address:        addrEth,
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
+	require.NoError(t, err)
+
+	// mint coins to module account
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
+	require.NoError(t, err)
+
+	claimMessage := types.MsgClaimEth{
+		Creator:    addrArkeo.String(),
+		EthAddress: addrEth,
+		Signature:  sigString,
+	}
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.Error(t, err)
+}
+
+func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// create valid eth claimrecords
+	addrArkeo := utils.GetRandomArkeoAddress()
+	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "600")
+	require.NoError(t, err)
+
+	claimRecord := types.ClaimRecord{
+		Chain:          types.ETHEREUM,
+		Address:        addrEth,
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
+	require.NoError(t, err)
+
+	// create an arkeo claim record for the same user. This should be merged once they call claim.
+	claimRecordArkeo := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        addrArkeo.String(),
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+		AmountVote:     sdk.Coin{},
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 150),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordArkeo)
+	require.NoError(t, err)
+
+	// mint coins to module account
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
+	require.NoError(t, err)
+
+	// get balance of arkeo address before claim
+	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+
+	claimMessage := types.MsgClaimEth{
+		Creator:    addrArkeo.String(),
+		EthAddress: addrEth,
+		Signature:  sigString,
+	}
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.NoError(t, err)
+
+	// check if claimrecord is updated
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
+	require.NoError(t, err)
+	require.True(t, claimRecord.IsEmpty())
+
+	// confirm we have a claimrecord for arkeo
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
+	require.NoError(t, err)
+	require.Equal(t, claimRecord.Address, addrArkeo.String())
+	require.Equal(t, claimRecord.Chain, types.ARKEO)
+	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
+	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 350))
+
+	// confirm balance increased by expected amount.
+	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 400))
+
+	// attempt to claim again to ensure it fails.
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.Error(t, err)
+
+	// attempt to claim from arkeo should also fail!
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
+	require.Error(t, err)
+}
+
+func TestClaimEthWithNoClaimRecord(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// create valid eth claimrecords
+	addrArkeo := utils.GetRandomArkeoAddress()
+	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "300")
+	require.NoError(t, err)
+
+	// mint coins to module account
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
+	require.NoError(t, err)
+
+	claimMessage := types.MsgClaimEth{
+		Creator:    addrArkeo.String(),
+		EthAddress: addrEth,
+		Signature:  sigString,
+	}
+	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	require.Error(t, err)
 }
 
 func TestIsValidClaimSignature(t *testing.T) {

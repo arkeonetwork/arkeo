@@ -8,9 +8,8 @@ import (
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
+	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,7 +19,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/log"
@@ -28,7 +26,16 @@ import (
 	tmdb "github.com/tendermint/tm-db"
 )
 
-func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
+type (
+	TestKeepers struct {
+		ClaimKeeper   keeper.Keeper
+		AccountKeeper authkeeper.AccountKeeper
+		BankKeeper    bankkeeper.Keeper
+	}
+)
+
+// CreateTestClaimKeepers creates test keepers for claim module
+func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := sdk.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := sdk.NewKVStoreKey(banktypes.StoreKey)
@@ -46,27 +53,32 @@ func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	registry := codectypes.NewInterfaceRegistry()
-	cdc := codec.NewProtoCodec(registry)
+	encodingConfig := simappparams.MakeTestEncodingConfig()
+	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	cdc := utils.MakeTestMarshaler()
+	amino := encodingConfig.Amino
 
-	paramsSubspace := typesparams.NewSubspace(cdc,
+	paramsSubspace := paramstypes.NewSubspace(cdc,
 		types.Amino,
 		storeKey,
 		memStoreKey,
 		"ClaimParams",
 	)
-	legacyCodec := utils.MakeTestCodec()
-	paramsKeeper := paramskeeper.NewKeeper(cdc, legacyCodec, keyParams, tkeyParams)
+	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
+
+	paramsKeeper := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	accountKeeper := authkeeper.NewAccountKeeper(cdc, keyAcc, paramsKeeper.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
 		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+		types.ModuleName:               {authtypes.Minter},
 		arkeotypes.ReserveName:         {},
 		arkeotypes.ProviderName:        {},
 		arkeotypes.ContractName:        {},
 	}, sdk.Bech32PrefixAccAddr)
-
+	accountKeeper.SetParams(ctx, authtypes.DefaultParams())
 	bankKeeper := bankkeeper.NewBaseKeeper(cdc, keyBank, accountKeeper, paramsKeeper.Subspace(banktypes.ModuleName), nil)
+	bankKeeper.SetParams(ctx, banktypes.DefaultParams())
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -77,10 +89,7 @@ func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 		paramsSubspace,
 	)
 
-	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
-	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
 	// Initialize params
-
 	airdropStartTime := time.Now().UTC().Add(-time.Hour) // started an hour ago
 	params := types.Params{
 		AirdropStartTime:   airdropStartTime,
@@ -90,5 +99,9 @@ func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	}
 
 	k.SetParams(ctx, params)
-	return k, ctx
+	return TestKeepers{
+		ClaimKeeper:   k,
+		AccountKeeper: accountKeeper,
+		BankKeeper:    bankKeeper,
+	}, ctx
 }

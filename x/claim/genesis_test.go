@@ -24,9 +24,9 @@ func TestGenesis(t *testing.T) {
 		Params: claimParams,
 	}
 
-	k, ctx := keepertest.ClaimKeeper(t)
-	claim.InitGenesis(ctx, k, genesisState)
-	got := claim.ExportGenesis(ctx, k)
+	testKeeepers, ctx := keepertest.CreateTestClaimKeepers(t)
+	claim.InitGenesis(ctx, testKeeepers.ClaimKeeper, genesisState)
+	got := claim.ExportGenesis(ctx, testKeeepers.ClaimKeeper)
 	require.NotNil(t, got)
 
 	addr1 := utils.GetRandomArkeoAddress().String()
@@ -65,9 +65,9 @@ func TestGenesis(t *testing.T) {
 			},
 		},
 	}
-	claim.InitGenesis(ctx, k, testGenesis)
+	claim.InitGenesis(ctx, testKeeepers.ClaimKeeper, testGenesis)
 
-	claimRecord, err := k.GetClaimRecord(ctx, addr2, types.ARKEO)
+	claimRecord, err := testKeeepers.ClaimKeeper.GetClaimRecord(ctx, addr2, types.ARKEO)
 	require.NoError(t, err)
 	require.Equal(t, claimRecord, types.ClaimRecord{
 		Address:        addr2,
@@ -77,11 +77,11 @@ func TestGenesis(t *testing.T) {
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000),
 	})
 
-	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr2, types.ACTION_VOTE, types.ARKEO)
+	claimableAmount, err := testKeeepers.ClaimKeeper.GetClaimableAmountForAction(ctx, addr2, types.ACTION_VOTE, types.ARKEO)
 	require.NoError(t, err)
 	require.Equal(t, claimableAmount, sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000))
 
-	genesisExported := claim.ExportGenesis(ctx, k)
+	genesisExported := claim.ExportGenesis(ctx, testKeeepers.ClaimKeeper)
 	require.Equal(t, genesisExported.Params, testGenesis.Params)
 	require.ElementsMatch(t, genesisExported.ClaimRecords, testGenesis.ClaimRecords)
 }
