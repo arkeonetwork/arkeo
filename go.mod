@@ -17,7 +17,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/ignite/cli v0.24.0
-	github.com/ignite/modules v0.0.0-20220830145312-d006783a7a21
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cast v1.5.0
