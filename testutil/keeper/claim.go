@@ -8,9 +8,8 @@ import (
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
+	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -54,8 +53,10 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	registry := codectypes.NewInterfaceRegistry()
-	cdc := codec.NewProtoCodec(registry)
+	encodingConfig := simappparams.MakeTestEncodingConfig()
+	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	cdc := utils.MakeTestMarshaler()
+	amino := encodingConfig.Amino
 
 	paramsSubspace := paramstypes.NewSubspace(cdc,
 		types.Amino,
@@ -63,18 +64,21 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 		memStoreKey,
 		"ClaimParams",
 	)
-	legacyCodec := utils.MakeTestCodec()
-	paramsKeeper := paramskeeper.NewKeeper(cdc, legacyCodec, keyParams, tkeyParams)
+	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
+
+	paramsKeeper := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	accountKeeper := authkeeper.NewAccountKeeper(cdc, keyAcc, paramsKeeper.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
 		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+		types.ModuleName:               {authtypes.Minter},
 		arkeotypes.ReserveName:         {},
 		arkeotypes.ProviderName:        {},
 		arkeotypes.ContractName:        {},
 	}, sdk.Bech32PrefixAccAddr)
-
+	accountKeeper.SetParams(ctx, authtypes.DefaultParams())
 	bankKeeper := bankkeeper.NewBaseKeeper(cdc, keyBank, accountKeeper, paramsKeeper.Subspace(banktypes.ModuleName), nil)
+	bankKeeper.SetParams(ctx, banktypes.DefaultParams())
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -85,10 +89,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 		paramsSubspace,
 	)
 
-	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
-	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
 	// Initialize params
-
 	airdropStartTime := time.Now().UTC().Add(-time.Hour) // started an hour ago
 	params := types.Params{
 		AirdropStartTime:   airdropStartTime,

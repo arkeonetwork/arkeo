@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/pkg/errors"
 )
 
@@ -227,16 +226,6 @@ func (k Keeper) ClaimCoinsForAction(ctx sdk.Context, addr string, action types.A
 // 	amt := k.GetModuleAccountBalance(ctx)
 // 	return k.distrKeeper.FundCommunityPool(ctx, sdk.NewCoins(amt), moduleAccAddr)
 // }
-
-// CreateModuleAccount creates module account and mint coins to it
-func (k Keeper) CreateModuleAccount(ctx sdk.Context, amount sdk.Coin) {
-	moduleAcc := authtypes.NewEmptyModuleAccount(types.ModuleName, authtypes.Minter)
-	k.accountKeeper.SetModuleAccount(ctx, moduleAcc)
-	err := k.bankKeeper.MintCoins(ctx, types.ModuleName, sdk.NewCoins(amount))
-	if err != nil {
-		panic(err) // module can not be set up correctly, should panic?
-	}
-}
 
 func chainToStorePrefix(chain types.Chain) []byte {
 	switch chain {
