@@ -20,7 +20,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/libs/log"
@@ -28,7 +27,16 @@ import (
 	tmdb "github.com/tendermint/tm-db"
 )
 
-func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
+type (
+	TestKeepers struct {
+		ClaimKeeper   keeper.Keeper
+		AccountKeeper authkeeper.AccountKeeper
+		BankKeeper    bankkeeper.Keeper
+	}
+)
+
+// CreateTestClaimKeepers creates test keepers for claim module
+func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := sdk.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := sdk.NewKVStoreKey(banktypes.StoreKey)
@@ -49,7 +57,7 @@ func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
-	paramsSubspace := typesparams.NewSubspace(cdc,
+	paramsSubspace := paramstypes.NewSubspace(cdc,
 		types.Amino,
 		storeKey,
 		memStoreKey,
@@ -90,5 +98,9 @@ func ClaimKeeper(t testing.TB) (keeper.Keeper, sdk.Context) {
 	}
 
 	k.SetParams(ctx, params)
-	return k, ctx
+	return TestKeepers{
+		ClaimKeeper:   k,
+		AccountKeeper: accountKeeper,
+		BankKeeper:    bankKeeper,
+	}, ctx
 }

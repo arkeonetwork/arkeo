@@ -11,7 +11,7 @@ import (
 )
 
 func TestClaimRecord(t *testing.T) {
-	keeper, ctx := testkeeper.ClaimKeeper(t)
+	keepers, ctx := testkeeper.CreateTestClaimKeepers(t)
 
 	addr1 := utils.GetRandomArkeoAddress().String()
 	addr2 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
@@ -32,14 +32,14 @@ func TestClaimRecord(t *testing.T) {
 			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		},
 	}
-	err := keeper.SetClaimRecords(ctx, claimRecords)
+	err := keepers.ClaimKeeper.SetClaimRecords(ctx, claimRecords)
 	require.NoError(t, err)
 
 	req := types.QueryClaimRecordRequest{
 		Address: addr1,
 		Chain:   types.ARKEO,
 	}
-	resp, err := keeper.ClaimRecord(ctx, &req)
+	resp, err := keepers.ClaimKeeper.ClaimRecord(ctx, &req)
 	require.NoError(t, err)
 	require.Equal(t, *resp.ClaimRecord, claimRecords[0])
 
@@ -47,7 +47,7 @@ func TestClaimRecord(t *testing.T) {
 		Address: addr2,
 		Chain:   types.ETHEREUM,
 	}
-	resp, err = keeper.ClaimRecord(ctx, &req)
+	resp, err = keepers.ClaimKeeper.ClaimRecord(ctx, &req)
 	require.NoError(t, err)
 	require.Equal(t, *resp.ClaimRecord, claimRecords[1])
 
@@ -55,6 +55,6 @@ func TestClaimRecord(t *testing.T) {
 		Address: "invalid address",
 		Chain:   types.ETHEREUM,
 	}
-	resp, _ = keeper.ClaimRecord(ctx, &req)
+	resp, _ = keepers.ClaimKeeper.ClaimRecord(ctx, &req)
 	require.Equal(t, *resp.ClaimRecord, types.ClaimRecord{})
 }
