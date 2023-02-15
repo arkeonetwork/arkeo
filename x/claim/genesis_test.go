@@ -5,14 +5,14 @@ import (
 	"time"
 
 	keepertest "github.com/arkeonetwork/arkeo/testutil/keeper"
-	"github.com/arkeonetwork/arkeo/testutil/nullify"
+	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/claim"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {
-
 	airdropStartTime := time.Now().UTC()
 	claimParams := types.Params{
 		AirdropStartTime:   airdropStartTime,
@@ -29,8 +29,59 @@ func TestGenesis(t *testing.T) {
 	got := claim.ExportGenesis(ctx, k)
 	require.NotNil(t, got)
 
-	nullify.Fill(&genesisState)
-	nullify.Fill(got)
+	addr1 := utils.GetRandomArkeoAddress().String()
+	addr2 := utils.GetRandomArkeoAddress().String()
+	ethAddr1 := "0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5" // random eth address
 
-	// this line is used by starport scaffolding # genesis/test/assert
+	testGenesis := types.GenesisState{
+		ModuleAccountBalance: sdk.NewInt64Coin(types.DefaultClaimDenom, 750000000),
+		Params: types.Params{
+			AirdropStartTime:   airdropStartTime,
+			DurationUntilDecay: types.DefaultDurationUntilDecay,
+			DurationOfDecay:    types.DefaultDurationOfDecay,
+			ClaimDenom:         types.DefaultClaimDenom,
+		},
+		ClaimRecords: []types.ClaimRecord{
+			{
+				Address:        addr1,
+				Chain:          types.ARKEO,
+				AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 1000000000),
+				AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 1000000000),
+				AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 1000000000),
+			},
+			{
+				Address:        addr2,
+				Chain:          types.ARKEO,
+				AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 1000000000),
+				AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000),
+				AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000),
+			},
+			{
+				Address:        ethAddr1,
+				Chain:          types.ETHEREUM,
+				AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 2000000000),
+				AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 2000000000),
+				AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 2000000000),
+			},
+		},
+	}
+	claim.InitGenesis(ctx, k, testGenesis)
+
+	claimRecord, err := k.GetClaimRecord(ctx, addr2, types.ARKEO)
+	require.NoError(t, err)
+	require.Equal(t, claimRecord, types.ClaimRecord{
+		Address:        addr2,
+		Chain:          types.ARKEO,
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 1000000000),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000),
+	})
+
+	claimableAmount, err := k.GetClaimableAmountForAction(ctx, addr2, types.ACTION_VOTE, types.ARKEO)
+	require.NoError(t, err)
+	require.Equal(t, claimableAmount, sdk.NewInt64Coin(types.DefaultClaimDenom, 1500000000))
+
+	genesisExported := claim.ExportGenesis(ctx, k)
+	require.Equal(t, genesisExported.Params, testGenesis.Params)
+	require.ElementsMatch(t, genesisExported.ClaimRecords, testGenesis.ClaimRecords)
 }
