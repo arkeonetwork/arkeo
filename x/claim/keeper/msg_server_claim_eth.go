@@ -18,24 +18,20 @@ import (
 
 func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*types.MsgClaimEthResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	// 1. get eth claim
+	// get eth claim
 	ethClaim, err := k.GetClaimRecord(ctx, msg.EthAddress, types.ETHEREUM)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.EthAddress)
 	}
 
-	if ethClaim.InitialClaimableAmount.IsZero() {
+	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(err, "no claimable amount for %s", msg.EthAddress)
 	}
+	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
 
-	// 2. check if already claimed
-	if ethClaim.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM] {
-		return nil, errors.Wrapf(err, "already claimed for %s", msg.EthAddress)
-	}
-
-	// 3. validate signature
+	// validate signature
 	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
-		ethClaim.InitialClaimableAmount.Amount.String(), msg.Signature)
+		totalAmountClaimable.Amount.String(), msg.Signature)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to validate signature for %s", msg.EthAddress)
 	}
@@ -45,35 +41,47 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.New("invalid signature")
 	}
 
+	// create new arkeo claim
+	arkeoClaim := types.ClaimRecord{
+		Address:        msg.Creator,
+		Chain:          types.ARKEO,
+		AmountClaim:    ethClaim.AmountClaim,
+		AmountVote:     ethClaim.AmountVote,
+		AmountDelegate: ethClaim.AmountDelegate,
+	}
+
 	// set eth claim to completed
-	ethClaim.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM] = true
+	ethClaim = setClaimableAmountForAllActions(ethClaim, sdk.Coin{})
 	err = k.SetClaimRecord(ctx, ethClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.EthAddress)
-	}
-
-	// create new arkeo claim
-	arkeoClaim := types.ClaimRecord{
-		Address:                msg.Creator,
-		Chain:                  types.ARKEO,
-		InitialClaimableAmount: ethClaim.InitialClaimableAmount,
-		ActionCompleted:        []bool{false, false, false},
 	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeClaimFromEth,
 			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.EthAddress)),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, ethClaim.InitialClaimableAmount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, arkeoClaim.AmountClaim.String()),
 		),
 	})
+
+	// see if there is an existing arkeo claim so we can merge it
+	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.Creator, types.ARKEO)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.Creator)
+	}
+
+	arkeoClaim, err = mergeClaimRecords(existingArkeoClaim, arkeoClaim)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to merge claim records for %s", msg.Creator)
+	}
 
 	err = k.SetClaimRecord(ctx, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
 	}
 
-	// call claim on arkeo to claim arkeo
+	// call claim on arkeo to claim arkeo (note: this could CLAIM for all tokens that are now merged)
 	_, err = k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
@@ -162,4 +170,27 @@ func hexDecode(s string) ([]byte, error) {
 // Has0xPrefix validates str begins with '0x' or '0X'.
 func has0xPrefix(str string) bool {
 	return strings.HasPrefix(str, "0x") || strings.HasPrefix(str, "0X")
+}
+
+func mergeClaimRecords(claimA types.ClaimRecord, claimB types.ClaimRecord) (types.ClaimRecord, error) {
+	if claimA.IsEmpty() {
+		return claimB, nil
+	}
+
+	if claimB.IsEmpty() {
+		return claimA, nil
+	}
+
+	if claimA.Address != claimB.Address {
+		return types.ClaimRecord{}, errors.New("cannot merge claims for different addresses")
+	}
+
+	if claimA.Chain != claimB.Chain {
+		return types.ClaimRecord{}, errors.New("cannot merge claims for different chains")
+	}
+
+	claimA.AmountClaim = claimA.AmountClaim.Add(claimB.AmountClaim)
+	claimA.AmountDelegate = claimA.AmountDelegate.Add(claimB.AmountDelegate)
+	claimA.AmountVote = claimA.AmountVote.Add(claimB.AmountVote)
+	return claimA, nil
 }

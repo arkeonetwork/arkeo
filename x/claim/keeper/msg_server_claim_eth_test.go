@@ -21,14 +21,15 @@ func TestClaimEth(t *testing.T) {
 
 	// create valid eth claimrecords
 	addrArkeo := utils.GetRandomArkeoAddress().String()
-	addrEth, _, err := generateSignedEthClaim(addrArkeo, "100")
+	addrEth, _, err := generateSignedEthClaim(addrArkeo, "300")
 	require.NoError(t, err)
 
 	claimRecord := types.ClaimRecord{
-		Chain:                  types.ETHEREUM,
-		Address:                addrEth,
-		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		ActionCompleted:        []bool{false, false, false},
+		Chain:          types.ETHEREUM,
+		Address:        addrEth,
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 	}
 	err = keeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)

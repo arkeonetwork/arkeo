@@ -18,16 +18,18 @@ func TestClaimRecord(t *testing.T) {
 
 	claimRecords := []types.ClaimRecord{
 		{
-			Chain:                  types.ARKEO,
-			Address:                addr1,
-			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-			ActionCompleted:        []bool{false, false, false},
+			Chain:          types.ARKEO,
+			Address:        addr1,
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		},
 		{
-			Chain:                  types.ETHEREUM,
-			Address:                addr2,
-			InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
-			ActionCompleted:        []bool{false, false, false},
+			Chain:          types.ETHEREUM,
+			Address:        addr2,
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		},
 	}
 	err := keeper.SetClaimRecords(ctx, claimRecords)

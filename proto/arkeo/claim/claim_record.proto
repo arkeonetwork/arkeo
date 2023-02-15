@@ -12,14 +12,7 @@ enum Action {
 
   ACTION_CLAIM = 0;
   ACTION_VOTE = 1;
-  ACTION_DELEGATE_STAKE = 2;
-}
-
-// actions for chains other than arkeo, limited currently to claiming
-enum ForeignChainAction {
-  option (gogoproto.goproto_enum_prefix) = false;
-
-  FOREIGN_CHAIN_ACTION_CLAIM = 0;
+  ACTION_DELEGATE = 2;
 }
 
 enum Chain {
@@ -39,13 +32,8 @@ message ClaimRecord {
   // arkeo address of claim user
   string address = 2 [ (gogoproto.moretags) = "yaml:\"address\"" ];
 
-  // total initial claimable amount for the user
-  cosmos.base.v1beta1.Coin initial_claimable_amount = 3 [
-    (gogoproto.nullable) = false,
-    (gogoproto.moretags) = "yaml:\"initial_claimable_amount\""
-  ];
-
-  // true if action is completed
-  // index of bool in array refers to action enum #
-  repeated bool action_completed = 4 [ (gogoproto.moretags) = "yaml:\"action_completed\"" ];
+  // claimable amount per action (claim, vote, delegate - changed to 0 after action completed)
+  cosmos.base.v1beta1.Coin amount_claim = 3 [(gogoproto.nullable) = false,  (gogoproto.moretags) = "yaml:\"amount_claim\""];
+  cosmos.base.v1beta1.Coin amount_vote = 4 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"amount_vote\""];
+  cosmos.base.v1beta1.Coin amount_delegate = 5 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"amount_delegate\""];
 }
