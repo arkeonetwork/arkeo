@@ -509,7 +509,67 @@ paths:
             type: object
             properties:
               claim_record:
-                type: string
+                type: object
+                properties:
+                  chain:
+                    type: string
+                    enum:
+                      - ARKEO
+                      - ETHEREUM
+                      - THORCHAIN
+                    default: ARKEO
+                  address:
+                    type: string
+                    title: arkeo address of claim user
+                  amount_claim:
+                    title: >-
+                      claimable amount per action (claim, vote, delegate -
+                      changed to 0 after action completed)
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  amount_vote:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  amount_delegate:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                title: A Claim Records is the metadata of claim data per address
         default:
           description: An unexpected error response.
           schema:
@@ -568,6 +628,24 @@ paths:
                   claim_denom:
                     type: string
                     title: denom of claimable asset
+                  initial_gas_amount:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                    title: >-
+                      uarkeo to distribute to arkeo account for gas to make
+                      claiming easier
             description: >-
               QueryParamsResponse is response type for the Query/Params RPC
               method.
@@ -45950,6 +46028,61 @@ definitions:
       - ETHEREUM
       - THORCHAIN
     default: ARKEO
+  arkeonetwork.arkeo.claim.ClaimRecord:
+    type: object
+    properties:
+      chain:
+        type: string
+        enum:
+          - ARKEO
+          - ETHEREUM
+          - THORCHAIN
+        default: ARKEO
+      address:
+        type: string
+        title: arkeo address of claim user
+      amount_claim:
+        title: >-
+          claimable amount per action (claim, vote, delegate - changed to 0
+          after action completed)
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+      amount_vote:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+      amount_delegate:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+    title: A Claim Records is the metadata of claim data per address
+  arkeonetwork.arkeo.claim.MsgClaimArkeoResponse:
+    type: object
   arkeonetwork.arkeo.claim.MsgClaimEthResponse:
     type: object
   arkeonetwork.arkeo.claim.Params:
@@ -45965,12 +46098,85 @@ definitions:
       claim_denom:
         type: string
         title: denom of claimable asset
+      initial_gas_amount:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: uarkeo to distribute to arkeo account for gas to make claiming easier
     description: Params defines the parameters for the module.
   arkeonetwork.arkeo.claim.QueryClaimRecordResponse:
     type: object
     properties:
       claim_record:
-        type: string
+        type: object
+        properties:
+          chain:
+            type: string
+            enum:
+              - ARKEO
+              - ETHEREUM
+              - THORCHAIN
+            default: ARKEO
+          address:
+            type: string
+            title: arkeo address of claim user
+          amount_claim:
+            title: >-
+              claimable amount per action (claim, vote, delegate - changed to 0
+              after action completed)
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+          amount_vote:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+          amount_delegate:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+        title: A Claim Records is the metadata of claim data per address
   arkeonetwork.arkeo.claim.QueryParamsResponse:
     type: object
     properties:
@@ -45988,7 +46194,37 @@ definitions:
           claim_denom:
             type: string
             title: denom of claimable asset
+          initial_gas_amount:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+            title: >-
+              uarkeo to distribute to arkeo account for gas to make claiming
+              easier
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  cosmos.base.v1beta1.Coin:
+    type: object
+    properties:
+      denom:
+        type: string
+      amount:
+        type: string
+    description: |-
+      Coin defines a token with a denomination and an amount.
+
+      NOTE: The amount field is an Int which implements the custom method
+      signatures required by gogoproto.
   cosmos.auth.v1beta1.AddressBytesToStringResponse:
     type: object
     properties:
@@ -48428,18 +48664,6 @@ definitions:
     description: |-
       SendEnabled maps coin denom to a send_enabled status (whether a denom is
       sendable).
-  cosmos.base.v1beta1.Coin:
-    type: object
-    properties:
-      denom:
-        type: string
-      amount:
-        type: string
-    description: |-
-      Coin defines a token with a denomination and an amount.
-
-      NOTE: The amount field is an Int which implements the custom method
-      signatures required by gogoproto.
   cosmos.base.tendermint.v1beta1.ABCIQueryResponse:
     type: object
     properties:

@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { Duration } from "../../google/protobuf/duration";
 import { Timestamp } from "../../google/protobuf/timestamp";
 
@@ -14,10 +15,18 @@ export interface Params {
     | undefined;
   /** denom of claimable asset */
   claimDenom: string;
+  /** uarkeo to distribute to arkeo account for gas to make claiming easier */
+  initialGasAmount: Coin | undefined;
 }
 
 function createBaseParams(): Params {
-  return { airdropStartTime: undefined, durationUntilDecay: undefined, durationOfDecay: undefined, claimDenom: "" };
+  return {
+    airdropStartTime: undefined,
+    durationUntilDecay: undefined,
+    durationOfDecay: undefined,
+    claimDenom: "",
+    initialGasAmount: undefined,
+  };
 }
 
 export const Params = {
@@ -33,6 +42,9 @@ export const Params = {
     }
     if (message.claimDenom !== "") {
       writer.uint32(34).string(message.claimDenom);
+    }
+    if (message.initialGasAmount !== undefined) {
+      Coin.encode(message.initialGasAmount, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -56,6 +68,9 @@ export const Params = {
         case 4:
           message.claimDenom = reader.string();
           break;
+        case 5:
+          message.initialGasAmount = Coin.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -70,6 +85,7 @@ export const Params = {
       durationUntilDecay: isSet(object.durationUntilDecay) ? Duration.fromJSON(object.durationUntilDecay) : undefined,
       durationOfDecay: isSet(object.durationOfDecay) ? Duration.fromJSON(object.durationOfDecay) : undefined,
       claimDenom: isSet(object.claimDenom) ? String(object.claimDenom) : "",
+      initialGasAmount: isSet(object.initialGasAmount) ? Coin.fromJSON(object.initialGasAmount) : undefined,
     };
   },
 
@@ -83,6 +99,8 @@ export const Params = {
     message.durationOfDecay !== undefined
       && (obj.durationOfDecay = message.durationOfDecay ? Duration.toJSON(message.durationOfDecay) : undefined);
     message.claimDenom !== undefined && (obj.claimDenom = message.claimDenom);
+    message.initialGasAmount !== undefined
+      && (obj.initialGasAmount = message.initialGasAmount ? Coin.toJSON(message.initialGasAmount) : undefined);
     return obj;
   },
 
@@ -96,6 +114,9 @@ export const Params = {
       ? Duration.fromPartial(object.durationOfDecay)
       : undefined;
     message.claimDenom = object.claimDenom ?? "";
+    message.initialGasAmount = (object.initialGasAmount !== undefined && object.initialGasAmount !== null)
+      ? Coin.fromPartial(object.initialGasAmount)
+      : undefined;
     return message;
   },
 };

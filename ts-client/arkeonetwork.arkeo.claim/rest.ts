@@ -9,6 +9,46 @@
  * ---------------------------------------------------------------
  */
 
+export enum ClaimChain {
+  ARKEO = "ARKEO",
+  ETHEREUM = "ETHEREUM",
+  THORCHAIN = "THORCHAIN",
+}
+
+export interface ClaimClaimRecord {
+  chain?: ClaimChain;
+
+  /** arkeo address of claim user */
+  address?: string;
+
+  /**
+   * claimable amount per action (claim, vote, delegate - changed to 0 after action completed)
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  amount_claim?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  amount_vote?: V1Beta1Coin;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  amount_delegate?: V1Beta1Coin;
+}
+
+export type ClaimMsgClaimArkeoResponse = object;
+
 export type ClaimMsgClaimEthResponse = object;
 
 /**
@@ -22,10 +62,19 @@ export interface ClaimParams {
 
   /** denom of claimable asset */
   claim_denom?: string;
+
+  /**
+   * uarkeo to distribute to arkeo account for gas to make claiming easier
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  initial_gas_amount?: V1Beta1Coin;
 }
 
 export interface ClaimQueryClaimRecordResponse {
-  claimRecord?: string;
+  claim_record?: ClaimClaimRecord;
 }
 
 /**
@@ -45,6 +94,17 @@ export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -180,10 +240,15 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @summary Queries a list of ClaimRecord items.
    * @request GET:/arkeonetwork/arkeo/claim/claimrecord/{address}
    */
-  queryClaimRecord = (address: string, params: RequestParams = {}) =>
+  queryClaimRecord = (
+    address: string,
+    query?: { chain?: "ARKEO" | "ETHEREUM" | "THORCHAIN" },
+    params: RequestParams = {},
+  ) =>
     this.request<ClaimQueryClaimRecordResponse, RpcStatus>({
       path: `/arkeonetwork/arkeo/claim/claimrecord/${address}`,
       method: "GET",
+      query: query,
       format: "json",
       ...params,
     });
