@@ -5,7 +5,6 @@ set -ex
 
 PEER="${PEER:=none}" # the hostname of a seed node set as tendermint persistent peer
 CHAIN_ID="arkeo"
-TOKEN="uarkeo"
 PORT_RPC=${PORT_RPC:=26657}
 PORT_P2P=${PORT_P2P:=26656}
 
