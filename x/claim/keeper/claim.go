@@ -152,7 +152,7 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 
 	// The entire airdrop has completed
 	if elapsedAirdropTime > params.DurationUntilDecay+params.DurationOfDecay {
-		return sdk.Coin{}, nil
+		return sdk.Coin{}, errors.New("airdrop has completed")
 	}
 
 	// Positive, since goneTime > params.DurationUntilDecay
