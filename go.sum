@@ -823,6 +823,7 @@ github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:
 github.com/ignite/cli v0.24.0 h1:2cggSIsT4MT9IIS4/8XqlwgekI0YWPMYeULLGrTgCUY=
 github.com/ignite/cli v0.24.0/go.mod h1:XlqM9HK751rcKZg7RfrP9KiJRAVi4XfZskhGnHPgLr0=
 github.com/ignite/modules v0.0.0-20220830145312-d006783a7a21 h1:2eqRFOwuBtP5prBIslVokLwLkXqekbY4cENDf2mEyxQ=
+github.com/ignite/modules v0.0.0-20220830145312-d006783a7a21/go.mod h1:9JK6kA34Z7qxM31BvZzPXR35JIlQNWyYHpJyGYcAPrc=
 github.com/imdario/mergo v0.3.5/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/imdario/mergo v0.3.8/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/imdario/mergo v0.3.9/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
