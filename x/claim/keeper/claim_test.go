@@ -206,3 +206,79 @@ func TestGetAllClaimRecords(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, len(claims), len(claimRecords))
 }
+
+func TestClaimFlow(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	addrArkeo := utils.GetRandomArkeoAddress()
+
+	claimRecord := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        addrArkeo.String(),
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+	}
+	err := keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
+	require.NoError(t, err)
+
+	// mint coins to module account
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
+	require.NoError(t, err)
+
+	// get balance of arkeo address before claim
+	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+
+	claimMessage := types.MsgClaimArkeo{
+		Creator: addrArkeo.String(),
+	}
+	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
+	require.NoError(t, err)
+
+	// check if claimrecord is updated
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
+	require.NoError(t, err)
+	require.True(t, !claimRecord.IsEmpty())
+
+	require.Equal(t, claimRecord.Address, addrArkeo.String())
+	require.Equal(t, claimRecord.Chain, types.ARKEO)
+	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
+	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+
+	// confirm balance increased by expected amount.
+	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+
+	// trigger event hook from voting
+	keepers.ClaimKeeper.AfterProposalVote(sdkCtx, 1, addrArkeo)
+	// confirm balance increased by expected amount.
+	balanceAfter = keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+
+	// trigger another event from voting, nothing additional airdrop should happen.
+	keepers.ClaimKeeper.AfterProposalVote(sdkCtx, 1, addrArkeo)
+	balanceAfter = keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+
+	// trigger event hook from delegation
+	err = keepers.ClaimKeeper.AfterDelegationModified(sdkCtx, addrArkeo, sdk.ValAddress(addrArkeo))
+	require.NoError(t, err)
+	// confirm balance increased by expected amount.
+	balanceAfter = keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 300))
+
+	// trigger event hook from voting, with an address that has no claim record
+	addrArkeo2 := utils.GetRandomArkeoAddress()
+	balanceBefore2 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo2, types.DefaultClaimDenom)
+	keepers.ClaimKeeper.AfterProposalVote(sdkCtx, 1, addrArkeo2)
+	balanceAfter2 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo2, types.DefaultClaimDenom)
+	require.Equal(t, balanceBefore2, balanceAfter2)
+
+	// same with delegation
+	err = keepers.ClaimKeeper.AfterDelegationModified(sdkCtx, addrArkeo, sdk.ValAddress(addrArkeo))
+	require.NoError(t, err)
+	balanceAfter2 = keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo2, types.DefaultClaimDenom)
+	require.Equal(t, balanceBefore2, balanceAfter2)
+}
