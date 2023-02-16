@@ -233,8 +233,6 @@ func chainToStorePrefix(chain types.Chain) []byte {
 		return []byte(types.ClaimRecordsArkeoStorePrefix)
 	case types.ETHEREUM:
 		return []byte(types.ClaimRecordsEthStorePrefix)
-	case types.THORCHAIN:
-		return []byte(types.ClaimRecordsThorStorePrefix)
 	default:
 		return []byte{}
 	}

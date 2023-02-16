@@ -18,9 +18,6 @@ const (
 
 	// ClaimRecordsStorePrefix defines the store prefix for the claim records (by eth address)
 	ClaimRecordsEthStorePrefix = "claimrecordsethereum"
-
-	// ClaimRecordsStorePrefix defines the store prefix for the claim records (by thor address)
-	ClaimRecordsThorStorePrefix = "claimrecordsthorchain"
 )
 
 func KeyPrefix(p string) []byte {

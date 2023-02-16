@@ -47,7 +47,6 @@ export function actionToJSON(object: Action): string {
 export enum Chain {
   ARKEO = 0,
   ETHEREUM = 1,
-  THORCHAIN = 2,
   UNRECOGNIZED = -1,
 }
 
@@ -59,9 +58,6 @@ export function chainFromJSON(object: any): Chain {
     case 1:
     case "ETHEREUM":
       return Chain.ETHEREUM;
-    case 2:
-    case "THORCHAIN":
-      return Chain.THORCHAIN;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -75,8 +71,6 @@ export function chainToJSON(object: Chain): string {
       return "ARKEO";
     case Chain.ETHEREUM:
       return "ETHEREUM";
-    case Chain.THORCHAIN:
-      return "THORCHAIN";
     case Chain.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
