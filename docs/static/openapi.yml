@@ -46033,7 +46033,6 @@ definitions:
         enum:
           - ARKEO
           - ETHEREUM
-          - 
         default: ARKEO
       address:
         type: string
