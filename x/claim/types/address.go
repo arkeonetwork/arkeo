@@ -9,8 +9,6 @@ func IsValidAddress(address string, chain Chain) bool {
 	case ARKEO:
 		_, err := sdk.AccAddressFromBech32(address)
 		return err == nil
-	case THORCHAIN:
-		return false // thorchain not supported yet
 	default:
 		return false
 	}

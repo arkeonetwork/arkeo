@@ -5,8 +5,7 @@
 The Arkeo claims module creates functionality to allow users to recieve airdroppped tokens. Native arkeo addresses
 that are to recieve the airdrop will have a small amount of arkeo in their accounts on genesis. This will be enough to pay for the gas fees of claiming their initial airdrop.
 
-Users of chains with differing address structures or derivation paths, specifically ethereum and thorchain, will be able to claim on arkeo using a signed message that transfers their airdrop from the designated Ethereum or Thorchain address to their Arkeo address. These users will either need to either use
-a faucet to recieve a small amount of arkeo to pay for the gas fees of claiming their initial airdrop or we will need to determine another mechanism to
+Ethereum users will be able to claim on arkeo using a signed message that transfers their airdrop from the designated Ethereum address to their Arkeo address. These users will either need to either use a faucet to recieve a small amount of arkeo to pay for the gas fees of claiming their initial airdrop or we will need to determine another mechanism to
 make this process as easy as possible.
 
 Arkeo airdrop amounts 'expire' if not claimed. Users have three months (`DurationUntilDecay`) to claim their full airdrop amount.

@@ -12,7 +12,6 @@
 export enum ClaimChain {
   ARKEO = "ARKEO",
   ETHEREUM = "ETHEREUM",
-  THORCHAIN = "THORCHAIN",
 }
 
 export interface ClaimClaimRecord {
@@ -242,7 +241,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    */
   queryClaimRecord = (
     address: string,
-    query?: { chain?: "ARKEO" | "ETHEREUM" | "THORCHAIN" },
+    query?: { chain?: "ARKEO" | "ETHEREUM" },
     params: RequestParams = {},
   ) =>
     this.request<ClaimQueryClaimRecordResponse, RpcStatus>({

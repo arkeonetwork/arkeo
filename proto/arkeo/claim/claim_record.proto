@@ -20,7 +20,6 @@ enum Chain {
 
   ARKEO = 0;
   ETHEREUM = 1;
-  THORCHAIN = 2;
 }
 
 

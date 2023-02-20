@@ -516,7 +516,6 @@ paths:
                     enum:
                       - ARKEO
                       - ETHEREUM
-                      - THORCHAIN
                     default: ARKEO
                   address:
                     type: string
@@ -600,7 +599,6 @@ paths:
           enum:
             - ARKEO
             - ETHEREUM
-            - THORCHAIN
           default: ARKEO
       tags:
         - Query
@@ -46026,7 +46024,6 @@ definitions:
     enum:
       - ARKEO
       - ETHEREUM
-      - THORCHAIN
     default: ARKEO
   arkeonetwork.arkeo.claim.ClaimRecord:
     type: object
@@ -46036,7 +46033,6 @@ definitions:
         enum:
           - ARKEO
           - ETHEREUM
-          - THORCHAIN
         default: ARKEO
       address:
         type: string
@@ -46123,7 +46119,6 @@ definitions:
             enum:
               - ARKEO
               - ETHEREUM
-              - THORCHAIN
             default: ARKEO
           address:
             type: string
