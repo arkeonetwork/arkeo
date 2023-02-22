@@ -30,7 +30,12 @@ RUN make install
 #
 FROM ubuntu:kinetic
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install -y jq curl htop vim
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+      jq=1.6-2.1ubuntu3 curl=7.85.0-1ubuntu0.2 htop=3.2.1-1 vim=2:9.0.0242-1ubuntu1 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the compiled binaries over.
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
