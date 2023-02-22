@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: arkeod-sts
+  namespace: foundation
+spec:
+  selector:
+    matchLabels:
+      app: arkeod
+  serviceName: "arkeod-service"
+  updateStrategy:
+    type: OnDelete
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: arkeod
+    spec:
+      containers:
+        - name: arkeod
+          image: ghcr.io/arkeonetwork/arkeo:latest
+          env:
+            - name: MONIKER
+              value: "foundation"
+            - name: "ARKEOD_API_ENABLE"
+              value: "true"
+            # - name: CHAIN_JSON
+            #   value: "https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/chain.json"
+            # - name: "MAX_NUM_INBOUND_PEERS"
+            #   value: "100"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 8000m
+              memory: 32Gi
+          volumeMounts:
+            - mountPath: "/.arkeod"
+              name: arkeod-volume-claim
+          ports:
+            - containerPort: 26656
+              name: p2p
+            - containerPort: 26657
+              name: rpc
+            - containerPort: 1317
+              name: lcd
+  volumeClaimTemplates:
+    - metadata:
+        name: arkeod-volume-claim
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Gi
+        storageClassName: gp2

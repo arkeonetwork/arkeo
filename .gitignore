@@ -1,6 +1,7 @@
 *.pb.go
 generated
 arkeod
+.arkeo/
 tmp-swagger-gen/
 
 .trunk
@@ -21,7 +22,8 @@ release/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
