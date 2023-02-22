@@ -22,27 +22,23 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-ARG TAG=mainnet
+ARG TAG=testnet
 RUN make install
 
 #
 # Main
 #
-FROM golang:${GO_VERSION}-alpine
+FROM ubuntu:kinetic
 
-RUN apk add --no-cache \
-    jq=1.6-r2 \
-    curl=7.87.0-r1
+RUN apt update -y && apt upgrade -y && apt install -y jq curl htop vim
 
 # Copy the compiled binaries over.
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /usr/bin/
 
 COPY scripts /scripts
 
-ENTRYPOINT ["/scripts/genesis.sh"]
-
-ARG TAG=mainnet
+ARG TAG=testnet
 ENV NET=$TAG
 
 # default to fullnode
-CMD ["/scripts/run-arkeo.sh"]
+ENTRYPOINT ["arkeod", "start", "--home", "/.arkeo"]

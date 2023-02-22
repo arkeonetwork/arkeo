@@ -105,10 +105,10 @@ test-watch:
 	@gow -c test ${TEST_BUILD_FLAGS} ${TEST_DIR}
 
 docker-build: proto-gen
-	@docker build . --file Dockerfile -t ${IMAGE}
+	@docker build . --file Dockerfile -t ${IMAGE}:${TAG}
 
 docker-run:
-	@docker run --rm -it -p 1317:1317 -p 26657:26657 ${IMAGE}
+	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
 
 
 ###############################################################################

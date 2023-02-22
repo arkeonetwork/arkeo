@@ -1,18 +1,18 @@
-version: "3"
+version: "3.6"
 services:
   arkeod:
     hostname: arkeod
-    image: arkeo
     build:
       dockerfile: ./Dockerfile
     ports:
       - "1317:1317"
+      - "26656:26656"
       - "26657:26657"
     volumes:
-      - "${HOME}/.arkeo:/root/.arkeo:rw"
+      - ".arkeo:/.arkeo:rw"
     environment:
-      NET: "mocknet"
-    command: arkeod start
+      NET: "testnet"
+    command: arkeod start --home /.arkeo --pruning nothing
 
   arkeod-1:
     image: arkeo
