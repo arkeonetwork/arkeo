@@ -75,14 +75,14 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	switch msg.CType {
 	case types.ContractType_Subscription:
 		if msg.Rate != provider.SubscriptionRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "subscription %d (client) vs %d (provider)", msg.Rate, provider.SubscriptionRate)
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
 		}
 		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
 		}
 	case types.ContractType_PayAsYouGo:
 		if msg.Rate != provider.PayAsYouGoRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go %d (client) vs %d (provider)", msg.Rate, provider.PayAsYouGoRate)
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}
 	default:
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.CType.String())
@@ -94,7 +94,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	}
 
 	if contract.IsOpen(ctx.BlockHeight()) {
-		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", ctx.BlockHeight()-contract.Expiration())
+		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", contract.Expiration()-ctx.BlockHeight())
 	}
 
 	return nil
@@ -104,12 +104,12 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	openCost := k.FetchConfig(ctx, configs.OpenContractCost)
 	if openCost > 0 {
 		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, getCoins(openCost)); err != nil {
-			return err
+			return errors.Wrapf(err, "failed to send open contract openCost=%d", openCost)
 		}
 	}
 
 	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, getCoins(msg.Deposit.Int64())); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Int64())
 	}
 
 	chain, err := common.NewChain(msg.Chain)
