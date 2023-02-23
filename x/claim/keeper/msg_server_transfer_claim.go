@@ -18,6 +18,10 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
+	if !originalClaim.IsTransferable {
+		return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "claim record %s is not transferable", msg.Creator)
+	}
+
 	if originalClaim.IsEmpty() || originalClaim.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "no claimable amount for %s", msg.Creator)
 	}

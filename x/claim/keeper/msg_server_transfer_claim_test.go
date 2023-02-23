@@ -13,6 +13,49 @@ import (
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
+func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	originalClaimAddr := sample.AccAddress()
+	claimRecord := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        originalClaimAddr,
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: false,
+	}
+	require.NoError(t, keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord))
+
+	// mint coins to module account
+	require.NoError(t, keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000))))
+	toAddr := utils.GetRandomArkeoAddress()
+	// get balance of arkeo address before claim
+
+	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
+	transferClaimMessage := &types.MsgTransferClaim{
+		Creator:   originalClaimAddr,
+		ToAddress: sample.AccAddress(),
+	}
+	result, err := msgServer.TransferClaim(ctx, transferClaimMessage)
+	require.Error(t, err)
+	require.Nil(t, result)
+
+	// check if claimrecord is updated
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, originalClaimAddr, types.ARKEO)
+	require.NoError(t, err)
+	require.False(t, claimRecord.IsEmpty())
+
+	// confirm we don't have a claimrecord for arkeo
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress, types.ARKEO)
+	require.NoError(t, err)
+	require.True(t, claimRecord.IsEmpty())
+
+	// confirm balance increased by expected amount.
+	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
+	require.True(t, balanceAfter.Equal(balanceBefore))
+}
+
 func TestTransferClaim(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
@@ -24,21 +67,21 @@ func TestTransferClaim(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: true,
 	}
 	require.NoError(t, keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord))
 
 	// mint coins to module account
 	require.NoError(t, keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000))))
 
-	creator, err := sdk.AccAddressFromBech32(originalClaimAddr)
-	require.NoError(t, err)
+	toAddr := utils.GetRandomArkeoAddress()
 	// get balance of arkeo address before claim
-	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, creator, types.DefaultClaimDenom)
+	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 	transferClaimMessage := &types.MsgTransferClaim{
 		Creator:   originalClaimAddr,
-		ToAddress: sample.AccAddress(),
+		ToAddress: toAddr.String(),
 	}
-	_, err = msgServer.TransferClaim(ctx, transferClaimMessage)
+	_, err := msgServer.TransferClaim(ctx, transferClaimMessage)
 	require.NoError(t, err)
 
 	// check if claimrecord is updated
@@ -54,9 +97,8 @@ func TestTransferClaim(t *testing.T) {
 	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
 	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
 	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
+	require.Equal(t, claimRecord.IsTransferable, false)
 
-	toAddr, err := sdk.AccAddressFromBech32(transferClaimMessage.ToAddress)
-	require.NoError(t, err)
 	// confirm balance increased by expected amount.
 	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
@@ -126,6 +168,7 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
+		IsTransferable: true,
 	}
 	require.NoError(t, keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord))
 
@@ -138,6 +181,7 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 		AmountClaim:    sdk.Coin{},
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 200),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 150),
+		IsTransferable: false,
 	}
 	require.NoError(t, keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordArkeo))
 
@@ -168,6 +212,7 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
 	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 400))
 	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 350))
+	require.Equal(t, claimRecord.IsTransferable, false)
 
 	// confirm balance increased by expected amount.
 	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, arkeoToAddress, types.DefaultClaimDenom)

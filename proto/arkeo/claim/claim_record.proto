@@ -35,4 +35,5 @@ message ClaimRecord {
   cosmos.base.v1beta1.Coin amount_claim = 3 [(gogoproto.nullable) = false,  (gogoproto.moretags) = "yaml:\"amount_claim\""];
   cosmos.base.v1beta1.Coin amount_vote = 4 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"amount_vote\""];
   cosmos.base.v1beta1.Coin amount_delegate = 5 [(gogoproto.nullable) = false, (gogoproto.moretags) = "yaml:\"amount_delegate\""];
+  bool is_transferable = 6;
 }
