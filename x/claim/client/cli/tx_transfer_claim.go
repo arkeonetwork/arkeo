@@ -1,16 +1,13 @@
 package cli
 
 import (
-	"strconv"
-
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
-)
 
-var _ = strconv.Itoa(0)
+	"github.com/arkeonetwork/arkeo/x/claim/types"
+)
 
 func CmdTransferClaim() *cobra.Command {
 	cmd := &cobra.Command{
@@ -19,7 +16,6 @@ func CmdTransferClaim() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argToAddress := args[0]
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -35,8 +31,6 @@ func CmdTransferClaim() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
-
 	flags.AddTxFlagsToCmd(cmd)
-
 	return cmd
 }

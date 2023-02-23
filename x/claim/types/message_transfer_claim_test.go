@@ -3,9 +3,10 @@ package types
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/sample"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
 )
 
 func TestMsgTransferClaim_ValidateBasic(t *testing.T) {
@@ -15,15 +16,30 @@ func TestMsgTransferClaim_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid address",
+			name: "invalid creator address",
 			msg: MsgTransferClaim{
-				Creator: "invalid_address",
+				Creator:   "invalid_address",
+				ToAddress: sample.AccAddress(),
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
-			name: "valid address",
+			name: "invalid to address",
+			msg: MsgTransferClaim{
+				Creator:   sample.AccAddress(),
+				ToAddress: "invalid_address",
+			},
+			err: sdkerrors.ErrInvalidAddress,
+		}, {
+			name: "empty to address",
 			msg: MsgTransferClaim{
 				Creator: sample.AccAddress(),
+			},
+			err: sdkerrors.ErrInvalidAddress,
+		}, {
+			name: "valid create address and valid to address",
+			msg: MsgTransferClaim{
+				Creator:   sample.AccAddress(),
+				ToAddress: sample.AccAddress(),
 			},
 		},
 	}
