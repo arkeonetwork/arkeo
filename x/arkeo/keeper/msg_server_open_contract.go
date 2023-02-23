@@ -104,7 +104,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	openCost := k.FetchConfig(ctx, configs.OpenContractCost)
 	if openCost > 0 {
 		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, getCoins(openCost)); err != nil {
-			return errors.Wrapf(err, "failed to send open contract openCost=%d", openCost)
+			return errors.Wrapf(err, "failed to send open contract costs openCost=%d", openCost)
 		}
 	}
 
