@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sentinel-sts
+  namespace: foundation
+spec:
+  selector:
+    matchLabels:
+      app: sentinel
+  serviceName: "sentinel-service"
+  updateStrategy:
+    type: OnDelete
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sentinel
+    spec:
+      containers:
+        - name: sentinel
+          image: ghcr.io/arkeonetwork/arkeo:sentinel
+          command:
+            - "/scripts/sentinel.sh"
+          envFrom:
+            - configMapRef:
+                name: sentinel-config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          volumeMounts:
+            - mountPath: "/root/.arkeo"
+              name: sentinel-arkeod-volume-claim
+          ports:
+            - containerPort: 3636
+              name: api
+  volumeClaimTemplates:
+    - metadata:
+        name: sentinel-arkeod-volume-claim
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi
+        storageClassName: gp2
