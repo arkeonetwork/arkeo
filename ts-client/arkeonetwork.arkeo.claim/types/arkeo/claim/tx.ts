@@ -21,6 +21,14 @@ export interface MsgClaimArkeo {
 export interface MsgClaimArkeoResponse {
 }
 
+export interface MsgTransferClaim {
+  creator: string;
+  toAddress: string;
+}
+
+export interface MsgTransferClaimResponse {
+}
+
 function createBaseMsgClaimEth(): MsgClaimEth {
   return { creator: "", ethAddress: "", signature: "" };
 }
@@ -213,10 +221,109 @@ export const MsgClaimArkeoResponse = {
   },
 };
 
+function createBaseMsgTransferClaim(): MsgTransferClaim {
+  return { creator: "", toAddress: "" };
+}
+
+export const MsgTransferClaim = {
+  encode(message: MsgTransferClaim, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.toAddress !== "") {
+      writer.uint32(18).string(message.toAddress);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTransferClaim {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTransferClaim();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.toAddress = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgTransferClaim {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      toAddress: isSet(object.toAddress) ? String(object.toAddress) : "",
+    };
+  },
+
+  toJSON(message: MsgTransferClaim): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.toAddress !== undefined && (obj.toAddress = message.toAddress);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgTransferClaim>, I>>(object: I): MsgTransferClaim {
+    const message = createBaseMsgTransferClaim();
+    message.creator = object.creator ?? "";
+    message.toAddress = object.toAddress ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgTransferClaimResponse(): MsgTransferClaimResponse {
+  return {};
+}
+
+export const MsgTransferClaimResponse = {
+  encode(_: MsgTransferClaimResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgTransferClaimResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgTransferClaimResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgTransferClaimResponse {
+    return {};
+  },
+
+  toJSON(_: MsgTransferClaimResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgTransferClaimResponse>, I>>(_: I): MsgTransferClaimResponse {
+    const message = createBaseMsgTransferClaimResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse>;
   ClaimArkeo(request: MsgClaimArkeo): Promise<MsgClaimArkeoResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  TransferClaim(request: MsgTransferClaim): Promise<MsgTransferClaimResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -225,6 +332,7 @@ export class MsgClientImpl implements Msg {
     this.rpc = rpc;
     this.ClaimEth = this.ClaimEth.bind(this);
     this.ClaimArkeo = this.ClaimArkeo.bind(this);
+    this.TransferClaim = this.TransferClaim.bind(this);
   }
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse> {
     const data = MsgClaimEth.encode(request).finish();
@@ -236,6 +344,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgClaimArkeo.encode(request).finish();
     const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "ClaimArkeo", data);
     return promise.then((data) => MsgClaimArkeoResponse.decode(new _m0.Reader(data)));
+  }
+
+  TransferClaim(request: MsgTransferClaim): Promise<MsgTransferClaimResponse> {
+    const data = MsgTransferClaim.encode(request).finish();
+    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "TransferClaim", data);
+    return promise.then((data) => MsgTransferClaimResponse.decode(new _m0.Reader(data)));
   }
 }
 
