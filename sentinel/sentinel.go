@@ -39,18 +39,6 @@ func NewProxy(config conf.Configuration) Proxy {
 	}
 }
 
-// Serve a reverse proxy for a given url
-func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
-	// parse the url
-	reverseUrl, _ := url.Parse(fmt.Sprintf("http://%s", host))
-
-	// create the reverse proxy
-	proxy := common.NewSingleHostReverseProxy(reverseUrl)
-
-	// Note that ServeHttp is non blocking and uses a go routine under the hood
-	proxy.ServeHTTP(w, r)
-}
-
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
 	// remove arkauth query arg
@@ -59,19 +47,34 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.RawQuery = values.Encode()
 
 	parts := strings.Split(r.URL.Path, "/")
-	host := parts[1]
+	target := parts[1]
 	parts = append(parts[:1], parts[1+1:]...)
 	r.URL.Path = strings.Join(parts, "/")
 
-	switch host { // nolint
+	templateURL := url.URL(*r.URL)
+	switch target { // nolint
 	case "btc-mainnet-fullnode":
-		// add username/password to request
-		host = fmt.Sprintf("thorchain:password@%s:8332", host)
+		templateURL.Host = os.Getenv("BTC_FULLNODE_HOST")
+	case "eth-mainnet-fullnode":
+		ethHost := os.Getenv("ETH_FULLNODE_HOST")
+		ethHostUrl, err := url.Parse(ethHost)
+		if err != nil {
+			p.logger.Error("fail to parse url", "error", err, "url", ethHost)
+			return
+		}
+		templateURL.Scheme = ethHostUrl.Scheme
+		templateURL.Host = ethHostUrl.Host
 	case "arkeo-mainnet-fullnode":
-		host = "arkeod:1317"
+		// we forbid arkeo-mainnet-fullnode see chain.go:L50
+		templateURL.Host = os.Getenv("ARKEO_FULLNODE_HOST")
 	}
 
-	p.serveReverseProxy(w, r, host)
+	// Serve a reverse proxy for a given url
+	// create the reverse proxy
+	proxy := common.NewSingleHostReverseProxy(&templateURL)
+
+	// Note that ServeHttp is non blocking and uses a go routine under the hood
+	proxy.ServeHTTP(w, r)
 }
 
 func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
