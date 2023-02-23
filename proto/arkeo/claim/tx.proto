@@ -8,7 +8,7 @@ option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 service Msg {
   rpc ClaimEth   (MsgClaimEth  ) returns (MsgClaimEthResponse  );
   rpc ClaimArkeo (MsgClaimArkeo) returns (MsgClaimArkeoResponse);
-    rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
+  rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
 // this line is used by starport scaffolding # proto/tx/rpc
 }
 message MsgClaimEth {
