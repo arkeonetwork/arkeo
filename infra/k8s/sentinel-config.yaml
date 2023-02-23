@@ -10,7 +10,7 @@ data:
   DESCRIPTION: "n/a"
   LOCATION: "n/a"
   PORT: "3636"
-  PROXY_HOST: "https://infura.with.key"
+  PROXY_HOST: "https://swapi.dev"
   SOURCE_CHAIN: "http://arkeod-service:1317"
   EVENT_STREAM_HOST: "arkeod-service:26657"
   FREE_RATE_LIMIT: "10"

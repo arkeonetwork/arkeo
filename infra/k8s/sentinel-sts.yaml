@@ -24,6 +24,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: sentinel-config
+            - secretRef:
+                name: sentinel-secrets
           resources:
             requests:
               cpu: 500m
