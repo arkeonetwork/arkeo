@@ -25,6 +25,7 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(CmdClaimEth())
 	cmd.AddCommand(CmdClaimArkeo())
+	cmd.AddCommand(CmdTransferClaim())
 	// this line is used by starport scaffolding # 1
 
 	return cmd
