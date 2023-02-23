@@ -34,7 +34,7 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 		AmountDelegate: originalClaim.AmountDelegate,
 	}
 
-	// set eth claim to completed
+	// set claim to completed
 	originalClaim = setClaimableAmountForAllActions(originalClaim, sdk.Coin{})
 	if err := k.SetClaimRecord(ctx, originalClaim); err != nil {
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
