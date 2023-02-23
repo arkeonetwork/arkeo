@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: arkeod
-          image: ghcr.io/arkeonetwork/arkeo:latest
+          image: ghcr.io/arkeonetwork/arkeo:testnet
           env:
             - name: MONIKER
               value: "foundation"
@@ -36,7 +36,7 @@ spec:
               cpu: 8000m
               memory: 32Gi
           volumeMounts:
-            - mountPath: "/.arkeod"
+            - mountPath: "/.arkeo"
               name: arkeod-volume-claim
           ports:
             - containerPort: 26656
