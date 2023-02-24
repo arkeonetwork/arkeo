@@ -47,12 +47,11 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.RawQuery = values.Encode()
 
 	parts := strings.Split(r.URL.Path, "/")
-	target := parts[1]
+	host := parts[1]
 	parts = append(parts[:1], parts[1+1:]...)
 	r.URL.Path = strings.Join(parts, "/")
 
-	templateURL := *r.URL
-	switch target { // nolint
+	switch host { // nolint
 	case "btc-mainnet-fullnode":
 		// TODO
 	case "eth-mainnet-fullnode":
@@ -67,14 +66,14 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 			respondWithError(w, "failed to parse backend url", http.StatusInternalServerError)
 			return
 		}
-		templateURL.Scheme = gaiaHostUrl.Scheme
-		templateURL.Host = gaiaHostUrl.Host
-		templateURL.Path = gaiaHostUrl.Path
+		r.URL.Scheme = gaiaHostUrl.Scheme
+		r.URL.Host = gaiaHostUrl.Host
+		r.URL.Path = gaiaHostUrl.Path
 	}
 
 	// Serve a reverse proxy for a given url
 	// create the reverse proxy
-	proxy := common.NewSingleHostReverseProxy(&templateURL)
+	proxy := common.NewSingleHostReverseProxy(r.URL)
 
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, r)
