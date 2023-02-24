@@ -12,6 +12,7 @@ services:
       - ".arkeo:/.arkeo:rw"
     environment:
       NET: "testnet"
+    entrypoint: /scripts/genesis.sh
     command: arkeod start --home /.arkeo --pruning nothing
 
   arkeod-1:
