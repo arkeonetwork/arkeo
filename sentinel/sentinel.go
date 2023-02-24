@@ -54,19 +54,22 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	templateURL := *r.URL
 	switch target { // nolint
 	case "btc-mainnet-fullnode":
-		templateURL.Host = os.Getenv("BTC_FULLNODE_HOST")
+		// TODO
 	case "eth-mainnet-fullnode":
-		ethHost := os.Getenv("ETH_FULLNODE_HOST")
-		ethHostUrl, err := url.Parse(ethHost)
-		if err != nil {
-			p.logger.Error("fail to parse url", "error", err, "url", ethHost)
-			return
-		}
-		templateURL.Scheme = ethHostUrl.Scheme
-		templateURL.Host = ethHostUrl.Host
+		// TODO
 	case "arkeo-mainnet-fullnode":
 		// we forbid arkeo-mainnet-fullnode see chain.go:L50
-		templateURL.Host = os.Getenv("ARKEO_FULLNODE_HOST")
+		// TODO
+	case "gaia-mainnet-rpc-archive":
+		gaiaHost := os.Getenv("GAIA_RPC_ARCHIVE_HOST")
+		gaiaHostUrl, err := url.Parse(gaiaHost)
+		if err != nil {
+			p.logger.Error("fail to parse url", "error", err, "url", gaiaHost)
+			return
+		}
+		templateURL.Scheme = gaiaHostUrl.Scheme
+		templateURL.Host = gaiaHostUrl.Host
+		templateURL.Path = gaiaHostUrl.Path
 	}
 
 	// Serve a reverse proxy for a given url
