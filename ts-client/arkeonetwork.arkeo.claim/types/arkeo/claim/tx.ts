@@ -34,7 +34,7 @@ export interface MsgAddClaim {
   creator: string;
   chain: string;
   address: string;
-  amount: Coin[];
+  amount: number;
 }
 
 export interface MsgAddClaimResponse {
@@ -330,7 +330,7 @@ export const MsgTransferClaimResponse = {
 };
 
 function createBaseMsgAddClaim(): MsgAddClaim {
-  return { creator: "", chain: "", address: "", amount: [] };
+  return { creator: "", chain: "", address: "", amount: 0 };
 }
 
 export const MsgAddClaim = {

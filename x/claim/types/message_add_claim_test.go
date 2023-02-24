@@ -3,9 +3,10 @@ package types
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/sample"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
 )
 
 func TestMsgAddClaim_ValidateBasic(t *testing.T) {
@@ -15,15 +16,51 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid address",
+			name: "invalid creator address",
 			msg: MsgAddClaim{
 				Creator: "invalid_address",
+				Address: sample.AccAddress(),
+				Chain:   "swapi.dev",
+				Amount:  100,
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
+			name: "invalid address",
+			msg: MsgAddClaim{
+				Creator: sample.AccAddress(),
+				Address: "invalid address",
+				Chain:   "swapi.dev",
+				Amount:  100,
+			},
+			err: sdkerrors.ErrInvalidAddress,
+		},
+		{
+			name: "invalid chain",
+			msg: MsgAddClaim{
+				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Chain:   "invalid chain",
+				Amount:  100,
+			},
+			err: sdkerrors.ErrInvalidRequest,
+		},
+		{
+			name: "invalid amount",
+			msg: MsgAddClaim{
+				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Chain:   "swapi.dev",
+				Amount:  -100,
+			},
+			err: sdkerrors.ErrInvalidRequest,
+		},
+		{
 			name: "valid address",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
+				Address: sample.AccAddress(),
+				Chain:   "swapi.dev",
+				Amount:  100,
 			},
 		},
 	}

@@ -5,6 +5,7 @@ package arkeonetwork.arkeo.claim;
 // this line is used by starport scaffolding # proto/tx/import
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
+import "arkeo/claim/claim_record.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
@@ -39,9 +40,9 @@ message MsgTransferClaimResponse {
 
 message MsgAddClaim {
   string creator = 1;
-  string chain = 2;
+  Chain chain = 2;
   string address = 3;
-  repeated cosmos.base.v1beta1.Coin amount = 4 [(gogoproto.nullable) = false];
+  int64 amount = 4 ;
 }
 
 message MsgAddClaimResponse {
