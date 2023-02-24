@@ -64,7 +64,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		gaiaHost := os.Getenv("GAIA_RPC_ARCHIVE_HOST")
 		gaiaHostUrl, err := url.Parse(gaiaHost)
 		if err != nil {
-			p.logger.Error("fail to parse url", "error", err, "url", gaiaHost)
+			respondWithError(w, "failed to parse backend url", http.StatusInternalServerError)
 			return
 		}
 		templateURL.Scheme = gaiaHostUrl.Scheme
@@ -122,28 +122,28 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
-		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	contract, err := p.MemStore.Get(key)
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", key)
-		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -165,28 +165,28 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
-		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
@@ -194,7 +194,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())
-		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -227,4 +227,19 @@ func (p Proxy) Run() {
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux); err != nil {
 		panic(err)
 	}
+}
+
+func respondWithError(w http.ResponseWriter, message string, code int) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		response = []byte(`{"error": "failed to marshal response payload"}`)
+		code = http.StatusInternalServerError
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(response)
 }

@@ -20,3 +20,4 @@ data:
   AS_GO_RATE_LIMIT: "10"
   AS_GO_RATE_LIMIT_DURATION: "1m"
   CLAIM_STORE_LOCATION: "/root/.arkeo/claims"
+  GAIA_RPC_ARCHIVE_HOST: "http://10.10.3.26:26657"

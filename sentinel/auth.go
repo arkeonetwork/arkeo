@@ -103,7 +103,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				return
 			}
 		} else {
-			p.logger.Info("serving paid tier requests", "remote-addr", remoteAddr)
+			p.logger.Info("serving free tier requests", "remote-addr", remoteAddr)
 			httpCode, err := p.freeTier(remoteAddr)
 			if err != nil {
 				p.logger.Error("failed to serve free tier request", "error", err)
