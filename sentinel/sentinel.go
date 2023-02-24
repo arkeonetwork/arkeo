@@ -51,7 +51,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	parts = append(parts[:1], parts[1+1:]...)
 	r.URL.Path = strings.Join(parts, "/")
 
-	templateURL := url.URL(*r.URL)
+	templateURL := *r.URL
 	switch target { // nolint
 	case "btc-mainnet-fullnode":
 		templateURL.Host = os.Getenv("BTC_FULLNODE_HOST")
