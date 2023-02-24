@@ -19,13 +19,18 @@ spec:
       containers:
         - name: sentinel
           image: ghcr.io/arkeonetwork/arkeo:sentinel
+          imagePullPolicy: Always
           command:
             - "/scripts/sentinel.sh"
           envFrom:
             - configMapRef:
                 name: sentinel-config
-            - secretRef:
-                name: sentinel-secrets
+          env:
+            - name: ETH_FULLNODE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: sentinel-secrets
+                  key: eth_fullnode_host
           resources:
             requests:
               cpu: 500m

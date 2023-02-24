@@ -19,6 +19,7 @@ spec:
       containers:
         - name: arkeod
           image: ghcr.io/arkeonetwork/arkeo:testnet
+          imagePullPolicy: Always
           env:
             - name: MONIKER
               value: "foundation"
