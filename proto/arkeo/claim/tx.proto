@@ -1,27 +1,27 @@
 syntax = "proto3";
 
 package arkeonetwork.arkeo.claim;
-
+import "arkeo/claim/claim_record.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc ClaimEth   (MsgClaimEth  ) returns (MsgClaimEthResponse  );
-  rpc ClaimArkeo (MsgClaimArkeo) returns (MsgClaimArkeoResponse);
+  rpc ClaimEth(MsgClaimEth) returns (MsgClaimEthResponse);
+  rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
-// this line is used by starport scaffolding # proto/tx/rpc
+
+  // this line is used by starport scaffolding # proto/tx/rpc
+  rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
 }
 message MsgClaimEth {
-  string creator     = 1;
+  string creator = 1;
   string eth_address = 2; // the adress the claim is for
-  string signature   = 3; // EIP712 signature that has to be signed by ethAddress
+  string signature = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
 message MsgClaimEthResponse {}
 
-message MsgClaimArkeo {
-  string creator = 1;
-}
+message MsgClaimArkeo { string creator = 1; }
 
 message MsgClaimArkeoResponse {}
 
@@ -30,7 +30,15 @@ message MsgTransferClaim {
   string toAddress = 2;
 }
 
-message MsgTransferClaimResponse {
+message MsgTransferClaimResponse {}
+
+message MsgAddClaim {
+  string creator = 1;
+  Chain chain = 2;
+  string address = 3;
+  int64 amount = 4;
 }
+
+message MsgAddClaimResponse {}
 
 // this line is used by starport scaffolding # proto/tx/message

@@ -44,7 +44,10 @@ export interface ClaimClaimRecord {
    * signatures required by gogoproto.
    */
   amount_delegate?: V1Beta1Coin
+  is_transferable?: boolean
 }
+
+export type ClaimMsgAddClaimResponse = object
 
 export type ClaimMsgClaimArkeoResponse = object
 

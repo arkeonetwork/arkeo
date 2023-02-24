@@ -6,7 +6,6 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Params defines the parameters for the module.
@@ -30,8 +29,9 @@ message Params {
   ];
 
   // denom of claimable asset
-  string claim_denom = 4;  
+  string claim_denom = 4;
   // uarkeo to distribute to arkeo account for gas to make claiming easier
-  cosmos.base.v1beta1.Coin initial_gas_amount = 5  [ (gogoproto.moretags) = "yaml:\"initial_gas_amount\""];
+  cosmos.base.v1beta1.Coin initial_gas_amount = 5
+      [ (gogoproto.moretags) = "yaml:\"initial_gas_amount\"" ];
   ;
 }
