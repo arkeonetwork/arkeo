@@ -60,7 +60,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		// we forbid arkeo-mainnet-fullnode see chain.go:L50
 		// TODO
 	case "gaia-mainnet-rpc-archive":
-		gaiaHost := os.Getenv("GAIA_RPC_ARCHIVE_HOST")
+		gaiaHost := p.Config.GaiaRpcArchiveHost
 		gaiaHostUrl, err := url.Parse(gaiaHost)
 		if err != nil {
 			respondWithError(w, "failed to parse backend url", http.StatusInternalServerError)
