@@ -9,9 +9,8 @@ service Msg {
   rpc ClaimEth(MsgClaimEth) returns (MsgClaimEthResponse);
   rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
-
-  // this line is used by starport scaffolding # proto/tx/rpc
   rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
 }
 message MsgClaimEth {
   string creator = 1;
