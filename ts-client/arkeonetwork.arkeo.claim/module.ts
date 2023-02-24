@@ -7,16 +7,16 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgClaimArkeo } from "./types/arkeo/claim/tx";
+import { MsgAddClaim } from "./types/arkeo/claim/tx";
 import { MsgClaimEth } from "./types/arkeo/claim/tx";
+import { MsgTransferClaim } from "./types/arkeo/claim/tx";
+import { MsgClaimArkeo } from "./types/arkeo/claim/tx";
 
-import { ClaimRecord as typeClaimRecord} from "./types"
-import { Params as typeParams} from "./types"
 
-export { MsgClaimArkeo, MsgClaimEth };
+export { MsgAddClaim, MsgClaimEth, MsgTransferClaim, MsgClaimArkeo };
 
-type sendMsgClaimArkeoParams = {
-  value: MsgClaimArkeo,
+type sendMsgAddClaimParams = {
+  value: MsgAddClaim,
   fee?: StdFee,
   memo?: string
 };
@@ -27,30 +27,38 @@ type sendMsgClaimEthParams = {
   memo?: string
 };
 
+type sendMsgTransferClaimParams = {
+  value: MsgTransferClaim,
+  fee?: StdFee,
+  memo?: string
+};
 
-type msgClaimArkeoParams = {
+type sendMsgClaimArkeoParams = {
   value: MsgClaimArkeo,
+  fee?: StdFee,
+  memo?: string
+};
+
+
+type msgAddClaimParams = {
+  value: MsgAddClaim,
 };
 
 type msgClaimEthParams = {
   value: MsgClaimEth,
 };
 
+type msgTransferClaimParams = {
+  value: MsgTransferClaim,
+};
+
+type msgClaimArkeoParams = {
+  value: MsgClaimArkeo,
+};
+
 
 export const registry = new Registry(msgTypes);
 
-type Field = {
-	name: string;
-	type: unknown;
-}
-function getStructure(template) {
-	const structure: {fields: Field[]} = { fields: [] }
-	for (let [key, value] of Object.entries(template)) {
-		let field = { name: key, type: typeof value }
-		structure.fields.push(field)
-	}
-	return structure
-}
 const defaultFee = {
   amount: [],
   gas: "200000",
@@ -66,17 +74,17 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgClaimArkeo({ value, fee, memo }: sendMsgClaimArkeoParams): Promise<DeliverTxResponse> {
+		async sendMsgAddClaim({ value, fee, memo }: sendMsgAddClaimParams): Promise<DeliverTxResponse> {
 			if (!signer) {
-					throw new Error('TxClient:sendMsgClaimArkeo: Unable to sign Tx. Signer is not present.')
+					throw new Error('TxClient:sendMsgAddClaim: Unable to sign Tx. Signer is not present.')
 			}
 			try {			
 				const { address } = (await signer.getAccounts())[0]; 
 				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgClaimArkeo({ value: MsgClaimArkeo.fromPartial(value) })
+				let msg = this.msgAddClaim({ value: MsgAddClaim.fromPartial(value) })
 				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:sendMsgClaimArkeo: Could not broadcast Tx: '+ e.message)
+				throw new Error('TxClient:sendMsgAddClaim: Could not broadcast Tx: '+ e.message)
 			}
 		},
 		
@@ -94,12 +102,40 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgClaimArkeo({ value }: msgClaimArkeoParams): EncodeObject {
-			try {
-				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgClaimArkeo", value: MsgClaimArkeo.fromPartial( value ) }  
+		async sendMsgTransferClaim({ value, fee, memo }: sendMsgTransferClaimParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgTransferClaim: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgTransferClaim({ value: MsgTransferClaim.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgClaimArkeo: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgTransferClaim: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgClaimArkeo({ value, fee, memo }: sendMsgClaimArkeoParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaimArkeo: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaimArkeo({ value: MsgClaimArkeo.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgClaimArkeo: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		
+		msgAddClaim({ value }: msgAddClaimParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgAddClaim", value: MsgAddClaim.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgAddClaim: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -108,6 +144,22 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgClaimEth", value: MsgClaimEth.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgClaimEth: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgTransferClaim({ value }: msgTransferClaimParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgTransferClaim", value: MsgTransferClaim.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgTransferClaim: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgClaimArkeo({ value }: msgClaimArkeoParams): EncodeObject {
+			try {
+				return { typeUrl: "/arkeonetwork.arkeo.claim.MsgClaimArkeo", value: MsgClaimArkeo.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaimArkeo: Could not create message: ' + e.message)
 			}
 		},
 		
@@ -125,18 +177,13 @@ export const queryClient = ({ addr: addr }: QueryClientOptions = { addr: "http:/
 class SDKModule {
 	public query: ReturnType<typeof queryClient>;
 	public tx: ReturnType<typeof txClient>;
-	public structure: Record<string,unknown>;
+	
 	public registry: Array<[string, GeneratedType]> = [];
 
 	constructor(client: IgniteClient) {		
 	
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
-		this.structure =  {
-						ClaimRecord: getStructure(typeClaimRecord.fromPartial({})),
-						Params: getStructure(typeParams.fromPartial({})),
-						
-		};
 		client.on('signer-changed',(signer) => {			
 		 this.updateTX(client);
 		})

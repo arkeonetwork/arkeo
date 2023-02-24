@@ -1,5 +1,6 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "arkeonetwork.arkeo.claim";
 
@@ -27,6 +28,16 @@ export interface MsgTransferClaim {
 }
 
 export interface MsgTransferClaimResponse {
+}
+
+export interface MsgAddClaim {
+  creator: string;
+  chain: string;
+  address: string;
+  amount: Coin[];
+}
+
+export interface MsgAddClaimResponse {
 }
 
 function createBaseMsgClaimEth(): MsgClaimEth {
@@ -318,12 +329,132 @@ export const MsgTransferClaimResponse = {
   },
 };
 
+function createBaseMsgAddClaim(): MsgAddClaim {
+  return { creator: "", chain: "", address: "", amount: [] };
+}
+
+export const MsgAddClaim = {
+  encode(message: MsgAddClaim, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.chain !== "") {
+      writer.uint32(18).string(message.chain);
+    }
+    if (message.address !== "") {
+      writer.uint32(26).string(message.address);
+    }
+    for (const v of message.amount) {
+      Coin.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAddClaim {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgAddClaim();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.chain = reader.string();
+          break;
+        case 3:
+          message.address = reader.string();
+          break;
+        case 4:
+          message.amount.push(Coin.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgAddClaim {
+    return {
+      creator: isSet(object.creator) ? String(object.creator) : "",
+      chain: isSet(object.chain) ? String(object.chain) : "",
+      address: isSet(object.address) ? String(object.address) : "",
+      amount: Array.isArray(object?.amount) ? object.amount.map((e: any) => Coin.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: MsgAddClaim): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.chain !== undefined && (obj.chain = message.chain);
+    message.address !== undefined && (obj.address = message.address);
+    if (message.amount) {
+      obj.amount = message.amount.map((e) => e ? Coin.toJSON(e) : undefined);
+    } else {
+      obj.amount = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgAddClaim>, I>>(object: I): MsgAddClaim {
+    const message = createBaseMsgAddClaim();
+    message.creator = object.creator ?? "";
+    message.chain = object.chain ?? "";
+    message.address = object.address ?? "";
+    message.amount = object.amount?.map((e) => Coin.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseMsgAddClaimResponse(): MsgAddClaimResponse {
+  return {};
+}
+
+export const MsgAddClaimResponse = {
+  encode(_: MsgAddClaimResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgAddClaimResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgAddClaimResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgAddClaimResponse {
+    return {};
+  },
+
+  toJSON(_: MsgAddClaimResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgAddClaimResponse>, I>>(_: I): MsgAddClaimResponse {
+    const message = createBaseMsgAddClaimResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse>;
   ClaimArkeo(request: MsgClaimArkeo): Promise<MsgClaimArkeoResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   TransferClaim(request: MsgTransferClaim): Promise<MsgTransferClaimResponse>;
+  /** this line is used by starport scaffolding # proto/tx/rpc */
+  AddClaim(request: MsgAddClaim): Promise<MsgAddClaimResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -333,6 +464,7 @@ export class MsgClientImpl implements Msg {
     this.ClaimEth = this.ClaimEth.bind(this);
     this.ClaimArkeo = this.ClaimArkeo.bind(this);
     this.TransferClaim = this.TransferClaim.bind(this);
+    this.AddClaim = this.AddClaim.bind(this);
   }
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse> {
     const data = MsgClaimEth.encode(request).finish();
@@ -350,6 +482,12 @@ export class MsgClientImpl implements Msg {
     const data = MsgTransferClaim.encode(request).finish();
     const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "TransferClaim", data);
     return promise.then((data) => MsgTransferClaimResponse.decode(new _m0.Reader(data)));
+  }
+
+  AddClaim(request: MsgAddClaim): Promise<MsgAddClaimResponse> {
+    const data = MsgAddClaim.encode(request).finish();
+    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "AddClaim", data);
+    return promise.then((data) => MsgAddClaimResponse.decode(new _m0.Reader(data)));
   }
 }
 
