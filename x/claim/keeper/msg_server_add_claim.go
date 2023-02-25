@@ -12,6 +12,6 @@ import (
 
 func (k msgServer) AddClaim(goCtx context.Context, msg *types.MsgAddClaim) (*types.MsgAddClaimResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	_ = ctx
+	ctx.Logger().Info("received add-claim message,not support")
 	return &types.MsgAddClaimResponse{}, nil
 }

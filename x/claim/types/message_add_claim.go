@@ -45,13 +45,12 @@ func (msg *MsgAddClaim) ValidateBasic() error {
 	if err != nil {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
-	_, err = sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid  address (%s)", err)
-	}
 	_, ok := Chain_value[msg.Chain.String()]
 	if !ok {
 		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid chain(%s),err: %s", msg.Chain, err)
+	}
+	if !IsValidAddress(msg.Address, msg.Chain) {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid  address")
 	}
 	if msg.Amount <= 0 {
 		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "amount should larger than 0")

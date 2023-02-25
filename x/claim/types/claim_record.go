@@ -31,10 +31,9 @@ func (claimRecord *ClaimRecord) IsEmpty() bool {
 
 // ChainFromString convert chain string to Chain Enum type
 func ChainFromString(chain string) (Chain, error) {
-	for id, item := range Chain_name {
-		if strings.EqualFold(item, chain) {
-			return Chain(id), nil
-		}
+	chainID, ok := Chain_value[strings.ToUpper(chain)]
+	if ok {
+		return Chain(chainID), nil
 	}
 	return Chain(-1), fmt.Errorf("invalid chain")
 }
