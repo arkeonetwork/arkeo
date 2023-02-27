@@ -55,7 +55,7 @@ func TestClaimArkeo(t *testing.T) {
 
 	// attempt to claim again to ensure it fails.
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
 
 	// ensure claim Arkeo fails from address with no claim record
 	addrArkeo2 := utils.GetRandomArkeoAddress()
@@ -63,5 +63,5 @@ func TestClaimArkeo(t *testing.T) {
 		Creator: addrArkeo2.String(),
 	}
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage2)
-	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
 }

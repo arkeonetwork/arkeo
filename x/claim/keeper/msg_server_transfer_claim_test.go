@@ -1,11 +1,9 @@
 package keeper_test
 
 import (
-	"errors"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 
 	"github.com/arkeonetwork/arkeo/testutil/sample"
@@ -38,7 +36,7 @@ func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
 		ToAddress: sample.AccAddress(),
 	}
 	result, err := msgServer.TransferClaim(ctx, transferClaimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrClaimRecordNotTransferrable, err)
 	require.Nil(t, result)
 
 	// check if claimrecord is updated
@@ -105,14 +103,13 @@ func TestTransferClaim(t *testing.T) {
 
 	// attempt to transfer it again
 	_, err = msgServer.TransferClaim(ctx, transferClaimMessage)
-	require.Error(t, err)
-	require.True(t, errors.Is(err, sdkerrors.ErrUnknownRequest))
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 
 	// attempt to claim from arkeo should also fail!
 	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{
 		Creator: originalClaimAddr,
 	})
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 }
 
 func TestOriginalClaimNotExistShouldFail(t *testing.T) {
@@ -137,7 +134,7 @@ func TestOriginalClaimNotExistShouldFail(t *testing.T) {
 	toAddrBalanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 
 	_, err = msgServer.TransferClaim(ctx, transferClaimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 
 	// check if claimrecord is updated
 	claimRecord, err := keepers.ClaimKeeper.GetClaimRecord(sdkCtx, originalClaimAddr, types.ARKEO)
@@ -220,11 +217,11 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 
 	// attempt to transfer claim again to ensure it fails.
 	result, err = msgServer.TransferClaim(ctx, &transferClaimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 	require.Nil(t, result)
 
 	// attempt to claim from arkeo should also fail!
 	resp, err := msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 	require.Nil(t, resp)
 }

@@ -17,7 +17,7 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 	}
 
 	if arkeoClaim.IsEmpty() || arkeoClaim.AmountClaim.IsZero() {
-		return nil, errors.Errorf("no claimable amount for %s", msg.Creator)
+		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
 
 	_, err = k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)

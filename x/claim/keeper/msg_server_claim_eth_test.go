@@ -105,7 +105,7 @@ func TestClaimEthWithInvalidSignature(t *testing.T) {
 		Signature:  sigString,
 	}
 	_, err = msgServer.ClaimEth(ctx, &claimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, types.ErrInvalidSignature, err)
 }
 
 func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
