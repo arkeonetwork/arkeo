@@ -146,13 +146,13 @@ func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (p Proxy) isRateLimited(key string, ctype types.ContractType) bool {
+func (p Proxy) isRateLimited(key string, contractType types.ContractType) bool {
 	mu.Lock()
 	defer mu.Unlock()
 
 	var limitTokens int
 	var limitDuration time.Duration
-	switch ctype {
+	switch contractType {
 	case types.ContractType_Subscription:
 		limitTokens = p.Config.SubTierRateLimit
 		limitDuration = p.Config.SubTierRateLimitDuration

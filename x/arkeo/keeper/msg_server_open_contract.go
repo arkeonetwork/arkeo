@@ -21,7 +21,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"chain", msg.Chain,
 		"client", msg.Client,
 		"delegate", msg.Delegate,
-		"contract type", msg.CType,
+		"contract type", msg.ContractType,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
 	)
@@ -72,7 +72,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrOpenContractDuration, "duration below allowed minimum duration from provider")
 	}
 
-	switch msg.CType {
+	switch msg.ContractType {
 	case types.ContractType_Subscription:
 		if msg.Rate != provider.SubscriptionRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
@@ -85,7 +85,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}
 	default:
-		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.CType.String())
+		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
 	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
@@ -118,7 +118,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 	contract := types.NewContract(msg.PubKey, chain, msg.FetchSpender())
 	contract.Client = msg.Client
-	contract.Type = msg.CType
+	contract.Type = msg.ContractType
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate

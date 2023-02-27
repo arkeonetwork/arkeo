@@ -44,7 +44,7 @@ func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider types.Provider)
 				types.EventTypeProviderMod,
 				sdk.NewAttribute("pubkey", provider.PubKey.String()),
 				sdk.NewAttribute("chain", provider.Chain.String()),
-				sdk.NewAttribute("metadata_uri", provider.MetadataURI),
+				sdk.NewAttribute("metadata_uri", provider.MetadataUri),
 				sdk.NewAttribute("metadata_nonce", strconv.FormatUint(provider.MetadataNonce, 10)),
 				sdk.NewAttribute("status", provider.Status.String()),
 				sdk.NewAttribute("min_contract_duration", strconv.FormatInt(provider.MinContractDuration, 10)),

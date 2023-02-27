@@ -61,7 +61,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 		Creator:             acct.String(),
 		PubKey:              pubkey,
 		Chain:               common.BTCChain.String(),
-		MetadataURI:         "foobar",
+		MetadataUri:         "foobar",
 		MetadataNonce:       3,
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -73,7 +73,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 
 	provider, err := k.GetProvider(ctx, msg.PubKey, common.BTCChain)
 	c.Assert(err, IsNil)
-	c.Check(provider.MetadataURI, Equals, "foobar")
+	c.Check(provider.MetadataUri, Equals, "foobar")
 	c.Check(provider.MetadataNonce, Equals, uint64(3))
 	c.Check(provider.MinContractDuration, Equals, int64(10))
 	c.Check(provider.MaxContractDuration, Equals, int64(500))

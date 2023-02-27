@@ -35,14 +35,14 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		PubKey:   pubkey,
-		Chain:    chain.String(),
-		Client:   acc,
-		Creator:  acc.String(),
-		CType:    types.ContractType_Subscription,
-		Duration: 100,
-		Rate:     15,
-		Deposit:  cosmos.NewInt(100 * 15),
+		PubKey:       pubkey,
+		Chain:        chain.String(),
+		Client:       acc,
+		Creator:      acc.String(),
+		ContractType: types.ContractType_Subscription,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(100 * 15),
 	}
 	c.Assert(s.OpenContractValidate(ctx, &msg), IsNil)
 
@@ -59,11 +59,11 @@ func (OpenContractSuite) TestValidate(c *C) {
 	msg.Rate = 10
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractMismatchRate)
-	msg.CType = types.ContractType_PayAsYouGo
+	msg.ContractType = types.ContractType_PayAsYouGo
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractMismatchRate)
 	msg.Rate = 15
-	msg.CType = types.ContractType_Subscription
+	msg.ContractType = types.ContractType_Subscription
 
 	provider.Bond = cosmos.NewInt(1)
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
@@ -96,14 +96,14 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
-		PubKey:   pubkey,
-		Chain:    chain.String(),
-		Creator:  acc.String(),
-		Client:   pubkey,
-		CType:    types.ContractType_PayAsYouGo,
-		Duration: 100,
-		Rate:     15,
-		Deposit:  cosmos.NewInt(1000),
+		PubKey:       pubkey,
+		Chain:        chain.String(),
+		Creator:      acc.String(),
+		Client:       pubkey,
+		ContractType: types.ContractType_PayAsYouGo,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1000),
 	}
 	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 

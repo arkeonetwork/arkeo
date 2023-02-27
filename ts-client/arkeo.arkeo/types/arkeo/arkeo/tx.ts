@@ -44,7 +44,7 @@ export interface MsgOpenContract {
   chain: string;
   client: string;
   delegate: string;
-  cType: ContractType;
+  contractType: ContractType;
   duration: number;
   rate: number;
   deposit: string;
@@ -373,7 +373,7 @@ export const MsgModProviderResponse = {
 };
 
 function createBaseMsgOpenContract(): MsgOpenContract {
-  return { creator: "", pubKey: "", chain: "", client: "", delegate: "", cType: 0, duration: 0, rate: 0, deposit: "" };
+  return { creator: "", pubKey: "", chain: "", client: "", delegate: "", contractType: 0, duration: 0, rate: 0, deposit: "" };
 }
 
 export const MsgOpenContract = {
@@ -393,8 +393,8 @@ export const MsgOpenContract = {
     if (message.delegate !== "") {
       writer.uint32(42).string(message.delegate);
     }
-    if (message.cType !== 0) {
-      writer.uint32(48).int32(message.cType);
+    if (message.contractType !== 0) {
+      writer.uint32(48).int32(message.contractType);
     }
     if (message.duration !== 0) {
       writer.uint32(56).int64(message.duration);
@@ -431,7 +431,7 @@ export const MsgOpenContract = {
           message.delegate = reader.string();
           break;
         case 6:
-          message.cType = reader.int32() as any;
+          message.contractType = reader.int32() as any;
           break;
         case 7:
           message.duration = longToNumber(reader.int64() as Long);
@@ -457,7 +457,7 @@ export const MsgOpenContract = {
       chain: isSet(object.chain) ? String(object.chain) : "",
       client: isSet(object.client) ? String(object.client) : "",
       delegate: isSet(object.delegate) ? String(object.delegate) : "",
-      cType: isSet(object.cType) ? contractTypeFromJSON(object.cType) : 0,
+      contractType: isSet(object.contractType) ? contractTypeFromJSON(object.contractType) : 0,
       duration: isSet(object.duration) ? Number(object.duration) : 0,
       rate: isSet(object.rate) ? Number(object.rate) : 0,
       deposit: isSet(object.deposit) ? String(object.deposit) : "",
@@ -471,7 +471,7 @@ export const MsgOpenContract = {
     message.chain !== undefined && (obj.chain = message.chain);
     message.client !== undefined && (obj.client = message.client);
     message.delegate !== undefined && (obj.delegate = message.delegate);
-    message.cType !== undefined && (obj.cType = contractTypeToJSON(message.cType));
+    message.contractType !== undefined && (obj.contractType = contractTypeToJSON(message.contractType));
     message.duration !== undefined && (obj.duration = Math.round(message.duration));
     message.rate !== undefined && (obj.rate = Math.round(message.rate));
     message.deposit !== undefined && (obj.deposit = message.deposit);
@@ -485,7 +485,7 @@ export const MsgOpenContract = {
     message.chain = object.chain ?? "";
     message.client = object.client ?? "";
     message.delegate = object.delegate ?? "";
-    message.cType = object.cType ?? 0;
+    message.contractType = object.contractType ?? 0;
     message.duration = object.duration ?? 0;
     message.rate = object.rate ?? 0;
     message.deposit = object.deposit ?? "";

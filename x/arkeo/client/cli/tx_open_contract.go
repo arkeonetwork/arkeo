@@ -35,7 +35,7 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
-			argCType, err := cast.ToInt32E(args[3])
+			argContractType, err := cast.ToInt32E(args[3])
 			if err != nil {
 				return err
 			}
@@ -72,7 +72,7 @@ func CmdOpenContract() *cobra.Command {
 				argChain,
 				cl,
 				delegate,
-				types.ContractType(argCType),
+				types.ContractType(argContractType),
 				argDuration,
 				argRate,
 				deposit,
