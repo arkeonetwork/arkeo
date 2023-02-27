@@ -2,6 +2,7 @@
 generated
 arkeod
 .arkeo/
+.sentinel*
 tmp-swagger-gen/
 
 .trunk

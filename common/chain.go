@@ -16,6 +16,7 @@ const (
 	BaseChain
 	BTCChain
 	ETHChain
+	GAIAChainRPCArchive
 )
 
 var ChainLookup = map[string]int32{
@@ -24,6 +25,7 @@ var ChainLookup = map[string]int32{
 	"github.com/arkeonetwork/arkeo-mainnet-fullnode": 2,
 	"btc-mainnet-fullnode":                           3,
 	"eth-mainnet-fullnode":                           4,
+	"gaia-mainnet-rpc-archive":                       5,
 }
 
 func (c Chain) String() string {
@@ -36,6 +38,8 @@ func (c Chain) String() string {
 		return "eth-mainnet-fullnode"
 	case StarWarsChain:
 		return "swapi.dev"
+	case GAIAChainRPCArchive:
+		return "gaia-mainnet-rpc-archive"
 	default:
 		return "unknown"
 	}

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sentinel-config
+  namespace: foundation
+data:
+  NET: "testnet"
+  MONIKER: "local"
+  WEBSITE: "n/a"
+  DESCRIPTION: "n/a"
+  LOCATION: "n/a"
+  PORT: "3636"
+  PROXY_HOST: "https://swapi.dev"
+  SOURCE_CHAIN: "http://arkeod-service:1317"
+  EVENT_STREAM_HOST: "arkeod-service:26657"
+  FREE_RATE_LIMIT: "10"
+  FREE_RATE_LIMIT_DURATION: "1m"
+  SUB_RATE_LIMIT: "10"
+  SUB_RATE_LIMIT_DURATION: "1m"
+  AS_GO_RATE_LIMIT: "10"
+  AS_GO_RATE_LIMIT_DURATION: "1m"
+  CLAIM_STORE_LOCATION: "/root/.arkeo/claims"
+  GAIA_RPC_ARCHIVE_HOST: "http://10.10.3.26:26657"

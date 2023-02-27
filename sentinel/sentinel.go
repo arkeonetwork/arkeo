@@ -39,18 +39,6 @@ func NewProxy(config conf.Configuration) Proxy {
 	}
 }
 
-// Serve a reverse proxy for a given url
-func (p Proxy) serveReverseProxy(w http.ResponseWriter, r *http.Request, host string) {
-	// parse the url
-	reverseUrl, _ := url.Parse(fmt.Sprintf("http://%s", host))
-
-	// create the reverse proxy
-	proxy := common.NewSingleHostReverseProxy(reverseUrl)
-
-	// Note that ServeHttp is non blocking and uses a go routine under the hood
-	proxy.ServeHTTP(w, r)
-}
-
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
 	// remove arkauth query arg
@@ -65,13 +53,30 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 
 	switch host { // nolint
 	case "btc-mainnet-fullnode":
-		// add username/password to request
-		host = fmt.Sprintf("thorchain:password@%s:8332", host)
+		// TODO
+	case "eth-mainnet-fullnode":
+		// TODO
 	case "arkeo-mainnet-fullnode":
-		host = "arkeod:1317"
+		// we forbid arkeo-mainnet-fullnode see chain.go:L50
+		// TODO
+	case "gaia-mainnet-rpc-archive":
+		gaiaHost := p.Config.GaiaRpcArchiveHost
+		gaiaHostUrl, err := url.Parse(gaiaHost)
+		if err != nil {
+			respondWithError(w, "failed to parse backend url", http.StatusInternalServerError)
+			return
+		}
+		r.URL.Scheme = gaiaHostUrl.Scheme
+		r.URL.Host = gaiaHostUrl.Host
+		r.URL.Path = gaiaHostUrl.Path
 	}
 
-	p.serveReverseProxy(w, r, host)
+	// Serve a reverse proxy for a given url
+	// create the reverse proxy
+	proxy := common.NewSingleHostReverseProxy(r.URL)
+
+	// Note that ServeHttp is non blocking and uses a go routine under the hood
+	proxy.ServeHTTP(w, r)
 }
 
 func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
@@ -116,28 +121,28 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
-		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
@@ -145,7 +150,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	contract, err := p.MemStore.Get(key)
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", key)
-		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -159,28 +164,28 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(path, "/")
 	if len(parts) < 5 {
-		http.Error(w, "not enough parameters", http.StatusBadRequest)
+		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
 	providerPK, err := common.NewPubKey(parts[2])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	chain, err := common.NewChain(parts[3])
 	if err != nil {
 		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
-		http.Error(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	spenderPK, err := common.NewPubKey(parts[4])
 	if err != nil {
 		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		http.Error(w, "Invalid spender pubkey", http.StatusBadRequest)
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
@@ -188,7 +193,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())
-		http.Error(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -221,4 +226,19 @@ func (p Proxy) Run() {
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux); err != nil {
 		panic(err)
 	}
+}
+
+func respondWithError(w http.ResponseWriter, message string, code int) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
+
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		response = []byte(`{"error": "failed to marshal response payload"}`)
+		code = http.StatusInternalServerError
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, _ = w.Write(response)
 }

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 USER="alice"
 
@@ -13,4 +13,4 @@ if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 	PUBKEY=$(arkeod debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 fi
 
-PROVIDER_PUBKEY=$PUBKEY sentinel
+PROVIDER_PUBKEY=$PUBKEY exec sentinel

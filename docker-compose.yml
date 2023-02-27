@@ -38,7 +38,7 @@ services:
       - "3636:3636"
     environment:
       NET: "mocknet"
-      MONIKER: "n/a"
+      MONIKER: "local"
       WEBSITE: "n/a"
       DESCRIPTION: "n/a"
       LOCATION: "n/a"
@@ -52,9 +52,9 @@ services:
       SUB_RATE_LIMIT_DURATION: "1m"
       AS_GO_RATE_LIMIT: 10
       AS_GO_RATE_LIMIT_DURATION: "1m"
-      CLAIM_STORE_LOCATION: "${HOME}/.arkeo/claims"
+      CLAIM_STORE_LOCATION: "/root/.arkeo/claims"
     entrypoint: "/scripts/sentinel.sh"
     command: sentinel
     volumes:
-      - "${HOME}/.arkeo:/root/.arkeo:rw"
+      - ".sentinel:/root/.arkeo:rw"
       - "./scripts:/scripts"

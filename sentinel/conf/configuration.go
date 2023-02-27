@@ -28,6 +28,7 @@ type Configuration struct {
 	SubTierRateLimitDuration  time.Duration `json:"subscription_tier_rate_limit_duration"`
 	AsGoTierRateLimit         int           `json:"pay_as_you_go_tier_rate_limit"`
 	AsGoTierRateLimitDuration time.Duration `json:"pay_as_you_go_tier_rate_limit_duration"`
+	GaiaRpcArchiveHost        string        `json:"gaia_rpc_archive_host"`
 }
 
 // Simple helper function to read an environment or return a default value
@@ -100,6 +101,7 @@ func NewConfiguration() Configuration {
 		AsGoTierRateLimit:         loadVarInt("AS_GO_RATE_LIMIT"),
 		AsGoTierRateLimitDuration: loadVarDuration("AS_GO_RATE_LIMIT_DURATION"),
 		ClaimStoreLocation:        loadVarString("CLAIM_STORE_LOCATION"),
+		GaiaRpcArchiveHost:        loadVarString("GAIA_RPC_ARCHIVE_HOST"),
 	}
 }
 
