@@ -16,7 +16,7 @@ message Provider {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   int32 chain = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];
-  string metadataURI = 3;
+  string metadata_uri = 3;
   uint64 metadata_nonce = 4;
   ProviderStatus status = 5;
   int64 min_contract_duration = 6;

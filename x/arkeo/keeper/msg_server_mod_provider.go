@@ -19,7 +19,7 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 		"receive MsgModProvider",
 		"pubkey", msg.PubKey,
 		"chain", msg.Chain,
-		"metatadata uri", msg.MetadataURI,
+		"metatadata uri", msg.MetadataUri,
 		"metadata nonce", msg.MetadataNonce,
 		"status", msg.Status,
 		"min contract duration", msg.MinContractDuration,
@@ -84,8 +84,8 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	}
 
 	// update metadata URI
-	if len(msg.MetadataURI) > 0 {
-		provider.MetadataURI = msg.MetadataURI
+	if len(msg.MetadataUri) > 0 {
+		provider.MetadataUri = msg.MetadataUri
 	}
 
 	// update metadata nonce

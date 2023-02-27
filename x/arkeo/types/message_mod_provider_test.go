@@ -32,13 +32,13 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 		Chain:               common.BTCChain.String(),
 		MinContractDuration: 12,
 		MaxContractDuration: 30,
-		MetadataURI:         "http://mad.hatter.net/test?foo=baz",
+		MetadataUri:         "http://mad.hatter.net/test?foo=baz",
 	}
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
 
 	// URI is too long
-	msg.MetadataURI = "http://mad.hatter.net/testsdkfjlsdkfjlsdfjsldfjkdsljflsdjfkdsjflsdjkfsdjlfsdjkfldsjflksjdfljsdlkfjsdlkfjdsklfjsdlkfjsdkljflksdjfklsdjflskdjflksdjflksdjfldsjflksdjfldskjflsdkfjsdlkjfksdljflskdjfsdlkjfdksljflsdkjfkldsjfsdlkfjlksdjfklsdjflkdsjfklsdjfsdkljflksdjflksdfjdklsjfl?foo=baz"
+	msg.MetadataUri = "http://mad.hatter.net/testsdkfjlsdkfjlsdfjsldfjkdsljflsdjfkdsjflsdjkfsdjlfsdjkfldsjflksjdfljsdlkfjsdlkfjdsklfjsdlkfjsdkljflksdjfklsdjflskdjflksdjflksdjfldsjflksdjfldskjflsdkfjsdlkjfksdljflskdjfsdlkjfdksljflsdkjfkldsjfsdlkfjlksdjfklsdjflkdsjfklsdjfsdkljflksdjflksdfjdklsjfl?foo=baz"
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidModProviderMetdataURI)
 }

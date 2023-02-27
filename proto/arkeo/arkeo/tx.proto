@@ -37,13 +37,13 @@ message MsgModProvider {
   string pub_key = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string chain = 3;
-  string metadataURI = 4;
-  uint64 metadataNonce = 5;
+  string metadata_uri = 4;
+  uint64 metadata_nonce = 5;
   ProviderStatus status = 6;
-  int64 minContractDuration = 7;
-  int64 maxContractDuration = 8;
-  int64 subscriptionRate = 9;
-  int64 payAsYouGoRate = 10;
+  int64 min_contract_duration = 7;
+  int64 max_contract_duration = 8;
+  int64 subscription_rate = 9;
+  int64 pay_as_you_go_rate = 10;
 }
 
 message MsgModProviderResponse {}
@@ -57,7 +57,7 @@ message MsgOpenContract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  ContractType cType = 6;
+  ContractType contract_type = 6;
   int64 duration = 7;
   int64 rate = 8;
   string deposit = 9 [
