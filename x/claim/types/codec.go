@@ -11,6 +11,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgClaimEth{}, "claim/ClaimEth", nil)
 	cdc.RegisterConcrete(&MsgClaimArkeo{}, "claim/ClaimArkeo", nil)
 	cdc.RegisterConcrete(&MsgTransferClaim{}, "claim/TransferClaim", nil)
+	cdc.RegisterConcrete(&MsgAddClaim{}, "claim/AddClaim", nil)
 	// this line is used by starport scaffolding # 2
 }
 
@@ -23,6 +24,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgTransferClaim{},
+	)
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgAddClaim{},
 	)
 	// this line is used by starport scaffolding # 3
 

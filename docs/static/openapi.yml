@@ -568,6 +568,8 @@ paths:
                       custom method
 
                       signatures required by gogoproto.
+                  is_transferable:
+                    type: boolean
                 title: A Claim Records is the metadata of claim data per address
         default:
           description: An unexpected error response.
@@ -46074,7 +46076,11 @@ definitions:
 
           NOTE: The amount field is an Int which implements the custom method
           signatures required by gogoproto.
+      is_transferable:
+        type: boolean
     title: A Claim Records is the metadata of claim data per address
+  arkeonetwork.arkeo.claim.MsgAddClaimResponse:
+    type: object
   arkeonetwork.arkeo.claim.MsgClaimArkeoResponse:
     type: object
   arkeonetwork.arkeo.claim.MsgClaimEthResponse:
@@ -46171,6 +46177,8 @@ definitions:
               method
 
               signatures required by gogoproto.
+          is_transferable:
+            type: boolean
         title: A Claim Records is the metadata of claim data per address
   arkeonetwork.arkeo.claim.QueryParamsResponse:
     type: object

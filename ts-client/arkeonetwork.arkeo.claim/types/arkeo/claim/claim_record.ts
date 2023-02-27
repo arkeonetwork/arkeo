@@ -86,10 +86,18 @@ export interface ClaimRecord {
   amountClaim: Coin | undefined;
   amountVote: Coin | undefined;
   amountDelegate: Coin | undefined;
+  isTransferable: boolean;
 }
 
 function createBaseClaimRecord(): ClaimRecord {
-  return { chain: 0, address: "", amountClaim: undefined, amountVote: undefined, amountDelegate: undefined };
+  return {
+    chain: 0,
+    address: "",
+    amountClaim: undefined,
+    amountVote: undefined,
+    amountDelegate: undefined,
+    isTransferable: false,
+  };
 }
 
 export const ClaimRecord = {
@@ -108,6 +116,9 @@ export const ClaimRecord = {
     }
     if (message.amountDelegate !== undefined) {
       Coin.encode(message.amountDelegate, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.isTransferable === true) {
+      writer.uint32(48).bool(message.isTransferable);
     }
     return writer;
   },
@@ -134,6 +145,9 @@ export const ClaimRecord = {
         case 5:
           message.amountDelegate = Coin.decode(reader, reader.uint32());
           break;
+        case 6:
+          message.isTransferable = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -149,6 +163,7 @@ export const ClaimRecord = {
       amountClaim: isSet(object.amountClaim) ? Coin.fromJSON(object.amountClaim) : undefined,
       amountVote: isSet(object.amountVote) ? Coin.fromJSON(object.amountVote) : undefined,
       amountDelegate: isSet(object.amountDelegate) ? Coin.fromJSON(object.amountDelegate) : undefined,
+      isTransferable: isSet(object.isTransferable) ? Boolean(object.isTransferable) : false,
     };
   },
 
@@ -162,6 +177,7 @@ export const ClaimRecord = {
       && (obj.amountVote = message.amountVote ? Coin.toJSON(message.amountVote) : undefined);
     message.amountDelegate !== undefined
       && (obj.amountDelegate = message.amountDelegate ? Coin.toJSON(message.amountDelegate) : undefined);
+    message.isTransferable !== undefined && (obj.isTransferable = message.isTransferable);
     return obj;
   },
 
@@ -178,6 +194,7 @@ export const ClaimRecord = {
     message.amountDelegate = (object.amountDelegate !== undefined && object.amountDelegate !== null)
       ? Coin.fromPartial(object.amountDelegate)
       : undefined;
+    message.isTransferable = object.isTransferable ?? false;
     return message;
   },
 };

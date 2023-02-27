@@ -1,5 +1,10 @@
 package types
 
+import (
+	"fmt"
+	"strings"
+)
+
 func (claimRecord *ClaimRecord) IsEmpty() bool {
 	if *claimRecord == (ClaimRecord{}) {
 		return true
@@ -22,4 +27,13 @@ func (claimRecord *ClaimRecord) IsEmpty() bool {
 	}
 
 	return true
+}
+
+// ChainFromString convert chain string to Chain Enum type
+func ChainFromString(chain string) (Chain, error) {
+	chainID, ok := Chain_value[strings.ToUpper(chain)]
+	if ok {
+		return Chain(chainID), nil
+	}
+	return Chain(-1), fmt.Errorf("invalid chain")
 }
