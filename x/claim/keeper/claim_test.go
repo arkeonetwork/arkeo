@@ -345,7 +345,7 @@ func TestClaimDecay(t *testing.T) {
 		Creator: addrArkeo3.String(),
 	}
 	_, err = msgServer.ClaimArkeo(sdkCtx, &claimMessage)
-	require.Error(t, err)
+	require.ErrorIs(t, err, types.ErrAirdropEnded)
 	// trigger event hook from voting
 	keepers.ClaimKeeper.AfterProposalVote(sdkCtx, 1, addrArkeo3)
 	// trigger event hook from delegation

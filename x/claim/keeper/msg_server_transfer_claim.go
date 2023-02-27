@@ -6,7 +6,6 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
@@ -18,13 +17,15 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
-	if !originalClaim.IsTransferable {
-		return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "claim record %s is not transferable", msg.Creator)
-	}
 
 	if originalClaim.IsEmpty() || originalClaim.AmountClaim.IsZero() {
-		return nil, errors.Wrapf(sdkerrors.ErrUnknownRequest, "no claimable amount for %s", msg.Creator)
+		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
+
+	if !originalClaim.IsTransferable {
+		return nil, errors.Wrapf(types.ErrClaimRecordNotTransferrable, "claim record for %s is not transferable", msg.Creator)
+	}
+
 	// create new arkeo claim
 	arkeoClaim := types.ClaimRecord{
 		Address:        msg.ToAddress,
@@ -32,6 +33,7 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 		AmountClaim:    originalClaim.AmountClaim,
 		AmountVote:     originalClaim.AmountVote,
 		AmountDelegate: originalClaim.AmountDelegate,
+		IsTransferable: false,
 	}
 
 	// set claim to completed

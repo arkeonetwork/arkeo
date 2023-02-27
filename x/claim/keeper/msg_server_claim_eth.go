@@ -25,7 +25,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
-		return nil, errors.Errorf("no claimable amount for %s", msg.EthAddress)
+		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
 
@@ -33,12 +33,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
 		totalAmountClaimable.Amount.String(), msg.Signature)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to validate signature for %s", msg.EthAddress)
+		return nil, errors.Wrapf(types.ErrInvalidSignature, "failed to validate signature for %s", msg.EthAddress)
 	}
 
 	if !isValid {
 		// this shouldn't happen without an error, but just in case
-		return nil, errors.New("invalid signature")
+		return nil, errors.Wrapf(types.ErrInvalidSignature, "failed to validate signature for %s", msg.EthAddress)
 	}
 
 	// create new arkeo claim
