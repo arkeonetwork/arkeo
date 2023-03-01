@@ -2,7 +2,7 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "claim-arkeo" // append arkeo to avoid namespace collisions with comsos claim module
+	ModuleName = "claimarkeo" // append arkeo to avoid namespace collisions with comsos claim module
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
