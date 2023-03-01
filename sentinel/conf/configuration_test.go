@@ -31,6 +31,7 @@ func (ConfigurationSuite) TestConfiguration(c *C) {
 	os.Setenv("AS_GO_RATE_LIMIT", "97")
 	os.Setenv("AS_GO_RATE_LIMIT_DURATION", "3h")
 	os.Setenv("CLAIM_STORE_LOCATION", "clammy")
+	os.Setenv("GAIA_RPC_ARCHIVE_HOST", "gaia-host")
 
 	config := NewConfiguration()
 
