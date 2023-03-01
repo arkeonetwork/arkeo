@@ -31,6 +31,10 @@ import (
 // ModuleBasics is a mock module basic manager for testing
 var ModuleBasics = module.NewBasicManager()
 
+const (
+	appName = `Arkeo` // it is case sensitive when using with keyring-backend=os
+)
+
 type Curl struct {
 	client         http.Client
 	baseURL        string
@@ -95,7 +99,11 @@ func main() {
 		println(fmt.Sprintf("error making http request: %+v", err))
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatalf("fail to close response body,%s", err)
+		}
+	}()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
@@ -105,13 +113,17 @@ func main() {
 }
 
 func (c Curl) getContract(provider, chain, spender string) types.Contract {
-	url := fmt.Sprintf("%s/contract/%s/%s/%s", c.baseURL, provider, chain, spender)
-	resp, err := c.client.Get(url)
+	u := fmt.Sprintf("%s/contract/%s/%s/%s", c.baseURL, provider, chain, spender)
+	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatalf("fail to close response body,%s", err)
+		}
+	}()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
@@ -127,13 +139,17 @@ func (c Curl) getContract(provider, chain, spender string) types.Contract {
 }
 
 func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
-	url := fmt.Sprintf("%s/claim/%s/%s/%s", c.baseURL, provider, chain, spender)
-	resp, err := c.client.Get(url)
+	u := fmt.Sprintf("%s/claim/%s/%s/%s", c.baseURL, provider, chain, spender)
+	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatalf("fail to close response body,%s", err)
+		}
+	}()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
@@ -154,7 +170,11 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatalf("fail to close response body,%s", err)
+		}
+	}()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err) // nolint
@@ -179,7 +199,7 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
 	// buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
+	kb, err := cKeys.New(appName, c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -212,7 +232,7 @@ func (c Curl) getSpender(user string) string {
 	buf := strings.NewReader("redacted\nredacted\nredacted\nredacted\nredacted\n")
 	// buf := bufio.NewReader(os.Stdin)
 
-	kb, err := cKeys.New("arkeod", c.keyringBackend, getArkeoHome(), buf, cdc)
+	kb, err := cKeys.New(appName, c.keyringBackend, getArkeoHome(), buf, cdc)
 	if err != nil {
 		log.Fatal(err)
 	}
