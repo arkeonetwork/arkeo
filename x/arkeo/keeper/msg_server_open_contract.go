@@ -84,6 +84,9 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		if msg.Rate != provider.PayAsYouGoRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}
+		if msg.SettlementDuration != provider.SettlementDuration {
+			return errors.Wrapf(types.ErrInvalidModProviderSettlementDuration, "mismatch settlement duration for provider: %d client sent %d", provider.SettlementDuration, msg.SettlementDuration)
+		}
 	default:
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
@@ -123,6 +126,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract.Duration = msg.Duration
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
+	contract.SettlementDuration = msg.SettlementDuration
 
 	exp := types.NewContractExpiration(msg.PubKey, chain, msg.FetchSpender())
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())

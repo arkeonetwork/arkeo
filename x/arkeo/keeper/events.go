@@ -72,7 +72,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 				sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
 				sdk.NewAttribute("open_cost", strconv.FormatInt(openCost, 10)),
 				sdk.NewAttribute("deposit", contract.Deposit.String()),
-				sdk.NewAttribute("settlement-duration", strconv.FormatUint(contract.SettlementDuration, 10)),
+				sdk.NewAttribute("settlement-duration", strconv.FormatInt(contract.SettlementDuration, 10)),
 			),
 		},
 	)

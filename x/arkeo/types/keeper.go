@@ -42,8 +42,11 @@ func (c Contract) FetchSpender() common.PubKey {
 	return c.Client
 }
 
-func (c Contract) Expiration() int64 {
-	return c.Height + c.Duration
+func (contract Contract) Expiration() int64 {
+	if contract.Type == ContractType_PayAsYouGo {
+		return contract.Height + contract.Duration + contract.SettlementDuration
+	}
+	return contract.Height + contract.Duration
 }
 
 func (c Contract) IsOpen(h int64) bool {

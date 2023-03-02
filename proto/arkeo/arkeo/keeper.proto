@@ -62,7 +62,7 @@ message Contract {
   ];
   int64 nonce = 11;
   int64 closed_height = 12;
-  uint64 settlement_duration = 13;
+  int64 settlement_duration = 13;
 }
 
 message ContractExpiration {
