@@ -13,12 +13,12 @@ const TypeMsgModProvider = "mod_provider"
 
 var _ sdk.Msg = &MsgModProvider{}
 
-func NewMsgModProvider(creator string, pubkey common.PubKey, chain, metadataURI string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
+func NewMsgModProvider(creator string, pubkey common.PubKey, chain, metadataUri string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
 		PubKey:              pubkey,
 		Chain:               chain,
-		MetadataURI:         metadataURI,
+		MetadataUri:         metadataUri,
 		MetadataNonce:       metadataNonce,
 		Status:              status,
 		MinContractDuration: minContractDuration,
@@ -92,8 +92,8 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		}
 	*/
 	// Ensure URIs don't get too long and cause chain bloat
-	if len(msg.MetadataURI) > 100 {
-		return errors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataURI))
+	if len(msg.MetadataUri) > 100 {
+		return errors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataUri))
 	}
 
 	// check durations

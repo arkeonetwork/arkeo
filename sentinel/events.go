@@ -72,7 +72,7 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 				return evt, err
 			}
 		case "metadata_uri":
-			evt.Provider.MetadataURI = v
+			evt.Provider.MetadataUri = v
 		case "metadata_nonce":
 			evt.Provider.MetadataNonce, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
