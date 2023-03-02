@@ -45,13 +45,6 @@ message MsgModProvider {
   int64 subscription_rate = 9;
   int64 pay_as_you_go_rate = 10;
   int64 settlement_duration = 11;
-  // Question #1 - how does a provider designate their free tier rate 
-  // Question #2 - how does a provider designate they dont accept subscriptions or pay as you go? 
-  // should we be validating their rates are never 0?
-  // we allow providers to cancel their bonds because "users can cancel their owned contracts at any time" - however this is not true
-  // need to discuss with others about, it seems problematic. 
-  // can overflow / wrap cause any sort of exploit.... should we be using some sort of "safemath"
-  // alot of these values can be passed as negative values, why ? does this open up another potential attack or abuse?
 }
 
 message MsgModProviderResponse {}
