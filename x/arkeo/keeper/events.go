@@ -51,6 +51,7 @@ func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider types.Provider)
 				sdk.NewAttribute("max_contract_duration", strconv.FormatInt(provider.MaxContractDuration, 10)),
 				sdk.NewAttribute("subscription_rate", strconv.FormatInt(provider.SubscriptionRate, 10)),
 				sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
+				sdk.NewAttribute("settlement-duration", strconv.FormatInt(provider.SettlementDuration, 10)),
 			),
 		},
 	)
@@ -71,6 +72,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 				sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
 				sdk.NewAttribute("open_cost", strconv.FormatInt(openCost, 10)),
 				sdk.NewAttribute("deposit", contract.Deposit.String()),
+				sdk.NewAttribute("settlement-duration", strconv.FormatUint(contract.SettlementDuration, 10)),
 			),
 		},
 	)

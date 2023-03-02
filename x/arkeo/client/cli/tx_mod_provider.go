@@ -13,9 +13,9 @@ import (
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [pubkey] [chain] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate]",
+		Use:   "mod-provider [pubkey] [chain] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration]",
 		Short: "Broadcast message modProvider",
-		Args:  cobra.ExactArgs(9),
+		Args:  cobra.ExactArgs(10),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			pubkey, err := common.NewPubKey(argPubkey)
@@ -50,6 +50,11 @@ func CmdModProvider() *cobra.Command {
 				return err
 			}
 
+			argSettlementDuration, err := cast.ToInt64E(args[9])
+			if err != nil {
+				return err
+			}
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -66,6 +71,7 @@ func CmdModProvider() *cobra.Command {
 				argMaxContractDuration,
 				argSubscriptionRate,
 				argPayAsYouGoRate,
+				argSettlementDuration,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

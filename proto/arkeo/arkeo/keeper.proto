@@ -23,12 +23,13 @@ message Provider {
   int64 max_contract_duration = 7;
   int64 subscription_rate = 8;
   int64 pay_as_you_go_rate = 9;
-  string bond = 10 [
+  int64 settlement_duration = 10; // number of blocks for settlement period for pay as you go contracts only.
+  string bond = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 last_update = 11;
+  int64 last_update = 12;
 }
 
 enum ContractType {
@@ -61,6 +62,7 @@ message Contract {
   ];
   int64 nonce = 11;
   int64 closed_height = 12;
+  uint64 settlement_duration = 13;
 }
 
 message ContractExpiration {

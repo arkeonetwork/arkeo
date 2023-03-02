@@ -32,4 +32,5 @@ var (
 	ErrClaimContractIncomeBadNonce           = errors.Register(ModuleName, 23, "nonce must be greater than zero")
 	ErrClaimContractIncomeClosed             = errors.Register(ModuleName, 24, "contract is closed")
 	ErrClaimContractIncomeInvalidSignature   = errors.Register(ModuleName, 25, "invalid signature")
+	ErrInvalidModProviderSettlementDuration  = errors.Register(ModuleName, 26, "invalid mode provider bad settlement duration")
 )

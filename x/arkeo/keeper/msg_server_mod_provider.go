@@ -99,6 +99,7 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	// update contract durations
 	provider.MinContractDuration = msg.MinContractDuration
 	provider.MaxContractDuration = msg.MaxContractDuration
+	provider.SettlementDuration = msg.SettlementDuration
 
 	// update contract rates
 	provider.SubscriptionRate = msg.SubscriptionRate

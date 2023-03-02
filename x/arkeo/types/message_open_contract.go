@@ -14,17 +14,20 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, client, delegate common.PubKey, contractType ContractType, duration, rate int64, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string,
+	client, delegate common.PubKey, contractType ContractType,
+	duration, rate int64, deposit cosmos.Int, settlementDuration int64) *MsgOpenContract {
 	return &MsgOpenContract{
-		Creator:      creator,
-		PubKey:       pubkey,
-		Chain:        chain,
-		ContractType: contractType,
-		Duration:     duration,
-		Rate:         rate,
-		Client:       client,
-		Deposit:      deposit,
-		Delegate:     delegate,
+		Creator:            creator,
+		PubKey:             pubkey,
+		Chain:              chain,
+		ContractType:       contractType,
+		Duration:           duration,
+		Rate:               rate,
+		Client:             client,
+		Deposit:            deposit,
+		Delegate:           delegate,
+		SettlementDuration: settlementDuration,
 	}
 }
 
@@ -103,6 +106,10 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 
 	if msg.Rate <= 0 {
 		return errors.Wrapf(ErrOpenContractRate, "contract rate cannot be zero")
+	}
+
+	if msg.SettlementDuration < 0 {
+		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
 	}
 
 	return nil
