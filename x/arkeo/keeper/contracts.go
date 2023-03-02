@@ -7,6 +7,7 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	gogotypes "github.com/gogo/protobuf/types"
 )
 
 func (k KVStore) setContract(ctx cosmos.Context, key string, record types.Contract) {
@@ -117,4 +118,28 @@ func (k KVStore) SetContractExpirationSet(ctx cosmos.Context, record types.Contr
 
 func (k KVStore) RemoveContractExpirationSet(ctx cosmos.Context, height int64) {
 	k.del(ctx, k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10)))
+}
+
+func (kvStore KVStore) GetNextContractId(ctx cosmos.Context) uint64 {
+	var contractId uint64
+	store := ctx.KVStore(kvStore.storeKey)
+
+	bz := store.Get([]byte(types.KeyNextGlobalContractId))
+	if bz == nil {
+		// initialize the pool id numbers
+		contractId = 1
+	} else {
+		val := gogotypes.UInt64Value{}
+		kvStore.cdc.MustUnmarshal(bz, &val)
+		contractId = val.GetValue()
+	}
+
+	kvStore.setNextContractId(ctx, contractId+1)
+	return contractId
+}
+
+func (k KVStore) setNextContractId(ctx cosmos.Context, contractId uint64) {
+	bz := k.cdc.MustMarshal(&gogotypes.UInt64Value{Value: contractId})
+	store := ctx.KVStore(k.storeKey)
+	store.Set([]byte(types.KeyNextGlobalContractId), bz)
 }

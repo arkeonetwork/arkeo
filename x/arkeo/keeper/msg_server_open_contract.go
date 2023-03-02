@@ -127,6 +127,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
 	contract.SettlementDuration = msg.SettlementDuration
+	contract.Id = k.mgr.keeper.GetNextContractId(ctx)
 
 	exp := types.NewContractExpiration(msg.PubKey, chain, msg.FetchSpender())
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())

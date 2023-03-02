@@ -80,6 +80,7 @@ message MsgCloseContract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  uint64 contract_id = 6;
 }
 
 message MsgCloseContractResponse {}
@@ -94,6 +95,7 @@ message MsgClaimContractIncome {
   bytes signature = 5;
   int64 nonce = 6;
   int64 height = 7;
+  uint64 contract_id = 8;
 }
 
 message MsgClaimContractIncomeResponse {}

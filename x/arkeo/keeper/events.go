@@ -28,6 +28,7 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseCon
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeCloseContract,
+				sdk.NewAttribute("id", strconv.FormatUint(msg.ContractId, 10)),
 				sdk.NewAttribute("pubkey", msg.PubKey.String()),
 				sdk.NewAttribute("chain", msg.Chain),
 				sdk.NewAttribute("client", msg.Client.String()),
@@ -62,6 +63,7 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeOpenContract,
+				sdk.NewAttribute("id", strconv.FormatUint(contract.Id, 10)),
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),
@@ -83,6 +85,7 @@ func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt, valIncome c
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeContractSettlement,
+				sdk.NewAttribute("id", strconv.FormatUint(contract.Id, 10)),
 				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),

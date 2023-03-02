@@ -15,6 +15,8 @@ const (
 
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_arkeo"
+
+	KeyNextGlobalContractId = "coontract_id_next"
 )
 
 func KeyPrefix(p string) []byte {
