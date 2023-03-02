@@ -33,7 +33,7 @@ FROM ubuntu:kinetic
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-      jq=1.6-2.1ubuntu3 curl=7.85.0-1ubuntu0.2 htop=3.2.1-1 vim=2:9.0.0242-1ubuntu1 ca-certificates=20211016ubuntu0.22.10.1 && \
+      jq=1.6-2.1ubuntu3 curl=7.85.0-1ubuntu0.3 htop=3.2.1-1 vim=2:9.0.0242-1ubuntu1 ca-certificates=20211016ubuntu0.22.10.1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
