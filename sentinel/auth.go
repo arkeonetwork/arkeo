@@ -36,6 +36,11 @@ type ArkAuth struct {
 	Signature []byte
 }
 
+// String implement fmt.Stringer
+func (aa ArkAuth) String() string {
+	return fmt.Sprintf("%s:%s:%s:%d:%d:%s", aa.Provider, aa.Chain, aa.Spender, aa.Height, aa.Nonce, hex.EncodeToString(aa.Signature))
+}
+
 func parseArkAuth(raw string) (ArkAuth, error) {
 	var aa ArkAuth
 	var err error
@@ -87,29 +92,28 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		var aa ArkAuth
-
 		args := r.URL.Query()
 		raw, aaOK := args[QueryArkAuth]
 		if aaOK {
 			aa, err = parseArkAuth(raw[0])
 		}
 		remoteAddr := p.getRemoteAddr(r)
-		if err != nil || aa.Validate(p.Config.ProviderPubKey) == nil {
+		if err == nil && aa.Validate(p.Config.ProviderPubKey) == nil {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
 			httpCode, err := p.paidTier(aa, remoteAddr)
-			if err != nil {
-				p.logger.Error("failed to serve paid tier request", "error", err)
-				http.Error(w, err.Error(), httpCode)
+			// paidTier can serve the request
+			if err == nil {
+				next.ServeHTTP(w, r)
 				return
 			}
-		} else {
-			p.logger.Info("serving free tier requests", "remote-addr", remoteAddr)
-			httpCode, err := p.freeTier(remoteAddr)
-			if err != nil {
-				p.logger.Error("failed to serve free tier request", "error", err)
-				http.Error(w, err.Error(), httpCode)
-				return
-			}
+			p.logger.Error("failed to serve paid tier request", "error", err, "http_code", httpCode)
+		}
+		p.logger.Info("serving free tier requests", "remote-addr", remoteAddr)
+		httpCode, err := p.freeTier(remoteAddr)
+		if err != nil {
+			p.logger.Error("failed to serve free tier request", "error", err)
+			http.Error(w, err.Error(), httpCode)
+			return
 		}
 		next.ServeHTTP(w, r)
 	})
