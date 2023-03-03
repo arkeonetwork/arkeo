@@ -142,3 +142,57 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Check(userSet.User, Equals, contract.FetchSpender())
 	c.Check(userSet.ContractSet.ContractIds, HasLen, 1)
 }
+
+func (OpenContractSuite) TestOpenContract(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+
+	providerPubKey := types.GetRandomPubKey()
+	providerAddress, err := providerPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+	chain := common.BTCChain
+	c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
+
+	msg := types.MsgOpenContract{
+		PubKey:       providerPubKey,
+		Chain:        chain.String(),
+		Creator:      providerAddress.String(),
+		Client:       providerPubKey,
+		ContractType: types.ContractType_PayAsYouGo,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1000),
+	}
+	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
+
+	contract, err := k.GetActiveContractForUser(ctx, providerPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(0))
+
+	// setup
+	clientPubKey := types.GetRandomPubKey()
+	clientAddress, err := clientPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+
+	msg = types.MsgOpenContract{
+		PubKey:       providerPubKey,
+		Chain:        chain.String(),
+		Creator:      clientAddress.String(),
+		Client:       clientPubKey,
+		ContractType: types.ContractType_PayAsYouGo,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1000),
+	}
+	c.Assert(k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))), IsNil)
+	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
+
+	contract, err = k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(1))
+}
