@@ -152,6 +152,22 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	providerAddress, err := providerPubKey.GetMyAddress()
 	c.Assert(err, IsNil)
 	chain := common.BTCChain
+	provider := types.NewProvider(providerPubKey, chain)
+	provider.Bond = cosmos.NewInt(10000000000)
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
+	modProviderMsg := types.MsgModProvider{
+		PubKey:              provider.PubKey,
+		Chain:               provider.Chain.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_Online,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+	}
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
+
+	c.Assert(err, IsNil)
 	c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
@@ -162,9 +178,10 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 		ContractType: types.ContractType_PayAsYouGo,
 		Duration:     100,
 		Rate:         15,
-		Deposit:      cosmos.NewInt(1000),
+		Deposit:      cosmos.NewInt(1500),
 	}
-	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
 
 	contract, err := k.GetActiveContractForUser(ctx, providerPubKey, providerPubKey, chain)
 	c.Assert(err, IsNil)
@@ -172,7 +189,6 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	c.Check(contract.IsEmpty(), Equals, false)
 	c.Check(contract.Id, Equals, uint64(0))
 
-	// setup
 	clientPubKey := types.GetRandomPubKey()
 	clientAddress, err := clientPubKey.GetMyAddress()
 	c.Assert(err, IsNil)
@@ -195,4 +211,7 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 
 	c.Check(contract.IsEmpty(), Equals, false)
 	c.Check(contract.Id, Equals, uint64(1))
+
+	_, err = s.OpenContract(ctx, &msg)
+	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
 }
