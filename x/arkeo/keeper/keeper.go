@@ -78,20 +78,22 @@ type KeeperProvider interface {
 
 type KeeperContract interface {
 	GetContractIterator(_ cosmos.Context) cosmos.Iterator
-	GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) (types.Contract, error)
+	GetContract(_ cosmos.Context, _ uint64) (types.Contract, error)
 	SetContract(_ cosmos.Context, _ types.Contract) error
-	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool
-	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey)
+	ContractExists(_ cosmos.Context, _ uint64) bool
+	RemoveContract(_ cosmos.Context, _ uint64)
 	GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator
 	GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error)
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error
 	RemoveContractExpirationSet(_ cosmos.Context, _ int64)
+	GetNextContractId(_ cosmos.Context) uint64
 }
 
 const (
 	prefixVersion               dbPrefix = "ver/"
 	prefixProvider              dbPrefix = "p/"
 	prefixContract              dbPrefix = "c/"
+	prefixContractNextId        dbPrefix = "cni/"
 	prefixContractExpirationSet dbPrefix = "ces/"
 )
 

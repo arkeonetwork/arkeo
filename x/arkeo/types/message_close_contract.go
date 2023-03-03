@@ -72,36 +72,5 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	if err != nil {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
-
-	// verify pubkey
-	_, err = common.NewPubKey(msg.PubKey.String())
-	if err != nil {
-		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
-	}
-
-	// verify chain
-	_, err = common.NewChain(msg.Chain)
-	if err != nil {
-		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
-	}
-
-	// contract can be cancelled by provider or client, this check if the
-	// client is making the request to cancel
-	if len(msg.Client) > 0 {
-		pk, err := common.NewPubKey(msg.Client.String())
-		if err != nil {
-			return errors.Wrapf(sdkerrors.ErrInvalidPubKey, "invalid client pubkey (%s)", err)
-		}
-
-		signer := msg.MustGetSigner()
-		client, err := pk.GetMyAddress()
-		if err != nil {
-			return err
-		}
-		if !signer.Equals(client) {
-			return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client pubkey: %s", msg.GetSigners(), client)
-		}
-	}
-
 	return nil
 }

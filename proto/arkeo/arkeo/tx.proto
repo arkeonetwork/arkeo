@@ -71,27 +71,17 @@ message MsgOpenContractResponse {}
 
 message MsgCloseContract {
   string creator = 1;
-  string pub_key = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
-  string client = 4
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  uint64 contract_id = 6;
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
   string creator = 1;
-  string pub_key = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
-  string spender = 4
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes signature = 5;
   int64 nonce = 6;
   int64 height = 7;
+  uint64 contract_id = 8;
 }
 
 message MsgClaimContractIncomeResponse {}

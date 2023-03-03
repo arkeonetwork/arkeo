@@ -94,7 +94,7 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return err
 	}
 	if !signer.Equals(client) {
-		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
+		return errors.Wrapf(ErrInvalidPubKey, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
 	}
 
 	if msg.Duration <= 0 {

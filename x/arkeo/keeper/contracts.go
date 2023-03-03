@@ -4,14 +4,15 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	gogotypes "github.com/gogo/protobuf/types"
 )
 
-func (k KVStore) setContract(ctx cosmos.Context, key string, record types.Contract) {
+func (k KVStore) setContract(ctx cosmos.Context, contract types.Contract) {
 	store := ctx.KVStore(k.storeKey)
-	buf := k.cdc.MustMarshal(&record)
+	key := k.GetContractKey(ctx, contract.Id)
+	buf := k.cdc.MustMarshal(&contract)
 	if buf == nil {
 		store.Delete([]byte(key))
 	} else {
@@ -19,14 +20,15 @@ func (k KVStore) setContract(ctx cosmos.Context, key string, record types.Contra
 	}
 }
 
-func (k KVStore) getContract(ctx cosmos.Context, key string, record *types.Contract) (bool, error) {
+func (k KVStore) getContract(ctx cosmos.Context, id uint64, contract *types.Contract) (bool, error) {
 	store := ctx.KVStore(k.storeKey)
+	key := k.GetContractKey(ctx, id)
 	if !store.Has([]byte(key)) {
 		return false, nil
 	}
 
 	bz := store.Get([]byte(key))
-	if err := k.cdc.Unmarshal(bz, record); err != nil {
+	if err := k.cdc.Unmarshal(bz, contract); err != nil {
 		return true, err
 	}
 	return true, nil
@@ -38,37 +40,34 @@ func (k KVStore) GetContractIterator(ctx cosmos.Context) cosmos.Iterator {
 }
 
 // GetContract get the entire Contract metadata struct based on given asset
-func (k KVStore) GetContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) (types.Contract, error) {
-	record := types.NewContract(pubkey, chain, client)
-	_, err := k.getContract(ctx, k.GetKey(ctx, prefixContract, record.Key()), &record)
-
-	return record, err
+func (k KVStore) GetContract(ctx cosmos.Context, id uint64) (types.Contract, error) {
+	contract := types.Contract{}
+	_, err := k.getContract(ctx, id, &contract)
+	return contract, err
 }
 
 // SetContract save the entire Contract metadata struct to key value store
-func (k KVStore) SetContract(ctx cosmos.Context, record types.Contract) error {
-	if record.ProviderPubKey.IsEmpty() || record.Chain.IsEmpty() || record.Client.IsEmpty() {
+func (k KVStore) SetContract(ctx cosmos.Context, contract types.Contract) error {
+	if contract.ProviderPubKey.IsEmpty() || contract.Chain.IsEmpty() || contract.Client.IsEmpty() {
 		return errors.New("cannot save a contract with an empty provider pubkey, chain, or client address")
 	}
-	k.setContract(ctx, k.GetKey(ctx, prefixContract, record.Key()), record)
+	k.setContract(ctx, contract)
 	return nil
 }
 
 // ContractExists check whether the given contract exist in the data store
-func (k KVStore) ContractExists(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) bool {
-	record := types.NewContract(pubkey, chain, client)
-	return k.has(ctx, k.GetKey(ctx, prefixContract, record.Key()))
+func (k KVStore) ContractExists(ctx cosmos.Context, id uint64) bool {
+	return k.has(ctx, k.GetContractKey(ctx, id))
 }
 
-func (k KVStore) RemoveContract(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain, client common.PubKey) {
-	record := types.NewContract(pubkey, chain, client)
-	k.del(ctx, k.GetKey(ctx, prefixContract, record.Key()))
+func (k KVStore) RemoveContract(ctx cosmos.Context, id uint64) {
+	k.del(ctx, k.GetContractKey(ctx, id))
 }
 
 func (k KVStore) setContractExpirationSet(ctx cosmos.Context, key string, record types.ContractExpirationSet) {
 	store := ctx.KVStore(k.storeKey)
 	buf := k.cdc.MustMarshal(&record)
-	if len(record.Contracts) == 0 {
+	if len(record.ContractSet.ContractIds) == 0 {
 		store.Delete([]byte(key))
 	} else {
 		store.Set([]byte(key), buf)
@@ -90,6 +89,10 @@ func (k KVStore) getContractExpirationSet(ctx cosmos.Context, key string, record
 
 func (k KVStore) getContractExpirationSetKey(ctx cosmos.Context, height int64) string {
 	return k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10))
+}
+
+func (k KVStore) GetContractKey(ctx cosmos.Context, id uint64) string {
+	return k.GetKey(ctx, prefixContract, strconv.FormatUint(id, 10))
 }
 
 // GetContractExpirationSetIterator iterate contract expiration sets
@@ -117,4 +120,28 @@ func (k KVStore) SetContractExpirationSet(ctx cosmos.Context, record types.Contr
 
 func (k KVStore) RemoveContractExpirationSet(ctx cosmos.Context, height int64) {
 	k.del(ctx, k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10)))
+}
+
+func (kvStore KVStore) GetNextContractId(ctx cosmos.Context) uint64 {
+	var contractId uint64
+	store := ctx.KVStore(kvStore.storeKey)
+
+	bz := store.Get([]byte(prefixContractNextId))
+	if bz == nil {
+		// initialize the id number, this assignment is not necessary, but it's here for clarity
+		contractId = 0
+	} else {
+		val := gogotypes.UInt64Value{}
+		kvStore.cdc.MustUnmarshal(bz, &val)
+		contractId = val.GetValue()
+	}
+
+	kvStore.setNextContractId(ctx, contractId+1) // increment and set
+	return contractId
+}
+
+func (k KVStore) setNextContractId(ctx cosmos.Context, contractId uint64) {
+	bz := k.cdc.MustMarshal(&gogotypes.UInt64Value{Value: contractId})
+	store := ctx.KVStore(k.storeKey)
+	store.Set([]byte(prefixContractNextId), bz)
 }

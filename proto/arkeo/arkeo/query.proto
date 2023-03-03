@@ -62,9 +62,7 @@ message QueryAllProviderResponse {
 }
 
 message QueryFetchContractRequest {
-  string pubkey = 1;
-  string chain = 2;
-  string client = 3;
+  uint64 contract_id = 1;
 }
 
 message QueryFetchContractResponse {

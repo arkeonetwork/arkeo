@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -46,22 +45,7 @@ func (k KVStore) FetchContract(c context.Context, req *types.QueryFetchContractR
 	}
 	ctx := sdk.UnwrapSDKContext(c)
 
-	pk, err := common.NewPubKey(req.Pubkey)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "pubkey not found")
-	}
-
-	chain, err := common.NewChain(req.Chain)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "chain not found")
-	}
-
-	client, err := common.NewPubKey(req.Client)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "client not found")
-	}
-
-	val, err := k.GetContract(ctx, pk, chain, client)
+	val, err := k.GetContract(ctx, req.ContractId)
 	if err != nil {
 		return nil, status.Error(codes.Aborted, err.Error())
 	}

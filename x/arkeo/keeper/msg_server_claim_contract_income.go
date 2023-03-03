@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -17,9 +16,7 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 
 	ctx.Logger().Info(
 		"receive MsgClaimContractIncome",
-		"pubkey", msg.PubKey,
-		"chain", msg.Chain,
-		"spender", msg.Spender,
+		"contract_id", msg.ContractId,
 		"nonce", msg.Nonce,
 		"height", msg.Height,
 	)
@@ -44,11 +41,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return errors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
-	chain, err := common.NewChain(msg.Chain)
-	if err != nil {
-		return err
-	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Spender)
+	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
 	}
@@ -69,11 +62,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 }
 
 func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
-	chain, err := common.NewChain(msg.Chain)
-	if err != nil {
-		return err
-	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.Spender)
+	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
 	}
