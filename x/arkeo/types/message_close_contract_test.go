@@ -51,3 +51,26 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
 }
+
+func (MsgCloseContractSuite) TestValidateBasicIssues(c *C) {
+	// setup
+	pubkey := GetRandomPubKey()
+	pubkey2 := GetRandomPubKey()
+
+	// exmaple showing a caller closing a contract
+	// for someone else
+	msg := MsgCloseContract{
+		Creator:  GetRandomBech32Addr().String(),
+		PubKey:   pubkey,
+		Client:   "",
+		Delegate: pubkey2,
+		Chain:    common.BTCChain.String(),
+	}
+
+	err := msg.ValidateBasic()
+	c.Check(err, ErrIs, ErrProviderBadSigner)
+
+	// Note: this test fails, because no error is returned!
+	// supplying no client allows anyone to close a contract that belongs
+	// to a specific delegate.
+}

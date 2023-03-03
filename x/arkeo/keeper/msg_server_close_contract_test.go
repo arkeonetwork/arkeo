@@ -89,3 +89,47 @@ func (CloseContractSuite) TestHandle(c *C) {
 	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(2))
 }
+
+func (CloseContractSuite) TestIssuesWithRandoClosingContract(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(14)
+
+	s := newMsgServer(k, sk)
+
+	// setup
+	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(500)), IsNil)
+	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(500)), IsNil)
+	pubkey := types.GetRandomPubKey()
+	provider, err := pubkey.GetMyAddress()
+	c.Assert(err, IsNil)
+	acc := types.GetRandomPubKey()
+	acc2 := types.GetRandomPubKey()
+	chain := common.BTCChain
+	c.Check(k.GetBalance(ctx, provider).IsZero(), Equals, true)
+
+	contract := types.NewContract(pubkey, chain, acc)
+	contract.Type = types.ContractType_Subscription
+	contract.Duration = 100
+	contract.Height = 10
+	contract.Rate = 5
+	contract.Deposit = cosmos.NewInt(500)
+	contract.Delegate = acc2
+	c.Assert(k.SetContract(ctx, contract), IsNil)
+
+	// this shows that a random caller can clost a subscription contract.
+	msg := types.MsgCloseContract{
+		PubKey:   pubkey,
+		Chain:    chain.String(),
+		Creator:  types.GetRandomBech32Addr().String(),
+		Delegate: acc2,
+	}
+	// c.Assert(s.CloseContractValidate(ctx, &msg), IsNil)
+	// c.Assert(s.CloseContractHandle(ctx, &msg), IsNil)
+
+	// this should fail, we are calling the close as a total rando.
+	err = msg.ValidateBasic()
+	c.Assert(err, IsNil)
+
+	_, err = s.CloseContract(ctx, &msg)
+	c.Assert(err, IsNil)
+}
