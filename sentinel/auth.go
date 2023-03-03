@@ -157,10 +157,10 @@ func (p Proxy) isRateLimited(key string, contractType types.ContractType) bool {
 	var limitTokens int
 	var limitDuration time.Duration
 	switch contractType {
-	case types.ContractType_Subscription:
+	case types.ContractType_SUBSCRIPTION:
 		limitTokens = p.Config.SubTierRateLimit
 		limitDuration = p.Config.SubTierRateLimitDuration
-	case types.ContractType_PayAsYouGo:
+	case types.ContractType_PAY_AS_YOU_GO:
 		limitTokens = p.Config.AsGoTierRateLimit
 		limitDuration = p.Config.AsGoTierRateLimitDuration
 	default:
@@ -203,7 +203,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// check if we've exceed the total number of pay-as-you-go queries
-	if contract.Type == types.ContractType_PayAsYouGo {
+	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
 		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate)) {
 			return http.StatusPaymentRequired, fmt.Errorf("contract spent")
 		}

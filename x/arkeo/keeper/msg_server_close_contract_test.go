@@ -61,7 +61,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	c.Check(k.GetBalance(ctx, provider).IsZero(), Equals, true)
 
 	contract := types.NewContract(pubkey, chain, acc)
-	contract.Type = types.ContractType_Subscription
+	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Rate = 5
