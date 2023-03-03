@@ -21,7 +21,7 @@ DOCKER         := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
-TAG?=testnet
+TAG?=latest
 ldflags = -X gitlab.com/arkeonetwork/arkeo/config.Version=$(VERSION) \
           -X gitlab.com/arkeonetwork/arkeo/config.GitCommit=$(COMMIT) \
           -X gitlab.com/arkeonetwork/arkeo/config.BuildTime=${NOW} \
@@ -148,3 +148,11 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+# arkeod binaries
+dist:
+	rm -rf bin && mkdir -p bin/linux_amd64 bin/linux_arm64 bin/darwin_amd64 bin/darwin_arm64
+	env GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=darwin GOARCH=amd64 go build -o bin/darwin_amd64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm64 ${BUILD_FLAGS} ./cmd/arkeod

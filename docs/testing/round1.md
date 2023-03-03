@@ -1,24 +1,70 @@
-# [Round 1] Stagenet Testing Docs
+# [Round 1] Testing Docs
 
 This phase of testing is about getting the complete full stack of a working environment, run by a single dev, while the team can run through a series of testing.
 
 ## Step 1: get the cli installed
+Either clone and build arkeo and its tools from source as outlined in [readme.md](../readme.md),
+or download a binary for your operating system below:
 
-Clone the repo (https://github.com/ArkeoNetwork/arkeo-protocol), and install the client. You will need `golang` already installed and you have environments (such as `GOBIN`). You’ll want `$GOBIN` in you `$PATH`
+- [macOS (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/darwin_amd64/arkeod)
+  - sha256 `427f3edfd0d7d58719f8a33d65826d39fa45a9fa2fa4e5e70835d8b4117b8ef0`
+- [macOS (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/darwin_arm64/arkeod)
+  - sha256 `3d55c33393aa744fbc619b70fe802413394503e6c941023316f99137d8944792`
+- [linux (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/linux_amd64/arkeod)
+  - sha256 `12a66411c342c0874778066a9548ff220850deb4265c79ccfa98e508d939d80d`
+- [linux (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/linux_arm64/arkeod)
+  - sha256 `69acb1916a5715fbf00eb733252999665d4f71a8a35c07e2c8e360cb7d78caad`
 
+after downloading the executable, verify the integrity of the downloaded artifact:
 ```bash
-$ cd ar
-$ cd arkeo-protocol
-$ make install tools
+$ cd /path/to/downloads
+# replace the sha256 sum we echo below with the appropriate sum for your os listed above
+$ echo '12a66411c342c0874778066a9548ff220850deb4265c79ccfa98e508d939d80d arkeod' | sha256sum -c -       
+arkeod: OK
+```
+note the output "`arkeod: OK`"
+
+now move the `arkeod` file to a directory that's on your PATH, or add the containing directory to your PATH:
+```bash
+$ export PATH=$PATH:/path/to/directory_containing
+```
+/path/to/directory is the directory you placed the arkeod binary you downloaded in. to make this permanent,
+add the `export PATH=...` statement above to your shell initialization scripts (.bashrc, .zshrc, etc.)
+
+verify installation by executing the arkeod command:
+```
+$ arkeod version
+0.0.1
 ```
 
+then update your client config as follows:
+```bash
+$ arkeod config chain-id arkeo
+$ arkeod config node tcp://testnet-seed.arkeo.shapeshift.com:26657
+```
+you can verify the configuration applied successfully:
+```bash
+$ arkeod config
+{
+  "chain-id": "arkeo",
+  "keyring-backend": "os",
+  "output": "text",
+  "node": "tcp://testnet-seed.arkeo.shapeshift.com:26657",
+  "broadcast-mode": "sync"
+}
+```
+and query the current block height:
+```
+$ arkeod query block | jq '.block.header.height'
+"157326"
+```
 ## Step 2: Setup a wallet
-
-Create a wallet using the cli and find you address and pubkey
+Create a wallet using the cli and find your address and pubkey.
 
 ```bash
 $ arkeod keys add <user> --keyring-backend file
 ```
+__Note__: optionally recover from an existing bip39 mnemonic by adding `--recover` to the `keys add` command above
 
 You should see your address from the output of this command. It will start with `arkeo1`
 
