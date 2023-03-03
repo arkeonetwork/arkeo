@@ -107,7 +107,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	}
 	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 
-	contract, err := k.GetContract(ctx, pubkey, chain, pubkey)
+	contract, err := k.GetActiveContractForUser(ctx, pubkey, pubkey, chain)
 	c.Assert(err, IsNil)
 
 	c.Check(contract.Type, Equals, types.ContractType_PAY_AS_YOU_GO)
@@ -125,5 +125,11 @@ func (OpenContractSuite) TestHandle(c *C) {
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	c.Assert(err, IsNil)
 	c.Check(set.Height, Equals, contract.Expiration())
-	c.Check(set.Contracts, HasLen, 1)
+	c.Check(set.ContractSet.ContractIds, HasLen, 1)
+
+	// check that contract has been added to the user
+	userSet, err := k.GetUserContractSet(ctx, contract.FetchSpender())
+	c.Assert(err, IsNil)
+	c.Check(userSet.User, Equals, contract.FetchSpender())
+	c.Check(userSet.ContractSet.ContractIds, HasLen, 1)
 }

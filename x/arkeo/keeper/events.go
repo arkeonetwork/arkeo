@@ -28,10 +28,7 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseCon
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeCloseContract,
-				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain),
-				sdk.NewAttribute("client", msg.Client.String()),
-				sdk.NewAttribute("delegate", msg.Delegate.String()),
+				sdk.NewAttribute("contract_id", strconv.FormatUint(msg.ContractId, 10)),
 			),
 		},
 	)

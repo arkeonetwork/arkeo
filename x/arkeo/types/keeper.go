@@ -75,14 +75,6 @@ func (c Contract) ClientAddress() cosmos.AccAddress {
 	return addr
 }
 
-func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client common.PubKey) *ContractExpiration {
-	return &ContractExpiration{
-		ProviderPubKey: pubkey,
-		Chain:          chain,
-		Client:         client,
-	}
-}
-
 func (ct *ContractType) UnmarshalJSON(b []byte) error {
 	var item interface{}
 	if err := json.Unmarshal(b, &item); err != nil {

@@ -20,14 +20,14 @@ func (s *KeeperContractSuite) TestContract(c *C) {
 
 	err := k.SetContract(ctx, contract)
 	c.Assert(err, IsNil)
-	contract, err = k.GetContract(ctx, contract.ProviderPubKey, contract.Chain, contract.Client)
+	contract, err = k.GetActiveContractForUser(ctx, contract.Client, contract.ProviderPubKey, contract.Chain)
 	c.Assert(err, IsNil)
 	c.Check(contract.Chain.Equals(common.BTCChain), Equals, true)
-	c.Check(k.ContractExists(ctx, contract.ProviderPubKey, contract.Chain, contract.Client), Equals, true)
-	c.Check(k.ContractExists(ctx, contract.ProviderPubKey, common.ETHChain, contract.Client), Equals, false)
+	c.Check(k.ContractExists(ctx, contract.Id), Equals, true)
+	c.Check(k.ContractExists(ctx, contract.Id+1), Equals, false)
 
-	k.RemoveContract(ctx, contract.ProviderPubKey, contract.Chain, contract.Client)
-	c.Check(k.ContractExists(ctx, contract.ProviderPubKey, contract.Chain, contract.Client), Equals, false)
+	k.RemoveContract(ctx, contract.Id)
+	c.Check(k.ContractExists(ctx, contract.Id), Equals, false)
 }
 
 func (s *KeeperContractSuite) TestContractExpirationSet(c *C) {
@@ -39,20 +39,17 @@ func (s *KeeperContractSuite) TestContractExpirationSet(c *C) {
 	set.Height = 100
 	c.Check(k.SetContractExpirationSet(ctx, set), IsNil) // empty asset NOT should error
 
-	exp := types.NewContractExpiration(types.GetRandomPubKey(), common.BTCChain, types.GetRandomPubKey())
-	set.Contracts = append(set.Contracts, exp)
+	contractId := uint64(100)
+	set.ContractSet.ContractIds = append(set.ContractSet.ContractIds, contractId)
 
 	c.Assert(k.SetContractExpirationSet(ctx, set), IsNil)
 	set, err = k.GetContractExpirationSet(ctx, set.Height)
 	c.Assert(err, IsNil)
 	c.Check(set.Height, Equals, int64(100))
-	c.Assert(set.Contracts, HasLen, 1)
-	c.Check(set.Contracts[0].ProviderPubKey, Equals, exp.ProviderPubKey)
-	c.Check(set.Contracts[0].Chain, Equals, exp.Chain)
-	c.Check(set.Contracts[0].Client.String(), Equals, exp.Client.String())
+	c.Assert(set.ContractSet.ContractIds, HasLen, 1)
 
 	k.RemoveContractExpirationSet(ctx, 100)
 	set, err = k.GetContractExpirationSet(ctx, set.Height)
 	c.Assert(err, IsNil)
-	c.Assert(set.Contracts, HasLen, 0)
+	c.Assert(set.ContractSet.ContractIds, HasLen, 0)
 }

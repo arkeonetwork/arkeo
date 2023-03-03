@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	gogotypes "github.com/gogo/protobuf/types"
@@ -91,6 +92,10 @@ func (k KVStore) getContractExpirationSetKey(ctx cosmos.Context, height int64) s
 	return k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10))
 }
 
+func (k KVStore) getUserContractSetKey(ctx cosmos.Context, pubkey common.PubKey) string {
+	return k.GetKey(ctx, prefixContractExpirationSet, pubkey.String())
+}
+
 func (k KVStore) GetContractKey(ctx cosmos.Context, id uint64) string {
 	return k.GetKey(ctx, prefixContract, strconv.FormatUint(id, 10))
 }
@@ -144,4 +149,60 @@ func (k KVStore) setNextContractId(ctx cosmos.Context, contractId uint64) {
 	bz := k.cdc.MustMarshal(&gogotypes.UInt64Value{Value: contractId})
 	store := ctx.KVStore(k.storeKey)
 	store.Set([]byte(prefixContractNextId), bz)
+}
+
+func (k KVStore) SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error {
+	if len(contractSet.User) == 0 {
+		return errors.New("cannot save a user contract set with a blank user")
+	}
+	k.setUserContractSet(ctx, k.getUserContractSetKey(ctx, contractSet.User), contractSet)
+	return nil
+}
+
+func (k KVStore) setUserContractSet(ctx cosmos.Context, key string, set types.UserContractSet) {
+	store := ctx.KVStore(k.storeKey)
+	buf := k.cdc.MustMarshal(&set)
+	if len(set.ContractSet.ContractIds) == 0 {
+		store.Delete([]byte(key))
+	} else {
+		store.Set([]byte(key), buf)
+	}
+}
+
+func (k KVStore) GetUserContractSet(ctx cosmos.Context, user common.PubKey) (types.UserContractSet, error) {
+	record := types.UserContractSet{
+		User: user,
+	}
+	_, err := k.getUserContractSet(ctx, k.getUserContractSetKey(ctx, user), &record)
+	return record, err
+}
+
+func (k KVStore) getUserContractSet(ctx cosmos.Context, key string, contractSet *types.UserContractSet) (bool, error) {
+	store := ctx.KVStore(k.storeKey)
+	if !store.Has([]byte(key)) {
+		return false, nil
+	}
+
+	bz := store.Get([]byte(key))
+	if err := k.cdc.Unmarshal(bz, contractSet); err != nil {
+		return true, err
+	}
+	return true, nil
+}
+
+func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error) {
+	contractSet, err := k.GetUserContractSet(ctx, user)
+	if err != nil {
+		return types.Contract{}, err
+	}
+	for _, contractId := range contractSet.ContractSet.ContractIds {
+		contract, err := k.GetContract(ctx, contractId)
+		if err != nil {
+			return types.Contract{}, err
+		}
+		if contract.ProviderPubKey.Equals(provider) && contract.Chain.Equals(chain) && contract.IsOpen(ctx.BlockHeight()) {
+			return contract, nil
+		}
+	}
+	return types.Contract{}, nil
 }

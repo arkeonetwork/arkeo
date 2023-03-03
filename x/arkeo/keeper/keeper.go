@@ -87,6 +87,9 @@ type KeeperContract interface {
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error
 	RemoveContractExpirationSet(_ cosmos.Context, _ int64)
 	GetNextContractId(_ cosmos.Context) uint64
+	SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error
+	GetUserContractSet(ctx cosmos.Context, pubkey common.PubKey) (types.UserContractSet, error)
+	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error)
 }
 
 const (

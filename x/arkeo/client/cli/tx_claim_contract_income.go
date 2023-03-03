@@ -15,48 +15,40 @@ import (
 
 func CmdClaimContractIncome() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-contract-income [pubkey] [chain] [client] [nonce] [height] [signature]",
+		Use:   "claim-contract-income [contract-id] [spender] [nonce] [height] [signature]",
 		Short: "Broadcast message claimContractIncome",
-		Args:  cobra.ExactArgs(6),
+		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argPubkey := args[0]
-			argChain := args[1]
-			argClient := args[2]
-			argSignature := args[5]
-			argNonce, err := cast.ToInt64E(args[3])
-			if err != nil {
-				return err
-			}
-			argHeight, err := cast.ToInt64E(args[4])
-			if err != nil {
-				return err
-			}
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			pubkey, err := common.NewPubKey(argPubkey)
+			argContractId, err := cast.ToUint64E(args[0])
+			if err != nil {
+				return err
+			}
+			spender, err := common.NewPubKey(args[1])
 			if err != nil {
 				return err
 			}
 
-			client, err := common.NewPubKey(argClient)
+			argNonce, err := cast.ToInt64E(args[2])
 			if err != nil {
 				return err
 			}
-
-			signature, err := hex.DecodeString(argSignature)
+			argHeight, err := cast.ToInt64E(args[3])
 			if err != nil {
 				return err
 			}
-
+			signature, err := hex.DecodeString(args[4])
+			if err != nil {
+				return err
+			}
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress().String(),
-				pubkey,
-				argChain,
-				client,
+				argContractId,
+				spender,
 				argNonce,
 				argHeight,
 				signature,

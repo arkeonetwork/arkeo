@@ -64,11 +64,17 @@ message Contract {
   uint64 id = 13;
 }
 
+message ContractSet {
+  repeated uint64 contract_ids = 2 [packed = true];
+}
+
 message ContractExpirationSet {
   int64 height = 1;
   ContractSet contract_set = 2;
 }
 
-message ContractSet {
-  repeated uint64 contract_ids = 2 [packed = true];
+message UserContractSet {
+  string user = 1
+      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  ContractSet contract_set = 2;
 }

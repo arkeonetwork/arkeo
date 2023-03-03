@@ -88,13 +88,13 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
+	activeContract, err := k.GetActiveContractForUser(ctx, msg.FetchSpender(), msg.PubKey, chain)
 	if err != nil {
 		return err
 	}
 
-	if contract.IsOpen(ctx.BlockHeight()) {
-		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", contract.Expiration()-ctx.BlockHeight())
+	if !activeContract.IsEmpty() {
+		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
 	}
 
 	return nil
@@ -126,13 +126,26 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract.Rate = msg.Rate
 	contract.Deposit = msg.Deposit
 
-	exp := types.NewContractExpiration(msg.PubKey, chain, msg.FetchSpender())
-	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
+	// create expiration set
+
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	if err != nil {
 		return err
 	}
-	set.Contracts = append(set.Contracts, exp)
-	err = k.SetContractExpirationSet(ctx, set)
+
+	expirationSet.ContractSet.ContractIds = append(expirationSet.ContractSet.ContractIds, contract.Id)
+	err = k.SetContractExpirationSet(ctx, expirationSet)
+	if err != nil {
+		return err
+	}
+
+	// create user set.
+	userSet, err := k.GetUserContractSet(ctx, msg.FetchSpender())
+	if err != nil {
+		return err
+	}
+	userSet.ContractSet.ContractIds = append(userSet.ContractSet.ContractIds, contract.Id)
+	err = k.SetUserContractSet(ctx, userSet)
 	if err != nil {
 		return err
 	}
