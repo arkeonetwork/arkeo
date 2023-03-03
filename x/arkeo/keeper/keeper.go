@@ -233,7 +233,7 @@ func (k KVStore) AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosm
 // SendFromAccountToModule transfer fund from one account to a module
 func (k KVStore) SendFromAccountToModule(ctx cosmos.Context, from cosmos.AccAddress, to string, coins cosmos.Coins) error {
 	if !k.HasCoins(ctx, from, coins) {
-		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance for account %s", from)
 	}
 	return k.coinKeeper.SendCoinsFromAccountToModule(ctx, from, to, coins)
 }

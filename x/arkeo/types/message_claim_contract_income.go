@@ -65,6 +65,14 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func (msg *MsgClaimContractIncome) GetBytesToSign() []byte {
+	return GetBytesToSign(msg.ContractId, msg.Spender, msg.Height, msg.Nonce)
+}
+
+func GetBytesToSign(contractId uint64, spender common.PubKey, height, nonce int64) []byte {
+	return []byte(fmt.Sprintf("%d:%s:%d:%d", contractId, spender, height, nonce))
+}
+
 func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Creator)
 	if err != nil {
@@ -94,8 +102,8 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	if err != nil {
 		return err
 	}
-	bites := []byte(fmt.Sprintf("%d:%s:%d:%d", msg.ContractId, msg.Spender, msg.Height, msg.Nonce))
-	if !pk.VerifySignature(bites, msg.Signature) {
+
+	if !pk.VerifySignature(msg.GetBytesToSign(), msg.Signature) {
 		return errors.Wrap(ErrClaimContractIncomeInvalidSignature, "")
 	}
 

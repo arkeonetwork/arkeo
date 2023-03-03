@@ -16,15 +16,20 @@ var _ = Suite(&OpenContractSuite{})
 func (OpenContractSuite) TestValidate(c *C) {
 	var err error
 	ctx, k, sk := SetupKeeperWithStaking(c)
-
+	ctx = ctx.WithBlockHeight(1)
 	s := newMsgServer(k, sk)
 
 	// setup
-	pubkey := types.GetRandomPubKey()
-	acc := types.GetRandomPubKey()
+	providerPubkey := types.GetRandomPubKey()
+	clientPubKey := types.GetRandomPubKey()
+	acc, err := clientPubKey.GetMyAddress()
+	if err != nil {
+		c.Error(err)
+	}
+
 	chain := common.BTCChain
 
-	provider := types.NewProvider(pubkey, chain)
+	provider := types.NewProvider(providerPubkey, chain)
 	provider.Bond = cosmos.NewInt(500_00000000)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.MaxContractDuration = 1000
@@ -35,15 +40,16 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		PubKey:       pubkey,
+		PubKey:       providerPubkey,
 		Chain:        chain.String(),
-		Client:       acc,
+		Client:       clientPubKey,
 		Creator:      acc.String(),
 		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
 		Rate:         15,
 		Deposit:      cosmos.NewInt(100 * 15),
 	}
+	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(100*25))), IsNil)
 	c.Assert(s.OpenContractValidate(ctx, &msg), IsNil)
 
 	// check duration
@@ -72,20 +78,21 @@ func (OpenContractSuite) TestValidate(c *C) {
 	provider.Bond = cosmos.NewInt(500_00000000)
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 
-	ctx = ctx.WithBlockHeight(14)
-	contract := types.NewContract(pubkey, chain, acc)
+	ctx = ctx.WithBlockHeight(15)
+	contract := types.NewContract(providerPubkey, chain, clientPubKey)
 	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
 	contract.Rate = 2
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+
+	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
 }
 
 func (OpenContractSuite) TestHandle(c *C) {
 	ctx, k, sk := SetupKeeperWithStaking(c)
-
+	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 
 	// setup
