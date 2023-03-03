@@ -30,7 +30,7 @@ func (ModProviderSuite) TestValidate(c *C) {
 		Chain:               provider.Chain.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
-		Status:              types.ProviderStatus_Online,
+		Status:              types.ProviderStatus_ONLINE,
 	}
 	c.Assert(s.ModProviderValidate(ctx, &msg), IsNil)
 
@@ -65,7 +65,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 		MetadataNonce:       3,
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
-		Status:              types.ProviderStatus_Online,
+		Status:              types.ProviderStatus_ONLINE,
 		SubscriptionRate:    11,
 		PayAsYouGoRate:      12,
 	}
@@ -77,7 +77,7 @@ func (ModProviderSuite) TestHandle(c *C) {
 	c.Check(provider.MetadataNonce, Equals, uint64(3))
 	c.Check(provider.MinContractDuration, Equals, int64(10))
 	c.Check(provider.MaxContractDuration, Equals, int64(500))
-	c.Check(provider.Status, Equals, types.ProviderStatus_Online)
+	c.Check(provider.Status, Equals, types.ProviderStatus_ONLINE)
 	c.Check(provider.SubscriptionRate, Equals, int64(11))
 	c.Check(provider.PayAsYouGoRate, Equals, int64(12))
 }

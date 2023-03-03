@@ -207,9 +207,9 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (cosmos.Int, error) {
 	var debt cosmos.Int
 	switch contract.Type {
-	case types.ContractType_Subscription:
+	case types.ContractType_SUBSCRIPTION:
 		debt = cosmos.NewInt(contract.Rate * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
-	case types.ContractType_PayAsYouGo:
+	case types.ContractType_PAY_AS_YOU_GO:
 		debt = cosmos.NewInt(contract.Rate * contract.Nonce).Sub(contract.Paid)
 	default:
 		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())

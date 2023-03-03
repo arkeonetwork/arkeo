@@ -60,7 +60,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
 	}
 
-	if provider.Status != types.ProviderStatus_Online {
+	if provider.Status != types.ProviderStatus_ONLINE {
 		return errors.Wrapf(types.ErrOpenContractBadProviderStatus, "has status %s", provider.Status.String())
 	}
 
@@ -73,14 +73,14 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	}
 
 	switch msg.ContractType {
-	case types.ContractType_Subscription:
+	case types.ContractType_SUBSCRIPTION:
 		if msg.Rate != provider.SubscriptionRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
 		}
 		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
 		}
-	case types.ContractType_PayAsYouGo:
+	case types.ContractType_PAY_AS_YOU_GO:
 		if msg.Rate != provider.PayAsYouGoRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}

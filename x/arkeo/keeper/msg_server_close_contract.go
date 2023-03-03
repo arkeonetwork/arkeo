@@ -59,7 +59,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 			return errors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized contract client")
 		}
 
-		if contract.Type == types.ContractType_PayAsYouGo {
+		if contract.Type == types.ContractType_PAY_AS_YOU_GO {
 			// clients are not allowed to cancel a pay-as-you-go contract as it
 			// could be a way to game providers. IE, the client make 1,000 requests
 			// and before the provider can claim the rewards, the client cancels

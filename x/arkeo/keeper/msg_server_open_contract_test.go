@@ -26,7 +26,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	provider := types.NewProvider(pubkey, chain)
 	provider.Bond = cosmos.NewInt(500_00000000)
-	provider.Status = types.ProviderStatus_Online
+	provider.Status = types.ProviderStatus_ONLINE
 	provider.MaxContractDuration = 1000
 	provider.MinContractDuration = 10
 	provider.SubscriptionRate = 15
@@ -39,7 +39,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 		Chain:        chain.String(),
 		Client:       acc,
 		Creator:      acc.String(),
-		ContractType: types.ContractType_Subscription,
+		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
 		Rate:         15,
 		Deposit:      cosmos.NewInt(100 * 15),
@@ -59,11 +59,11 @@ func (OpenContractSuite) TestValidate(c *C) {
 	msg.Rate = 10
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractMismatchRate)
-	msg.ContractType = types.ContractType_PayAsYouGo
+	msg.ContractType = types.ContractType_PAY_AS_YOU_GO
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractMismatchRate)
 	msg.Rate = 15
-	msg.ContractType = types.ContractType_Subscription
+	msg.ContractType = types.ContractType_SUBSCRIPTION
 
 	provider.Bond = cosmos.NewInt(1)
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
@@ -74,7 +74,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	ctx = ctx.WithBlockHeight(14)
 	contract := types.NewContract(pubkey, chain, acc)
-	contract.Type = types.ContractType_Subscription
+	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
 	contract.Rate = 2
@@ -100,7 +100,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 		Chain:        chain.String(),
 		Creator:      acc.String(),
 		Client:       pubkey,
-		ContractType: types.ContractType_PayAsYouGo,
+		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         15,
 		Deposit:      cosmos.NewInt(1000),
@@ -110,7 +110,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	contract, err := k.GetContract(ctx, pubkey, chain, pubkey)
 	c.Assert(err, IsNil)
 
-	c.Check(contract.Type, Equals, types.ContractType_PayAsYouGo)
+	c.Check(contract.Type, Equals, types.ContractType_PAY_AS_YOU_GO)
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))

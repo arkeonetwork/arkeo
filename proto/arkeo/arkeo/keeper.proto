@@ -7,8 +7,8 @@ import "cosmos_proto/cosmos.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 enum ProviderStatus {
-  Offline = 0;
-  Online = 1;
+  OFFLINE = 0;
+  ONLINE = 1;
 }
 
 message Provider {
@@ -32,8 +32,8 @@ message Provider {
 }
 
 enum ContractType {
-  Subscription = 0;
-  PayAsYouGo = 1;
+  SUBSCRIPTION = 0;
+  PAY_AS_YOU_GO = 1;
 }
 
 message Contract {
