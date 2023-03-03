@@ -4,7 +4,7 @@ info:
   name: ''
   description: ''
 paths:
-  /arkeo/contract/{pubkey}/{chain}/{client}:
+  /arkeo/contract/{contract_id}:
     get:
       operationId: ArkeoArkeoFetchContract
       responses:
@@ -50,6 +50,9 @@ paths:
                   closed_height:
                     type: string
                     format: int64
+                  id:
+                    type: string
+                    format: uint64
         default:
           description: An unexpected error response.
           schema:
@@ -69,18 +72,11 @@ paths:
                       type: string
                   additionalProperties: {}
       parameters:
-        - name: pubkey
+        - name: contract_id
           in: path
           required: true
           type: string
-        - name: chain
-          in: path
-          required: true
-          type: string
-        - name: client
-          in: path
-          required: true
-          type: string
+          format: uint64
       tags:
         - Query
   /arkeo/contracts:
@@ -131,6 +127,9 @@ paths:
                     closed_height:
                       type: string
                       format: int64
+                    id:
+                      type: string
+                      format: uint64
               pagination:
                 type: object
                 properties:
@@ -289,7 +288,7 @@ paths:
                   chain:
                     type: integer
                     format: int32
-                  metadataURI:
+                  metadata_uri:
                     type: string
                   metadata_nonce:
                     type: string
@@ -365,7 +364,7 @@ paths:
                     chain:
                       type: integer
                       format: int32
-                    metadataURI:
+                    metadata_uri:
                       type: string
                     metadata_nonce:
                       type: string
@@ -523,7 +522,9 @@ paths:
                   amount_claim:
                     title: >-
                       claimable amount per action (claim, vote, delegate -
-                      changed to 0 after action completed)
+                      changed to 0 after
+
+                      action completed)
                     type: object
                     properties:
                       denom:
@@ -35432,9 +35433,6 @@ paths:
             type: object
             properties:
               denom_trace:
-                description: >-
-                  denom_trace returns the requested denomination trace
-                  information.
                 type: object
                 properties:
                   path:
@@ -35447,6 +35445,11 @@ paths:
                   base_denom:
                     type: string
                     description: base denomination of the relayed fungible token.
+                description: >-
+                  DenomTrace contains the base denomination for ICS20 fungible
+                  tokens and the
+
+                  source tracing information path.
             description: >-
               QueryDenomTraceResponse is the response type for the
               Query/DenomTrace RPC
@@ -45337,6 +45340,9 @@ definitions:
       closed_height:
         type: string
         format: int64
+      id:
+        type: string
+        format: uint64
   arkeo.arkeo.ContractType:
     type: string
     enum:
@@ -45364,7 +45370,7 @@ definitions:
       chain:
         type: integer
         format: int32
-      metadataURI:
+      metadata_uri:
         type: string
       metadata_nonce:
         type: string
@@ -45440,6 +45446,9 @@ definitions:
             closed_height:
               type: string
               format: int64
+            id:
+              type: string
+              format: uint64
       pagination:
         type: object
         properties:
@@ -45479,7 +45488,7 @@ definitions:
             chain:
               type: integer
               format: int32
-            metadataURI:
+            metadata_uri:
               type: string
             metadata_nonce:
               type: string
@@ -45573,6 +45582,9 @@ definitions:
           closed_height:
             type: string
             format: int64
+          id:
+            type: string
+            format: uint64
   arkeo.arkeo.QueryFetchProviderResponse:
     type: object
     properties:
@@ -45584,7 +45596,7 @@ definitions:
           chain:
             type: integer
             format: int32
-          metadataURI:
+          metadata_uri:
             type: string
           metadata_nonce:
             type: string
@@ -46040,7 +46052,9 @@ definitions:
       amount_claim:
         title: >-
           claimable amount per action (claim, vote, delegate - changed to 0
-          after action completed)
+          after
+
+          action completed)
         type: object
         properties:
           denom:
@@ -46132,7 +46146,9 @@ definitions:
           amount_claim:
             title: >-
               claimable amount per action (claim, vote, delegate - changed to 0
-              after action completed)
+              after
+
+              action completed)
             type: object
             properties:
               denom:
@@ -70954,7 +70970,6 @@ definitions:
     type: object
     properties:
       denom_trace:
-        description: denom_trace returns the requested denomination trace information.
         type: object
         properties:
           path:
@@ -70967,6 +70982,11 @@ definitions:
           base_denom:
             type: string
             description: base denomination of the relayed fungible token.
+        description: >-
+          DenomTrace contains the base denomination for ICS20 fungible tokens
+          and the
+
+          source tracing information path.
     description: |-
       QueryDenomTraceResponse is the response type for the Query/DenomTrace RPC
       method.

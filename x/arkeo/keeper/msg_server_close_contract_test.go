@@ -20,11 +20,14 @@ func (CloseContractSuite) TestValidate(c *C) {
 	s := newMsgServer(k, sk)
 
 	// setup
-	pubkey := types.GetRandomPubKey()
-	acc := types.GetRandomPubKey()
+	providerPubkey := types.GetRandomPubKey()
+
+	clientPubKey := types.GetRandomPubKey()
+	clientAcct, err := clientPubKey.GetMyAddress()
+
 	chain := common.BTCChain
 
-	contract := types.NewContract(pubkey, chain, acc)
+	contract := types.NewContract(providerPubkey, chain, clientPubKey)
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Id = 1
@@ -32,14 +35,14 @@ func (CloseContractSuite) TestValidate(c *C) {
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    acc.String(),
+		Creator:    clientAcct.String(),
 		ContractId: contract.Id,
 	}
 	c.Assert(s.CloseContractValidate(ctx, &msg), IsNil)
 
 	contract.Duration = 3
 	c.Assert(k.SetContract(ctx, contract), IsNil)
-	err := s.CloseContractValidate(ctx, &msg)
+	err = s.CloseContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrCloseContractAlreadyClosed)
 }
 

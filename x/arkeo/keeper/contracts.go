@@ -195,6 +195,11 @@ func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey
 	if err != nil {
 		return types.Contract{}, err
 	}
+
+	if contractSet.ContractSet == nil || len(contractSet.ContractSet.ContractIds) == 0 {
+		return types.Contract{}, nil
+	}
+
 	for _, contractId := range contractSet.ContractSet.ContractIds {
 		contract, err := k.GetContract(ctx, contractId)
 		if err != nil {
@@ -204,5 +209,6 @@ func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey
 			return contract, nil
 		}
 	}
+
 	return types.Contract{}, nil
 }

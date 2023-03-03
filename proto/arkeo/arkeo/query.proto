@@ -26,7 +26,7 @@ service Query {
 
   rpc FetchContract(QueryFetchContractRequest)
       returns (QueryFetchContractResponse) {
-    option (google.api.http).get = "/arkeo/contract/{pubkey}/{chain}/{client}";
+    option (google.api.http).get = "/arkeo/contract/{contract_id}";
   }
   rpc ContractAll(QueryAllContractRequest) returns (QueryAllContractResponse) {
     option (google.api.http).get = "/arkeo/contracts";

@@ -57,8 +57,6 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 		Nonce:      24,
 		Spender:    spenderPubKey,
 	}
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidChain)
 
 	message := []byte(fmt.Sprintf("%d:%s:%d:%d", msg.ContractId, msg.Spender, msg.Height, msg.Nonce))
 	msg.Signature, _, err = kb.Sign("whatever", message)

@@ -111,6 +111,8 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Assert(err, IsNil)
 
 	c.Check(contract.Type, Equals, types.ContractType_PAY_AS_YOU_GO)
+	c.Check(contract.IsEmpty(), Equals, false)
+
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))

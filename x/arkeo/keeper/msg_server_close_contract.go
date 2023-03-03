@@ -46,8 +46,17 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	}
 
 	signerAccountAddress := msg.MustGetSigner()
+
 	clientPublicKey, err := common.NewPubKey(contract.Client.String())
+	if err != nil {
+		return err
+	}
+
 	clientAccountAddress, err := clientPublicKey.GetMyAddress()
+	if err != nil {
+		return err
+	}
+
 	if !signerAccountAddress.Equals(clientAccountAddress) {
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}

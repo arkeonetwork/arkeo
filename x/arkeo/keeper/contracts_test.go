@@ -17,10 +17,11 @@ func (s *KeeperContractSuite) TestContract(c *C) {
 	c.Check(k.SetContract(ctx, types.Contract{}), NotNil) // empty asset should error
 
 	contract := types.NewContract(types.GetRandomPubKey(), common.BTCChain, types.GetRandomPubKey())
-
+	contract.Id = 1
 	err := k.SetContract(ctx, contract)
 	c.Assert(err, IsNil)
-	contract, err = k.GetActiveContractForUser(ctx, contract.Client, contract.ProviderPubKey, contract.Chain)
+
+	contract, err = k.GetContract(ctx, contract.Id)
 	c.Assert(err, IsNil)
 	c.Check(contract.Chain.Equals(common.BTCChain), Equals, true)
 	c.Check(k.ContractExists(ctx, contract.Id), Equals, true)
@@ -37,6 +38,7 @@ func (s *KeeperContractSuite) TestContractExpirationSet(c *C) {
 	c.Check(k.SetContractExpirationSet(ctx, set), NotNil) // empty asset should error
 
 	set.Height = 100
+	set.ContractSet = &types.ContractSet{}
 	c.Check(k.SetContractExpirationSet(ctx, set), IsNil) // empty asset NOT should error
 
 	contractId := uint64(100)
@@ -51,5 +53,5 @@ func (s *KeeperContractSuite) TestContractExpirationSet(c *C) {
 	k.RemoveContractExpirationSet(ctx, 100)
 	set, err = k.GetContractExpirationSet(ctx, set.Height)
 	c.Assert(err, IsNil)
-	c.Assert(set.ContractSet.ContractIds, HasLen, 0)
+	c.Assert(set.ContractSet, IsNil)
 }

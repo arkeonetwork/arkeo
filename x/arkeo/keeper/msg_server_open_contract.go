@@ -133,6 +133,10 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
+	if expirationSet.ContractSet == nil {
+		expirationSet.ContractSet = &types.ContractSet{}
+	}
+
 	expirationSet.ContractSet.ContractIds = append(expirationSet.ContractSet.ContractIds, contract.Id)
 	err = k.SetContractExpirationSet(ctx, expirationSet)
 	if err != nil {
@@ -144,6 +148,11 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	if err != nil {
 		return err
 	}
+
+	if userSet.ContractSet == nil {
+		userSet.ContractSet = &types.ContractSet{}
+	}
+
 	userSet.ContractSet.ContractIds = append(userSet.ContractSet.ContractIds, contract.Id)
 	err = k.SetUserContractSet(ctx, userSet)
 	if err != nil {
