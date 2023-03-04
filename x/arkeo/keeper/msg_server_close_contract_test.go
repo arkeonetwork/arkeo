@@ -135,6 +135,8 @@ func (CloseContractSuite) TestCloseSubscriptionContract(c *C) {
 		Deposit:      cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &openContractMessage)
+	c.Assert(err, IsNil)
+
 	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
 	c.Assert(err, IsNil)
 
@@ -161,6 +163,7 @@ func (CloseContractSuite) TestCloseSubscriptionContract(c *C) {
 	c.Assert(err, IsNil)
 
 	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
 	closeContractMsg.ContractId = contract.Id
 
 	// confirm that the contract cannot be closed by the delegate
@@ -219,6 +222,8 @@ func (CloseContractSuite) TestClosePayAsYouGoContract(c *C) {
 		Deposit:      cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &openContractMessage)
+	c.Assert(err, IsNil)
+
 	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
 	c.Assert(err, IsNil)
 
@@ -245,6 +250,8 @@ func (CloseContractSuite) TestClosePayAsYouGoContract(c *C) {
 	c.Assert(err, IsNil)
 
 	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
 	closeContractMsg.ContractId = contract.Id
 
 	// confirm that the contract cannot be closed by the delegate

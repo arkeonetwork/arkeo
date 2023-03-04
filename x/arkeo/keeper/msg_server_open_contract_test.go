@@ -214,4 +214,16 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 
 	_, err = s.OpenContract(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
+
+	// confirm that the client can open a contract with a deleagate
+	delegatePubKey := types.GetRandomPubKey()
+	msg.Delegate = delegatePubKey
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	contract, err = k.GetActiveContractForUser(ctx, delegatePubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(2))
 }
