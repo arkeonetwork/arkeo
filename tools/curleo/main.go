@@ -60,24 +60,25 @@ func main() {
 	}
 	values := u.Query()
 
-	parts := strings.Split(u.Path, "/")
-	chain := parts[1]
+	// parts := strings.Split(u.Path, "/") // FIXME
+	// chain := parts[1] FIXME
 
 	curl := Curl{
 		client:         http.Client{Timeout: time.Duration(5) * time.Second},
 		baseURL:        fmt.Sprintf("%s://%s", u.Scheme, u.Host),
 		keyringBackend: *keyringBackend,
 	}
-	metadata := curl.parseMetadata()
+	// metadata := curl.parseMetadata() // FIXME
 	spender := curl.getSpender(*user)
-	claim := curl.getClaim(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+	contractId := uint64(0) // FIXME
+	claim := curl.getClaim(contractId)
 	height := claim.Height
 	if height == 0 {
-		contract := curl.getContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+		contract := curl.getContract(contractId)
 		height = contract.Height
 	}
 
-	auth := curl.sign(*user, metadata.Configuration.ProviderPubKey.String(), chain, spender, height, claim.Nonce+1)
+	auth := curl.sign(*user, contractId, spender, height, claim.Nonce+1)
 	values.Add(sentinel.QueryArkAuth, auth)
 
 	u.RawQuery = values.Encode()
@@ -189,7 +190,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	return meta
 }
 
-func (c Curl) sign(user string, contractId uint64, chain, spender string, height, nonce int64) string {
+func (c Curl) sign(user string, contractId uint64, spender string, height, nonce int64) string {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
