@@ -4,6 +4,89 @@ info:
   name: ''
   description: ''
 paths:
+  /arkeo/active_contract/{spender}/{provider}/{chain}:
+    get:
+      summary: Queries an active contract by spender, provider and chain.
+      operationId: ArkeoArkeoActiveContract
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              contract:
+                type: object
+                properties:
+                  provider_pub_key:
+                    type: string
+                  chain:
+                    type: integer
+                    format: int32
+                  client:
+                    type: string
+                  delegate:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - SUBSCRIPTION
+                      - PAY_AS_YOU_GO
+                    default: SUBSCRIPTION
+                  height:
+                    type: string
+                    format: int64
+                  duration:
+                    type: string
+                    format: int64
+                  rate:
+                    type: string
+                    format: int64
+                  deposit:
+                    type: string
+                  paid:
+                    type: string
+                  nonce:
+                    type: string
+                    format: int64
+                  closed_height:
+                    type: string
+                    format: int64
+                  id:
+                    type: string
+                    format: uint64
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: spender
+          in: path
+          required: true
+          type: string
+        - name: provider
+          in: path
+          required: true
+          type: string
+        - name: chain
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
   /arkeo/contract/{contract_id}:
     get:
       operationId: ArkeoArkeoFetchContract
@@ -44001,6 +44084,49 @@ definitions:
       - OFFLINE
       - ONLINE
     default: OFFLINE
+  arkeo.arkeo.QueryActiveContractResponse:
+    type: object
+    properties:
+      contract:
+        type: object
+        properties:
+          provider_pub_key:
+            type: string
+          chain:
+            type: integer
+            format: int32
+          client:
+            type: string
+          delegate:
+            type: string
+          type:
+            type: string
+            enum:
+              - SUBSCRIPTION
+              - PAY_AS_YOU_GO
+            default: SUBSCRIPTION
+          height:
+            type: string
+            format: int64
+          duration:
+            type: string
+            format: int64
+          rate:
+            type: string
+            format: int64
+          deposit:
+            type: string
+          paid:
+            type: string
+          nonce:
+            type: string
+            format: int64
+          closed_height:
+            type: string
+            format: int64
+          id:
+            type: string
+            format: uint64
   arkeo.arkeo.QueryAllContractResponse:
     type: object
     properties:

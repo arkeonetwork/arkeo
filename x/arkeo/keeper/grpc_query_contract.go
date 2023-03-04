@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -55,4 +56,31 @@ func (k KVStore) FetchContract(c context.Context, req *types.QueryFetchContractR
 	}
 
 	return &types.QueryFetchContractResponse{Contract: val}, nil
+}
+
+func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveContractRequest) (*types.QueryActiveContractResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	spenderPubKey, err := common.NewPubKey(req.Spender)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid spender pubkey")
+	}
+	providerPubKey, err := common.NewPubKey(req.Provider)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
+	}
+	chain, err := common.NewChain(req.Chain)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid chain")
+	}
+
+	activeContract, err := k.GetActiveContractForUser(ctx, spenderPubKey, providerPubKey, chain)
+	if err != nil {
+		return nil, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &types.QueryActiveContractResponse{Contract: activeContract}, nil
 }

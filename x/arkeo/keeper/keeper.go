@@ -62,6 +62,7 @@ type Keeper interface {
 	ProviderAll(c context.Context, req *types.QueryAllProviderRequest) (*types.QueryAllProviderResponse, error)
 	FetchContract(c context.Context, req *types.QueryFetchContractRequest) (*types.QueryFetchContractResponse, error)
 	ContractAll(c context.Context, req *types.QueryAllContractRequest) (*types.QueryAllContractResponse, error)
+	ActiveContract(goCtx context.Context, req *types.QueryActiveContractRequest) (*types.QueryActiveContractResponse, error)
 
 	// Keeper Interfaces
 	KeeperProvider
@@ -87,6 +88,8 @@ type KeeperContract interface {
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error
 	RemoveContractExpirationSet(_ cosmos.Context, _ int64)
 	GetNextContractId(_ cosmos.Context) uint64
+	SetNextContractId(ctx cosmos.Context, contractId uint64)
+	GetAndIncrementNextContractId(ctx cosmos.Context) uint64
 	SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error
 	GetUserContractSet(ctx cosmos.Context, pubkey common.PubKey) (types.UserContractSet, error)
 	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error)

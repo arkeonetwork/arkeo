@@ -82,7 +82,10 @@ export interface ClaimRecord {
   chain: Chain;
   /** arkeo address of claim user */
   address: string;
-  /** claimable amount per action (claim, vote, delegate - changed to 0 after action completed) */
+  /**
+   * claimable amount per action (claim, vote, delegate - changed to 0 after
+   * action completed)
+   */
   amountClaim: Coin | undefined;
   amountVote: Coin | undefined;
   amountDelegate: Coin | undefined;

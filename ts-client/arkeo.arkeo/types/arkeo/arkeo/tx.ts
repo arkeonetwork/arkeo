@@ -26,7 +26,7 @@ export interface MsgModProvider {
   creator: string;
   pubKey: string;
   chain: string;
-  metadataURI: string;
+  metadataUri: string;
   metadataNonce: number;
   status: ProviderStatus;
   minContractDuration: number;
@@ -55,10 +55,7 @@ export interface MsgOpenContractResponse {
 
 export interface MsgCloseContract {
   creator: string;
-  pubKey: string;
-  chain: string;
-  client: string;
-  delegate: string;
+  contractId: number;
 }
 
 export interface MsgCloseContractResponse {
@@ -66,8 +63,7 @@ export interface MsgCloseContractResponse {
 
 export interface MsgClaimContractIncome {
   creator: string;
-  pubKey: string;
-  chain: string;
+  contractId: number;
   spender: string;
   signature: Uint8Array;
   nonce: number;
@@ -197,7 +193,7 @@ function createBaseMsgModProvider(): MsgModProvider {
     creator: "",
     pubKey: "",
     chain: "",
-    metadataURI: "",
+    metadataUri: "",
     metadataNonce: 0,
     status: 0,
     minContractDuration: 0,
@@ -218,8 +214,8 @@ export const MsgModProvider = {
     if (message.chain !== "") {
       writer.uint32(26).string(message.chain);
     }
-    if (message.metadataURI !== "") {
-      writer.uint32(34).string(message.metadataURI);
+    if (message.metadataUri !== "") {
+      writer.uint32(34).string(message.metadataUri);
     }
     if (message.metadataNonce !== 0) {
       writer.uint32(40).uint64(message.metadataNonce);
@@ -259,7 +255,7 @@ export const MsgModProvider = {
           message.chain = reader.string();
           break;
         case 4:
-          message.metadataURI = reader.string();
+          message.metadataUri = reader.string();
           break;
         case 5:
           message.metadataNonce = longToNumber(reader.uint64() as Long);
@@ -292,7 +288,7 @@ export const MsgModProvider = {
       creator: isSet(object.creator) ? String(object.creator) : "",
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
       chain: isSet(object.chain) ? String(object.chain) : "",
-      metadataURI: isSet(object.metadataURI) ? String(object.metadataURI) : "",
+      metadataUri: isSet(object.metadataUri) ? String(object.metadataUri) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
       status: isSet(object.status) ? providerStatusFromJSON(object.status) : 0,
       minContractDuration: isSet(object.minContractDuration) ? Number(object.minContractDuration) : 0,
@@ -307,7 +303,7 @@ export const MsgModProvider = {
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = message.chain);
-    message.metadataURI !== undefined && (obj.metadataURI = message.metadataURI);
+    message.metadataUri !== undefined && (obj.metadataUri = message.metadataUri);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
     message.status !== undefined && (obj.status = providerStatusToJSON(message.status));
     message.minContractDuration !== undefined && (obj.minContractDuration = Math.round(message.minContractDuration));
@@ -322,7 +318,7 @@ export const MsgModProvider = {
     message.creator = object.creator ?? "";
     message.pubKey = object.pubKey ?? "";
     message.chain = object.chain ?? "";
-    message.metadataURI = object.metadataURI ?? "";
+    message.metadataUri = object.metadataUri ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
     message.status = object.status ?? 0;
     message.minContractDuration = object.minContractDuration ?? 0;
@@ -373,7 +369,17 @@ export const MsgModProviderResponse = {
 };
 
 function createBaseMsgOpenContract(): MsgOpenContract {
-  return { creator: "", pubKey: "", chain: "", client: "", delegate: "", contractType: 0, duration: 0, rate: 0, deposit: "" };
+  return {
+    creator: "",
+    pubKey: "",
+    chain: "",
+    client: "",
+    delegate: "",
+    contractType: 0,
+    duration: 0,
+    rate: 0,
+    deposit: "",
+  };
 }
 
 export const MsgOpenContract = {
@@ -533,7 +539,7 @@ export const MsgOpenContractResponse = {
 };
 
 function createBaseMsgCloseContract(): MsgCloseContract {
-  return { creator: "", pubKey: "", chain: "", client: "", delegate: "" };
+  return { creator: "", contractId: 0 };
 }
 
 export const MsgCloseContract = {
@@ -541,17 +547,8 @@ export const MsgCloseContract = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubKey !== "") {
-      writer.uint32(18).string(message.pubKey);
-    }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
-    }
-    if (message.client !== "") {
-      writer.uint32(34).string(message.client);
-    }
-    if (message.delegate !== "") {
-      writer.uint32(42).string(message.delegate);
+    if (message.contractId !== 0) {
+      writer.uint32(16).uint64(message.contractId);
     }
     return writer;
   },
@@ -567,16 +564,7 @@ export const MsgCloseContract = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubKey = reader.string();
-          break;
-        case 3:
-          message.chain = reader.string();
-          break;
-        case 4:
-          message.client = reader.string();
-          break;
-        case 5:
-          message.delegate = reader.string();
+          message.contractId = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -589,30 +577,21 @@ export const MsgCloseContract = {
   fromJSON(object: any): MsgCloseContract {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
-      client: isSet(object.client) ? String(object.client) : "",
-      delegate: isSet(object.delegate) ? String(object.delegate) : "",
+      contractId: isSet(object.contractId) ? Number(object.contractId) : 0,
     };
   },
 
   toJSON(message: MsgCloseContract): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = message.chain);
-    message.client !== undefined && (obj.client = message.client);
-    message.delegate !== undefined && (obj.delegate = message.delegate);
+    message.contractId !== undefined && (obj.contractId = Math.round(message.contractId));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgCloseContract>, I>>(object: I): MsgCloseContract {
     const message = createBaseMsgCloseContract();
     message.creator = object.creator ?? "";
-    message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? "";
-    message.client = object.client ?? "";
-    message.delegate = object.delegate ?? "";
+    message.contractId = object.contractId ?? 0;
     return message;
   },
 };
@@ -657,7 +636,7 @@ export const MsgCloseContractResponse = {
 };
 
 function createBaseMsgClaimContractIncome(): MsgClaimContractIncome {
-  return { creator: "", pubKey: "", chain: "", spender: "", signature: new Uint8Array(), nonce: 0, height: 0 };
+  return { creator: "", contractId: 0, spender: "", signature: new Uint8Array(), nonce: 0, height: 0 };
 }
 
 export const MsgClaimContractIncome = {
@@ -665,23 +644,20 @@ export const MsgClaimContractIncome = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubKey !== "") {
-      writer.uint32(18).string(message.pubKey);
-    }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
+    if (message.contractId !== 0) {
+      writer.uint32(16).uint64(message.contractId);
     }
     if (message.spender !== "") {
-      writer.uint32(34).string(message.spender);
+      writer.uint32(26).string(message.spender);
     }
     if (message.signature.length !== 0) {
-      writer.uint32(42).bytes(message.signature);
+      writer.uint32(34).bytes(message.signature);
     }
     if (message.nonce !== 0) {
-      writer.uint32(48).int64(message.nonce);
+      writer.uint32(40).int64(message.nonce);
     }
     if (message.height !== 0) {
-      writer.uint32(56).int64(message.height);
+      writer.uint32(48).int64(message.height);
     }
     return writer;
   },
@@ -697,21 +673,18 @@ export const MsgClaimContractIncome = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubKey = reader.string();
+          message.contractId = longToNumber(reader.uint64() as Long);
           break;
         case 3:
-          message.chain = reader.string();
-          break;
-        case 4:
           message.spender = reader.string();
           break;
-        case 5:
+        case 4:
           message.signature = reader.bytes();
           break;
-        case 6:
+        case 5:
           message.nonce = longToNumber(reader.int64() as Long);
           break;
-        case 7:
+        case 6:
           message.height = longToNumber(reader.int64() as Long);
           break;
         default:
@@ -725,8 +698,7 @@ export const MsgClaimContractIncome = {
   fromJSON(object: any): MsgClaimContractIncome {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      contractId: isSet(object.contractId) ? Number(object.contractId) : 0,
       spender: isSet(object.spender) ? String(object.spender) : "",
       signature: isSet(object.signature) ? bytesFromBase64(object.signature) : new Uint8Array(),
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
@@ -737,8 +709,7 @@ export const MsgClaimContractIncome = {
   toJSON(message: MsgClaimContractIncome): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.contractId !== undefined && (obj.contractId = Math.round(message.contractId));
     message.spender !== undefined && (obj.spender = message.spender);
     message.signature !== undefined
       && (obj.signature = base64FromBytes(message.signature !== undefined ? message.signature : new Uint8Array()));
@@ -750,8 +721,7 @@ export const MsgClaimContractIncome = {
   fromPartial<I extends Exact<DeepPartial<MsgClaimContractIncome>, I>>(object: I): MsgClaimContractIncome {
     const message = createBaseMsgClaimContractIncome();
     message.creator = object.creator ?? "";
-    message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? "";
+    message.contractId = object.contractId ?? 0;
     message.spender = object.spender ?? "";
     message.signature = object.signature ?? new Uint8Array();
     message.nonce = object.nonce ?? 0;

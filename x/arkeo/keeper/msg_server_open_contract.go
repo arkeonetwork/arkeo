@@ -118,7 +118,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	contract := types.NewContract(msg.PubKey, chain, msg.GetSpender())
-	contract.Id = k.Keeper.GetNextContractId(ctx)
+	contract.Id = k.Keeper.GetAndIncrementNextContractId(ctx)
 	contract.Client = msg.Client
 	contract.Type = msg.ContractType
 	contract.Height = ctx.BlockHeight()

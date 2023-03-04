@@ -127,6 +127,12 @@ func (k KVStore) RemoveContractExpirationSet(ctx cosmos.Context, height int64) {
 	k.del(ctx, k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10)))
 }
 
+func (kvStore KVStore) GetAndIncrementNextContractId(ctx cosmos.Context) uint64 {
+	contractId := kvStore.GetNextContractId(ctx)
+	kvStore.SetNextContractId(ctx, contractId+1) // increment and set
+	return contractId
+}
+
 func (kvStore KVStore) GetNextContractId(ctx cosmos.Context) uint64 {
 	var contractId uint64
 	store := ctx.KVStore(kvStore.storeKey)
@@ -140,12 +146,10 @@ func (kvStore KVStore) GetNextContractId(ctx cosmos.Context) uint64 {
 		kvStore.cdc.MustUnmarshal(bz, &val)
 		contractId = val.GetValue()
 	}
-
-	kvStore.setNextContractId(ctx, contractId+1) // increment and set
 	return contractId
 }
 
-func (k KVStore) setNextContractId(ctx cosmos.Context, contractId uint64) {
+func (k KVStore) SetNextContractId(ctx cosmos.Context, contractId uint64) {
 	bz := k.cdc.MustMarshal(&gogotypes.UInt64Value{Value: contractId})
 	store := ctx.KVStore(k.storeKey)
 	store.Set([]byte(prefixContractNextId), bz)

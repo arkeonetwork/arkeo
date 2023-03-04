@@ -23,6 +23,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			ctx.Logger().Error("unable to set contract", "provider", contract.ProviderPubKey, "chain", contract.Chain, "client", contract.Client, "error", err)
 		}
 	}
+	k.SetNextContractId(ctx, genState.NextContractId)
 }
 
 // ExportGenesis returns the module's exported genesis
@@ -51,8 +52,6 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		genesis.Contracts = append(genesis.Contracts, contract)
 	}
 	iter.Close()
-
-	// this line is used by starport scaffolding # genesis/module/export
-
+	genesis.NextContractId = k.GetNextContractId(ctx)
 	return genesis
 }
