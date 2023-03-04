@@ -60,25 +60,27 @@ func main() {
 	}
 	values := u.Query()
 
-	// parts := strings.Split(u.Path, "/") // FIXME
-	// chain := parts[1] FIXME
+	parts := strings.Split(u.Path, "/")
+	chain := parts[1]
 
 	curl := Curl{
 		client:         http.Client{Timeout: time.Duration(5) * time.Second},
 		baseURL:        fmt.Sprintf("%s://%s", u.Scheme, u.Host),
 		keyringBackend: *keyringBackend,
 	}
-	// metadata := curl.parseMetadata() // FIXME
+	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
-	contractId := uint64(0) // FIXME
-	claim := curl.getClaim(contractId)
+	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+	if contract.Height == 0 {
+		log.Fatalf("no active contract found for spender:%s provider:%s cbhain:%s", spender, metadata.Configuration.ProviderPubKey.String(), chain)
+	}
+	claim := curl.getClaim(contract.Id)
 	height := claim.Height
 	if height == 0 {
-		contract := curl.getContract(contractId)
 		height = contract.Height
 	}
 
-	auth := curl.sign(*user, contractId, spender, height, claim.Nonce+1)
+	auth := curl.sign(*user, contract.Id, spender, height, claim.Nonce+1)
 	values.Add(sentinel.QueryArkAuth, auth)
 
 	u.RawQuery = values.Encode()
@@ -113,8 +115,8 @@ func main() {
 	println(string(body))
 }
 
-func (c Curl) getContract(contractid uint64) types.Contract {
-	u := fmt.Sprintf("%s/contract/%d", c.baseURL, contractid)
+func (c Curl) getActiveContract(provider, chain, spender string) types.Contract {
+	u := fmt.Sprintf("%s/active_contract/%s/%s/%s", c.baseURL, spender, provider, chain)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
