@@ -29,7 +29,6 @@ func CmdActiveContract() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			params := &types.QueryActiveContractRequest{
-
 				Spender:  reqSpender,
 				Provider: reqProvider,
 				Chain:    reqChain,
