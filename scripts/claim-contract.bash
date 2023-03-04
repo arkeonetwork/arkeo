@@ -6,16 +6,11 @@ if [ -z "$1" ]; then
 fi
 
 if [ -z "$2" ]; then
-	echo "No provider supplied"
+	echo "No contract id supplied"
 	exit 1
 fi
 
 if [ -z "$3" ]; then
-	echo "No chain supplied"
-	exit 1
-fi
-
-if [ -z "$4" ]; then
 	echo "No nonce supplied"
 	exit 1
 fi
@@ -28,17 +23,13 @@ fi
 BIN="arkeod"
 BIN_TX="arkeo"
 USER="$1"
-PROVIDER="$2"
-CHAIN="$3"
-NONCE="$4"
-
-PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p --keyring-backend test | jq -r .key)
-PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
+CONTRACT_ID="$2"
+NONCE="$3"
 
 CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-HEIGHT=$(curl -s localhost:1317/arkeo/contract/"$PUBKEY"/"$CHAIN"/"$CLIENT_PUBKEY" | jq -r .contract.height)
+HEIGHT=$(curl -s localhost:1317/arkeo/contract/"$CONTRACT_ID" | jq -r .contract.height)
 
 if [ -z "$HEIGHT" ]; then
 	echo "No open contract to claim"
@@ -49,6 +40,6 @@ if [ "$HEIGHT" == "null" ]; then
 	exit 1
 fi
 
-SIGNATURE=$(signhere -u "$USER" -m "$PUBKEY:$CHAIN:$CLIENT_PUBKEY:$HEIGHT:$NONCE")
+SIGNATURE=$(signhere -u "$USER" -m "$CONTRACT_ID:$CLIENT_PUBKEY:$HEIGHT:$NONCE")
 
-$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$NONCE" "$HEIGHT" "$SIGNATURE"
+$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$CONTRACT_ID" "$CLIENT_PUBKEY" "$NONCE" "$HEIGHT" "$SIGNATURE"
