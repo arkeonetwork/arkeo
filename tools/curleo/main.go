@@ -72,17 +72,16 @@ func main() {
 	spender := curl.getSpender(*user)
 	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
 	if contract.Height == 0 {
-		log.Fatalf("no active contract found for spender:%s provider:%s cbhain:%s", spender, metadata.Configuration.ProviderPubKey.String(), chain)
+		println(fmt.Sprintf("no active contract found for spender:%s provider:%s cbhain:%s - will attempt free tier", spender, metadata.Configuration.ProviderPubKey.String(), chain))
+	} else {
+		claim := curl.getClaim(contract.Id)
+		height := claim.Height
+		if height == 0 {
+			height = contract.Height
+		}
+		auth := curl.sign(*user, contract.Id, spender, height, claim.Nonce+1)
+		values.Add(sentinel.QueryArkAuth, auth)
 	}
-	claim := curl.getClaim(contract.Id)
-	height := claim.Height
-	if height == 0 {
-		height = contract.Height
-	}
-
-	auth := curl.sign(*user, contract.Id, spender, height, claim.Nonce+1)
-	values.Add(sentinel.QueryArkAuth, auth)
-
 	u.RawQuery = values.Encode()
 
 	var resp *http.Response
