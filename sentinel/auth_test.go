@@ -1,7 +1,6 @@
 package sentinel
 
 import (
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -47,22 +46,21 @@ func (s *AuthSuite) TestArkAuth(c *C) {
 	var signature []byte
 	height := int64(12)
 	nonce := int64(3)
-	chain := common.BTCChain.String()
+	chain := common.BTCChain
+	contractId := uint64(50)
 
 	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", pubkey.String(), chain, pk, height, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 
-	sig := hex.EncodeToString(signature)
-
 	// happy path
-	raw := fmt.Sprintf("%s:%s:%s:%d:%d:%s", pubkey.String(), chain, pk, height, nonce, sig)
+	raw := GenerateArkAuthString(pubkey, contractId, pk, height, nonce, signature)
 	_, err = parseArkAuth(raw)
 	c.Assert(err, IsNil)
 
 	// bad signature
-	raw = fmt.Sprintf("%s:%s:%s:%d:%d:%s", pubkey.String(), chain, pk, height, nonce, "bad siggy")
-	_, err = parseArkAuth(raw)
+	raw = GenerateArkAuthString(pubkey, contractId, pk, height, nonce, signature)
+	_, err = parseArkAuth(raw + "randome not hex!")
 	c.Assert(err, NotNil)
 }
 
@@ -124,18 +122,18 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	contract := types.NewContract(pubkey, common.BTCChain, pk)
 	contract.Height = 5
 	contract.Duration = 100
+	contract.Id = 545
 	proxy.MemStore.SetHeight(10)
-	key := proxy.MemStore.Key(pubkey.String(), common.BTCChain.String(), pk.String())
-	proxy.MemStore.Put(key, contract)
+	proxy.MemStore.Put(contract)
 
 	// happy path
 	aa := ArkAuth{
-		Provider:  pubkey,
-		Height:    height,
-		Nonce:     nonce,
-		Chain:     common.BTCChain,
-		Spender:   pk,
-		Signature: signature,
+		Provider:   pubkey,
+		ContractId: contract.Id,
+		Height:     height,
+		Nonce:      nonce,
+		Spender:    pk,
+		Signature:  signature,
 	}
 	code, err := proxy.paidTier(aa, "127.0.0.1:8080")
 	c.Assert(err, IsNil)
@@ -147,7 +145,13 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	c.Assert(err, IsNil)
 	c.Check(claim.Nonce, Equals, int64(3))
 
-	// rate limited
+	// insure that same noonce is rejected.
+	code, err = proxy.paidTier(aa, "127.0.0.1:8080")
+	c.Assert(err, NotNil)
+	c.Check(code, Equals, http.StatusBadRequest)
+
+	// rate limited after increasing nonce
+	aa.Nonce = aa.Nonce + 1
 	code, err = proxy.paidTier(aa, "127.0.0.1:8080")
 	c.Assert(err, NotNil)
 	c.Check(code, Equals, http.StatusTooManyRequests)
@@ -194,22 +198,22 @@ func (s *AuthSuite) TestPaidTierFailFallbackToFreeTier(c *C) {
 	contract := types.NewContract(pubkey, common.BTCChain, pk)
 	contract.Height = 5
 	contract.Duration = 100
+	contract.Id = 55556
 	// set contract to expired
 	proxy.MemStore.SetHeight(120)
-	key := proxy.MemStore.Key(pubkey.String(), common.BTCChain.String(), pk.String())
-	proxy.MemStore.Put(key, contract)
+	proxy.MemStore.Put(contract)
 
 	nextHandler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	})
 	handlerForTest := proxy.auth(nextHandler)
 	c.Assert(handlerForTest, NotNil)
 	aa := ArkAuth{
-		Provider:  pubkey,
-		Height:    height,
-		Nonce:     nonce,
-		Chain:     common.BTCChain,
-		Spender:   pk,
-		Signature: signature,
+		Provider:   pubkey,
+		Height:     height,
+		Nonce:      nonce,
+		ContractId: contract.Id,
+		Spender:    pk,
+		Signature:  signature,
 	}
 
 	responseRecorder := httptest.NewRecorder()

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/tendermint/tendermint/libs/log"
@@ -101,7 +102,7 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if contract.IsClose(p.MemStore.GetHeight()) {
+		if contract.IsClosed(p.MemStore.GetHeight()) {
 			_ = p.ClaimStore.Remove(claim.Key()) // clear expired
 			p.logger.Info("claim expired")
 			continue
@@ -175,10 +176,10 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chain, err := common.NewChain(parts[3])
+	contractId, err := strconv.ParseUint(parts[3], 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
-		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
+		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[3])
+		respondWithError(w, fmt.Sprintf("bad contractId: %s", err), http.StatusBadRequest)
 		return
 	}
 
@@ -189,7 +190,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claim := NewClaim(providerPK, chain, spenderPK, 0, 0, "")
+	claim := NewClaim(providerPK, contractId, spenderPK, 0, 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())

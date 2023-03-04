@@ -137,9 +137,9 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Check(set.ContractSet.ContractIds, HasLen, 1)
 
 	// check that contract has been added to the user
-	userSet, err := k.GetUserContractSet(ctx, contract.FetchSpender())
+	userSet, err := k.GetUserContractSet(ctx, contract.GetSpender())
 	c.Assert(err, IsNil)
-	c.Check(userSet.User, Equals, contract.FetchSpender())
+	c.Check(userSet.User, Equals, contract.GetSpender())
 	c.Check(userSet.ContractSet.ContractIds, HasLen, 1)
 }
 

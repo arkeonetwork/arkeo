@@ -57,7 +57,7 @@ func (msg *MsgOpenContract) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgOpenContract) FetchSpender() common.PubKey {
+func (msg *MsgOpenContract) GetSpender() common.PubKey {
 	if !msg.Delegate.IsEmpty() {
 		return msg.Delegate
 	}

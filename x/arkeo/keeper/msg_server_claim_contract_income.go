@@ -54,7 +54,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
-	if contract.IsClose(ctx.BlockHeight()) {
+	if contract.IsClosed(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
 	}
 

@@ -88,7 +88,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, msg.FetchSpender(), msg.PubKey, chain)
+	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.PubKey, chain)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	contract := types.NewContract(msg.PubKey, chain, msg.FetchSpender())
+	contract := types.NewContract(msg.PubKey, chain, msg.GetSpender())
 	contract.Id = k.Keeper.GetNextContractId(ctx)
 	contract.Client = msg.Client
 	contract.Type = msg.ContractType
@@ -144,7 +144,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	// create user set.
-	userSet, err := k.GetUserContractSet(ctx, msg.FetchSpender())
+	userSet, err := k.GetUserContractSet(ctx, msg.GetSpender())
 	if err != nil {
 		return err
 	}

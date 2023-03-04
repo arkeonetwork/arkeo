@@ -126,6 +126,11 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				return evt, err
+			}
 		case "chain":
 			evt.Contract.Chain, err = common.NewChain(v)
 			if err != nil {
@@ -192,6 +197,11 @@ func parseCloseContract(input map[string]string) (CloseContract, error) {
 			if err != nil {
 				return evt, err
 			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				return evt, err
+			}
 		case "chain":
 			evt.Contract.Chain, err = common.NewChain(v)
 			if err != nil {
@@ -228,6 +238,11 @@ func parseClaimContractIncome(input map[string]string) (ClaimContractIncome, err
 		switch k {
 		case "pubkey":
 			evt.Contract.ProviderPubKey, err = common.NewPubKey(v)
+			if err != nil {
+				return evt, err
+			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				return evt, err
 			}

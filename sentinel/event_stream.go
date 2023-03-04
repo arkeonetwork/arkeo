@@ -108,7 +108,7 @@ func (p Proxy) EventListener(host string) {
 					if spender.IsEmpty() {
 						spender = evt.Contract.Client
 					}
-					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 					currClaim, err := p.ClaimStore.Get(newClaim.Key())
 					if err != nil {
 						logger.Error("failed to get claim", "error", err)
@@ -139,8 +139,7 @@ func (p Proxy) EventListener(host string) {
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
-			p.MemStore.Put(key, evt.Contract)
+			p.MemStore.Put(evt.Contract)
 		case result := <-closeContractOut:
 			evt, err := parseCloseContract(convertEvent("close_contract", result.Events))
 			if err != nil {
@@ -155,8 +154,7 @@ func (p Proxy) EventListener(host string) {
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
 			}
-			key := p.MemStore.Key(evt.Contract.ProviderPubKey.String(), evt.Contract.Chain.String(), spender.String())
-			p.MemStore.Put(key, evt.Contract)
+			p.MemStore.Put(evt.Contract)
 		case result := <-claimContractOut:
 			evt, err := parseClaimContractIncome(convertEvent("contract_settlement", result.Events))
 			if err != nil {
@@ -170,7 +168,7 @@ func (p Proxy) EventListener(host string) {
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
 			}
-			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Chain, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
 				logger.Error("failed to get claim", "error", err)

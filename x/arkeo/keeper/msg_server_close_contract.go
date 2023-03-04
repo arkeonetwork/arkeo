@@ -69,7 +69,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
 	}
 
-	if contract.IsClose(ctx.BlockHeight()) {
+	if contract.IsClosed(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
 	}
 
@@ -87,6 +87,6 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	k.CloseContractEvent(ctx, msg)
+	k.CloseContractEvent(ctx, &contract)
 	return nil
 }
