@@ -133,7 +133,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
-	contract.ProviderPubKey = data.Contract.ProviderPubKey
+	contract.Provider = data.Contract.ProviderPubKey
 	contract.Chain = data.Contract.Chain
 	contract.Client = data.Contract.Client
 	contract.Delegate = data.Contract.Delegate

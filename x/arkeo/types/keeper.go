@@ -21,14 +21,14 @@ func (p Provider) Key() string {
 	return fmt.Sprintf("%s/%s", p.PubKey, p.Chain)
 }
 
-func NewContract(pubkey common.PubKey, chain common.Chain, client common.PubKey) Contract {
+func NewContract(provider common.PubKey, chain common.Chain, client common.PubKey) Contract {
 	return Contract{
-		ProviderPubKey: pubkey,
-		Chain:          chain,
-		Client:         client,
-		Delegate:       common.EmptyPubKey,
-		Deposit:        cosmos.ZeroInt(),
-		Paid:           cosmos.ZeroInt(),
+		Provider: provider,
+		Chain:    chain,
+		Client:   client,
+		Delegate: common.EmptyPubKey,
+		Deposit:  cosmos.ZeroInt(),
+		Paid:     cosmos.ZeroInt(),
 	}
 }
 

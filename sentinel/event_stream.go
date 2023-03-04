@@ -101,7 +101,7 @@ func (p Proxy) EventListener(host string) {
 						logger.Error("failed to get close contract event", "error", err)
 						continue
 					}
-					if !isMyPubKey(evt.Contract.ProviderPubKey) {
+					if !isMyPubKey(evt.Contract.Provider) {
 						continue
 					}
 					spender := evt.Contract.Delegate
@@ -128,7 +128,7 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get open contract event", "error", err)
 				continue
 			}
-			if !isMyPubKey(evt.Contract.ProviderPubKey) {
+			if !isMyPubKey(evt.Contract.Provider) {
 				continue
 			}
 			if evt.Contract.Deposit.IsZero() {
@@ -142,7 +142,7 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get close contract event", "error", err)
 				continue
 			}
-			if !isMyPubKey(evt.Contract.ProviderPubKey) {
+			if !isMyPubKey(evt.Contract.Provider) {
 				continue
 			}
 			p.MemStore.Put(evt.Contract)
@@ -152,7 +152,7 @@ func (p Proxy) EventListener(host string) {
 				logger.Error("failed to get close contract event", "error", err)
 				continue
 			}
-			if !isMyPubKey(evt.Contract.ProviderPubKey) {
+			if !isMyPubKey(evt.Contract.Provider) {
 				continue
 			}
 			spender := evt.Contract.Delegate

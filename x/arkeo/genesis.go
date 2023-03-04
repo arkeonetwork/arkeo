@@ -20,7 +20,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 
 	for _, contract := range genState.Contracts {
 		if err := k.SetContract(ctx, contract); err != nil {
-			ctx.Logger().Error("unable to set contract", "provider", contract.ProviderPubKey, "chain", contract.Chain, "client", contract.Client, "error", err)
+			ctx.Logger().Error("unable to set contract", "provider", contract.Provider, "chain", contract.Chain, "client", contract.Client, "error", err)
 		}
 	}
 	k.SetNextContractId(ctx, genState.NextContractId)

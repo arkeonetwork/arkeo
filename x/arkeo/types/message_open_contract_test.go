@@ -26,10 +26,10 @@ func (MsgOpenContractSuite) TestValidateBasic(c *C) {
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgOpenContract{
-		Creator: acct.String(),
-		PubKey:  pubkey,
-		Client:  pubkey,
-		Chain:   common.BTCChain.String(),
+		Creator:  acct.String(),
+		Provider: pubkey,
+		Client:   pubkey,
+		Chain:    common.BTCChain.String(),
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrOpenContractDuration)

@@ -13,10 +13,10 @@ const TypeMsgModProvider = "mod_provider"
 
 var _ sdk.Msg = &MsgModProvider{}
 
-func NewMsgModProvider(creator string, pubkey common.PubKey, chain, metadataUri string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
+func NewMsgModProvider(creator string, provider common.PubKey, chain, metadataUri string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
-		PubKey:              pubkey,
+		Provider:            provider,
 		Chain:               chain,
 		MetadataUri:         metadataUri,
 		MetadataNonce:       metadataNonce,
@@ -64,9 +64,9 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	// verify pubkey
-	_, err = common.NewPubKey(msg.PubKey.String())
+	_, err = common.NewPubKey(msg.Provider.String())
 	if err != nil {
-		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid provider pubkey (%s): %s", msg.Provider, err)
 	}
 
 	// verify chain
@@ -76,7 +76,7 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	signer := msg.MustGetSigner()
-	provider, err := msg.PubKey.GetMyAddress()
+	provider, err := msg.Provider.GetMyAddress()
 	if err != nil {
 		return err
 	}

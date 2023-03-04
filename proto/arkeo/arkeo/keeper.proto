@@ -37,7 +37,7 @@ enum ContractType {
 }
 
 message Contract {
-  string provider_pub_key = 1
+  string provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   int32 chain = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];

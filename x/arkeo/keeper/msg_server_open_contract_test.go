@@ -40,7 +40,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		PubKey:       providerPubkey,
+		Provider:     providerPubkey,
 		Chain:        chain.String(),
 		Client:       clientPubKey,
 		Creator:      acc.String(),
@@ -103,7 +103,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
-		PubKey:       pubkey,
+		Provider:     pubkey,
 		Chain:        chain.String(),
 		Creator:      acc.String(),
 		Client:       pubkey,
@@ -157,7 +157,7 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 
 	modProviderMsg := types.MsgModProvider{
-		PubKey:              provider.PubKey,
+		Provider:            provider.PubKey,
 		Chain:               provider.Chain.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -171,7 +171,7 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
-		PubKey:       providerPubKey,
+		Provider:     providerPubKey,
 		Chain:        chain.String(),
 		Creator:      providerAddress.String(),
 		Client:       providerPubKey,
@@ -194,7 +194,7 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	c.Assert(err, IsNil)
 
 	msg = types.MsgOpenContract{
-		PubKey:       providerPubKey,
+		Provider:     providerPubKey,
 		Chain:        chain.String(),
 		Creator:      clientAddress.String(),
 		Client:       clientPubKey,

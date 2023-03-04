@@ -172,7 +172,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 	if !debt.IsZero() {
-		provider, err := contract.ProviderPubKey.GetMyAddress()
+		provider, err := contract.Provider.GetMyAddress()
 		if err != nil {
 			return contract, err
 		}

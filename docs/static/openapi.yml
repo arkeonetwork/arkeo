@@ -17,7 +17,7 @@ paths:
               contract:
                 type: object
                 properties:
-                  provider_pub_key:
+                  provider:
                     type: string
                   chain:
                     type: integer
@@ -99,7 +99,7 @@ paths:
               contract:
                 type: object
                 properties:
-                  provider_pub_key:
+                  provider:
                     type: string
                   chain:
                     type: integer
@@ -176,7 +176,7 @@ paths:
                 items:
                   type: object
                   properties:
-                    provider_pub_key:
+                    provider:
                       type: string
                     chain:
                       type: integer
@@ -43986,7 +43986,7 @@ definitions:
   arkeo.arkeo.Contract:
     type: object
     properties:
-      provider_pub_key:
+      provider:
         type: string
       chain:
         type: integer
@@ -44090,7 +44090,7 @@ definitions:
       contract:
         type: object
         properties:
-          provider_pub_key:
+          provider:
             type: string
           chain:
             type: integer
@@ -44135,7 +44135,7 @@ definitions:
         items:
           type: object
           properties:
-            provider_pub_key:
+            provider:
               type: string
             chain:
               type: integer
@@ -44271,7 +44271,7 @@ definitions:
       contract:
         type: object
         properties:
-          provider_pub_key:
+          provider:
             type: string
           chain:
             type: integer

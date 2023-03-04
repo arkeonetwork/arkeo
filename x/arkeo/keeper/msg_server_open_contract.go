@@ -17,7 +17,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 
 	ctx.Logger().Info(
 		"receive MsgOpenContract",
-		"pubkey", msg.PubKey,
+		"provder", msg.Provider,
 		"chain", msg.Chain,
 		"client", msg.Client,
 		"delegate", msg.Delegate,
@@ -50,7 +50,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, chain)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.PubKey, chain)
+	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, chain)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	contract := types.NewContract(msg.PubKey, chain, msg.GetSpender())
+	contract := types.NewContract(msg.Provider, chain, msg.GetSpender())
 	contract.Id = k.Keeper.GetAndIncrementNextContractId(ctx)
 	contract.Client = msg.Client
 	contract.Type = msg.ContractType

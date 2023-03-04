@@ -13,12 +13,12 @@ const TypeMsgBondProvider = "bond_provider"
 
 var _ sdk.Msg = &MsgBondProvider{}
 
-func NewMsgBondProvider(creator string, pubkey common.PubKey, chain string, bond cosmos.Int) *MsgBondProvider {
+func NewMsgBondProvider(creator string, provider common.PubKey, chain string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
-		Creator: creator,
-		PubKey:  pubkey,
-		Chain:   chain,
-		Bond:    bond,
+		Creator:  creator,
+		Provider: provider,
+		Chain:    chain,
+		Bond:     bond,
 	}
 }
 
@@ -58,13 +58,13 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 	}
 
 	// verify pubkey
-	_, err = common.NewPubKey(msg.PubKey.String())
+	_, err = common.NewPubKey(msg.Provider.String())
 	if err != nil {
-		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.PubKey, err)
+		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.Provider, err)
 	}
 
 	signer := msg.MustGetSigner()
-	provider, err := msg.PubKey.GetMyAddress()
+	provider, err := msg.Provider.GetMyAddress()
 	if err != nil {
 		return err
 	}
