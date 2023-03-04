@@ -28,9 +28,9 @@ paths:
                   type:
                     type: string
                     enum:
-                      - Subscription
-                      - PayAsYouGo
-                    default: Subscription
+                      - SUBSCRIPTION
+                      - PAY_AS_YOU_GO
+                    default: SUBSCRIPTION
                   height:
                     type: string
                     format: int64
@@ -105,9 +105,9 @@ paths:
                     type:
                       type: string
                       enum:
-                        - Subscription
-                        - PayAsYouGo
-                      default: Subscription
+                        - SUBSCRIPTION
+                        - PAY_AS_YOU_GO
+                      default: SUBSCRIPTION
                     height:
                       type: string
                       format: int64
@@ -296,9 +296,9 @@ paths:
                   status:
                     type: string
                     enum:
-                      - Offline
-                      - Online
-                    default: Offline
+                      - OFFLINE
+                      - ONLINE
+                    default: OFFLINE
                   min_contract_duration:
                     type: string
                     format: int64
@@ -372,9 +372,9 @@ paths:
                     status:
                       type: string
                       enum:
-                        - Offline
-                        - Online
-                      default: Offline
+                        - OFFLINE
+                        - ONLINE
+                      default: OFFLINE
                     min_contract_duration:
                       type: string
                       format: int64
@@ -45318,9 +45318,9 @@ definitions:
       type:
         type: string
         enum:
-          - Subscription
-          - PayAsYouGo
-        default: Subscription
+          - SUBSCRIPTION
+          - PAY_AS_YOU_GO
+        default: SUBSCRIPTION
       height:
         type: string
         format: int64
@@ -45346,9 +45346,9 @@ definitions:
   arkeo.arkeo.ContractType:
     type: string
     enum:
-      - Subscription
-      - PayAsYouGo
-    default: Subscription
+      - SUBSCRIPTION
+      - PAY_AS_YOU_GO
+    default: SUBSCRIPTION
   arkeo.arkeo.MsgBondProviderResponse:
     type: object
   arkeo.arkeo.MsgClaimContractIncomeResponse:
@@ -45378,9 +45378,9 @@ definitions:
       status:
         type: string
         enum:
-          - Offline
-          - Online
-        default: Offline
+          - OFFLINE
+          - ONLINE
+        default: OFFLINE
       min_contract_duration:
         type: string
         format: int64
@@ -45401,9 +45401,9 @@ definitions:
   arkeo.arkeo.ProviderStatus:
     type: string
     enum:
-      - Offline
-      - Online
-    default: Offline
+      - OFFLINE
+      - ONLINE
+    default: OFFLINE
   arkeo.arkeo.QueryAllContractResponse:
     type: object
     properties:
@@ -45424,9 +45424,9 @@ definitions:
             type:
               type: string
               enum:
-                - Subscription
-                - PayAsYouGo
-              default: Subscription
+                - SUBSCRIPTION
+                - PAY_AS_YOU_GO
+              default: SUBSCRIPTION
             height:
               type: string
               format: int64
@@ -45496,9 +45496,9 @@ definitions:
             status:
               type: string
               enum:
-                - Offline
-                - Online
-              default: Offline
+                - OFFLINE
+                - ONLINE
+              default: OFFLINE
             min_contract_duration:
               type: string
               format: int64
@@ -45560,9 +45560,9 @@ definitions:
           type:
             type: string
             enum:
-              - Subscription
-              - PayAsYouGo
-            default: Subscription
+              - SUBSCRIPTION
+              - PAY_AS_YOU_GO
+            default: SUBSCRIPTION
           height:
             type: string
             format: int64
@@ -45604,9 +45604,9 @@ definitions:
           status:
             type: string
             enum:
-              - Offline
-              - Online
-            default: Offline
+              - OFFLINE
+              - ONLINE
+            default: OFFLINE
           min_contract_duration:
             type: string
             format: int64
