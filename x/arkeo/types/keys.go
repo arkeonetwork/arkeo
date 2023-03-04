@@ -3,7 +3,7 @@ package types
 const (
 	// ModuleName defines the module name
 	ModuleName   = "arkeo"
-	ReserveName  = "reserve"
+	ReserveName  = "arkeo-reserve"
 	ProviderName = "providers"
 	ContractName = "contracts"
 
