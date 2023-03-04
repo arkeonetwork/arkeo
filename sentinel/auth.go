@@ -41,7 +41,11 @@ func (aa ArkAuth) String() string {
 }
 
 func GenerateArkAuthString(contractId uint64, spender common.PubKey, height int64, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%d:%s:%d:%d:%s", contractId, spender, height, nonce, hex.EncodeToString(signature))
+	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, spender.String(), height, nonce), hex.EncodeToString(signature))
+}
+
+func GenerateMessageToSign(contractId uint64, spender string, height int64, nonce int64) string {
+	return fmt.Sprintf("%d:%s:%d:%d", contractId, spender, height, nonce)
 }
 
 func parseArkAuth(raw string) (ArkAuth, error) {

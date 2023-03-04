@@ -164,7 +164,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 2 {
+	if len(parts) < 1 {
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
@@ -176,14 +176,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spenderPK, err := common.NewPubKey(parts[1])
-	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
-		return
-	}
-
-	claim := NewClaim(contractId, spenderPK, 0, 0, "")
+	claim := NewClaim(contractId, "", 0, 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())

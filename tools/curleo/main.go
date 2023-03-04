@@ -112,8 +112,8 @@ func main() {
 	println(string(body))
 }
 
-func (c Curl) getContract(provider, chain, spender string) types.Contract {
-	u := fmt.Sprintf("%s/contract/%s/%s/%s", c.baseURL, provider, chain, spender)
+func (c Curl) getContract(contractid uint64) types.Contract {
+	u := fmt.Sprintf("%s/contract/%d", c.baseURL, contractid)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
@@ -129,17 +129,17 @@ func (c Curl) getContract(provider, chain, spender string) types.Contract {
 		log.Fatal(err) // nolint
 	}
 
-	var claim types.Contract
-	err = json.Unmarshal(body, &claim)
+	var contract types.Contract
+	err = json.Unmarshal(body, &contract)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return claim
+	return contract
 }
 
-func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
-	u := fmt.Sprintf("%s/claim/%s/%s/%s", c.baseURL, provider, chain, spender)
+func (c Curl) getClaim(contractId uint64) sentinel.Claim {
+	u := fmt.Sprintf("%s/claim/%d", c.baseURL, contractId)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
@@ -189,7 +189,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	return meta
 }
 
-func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) string {
+func (c Curl) sign(user string, contractId uint64, chain, spender string, height, nonce int64) string {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
@@ -203,8 +203,7 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	msg := fmt.Sprintf("%s:%s:%s:%d:%d", provider, chain, spender, height, nonce)
+	msg := sentinel.GenerateMessageToSign(contractId, spender, height, nonce)
 
 	println("invoking Sign...")
 	signature, pk, err := kb.Sign(user, []byte(msg))
