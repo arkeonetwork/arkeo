@@ -24,7 +24,7 @@ func (CloseContractSuite) TestValidate(c *C) {
 
 	clientPubKey := types.GetRandomPubKey()
 	clientAcct, err := clientPubKey.GetMyAddress()
-
+	c.Assert(err, IsNil)
 	chain := common.BTCChain
 
 	contract := types.NewContract(providerPubkey, chain, clientPubKey)

@@ -151,7 +151,7 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	c.Check(code, Equals, http.StatusBadRequest)
 
 	// rate limited after increasing nonce
-	aa.Nonce = aa.Nonce + 1
+	aa.Nonce++
 	code, err = proxy.paidTier(aa, "127.0.0.1:8080")
 	c.Assert(err, NotNil)
 	c.Check(code, Equals, http.StatusTooManyRequests)
