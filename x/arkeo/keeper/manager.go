@@ -41,6 +41,10 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 		return err
 	}
 
+	if set.ContractSet == nil || len(set.ContractSet.ContractIds) == 0 {
+		return nil
+	}
+
 	for _, contractId := range set.ContractSet.ContractIds {
 		contract, err := mgr.keeper.GetContract(ctx, contractId)
 		if err != nil {
