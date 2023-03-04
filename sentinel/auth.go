@@ -28,7 +28,6 @@ var (
 )
 
 type ArkAuth struct {
-	Provider   common.PubKey
 	ContractId uint64
 	Spender    common.PubKey
 	Height     int64
@@ -38,42 +37,38 @@ type ArkAuth struct {
 
 // String implement fmt.Stringer
 func (aa ArkAuth) String() string {
-	return GenerateArkAuthString(aa.Provider, aa.ContractId, aa.Spender, aa.Height, aa.Nonce, aa.Signature)
+	return GenerateArkAuthString(aa.ContractId, aa.Spender, aa.Height, aa.Nonce, aa.Signature)
 }
 
-func GenerateArkAuthString(provider common.PubKey, contractId uint64, spender common.PubKey, height int64, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%s:%d:%s:%d:%d:%s", provider, contractId, spender, height, nonce, hex.EncodeToString(signature))
+func GenerateArkAuthString(contractId uint64, spender common.PubKey, height int64, nonce int64, signature []byte) string {
+	return fmt.Sprintf("%d:%s:%d:%d:%s", contractId, spender, height, nonce, hex.EncodeToString(signature))
 }
 
 func parseArkAuth(raw string) (ArkAuth, error) {
 	var aa ArkAuth
 	var err error
 
-	parts := strings.SplitN(raw, ":", 6)
-	if len(parts) != 6 {
+	parts := strings.SplitN(raw, ":", 5)
+	if len(parts) != 5 {
 		return aa, fmt.Errorf("not properly formatted ark-auth string: %s", raw)
 	}
-	aa.Provider, err = common.NewPubKey(parts[0])
+	aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
 		return aa, err
 	}
-	aa.ContractId, err = strconv.ParseUint(parts[1], 10, 64)
+	aa.Spender, err = common.NewPubKey(parts[1])
 	if err != nil {
 		return aa, err
 	}
-	aa.Spender, err = common.NewPubKey(parts[2])
+	aa.Height, err = strconv.ParseInt(parts[2], 10, 64)
 	if err != nil {
 		return aa, err
 	}
-	aa.Height, err = strconv.ParseInt(parts[3], 10, 64)
+	aa.Nonce, err = strconv.ParseInt(parts[3], 10, 64)
 	if err != nil {
 		return aa, err
 	}
-	aa.Nonce, err = strconv.ParseInt(parts[4], 10, 64)
-	if err != nil {
-		return aa, err
-	}
-	aa.Signature, err = hex.DecodeString(parts[5])
+	aa.Signature, err = hex.DecodeString(parts[4])
 	if err != nil {
 		return aa, err
 	}
@@ -84,9 +79,6 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	creator, err := provider.GetMyAddress()
 	if err != nil {
 		return fmt.Errorf("internal server error: %w", err)
-	}
-	if !provider.Equals(aa.Provider) {
-		return fmt.Errorf("provider pubkey does not match provider")
 	}
 	msg := types.NewMsgClaimContractIncome(creator.String(), aa.ContractId, aa.Spender, aa.Nonce, aa.Height, aa.Signature)
 	return msg.ValidateBasic()
@@ -193,7 +185,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	sig := hex.EncodeToString(aa.Signature)
-	claim := NewClaim(aa.Provider, aa.ContractId, aa.Spender, aa.Nonce, aa.Height, sig)
+	claim := NewClaim(aa.ContractId, aa.Spender, aa.Nonce, aa.Height, sig)
 	if p.ClaimStore.Has(key) {
 		var err error
 		claim, err = p.ClaimStore.Get(key)

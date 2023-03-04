@@ -108,7 +108,7 @@ func (p Proxy) EventListener(host string) {
 					if spender.IsEmpty() {
 						spender = evt.Contract.Client
 					}
-					newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+					newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 					currClaim, err := p.ClaimStore.Get(newClaim.Key())
 					if err != nil {
 						logger.Error("failed to get claim", "error", err)
@@ -159,7 +159,7 @@ func (p Proxy) EventListener(host string) {
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
 			}
-			newClaim := NewClaim(evt.Contract.ProviderPubKey, evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
 				logger.Error("failed to get claim", "error", err)

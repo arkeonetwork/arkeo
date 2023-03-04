@@ -54,12 +54,12 @@ func (s *AuthSuite) TestArkAuth(c *C) {
 	c.Assert(err, IsNil)
 
 	// happy path
-	raw := GenerateArkAuthString(pubkey, contractId, pk, height, nonce, signature)
+	raw := GenerateArkAuthString(contractId, pk, height, nonce, signature)
 	_, err = parseArkAuth(raw)
 	c.Assert(err, IsNil)
 
 	// bad signature
-	raw = GenerateArkAuthString(pubkey, contractId, pk, height, nonce, signature)
+	raw = GenerateArkAuthString(contractId, pk, height, nonce, signature)
 	_, err = parseArkAuth(raw + "randome not hex!")
 	c.Assert(err, NotNil)
 }
@@ -128,7 +128,6 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 
 	// happy path
 	aa := ArkAuth{
-		Provider:   pubkey,
 		ContractId: contract.Id,
 		Height:     height,
 		Nonce:      nonce,
@@ -208,7 +207,6 @@ func (s *AuthSuite) TestPaidTierFailFallbackToFreeTier(c *C) {
 	handlerForTest := proxy.auth(nextHandler)
 	c.Assert(handlerForTest, NotNil)
 	aa := ArkAuth{
-		Provider:   pubkey,
 		Height:     height,
 		Nonce:      nonce,
 		ContractId: contract.Id,
