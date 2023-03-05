@@ -739,16 +739,6 @@ func (app *App) Name() string { return app.BaseApp.Name() }
 // GetBaseApp returns the base app of the application
 func (app App) GetBaseApp() *baseapp.BaseApp { return app.BaseApp }
 
-// BeginBlocker application updates every begin block
-func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return app.mm.BeginBlock(ctx, req)
-}
-
-// EndBlocker application updates every end block
-func (app *App) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.mm.EndBlock(ctx, req)
-}
-
 // InitChainer application update at chain initialization
 func (app *App) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
