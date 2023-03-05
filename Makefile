@@ -1,4 +1,3 @@
-
 ########################################################################################
 # Environment Checks
 ########################################################################################
@@ -12,7 +11,7 @@ endif
 # Config
 ########################################################################################
 
-.PHONY: build test tools export healthcheck run-mocknet build-mocknet stop-mocknet ps-mocknet reset-mocknet logs-mocknet openapi
+.PHONY: build test tools
 
 # compiler flags
 IMAGE="arkeo"
@@ -61,6 +60,14 @@ build:
 install:
 	go install ${BUILD_FLAGS} ${BINARIES}
 
+# ------------------------------ Docker Build ------------------------------
+
+docker-build: proto-gen
+	@docker build --platform=linux/amd64 . --file Dockerfile -t ${IMAGE}:${TAG}
+
+docker-run:
+	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
+
 # ------------------------------ Housekeeping ------------------------------
 
 format:
@@ -76,7 +83,7 @@ lint-ci:
 	@go build ${BINARIES}
 	@./scripts/trunk check --all --no-progress --monitor=false
 
-# ------------------------------ Testing ------------------------------
+# ------------------------------ Unit Tests ------------------------------
 
 test-coverage:
 	@go test ${TEST_BUILD_FLAGS} -v -coverprofile=coverage.txt -covermode count ${TEST_DIR}
@@ -104,16 +111,41 @@ test-race:
 test-watch:
 	@gow -c test ${TEST_BUILD_FLAGS} ${TEST_DIR}
 
-docker-build: proto-gen
-	@docker build --platform=linux/amd64 . --file Dockerfile -t ${IMAGE}:${TAG}
+# ------------------------------ Regression Tests ------------------------------
 
-docker-run:
-	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
+test-regression:
+	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
+	@docker run --rm ${DOCKER_TTY_ARGS} \
+		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
+		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
+		-p 1317:1317 -p 26657:26657 \
+		-v $(shell pwd)/test/regression/mnt:/mnt \
+		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
+		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
+		-w /app arkeo-regtest sh -c 'make _test-regression'
 
+test-regression-coverage:
+	@go tool cover -html=test/regression/mnt/coverage/coverage.txt
 
-###############################################################################
-##                                 Protobuf                                  ##
-###############################################################################
+# internal target used in docker build
+_build-test-regression:
+	@go install -ldflags '$(ldflags)' -tags=testnet,regtest ./cmd/arkeod ./cmd/sentinel
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-arkeod ./cmd/arkeod
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-sentinel ./cmd/sentinel
+	@go build -ldflags '$(ldflags)' -tags testnet -o /regtest/regtest ./test/regression/cmd
+
+# internal target used in test run
+_test-regression:
+	@rm -rf /mnt/coverage && mkdir -p /mnt/coverage
+	@cd test/regression && /regtest/regtest
+	@go tool covdata textfmt -i /mnt/coverage -o /mnt/coverage/coverage.txt
+	@go tool cover -func /mnt/coverage/coverage.txt > /mnt/coverage/func-coverage.txt
+	@awk '/^total:/ {print "Regression Coverage: " $$3}' /mnt/coverage/func-coverage.txt
+	@chown -R ${UID}:${GID} /mnt
+
+########################################################################################
+# Protobuf
+########################################################################################
 
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.9.0
 

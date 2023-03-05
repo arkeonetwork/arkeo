@@ -1,3 +1,6 @@
+//go:build !regtest
+// +build !regtest
+
 package main
 
 import (
