@@ -1,0 +1,4 @@
+{{ template "default-state.yaml" }}
+---
+type: create-blocks
+count: 3

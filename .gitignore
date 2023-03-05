@@ -4,6 +4,7 @@ arkeod
 .arkeo/
 .sentinel*
 tmp-swagger-gen/
+test/regression/mnt/coverage
 
 .trunk
 
