@@ -64,9 +64,7 @@ message Contract {
   uint64 id = 13;
 }
 
-message ContractSet {
-  repeated uint64 contract_ids = 2 [packed = true];
-}
+message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
 
 message ContractExpirationSet {
   int64 height = 1;

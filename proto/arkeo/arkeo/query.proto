@@ -14,32 +14,31 @@ option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 // Query defines the gRPC querier service.
 service Query {
-  
+
   // Parameters queries the parameters of the module.
-  rpc Params        (QueryParamsRequest       ) returns (QueryParamsResponse       ) {
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/arkeo/params";
-  
   }
-  rpc FetchProvider (QueryFetchProviderRequest) returns (QueryFetchProviderResponse) {
+  rpc FetchProvider(QueryFetchProviderRequest)
+      returns (QueryFetchProviderResponse) {
     option (google.api.http).get = "/arkeo/provider/{pubkey}/{chain}";
-  
   }
-  rpc ProviderAll   (QueryAllProviderRequest  ) returns (QueryAllProviderResponse  ) {
+  rpc ProviderAll(QueryAllProviderRequest) returns (QueryAllProviderResponse) {
     option (google.api.http).get = "/arkeo/providers";
-  
   }
-  rpc FetchContract (QueryFetchContractRequest) returns (QueryFetchContractResponse) {
+  rpc FetchContract(QueryFetchContractRequest)
+      returns (QueryFetchContractResponse) {
     option (google.api.http).get = "/arkeo/contract/{contract_id}";
-  
   }
-  rpc ContractAll   (QueryAllContractRequest  ) returns (QueryAllContractResponse  ) {
+  rpc ContractAll(QueryAllContractRequest) returns (QueryAllContractResponse) {
     option (google.api.http).get = "/arkeo/contracts";
-  
   }
 
   // Queries an active contract by spender, provider and chain.
-  rpc ActiveContract (QueryActiveContractRequest) returns (QueryActiveContractResponse) {
-    option (google.api.http).get = "/arkeo/active_contract/{spender}/{provider}/{chain}";
+  rpc ActiveContract(QueryActiveContractRequest)
+      returns (QueryActiveContractResponse) {
+    option (google.api.http).get =
+        "/arkeo/active_contract/{spender}/{provider}/{chain}";
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -47,18 +46,18 @@ message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-  
+
   // params holds all the parameters of this module.
-  Params params = 1 [(gogoproto.nullable) = false];
+  Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
 message QueryFetchProviderRequest {
   string pubkey = 1;
-  string chain  = 2;
+  string chain = 2;
 }
 
 message QueryFetchProviderResponse {
-  Provider provider = 1 [(gogoproto.nullable) = false];
+  Provider provider = 1 [ (gogoproto.nullable) = false ];
 }
 
 message QueryAllProviderRequest {
@@ -66,16 +65,14 @@ message QueryAllProviderRequest {
 }
 
 message QueryAllProviderResponse {
-  repeated Provider                               provider   = 1 [(gogoproto.nullable) = false];
-           cosmos.base.query.v1beta1.PageResponse pagination = 2;
+  repeated Provider provider = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-message QueryFetchContractRequest {
-  uint64 contract_id = 1;
-}
+message QueryFetchContractRequest { uint64 contract_id = 1; }
 
 message QueryFetchContractResponse {
-  Contract contract = 1 [(gogoproto.nullable) = false];
+  Contract contract = 1 [ (gogoproto.nullable) = false ];
 }
 
 message QueryAllContractRequest {
@@ -83,19 +80,17 @@ message QueryAllContractRequest {
 }
 
 message QueryAllContractResponse {
-  repeated Contract                               contract   = 1 [(gogoproto.nullable) = false];
-           cosmos.base.query.v1beta1.PageResponse pagination = 2;
+  repeated Contract contract = 1 [ (gogoproto.nullable) = false ];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
-
 
 // this line is used by starport scaffolding # 3
 message QueryActiveContractRequest {
-  string spender  = 1;
+  string spender = 1;
   string provider = 2;
-  string chain    = 3;
+  string chain = 3;
 }
 
 message QueryActiveContractResponse {
-  Contract contract = 1 [(gogoproto.nullable) = false];
+  Contract contract = 1 [ (gogoproto.nullable) = false ];
 }
-
