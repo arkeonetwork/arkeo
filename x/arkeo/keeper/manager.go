@@ -197,6 +197,8 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			}
 		}
 		contract.ClosedHeight = ctx.BlockHeight()
+		// this contract can now be removed from the users list of contracts
+		mgr.keeper.RemoveFromUserContractSet(ctx, contract.GetSpender(), contract.Id)
 	}
 
 	err = mgr.keeper.SetContract(ctx, contract)

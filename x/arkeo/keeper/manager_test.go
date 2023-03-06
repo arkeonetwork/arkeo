@@ -118,3 +118,116 @@ func (ManagerSuite) TestValidatorPayout(c *C) {
 	// ensure block reward is equal to total rewarded to validators and delegates
 	c.Check(blockReward, Equals, totalBal.Int64())
 }
+
+func (ManagerSuite) TestContractEndBlock(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+	mgr := NewManager(k, sk)
+
+	// create a provider for 2 chains
+	providerPubKey := types.GetRandomPubKey()
+	provider := types.NewProvider(providerPubKey, common.BTCChain)
+	provider.Bond = cosmos.NewInt(20000000000)
+	provider.LastUpdate = ctx.BlockHeight()
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+	provider.Chain = common.ETHChain
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
+	modProviderMsg := types.MsgModProvider{
+		Provider:            provider.PubKey,
+		Chain:               common.BTCChain.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_ONLINE,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+	}
+	err := s.ModProviderHandle(ctx, &modProviderMsg)
+	c.Assert(err, IsNil)
+	modProviderMsg.Chain = common.ETHChain.String()
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
+	c.Assert(err, IsNil)
+
+	// create user1 to open a contract against the provider.
+	user1PubKey := types.GetRandomPubKey()
+	user1Address, err := user1PubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+	c.Assert(k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))), IsNil)
+
+	msg := types.MsgOpenContract{
+		Provider:     providerPubKey,
+		Chain:        common.BTCChain.String(),
+		Creator:      user1Address.String(),
+		Client:       user1PubKey,
+		ContractType: types.ContractType_PAY_AS_YOU_GO,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1500),
+	}
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// have user1 open a contract for a delegate.
+	delegatePubKey := types.GetRandomPubKey()
+	msg.Delegate = delegatePubKey
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// create user2 to open a contract against the provider.
+	user2PubKey := types.GetRandomPubKey()
+	user2Address, err := user2PubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+
+	c.Assert(k.MintAndSendToAccount(ctx, user2Address, getCoin(common.Tokens(20))), IsNil)
+	msg.Delegate = common.EmptyPubKey
+	msg.Client = user2PubKey
+	msg.Creator = user2Address.String()
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// confirm user 1 has an active and open contract
+	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	c.Assert(err, IsNil)
+	c.Check(activeContract.IsEmpty(), Equals, false)
+
+	// have user2 open another conrtact with a different expiration
+	// to ensure we properly handle a user contract set with multiples
+	// contracts with different expiries.
+	msg.Duration = 200
+	msg.Chain = common.ETHChain.String()
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// confirm user 2 has 2 contracts in their set.
+	contractSet, err := k.GetUserContractSet(ctx, user2PubKey)
+	c.Assert(err, IsNil)
+
+	contractIdExpiring := contractSet.ContractSet.ContractIds[0]
+	c.Check(len(contractSet.ContractSet.ContractIds), Equals, 2)
+
+	// advance 100 blocks and call end block
+	ctx = ctx.WithBlockHeight(110)
+	mgr.ContractEndBlock(ctx)
+
+	// user 2 should only have 1 contract left in their set.
+	contractSet, err = k.GetUserContractSet(ctx, user2PubKey)
+	c.Assert(err, IsNil)
+
+	c.Check(len(contractSet.ContractSet.ContractIds), Equals, 1)
+
+	// confirm the contract id left is not the one that expired.
+	c.Check(contractIdExpiring, Not(Equals), contractSet.ContractSet.ContractIds[0])
+
+	// cofirm user1 has no active contract.
+	activeContract, err = k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	c.Assert(err, IsNil)
+	c.Check(activeContract.IsEmpty(), Equals, true)
+
+	// advance 100 more blocks and call end block to ensure user 2 has no contracts left.
+	ctx = ctx.WithBlockHeight(210)
+	mgr.ContractEndBlock(ctx)
+	contractSet, err = k.GetUserContractSet(ctx, user2PubKey)
+	c.Assert(err, IsNil)
+	c.Assert(contractSet.ContractSet, IsNil)
+}

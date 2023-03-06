@@ -92,8 +92,8 @@ func (k KVStore) getContractExpirationSetKey(ctx cosmos.Context, height int64) s
 	return k.GetKey(ctx, prefixContractExpirationSet, strconv.FormatInt(height, 10))
 }
 
-func (k KVStore) getUserContractSetKey(ctx cosmos.Context, pubkey common.PubKey) string {
-	return k.GetKey(ctx, prefixContractExpirationSet, pubkey.String())
+func (k KVStore) getUserContractSetKey(ctx cosmos.Context, userPubKey common.PubKey) string {
+	return k.GetKey(ctx, prefixContractExpirationSet, userPubKey.String())
 }
 
 func (k KVStore) GetContractKey(ctx cosmos.Context, id uint64) string {
@@ -215,4 +215,25 @@ func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey
 	}
 
 	return types.Contract{}, nil
+}
+
+// RemoveFromUserContractSet remove a contract from a user's contract set and saves the updated set to the store
+func (k KVStore) RemoveFromUserContractSet(ctx cosmos.Context, user common.PubKey, contractId uint64) error {
+	contractSet, err := k.GetUserContractSet(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	_, err = contractSet.RemoveContractFromSet(contractId)
+	if err != nil {
+		return err
+	}
+
+	if len(contractSet.ContractSet.ContractIds) == 0 {
+		// set is empty, remove key.
+		k.del(ctx, k.getUserContractSetKey(ctx, user))
+		return nil
+	}
+
+	return k.SetUserContractSet(ctx, contractSet)
 }

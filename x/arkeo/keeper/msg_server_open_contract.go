@@ -55,6 +55,10 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
+	if provider.LastUpdate == 0 {
+		return errors.Wrapf(types.ErrProviderNotFound, "provider %s for chain %s not found", msg.Provider, msg.Chain)
+	}
+
 	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
 	if provider.Bond.LT(cosmos.NewInt(minBond)) {
 		return errors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
