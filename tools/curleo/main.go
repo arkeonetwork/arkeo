@@ -70,16 +70,18 @@ func main() {
 	}
 	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
-	claim := curl.getClaim(metadata.Configuration.ProviderPubKey.String(), chain, spender)
-	height := claim.Height
-	if height == 0 {
-		contract := curl.getContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
-		height = contract.Height
+	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+	if contract.Height == 0 {
+		println(fmt.Sprintf("no active contract found for spender:%s provider:%s cbhain:%s - will attempt free tier", spender, metadata.Configuration.ProviderPubKey.String(), chain))
+	} else {
+		claim := curl.getClaim(contract.Id)
+		height := claim.Height
+		if height == 0 {
+			height = contract.Height
+		}
+		auth := curl.sign(*user, contract.Id, spender, height, claim.Nonce+1)
+		values.Add(sentinel.QueryArkAuth, auth)
 	}
-
-	auth := curl.sign(*user, metadata.Configuration.ProviderPubKey.String(), chain, spender, height, claim.Nonce+1)
-	values.Add(sentinel.QueryArkAuth, auth)
-
 	u.RawQuery = values.Encode()
 
 	var resp *http.Response
@@ -112,8 +114,8 @@ func main() {
 	println(string(body))
 }
 
-func (c Curl) getContract(provider, chain, spender string) types.Contract {
-	u := fmt.Sprintf("%s/contract/%s/%s/%s", c.baseURL, provider, chain, spender)
+func (c Curl) getActiveContract(provider, chain, spender string) types.Contract {
+	u := fmt.Sprintf("%s/active-contract/%s/%s/%s", c.baseURL, spender, provider, chain)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
@@ -129,17 +131,17 @@ func (c Curl) getContract(provider, chain, spender string) types.Contract {
 		log.Fatal(err) // nolint
 	}
 
-	var claim types.Contract
-	err = json.Unmarshal(body, &claim)
+	var contract types.Contract
+	err = json.Unmarshal(body, &contract)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return claim
+	return contract
 }
 
-func (c Curl) getClaim(provider, chain, spender string) sentinel.Claim {
-	u := fmt.Sprintf("%s/claim/%s/%s/%s", c.baseURL, provider, chain, spender)
+func (c Curl) getClaim(contractId uint64) sentinel.Claim {
+	u := fmt.Sprintf("%s/claim/%d", c.baseURL, contractId)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)
@@ -189,7 +191,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	return meta
 }
 
-func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) string {
+func (c Curl) sign(user string, contractId uint64, spender string, height, nonce int64) string {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
@@ -203,8 +205,7 @@ func (c Curl) sign(user, provider, chain, spender string, height, nonce int64) s
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	msg := fmt.Sprintf("%s:%s:%s:%d:%d", provider, chain, spender, height, nonce)
+	msg := sentinel.GenerateMessageToSign(contractId, spender, height, nonce)
 
 	println("invoking Sign...")
 	signature, pk, err := kb.Sign(user, []byte(msg))

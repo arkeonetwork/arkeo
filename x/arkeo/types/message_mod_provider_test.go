@@ -28,7 +28,7 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 	// happy path
 	msg = MsgModProvider{
 		Creator:             acct.String(),
-		PubKey:              pubkey,
+		Provider:            pubkey,
 		Chain:               common.BTCChain.String(),
 		MinContractDuration: 12,
 		MaxContractDuration: 30,

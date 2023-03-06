@@ -18,7 +18,7 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 
 	ctx.Logger().Info(
 		"receive MsgBondProvider",
-		"pubkey", msg.PubKey,
+		"provider", msg.Provider,
 		"chain", msg.Chain,
 		"bond", msg.Bond,
 	)
@@ -57,11 +57,11 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.PubKey, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, chain)
 	if err != nil {
 		return err
 	}
-	addr, err := msg.PubKey.GetMyAddress()
+	addr, err := msg.Provider.GetMyAddress()
 	if err != nil {
 		return err
 	}

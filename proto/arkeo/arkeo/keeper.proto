@@ -37,7 +37,7 @@ enum ContractType {
 }
 
 message Contract {
-  string provider_pub_key = 1
+  string provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   int32 chain = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];
@@ -61,18 +61,18 @@ message Contract {
   ];
   int64 nonce = 11;
   int64 closed_height = 12;
+  uint64 id = 13;
 }
 
-message ContractExpiration {
-  string provider_pub_key = 1
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  int32 chain = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];
-  string client = 3
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-}
+message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
 
 message ContractExpirationSet {
   int64 height = 1;
-  repeated ContractExpiration contracts = 2;
+  ContractSet contract_set = 2;
+}
+
+message UserContractSet {
+  string user = 1
+      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  ContractSet contract_set = 2;
 }

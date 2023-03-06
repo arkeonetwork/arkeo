@@ -46,24 +46,9 @@ func (k KVStore) FetchContract(c context.Context, req *types.QueryFetchContractR
 	}
 	ctx := sdk.UnwrapSDKContext(c)
 
-	pk, err := common.NewPubKey(req.Pubkey)
+	val, err := k.GetContract(ctx, req.ContractId)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, "pubkey not found")
-	}
-
-	chain, err := common.NewChain(req.Chain)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "chain not found")
-	}
-
-	client, err := common.NewPubKey(req.Client)
-	if err != nil {
-		return nil, status.Error(codes.NotFound, "client not found")
-	}
-
-	val, err := k.GetContract(ctx, pk, chain, client)
-	if err != nil {
-		return nil, status.Error(codes.Aborted, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	if val.Height <= 0 {
@@ -71,4 +56,31 @@ func (k KVStore) FetchContract(c context.Context, req *types.QueryFetchContractR
 	}
 
 	return &types.QueryFetchContractResponse{Contract: val}, nil
+}
+
+func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveContractRequest) (*types.QueryActiveContractResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	spenderPubKey, err := common.NewPubKey(req.Spender)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid spender pubkey")
+	}
+	providerPubKey, err := common.NewPubKey(req.Provider)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
+	}
+	chain, err := common.NewChain(req.Chain)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid chain")
+	}
+
+	activeContract, err := k.GetActiveContractForUser(ctx, spenderPubKey, providerPubKey, chain)
+	if err != nil {
+		return nil, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &types.QueryActiveContractResponse{Contract: activeContract}, nil
 }

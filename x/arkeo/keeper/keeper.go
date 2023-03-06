@@ -62,6 +62,7 @@ type Keeper interface {
 	ProviderAll(c context.Context, req *types.QueryAllProviderRequest) (*types.QueryAllProviderResponse, error)
 	FetchContract(c context.Context, req *types.QueryFetchContractRequest) (*types.QueryFetchContractResponse, error)
 	ContractAll(c context.Context, req *types.QueryAllContractRequest) (*types.QueryAllContractResponse, error)
+	ActiveContract(goCtx context.Context, req *types.QueryActiveContractRequest) (*types.QueryActiveContractResponse, error)
 
 	// Keeper Interfaces
 	KeeperProvider
@@ -78,20 +79,27 @@ type KeeperProvider interface {
 
 type KeeperContract interface {
 	GetContractIterator(_ cosmos.Context) cosmos.Iterator
-	GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) (types.Contract, error)
+	GetContract(_ cosmos.Context, _ uint64) (types.Contract, error)
 	SetContract(_ cosmos.Context, _ types.Contract) error
-	ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool
-	RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey)
+	ContractExists(_ cosmos.Context, _ uint64) bool
+	RemoveContract(_ cosmos.Context, _ uint64)
 	GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator
 	GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error)
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error
 	RemoveContractExpirationSet(_ cosmos.Context, _ int64)
+	GetNextContractId(_ cosmos.Context) uint64
+	SetNextContractId(ctx cosmos.Context, contractId uint64)
+	GetAndIncrementNextContractId(ctx cosmos.Context) uint64
+	SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error
+	GetUserContractSet(ctx cosmos.Context, pubkey common.PubKey) (types.UserContractSet, error)
+	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error)
 }
 
 const (
 	prefixVersion               dbPrefix = "ver/"
 	prefixProvider              dbPrefix = "p/"
 	prefixContract              dbPrefix = "c/"
+	prefixContractNextId        dbPrefix = "cni/"
 	prefixContractExpirationSet dbPrefix = "ces/"
 )
 
@@ -228,7 +236,7 @@ func (k KVStore) AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosm
 // SendFromAccountToModule transfer fund from one account to a module
 func (k KVStore) SendFromAccountToModule(ctx cosmos.Context, from cosmos.AccAddress, to string, coins cosmos.Coins) error {
 	if !k.HasCoins(ctx, from, coins) {
-		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance")
+		return errors.Wrapf(sdkerrors.ErrInsufficientFunds, "not enough balance for account %s", from)
 	}
 	return k.coinKeeper.SendCoinsFromAccountToModule(ctx, from, to, coins)
 }

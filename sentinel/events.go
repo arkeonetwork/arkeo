@@ -121,8 +121,13 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 
 	for k, v := range input {
 		switch k {
-		case "pubkey":
-			evt.Contract.ProviderPubKey, err = common.NewPubKey(v)
+		case "provider":
+			evt.Contract.Provider, err = common.NewPubKey(v)
+			if err != nil {
+				return evt, err
+			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				return evt, err
 			}
@@ -187,8 +192,13 @@ func parseCloseContract(input map[string]string) (CloseContract, error) {
 
 	for k, v := range input {
 		switch k {
-		case "pubkey":
-			evt.Contract.ProviderPubKey, err = common.NewPubKey(v)
+		case "provider":
+			evt.Contract.Provider, err = common.NewPubKey(v)
+			if err != nil {
+				return evt, err
+			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				return evt, err
 			}
@@ -226,8 +236,13 @@ func parseClaimContractIncome(input map[string]string) (ClaimContractIncome, err
 
 	for k, v := range input {
 		switch k {
-		case "pubkey":
-			evt.Contract.ProviderPubKey, err = common.NewPubKey(v)
+		case "provider":
+			evt.Contract.Provider, err = common.NewPubKey(v)
+			if err != nil {
+				return evt, err
+			}
+		case "contract_id":
+			evt.Contract.Id, err = strconv.ParseUint(v, 10, 64)
 			if err != nil {
 				return evt, err
 			}

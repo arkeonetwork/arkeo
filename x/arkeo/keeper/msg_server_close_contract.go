@@ -10,7 +10,6 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContract) (*types.MsgCloseContractResponse, error) {
@@ -18,10 +17,7 @@ func (k msgServer) CloseContract(goCtx context.Context, msg *types.MsgCloseContr
 
 	ctx.Logger().Info(
 		"receive MsgCloseContract",
-		"pubkey", msg.PubKey,
-		"chain", msg.Chain,
-		"client", msg.Client,
-		"delegate", msg.Delegate,
+		"contract_id", msg.ContractId,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -44,32 +40,36 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return errors.Wrapf(types.ErrDisabledHandler, "close contract")
 	}
 
-	chain, err := common.NewChain(msg.Chain)
-	if err != nil {
-		return err
-	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
+	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
 	}
 
-	// if client is provided, ensure contract client matches msg client
-	if len(msg.Client) > 0 {
-		if !contract.Client.Equals(msg.Client) {
-			return errors.Wrapf(sdkerrors.ErrUnauthorized, "unauthorized contract client")
-		}
+	signerAccountAddress := msg.MustGetSigner()
 
-		if contract.Type == types.ContractType_PAY_AS_YOU_GO {
-			// clients are not allowed to cancel a pay-as-you-go contract as it
-			// could be a way to game providers. IE, the client make 1,000 requests
-			// and before the provider can claim the rewards, the client cancels
-			// the contract. We do not want providers to feel "rushed" to claim
-			// their rewards or the income is gone.
-			return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
-		}
+	clientPublicKey, err := common.NewPubKey(contract.Client.String())
+	if err != nil {
+		return err
 	}
 
-	if contract.IsClose(ctx.BlockHeight()) {
+	clientAccountAddress, err := clientPublicKey.GetMyAddress()
+	if err != nil {
+		return err
+	}
+
+	if !signerAccountAddress.Equals(clientAccountAddress) {
+		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
+	}
+	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
+		// clients are not allowed to cancel a pay-as-you-go contract as it
+		// could be a way to game providers. IE, the client make 1,000 requests
+		// and before the provider can claim the rewards, the client cancels
+		// the contract. We do not want providers to feel "rushed" to claim
+		// their rewards or the income is gone.
+		return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
+	}
+
+	if contract.IsClosed(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
 	}
 
@@ -77,11 +77,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 }
 
 func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseContract) error {
-	chain, err := common.NewChain(msg.Chain)
-	if err != nil {
-		return err
-	}
-	contract, err := k.GetContract(ctx, msg.PubKey, chain, msg.FetchSpender())
+	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
 	}
@@ -91,6 +87,6 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	k.CloseContractEvent(ctx, msg)
+	k.CloseContractEvent(ctx, &contract)
 	return nil
 }

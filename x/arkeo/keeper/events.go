@@ -14,7 +14,7 @@ func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *t
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeProviderBond,
-				sdk.NewAttribute("pubkey", msg.PubKey.String()),
+				sdk.NewAttribute("provider", msg.Provider.String()),
 				sdk.NewAttribute("chain", msg.Chain),
 				sdk.NewAttribute("bond_rel", msg.Bond.String()),
 				sdk.NewAttribute("bond_abs", bond.String()),
@@ -23,15 +23,16 @@ func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *t
 	)
 }
 
-func (k msgServer) CloseContractEvent(ctx cosmos.Context, msg *types.MsgCloseContract) {
+func (k msgServer) CloseContractEvent(ctx cosmos.Context, contract *types.Contract) {
 	ctx.EventManager().EmitEvents(
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeCloseContract,
-				sdk.NewAttribute("pubkey", msg.PubKey.String()),
-				sdk.NewAttribute("chain", msg.Chain),
-				sdk.NewAttribute("client", msg.Client.String()),
-				sdk.NewAttribute("delegate", msg.Delegate.String()),
+				sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
+				sdk.NewAttribute("provider", contract.Provider.String()),
+				sdk.NewAttribute("chain", contract.Chain.String()),
+				sdk.NewAttribute("client", contract.Client.String()),
+				sdk.NewAttribute("delegate", contract.Delegate.String()),
 			),
 		},
 	)
@@ -61,7 +62,8 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeOpenContract,
-				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
+				sdk.NewAttribute("provider", contract.Provider.String()),
+				sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),
 				sdk.NewAttribute("delegate", contract.Delegate.String()),
@@ -81,7 +83,8 @@ func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt, valIncome c
 		sdk.Events{
 			sdk.NewEvent(
 				types.EventTypeContractSettlement,
-				sdk.NewAttribute("pubkey", contract.ProviderPubKey.String()),
+				sdk.NewAttribute("provider", contract.Provider.String()),
+				sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
 				sdk.NewAttribute("chain", contract.Chain.String()),
 				sdk.NewAttribute("client", contract.Client.String()),
 				sdk.NewAttribute("delegate", contract.Delegate.String()),

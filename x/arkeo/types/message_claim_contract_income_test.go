@@ -40,7 +40,7 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	c.Assert(err, IsNil)
 	pub, err := info.GetPubKey()
 	c.Assert(err, IsNil)
-	pk, err := common.NewPubKeyFromCrypto(pub)
+	spenderPubKey, err := common.NewPubKeyFromCrypto(pub)
 	c.Assert(err, IsNil)
 
 	// invalid address
@@ -51,17 +51,14 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgClaimContractIncome{
-		Creator: acct.String(),
-		PubKey:  pubkey,
-		Spender: pk,
-		Height:  12,
-		Nonce:   24,
+		Creator:    acct.String(),
+		ContractId: 1,
+		Height:     12,
+		Nonce:      24,
+		Spender:    spenderPubKey,
 	}
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidChain)
 
-	msg.Chain = common.BTCChain.String()
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
+	message := msg.GetBytesToSign()
 	msg.Signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 	err = msg.ValidateBasic()
@@ -87,12 +84,11 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	msg := MsgClaimContractIncome{
-		Creator: acct.String(),
-		PubKey:  pubkey,
-		Spender: pubkey,
-		Chain:   common.BTCChain.String(),
-		Height:  100,
-		Nonce:   48,
+		Creator:    acct.String(),
+		Spender:    pubkey,
+		Height:     100,
+		Nonce:      48,
+		ContractId: 500,
 	}
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
@@ -103,7 +99,7 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	c.Assert(err, IsNil)
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", msg.PubKey, msg.Chain, msg.Spender, msg.Height, msg.Nonce))
+	message := []byte(fmt.Sprintf("%d:%s:%d:%d", msg.ContractId, msg.Spender, msg.Height, msg.Nonce))
 	msg.Signature, pub, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 

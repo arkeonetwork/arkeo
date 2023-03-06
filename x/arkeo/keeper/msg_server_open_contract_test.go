@@ -16,15 +16,20 @@ var _ = Suite(&OpenContractSuite{})
 func (OpenContractSuite) TestValidate(c *C) {
 	var err error
 	ctx, k, sk := SetupKeeperWithStaking(c)
-
+	ctx = ctx.WithBlockHeight(1)
 	s := newMsgServer(k, sk)
 
 	// setup
-	pubkey := types.GetRandomPubKey()
-	acc := types.GetRandomPubKey()
+	providerPubkey := types.GetRandomPubKey()
+	clientPubKey := types.GetRandomPubKey()
+	acc, err := clientPubKey.GetMyAddress()
+	if err != nil {
+		c.Error(err)
+	}
+
 	chain := common.BTCChain
 
-	provider := types.NewProvider(pubkey, chain)
+	provider := types.NewProvider(providerPubkey, chain)
 	provider.Bond = cosmos.NewInt(500_00000000)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.MaxContractDuration = 1000
@@ -35,15 +40,16 @@ func (OpenContractSuite) TestValidate(c *C) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		PubKey:       pubkey,
+		Provider:     providerPubkey,
 		Chain:        chain.String(),
-		Client:       acc,
+		Client:       clientPubKey,
 		Creator:      acc.String(),
 		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
 		Rate:         15,
 		Deposit:      cosmos.NewInt(100 * 15),
 	}
+	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(100*25))), IsNil)
 	c.Assert(s.OpenContractValidate(ctx, &msg), IsNil)
 
 	// check duration
@@ -72,20 +78,21 @@ func (OpenContractSuite) TestValidate(c *C) {
 	provider.Bond = cosmos.NewInt(500_00000000)
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 
-	ctx = ctx.WithBlockHeight(14)
-	contract := types.NewContract(pubkey, chain, acc)
+	ctx = ctx.WithBlockHeight(15)
+	contract := types.NewContract(providerPubkey, chain, clientPubKey)
 	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
 	contract.Rate = 2
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+
+	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 	err = s.OpenContractValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
 }
 
 func (OpenContractSuite) TestHandle(c *C) {
 	ctx, k, sk := SetupKeeperWithStaking(c)
-
+	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 
 	// setup
@@ -96,7 +103,7 @@ func (OpenContractSuite) TestHandle(c *C) {
 	c.Assert(k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))), IsNil)
 
 	msg := types.MsgOpenContract{
-		PubKey:       pubkey,
+		Provider:     pubkey,
 		Chain:        chain.String(),
 		Creator:      acc.String(),
 		Client:       pubkey,
@@ -107,10 +114,12 @@ func (OpenContractSuite) TestHandle(c *C) {
 	}
 	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
 
-	contract, err := k.GetContract(ctx, pubkey, chain, pubkey)
+	contract, err := k.GetActiveContractForUser(ctx, pubkey, pubkey, chain)
 	c.Assert(err, IsNil)
 
 	c.Check(contract.Type, Equals, types.ContractType_PAY_AS_YOU_GO)
+	c.Check(contract.IsEmpty(), Equals, false)
+
 	c.Check(contract.Height, Equals, ctx.BlockHeight())
 	c.Check(contract.Duration, Equals, int64(100))
 	c.Check(contract.Rate, Equals, int64(15))
@@ -125,5 +134,96 @@ func (OpenContractSuite) TestHandle(c *C) {
 	set, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	c.Assert(err, IsNil)
 	c.Check(set.Height, Equals, contract.Expiration())
-	c.Check(set.Contracts, HasLen, 1)
+	c.Check(set.ContractSet.ContractIds, HasLen, 1)
+
+	// check that contract has been added to the user
+	userSet, err := k.GetUserContractSet(ctx, contract.GetSpender())
+	c.Assert(err, IsNil)
+	c.Check(userSet.User, Equals, contract.GetSpender())
+	c.Check(userSet.ContractSet.ContractIds, HasLen, 1)
+}
+
+func (OpenContractSuite) TestOpenContract(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+
+	providerPubKey := types.GetRandomPubKey()
+	providerAddress, err := providerPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+	chain := common.BTCChain
+	provider := types.NewProvider(providerPubKey, chain)
+	provider.Bond = cosmos.NewInt(10000000000)
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
+	modProviderMsg := types.MsgModProvider{
+		Provider:            provider.PubKey,
+		Chain:               provider.Chain.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_ONLINE,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+	}
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
+
+	c.Assert(err, IsNil)
+	c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
+
+	msg := types.MsgOpenContract{
+		Provider:     providerPubKey,
+		Chain:        chain.String(),
+		Creator:      providerAddress.String(),
+		Client:       providerPubKey,
+		ContractType: types.ContractType_PAY_AS_YOU_GO,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1500),
+	}
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	contract, err := k.GetActiveContractForUser(ctx, providerPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(0))
+
+	clientPubKey := types.GetRandomPubKey()
+	clientAddress, err := clientPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+
+	msg = types.MsgOpenContract{
+		Provider:     providerPubKey,
+		Chain:        chain.String(),
+		Creator:      clientAddress.String(),
+		Client:       clientPubKey,
+		ContractType: types.ContractType_PAY_AS_YOU_GO,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1000),
+	}
+	c.Assert(k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))), IsNil)
+	c.Assert(s.OpenContractHandle(ctx, &msg), IsNil)
+
+	contract, err = k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(1))
+
+	_, err = s.OpenContract(ctx, &msg)
+	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
+
+	// confirm that the client can open a contract with a deleagate
+	delegatePubKey := types.GetRandomPubKey()
+	msg.Delegate = delegatePubKey
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	contract, err = k.GetActiveContractForUser(ctx, delegatePubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(2))
 }

@@ -21,7 +21,6 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
-	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -37,8 +36,8 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
 	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
-	keyParams := cosmos.NewKVStoreKey(paramstypes.StoreKey)
-	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
+	keyParams := cosmos.NewKVStoreKey(typesparams.StoreKey)
+	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
 	db := tmdb.NewMemDB()
@@ -102,8 +101,8 @@ func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
 	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
-	keyParams := cosmos.NewKVStoreKey(paramstypes.StoreKey)
-	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
+	keyParams := cosmos.NewKVStoreKey(typesparams.StoreKey)
+	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
 	db := tmdb.NewMemDB()

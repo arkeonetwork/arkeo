@@ -664,7 +664,7 @@ export interface FieldOptions {
    * options below.  This option is not yet implemented in the open source
    * release -- sorry, we'll try to include it in a future version!
    */
-  ctype: FieldOptions_ContractType;
+  ctype: FieldOptions_CType;
   /**
    * The packed option can be enabled for repeated primitive fields to enable
    * a more efficient representation on the wire. Rather than repeatedly
@@ -730,7 +730,7 @@ export interface FieldOptions {
   uninterpretedOption: UninterpretedOption[];
 }
 
-export enum FieldOptions_ContractType {
+export enum FieldOptions_CType {
   /** STRING - Default mode. */
   STRING = 0,
   CORD = 1,
@@ -738,33 +738,33 @@ export enum FieldOptions_ContractType {
   UNRECOGNIZED = -1,
 }
 
-export function fieldOptions_ContractTypeFromJSON(object: any): FieldOptions_ContractType {
+export function fieldOptions_CTypeFromJSON(object: any): FieldOptions_CType {
   switch (object) {
     case 0:
     case "STRING":
-      return FieldOptions_ContractType.STRING;
+      return FieldOptions_CType.STRING;
     case 1:
     case "CORD":
-      return FieldOptions_ContractType.CORD;
+      return FieldOptions_CType.CORD;
     case 2:
     case "STRING_PIECE":
-      return FieldOptions_ContractType.STRING_PIECE;
+      return FieldOptions_CType.STRING_PIECE;
     case -1:
     case "UNRECOGNIZED":
     default:
-      return FieldOptions_ContractType.UNRECOGNIZED;
+      return FieldOptions_CType.UNRECOGNIZED;
   }
 }
 
-export function fieldOptions_ContractTypeToJSON(object: FieldOptions_ContractType): string {
+export function fieldOptions_CTypeToJSON(object: FieldOptions_CType): string {
   switch (object) {
-    case FieldOptions_ContractType.STRING:
+    case FieldOptions_CType.STRING:
       return "STRING";
-    case FieldOptions_ContractType.CORD:
+    case FieldOptions_CType.CORD:
       return "CORD";
-    case FieldOptions_ContractType.STRING_PIECE:
+    case FieldOptions_CType.STRING_PIECE:
       return "STRING_PIECE";
-    case FieldOptions_ContractType.UNRECOGNIZED:
+    case FieldOptions_CType.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -2816,7 +2816,7 @@ export const FieldOptions = {
 
   fromJSON(object: any): FieldOptions {
     return {
-      ctype: isSet(object.ctype) ? fieldOptions_ContractTypeFromJSON(object.ctype) : 0,
+      ctype: isSet(object.ctype) ? fieldOptions_CTypeFromJSON(object.ctype) : 0,
       packed: isSet(object.packed) ? Boolean(object.packed) : false,
       jstype: isSet(object.jstype) ? fieldOptions_JSTypeFromJSON(object.jstype) : 0,
       lazy: isSet(object.lazy) ? Boolean(object.lazy) : false,
@@ -2830,7 +2830,7 @@ export const FieldOptions = {
 
   toJSON(message: FieldOptions): unknown {
     const obj: any = {};
-    message.ctype !== undefined && (obj.ctype = fieldOptions_ContractTypeToJSON(message.ctype));
+    message.ctype !== undefined && (obj.ctype = fieldOptions_CTypeToJSON(message.ctype));
     message.packed !== undefined && (obj.packed = message.packed);
     message.jstype !== undefined && (obj.jstype = fieldOptions_JSTypeToJSON(message.jstype));
     message.lazy !== undefined && (obj.lazy = message.lazy);

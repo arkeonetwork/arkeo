@@ -74,11 +74,11 @@ func (s *MemStoreSuite) TestMemStore(c *C) {
 	contract := types.NewContract(pk1, common.Chain(0), pk2)
 	contract.Height = 4
 	contract.Duration = 100
-	key := mem.Key(pk1.String(), common.Chain(0).String(), pk2.String())
+	contract.Id = 55786
 
-	mem.Put(key, contract)
+	mem.Put(contract)
 
-	contract, err = mem.Get(key)
+	contract, err = mem.Get(contract.Key())
 	c.Assert(err, IsNil)
 	c.Check(contract.Height, Equals, int64(4))
 
@@ -86,7 +86,7 @@ func (s *MemStoreSuite) TestMemStore(c *C) {
 	pk, err := common.NewPubKey("cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	c.Assert(err, IsNil)
 
-	key = mem.Key(pk.String(), "arkeo-mainnet", pk.String())
+	key := mem.Key(pk.String(), "arkeo-mainnet", pk.String())
 	contract, err = mem.Get(key)
 	c.Assert(err, IsNil)
 	c.Check(contract.Rate, Equals, int64(3))

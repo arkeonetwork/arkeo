@@ -1,4 +1,5 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
 import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
 import { Contract, Provider } from "./keeper";
@@ -35,9 +36,7 @@ export interface QueryAllProviderResponse {
 }
 
 export interface QueryFetchContractRequest {
-  pubkey: string;
-  chain: string;
-  client: string;
+  contractId: number;
 }
 
 export interface QueryFetchContractResponse {
@@ -51,6 +50,16 @@ export interface QueryAllContractRequest {
 export interface QueryAllContractResponse {
   contract: Contract[];
   pagination: PageResponse | undefined;
+}
+
+/** this line is used by starport scaffolding # 3 */
+export interface QueryActiveContractRequest {
+  spender: string;
+  provider: string;
+  chain: string;
+}
+
+export interface QueryActiveContractResponse {
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -364,19 +373,13 @@ export const QueryAllProviderResponse = {
 };
 
 function createBaseQueryFetchContractRequest(): QueryFetchContractRequest {
-  return { pubkey: "", chain: "", client: "" };
+  return { contractId: 0 };
 }
 
 export const QueryFetchContractRequest = {
   encode(message: QueryFetchContractRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.pubkey !== "") {
-      writer.uint32(10).string(message.pubkey);
-    }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
-    }
-    if (message.client !== "") {
-      writer.uint32(26).string(message.client);
+    if (message.contractId !== 0) {
+      writer.uint32(8).uint64(message.contractId);
     }
     return writer;
   },
@@ -389,13 +392,7 @@ export const QueryFetchContractRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.pubkey = reader.string();
-          break;
-        case 2:
-          message.chain = reader.string();
-          break;
-        case 3:
-          message.client = reader.string();
+          message.contractId = longToNumber(reader.uint64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -406,26 +403,18 @@ export const QueryFetchContractRequest = {
   },
 
   fromJSON(object: any): QueryFetchContractRequest {
-    return {
-      pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
-      client: isSet(object.client) ? String(object.client) : "",
-    };
+    return { contractId: isSet(object.contractId) ? Number(object.contractId) : 0 };
   },
 
   toJSON(message: QueryFetchContractRequest): unknown {
     const obj: any = {};
-    message.pubkey !== undefined && (obj.pubkey = message.pubkey);
-    message.chain !== undefined && (obj.chain = message.chain);
-    message.client !== undefined && (obj.client = message.client);
+    message.contractId !== undefined && (obj.contractId = Math.round(message.contractId));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryFetchContractRequest>, I>>(object: I): QueryFetchContractRequest {
     const message = createBaseQueryFetchContractRequest();
-    message.pubkey = object.pubkey ?? "";
-    message.chain = object.chain ?? "";
-    message.client = object.client ?? "";
+    message.contractId = object.contractId ?? 0;
     return message;
   },
 };
@@ -594,6 +583,112 @@ export const QueryAllContractResponse = {
   },
 };
 
+function createBaseQueryActiveContractRequest(): QueryActiveContractRequest {
+  return { spender: "", provider: "", chain: "" };
+}
+
+export const QueryActiveContractRequest = {
+  encode(message: QueryActiveContractRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.spender !== "") {
+      writer.uint32(10).string(message.spender);
+    }
+    if (message.provider !== "") {
+      writer.uint32(18).string(message.provider);
+    }
+    if (message.chain !== "") {
+      writer.uint32(26).string(message.chain);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryActiveContractRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryActiveContractRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.spender = reader.string();
+          break;
+        case 2:
+          message.provider = reader.string();
+          break;
+        case 3:
+          message.chain = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryActiveContractRequest {
+    return {
+      spender: isSet(object.spender) ? String(object.spender) : "",
+      provider: isSet(object.provider) ? String(object.provider) : "",
+      chain: isSet(object.chain) ? String(object.chain) : "",
+    };
+  },
+
+  toJSON(message: QueryActiveContractRequest): unknown {
+    const obj: any = {};
+    message.spender !== undefined && (obj.spender = message.spender);
+    message.provider !== undefined && (obj.provider = message.provider);
+    message.chain !== undefined && (obj.chain = message.chain);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryActiveContractRequest>, I>>(object: I): QueryActiveContractRequest {
+    const message = createBaseQueryActiveContractRequest();
+    message.spender = object.spender ?? "";
+    message.provider = object.provider ?? "";
+    message.chain = object.chain ?? "";
+    return message;
+  },
+};
+
+function createBaseQueryActiveContractResponse(): QueryActiveContractResponse {
+  return {};
+}
+
+export const QueryActiveContractResponse = {
+  encode(_: QueryActiveContractResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryActiveContractResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryActiveContractResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryActiveContractResponse {
+    return {};
+  },
+
+  toJSON(_: QueryActiveContractResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryActiveContractResponse>, I>>(_: I): QueryActiveContractResponse {
+    const message = createBaseQueryActiveContractResponse();
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -602,6 +697,8 @@ export interface Query {
   ProviderAll(request: QueryAllProviderRequest): Promise<QueryAllProviderResponse>;
   FetchContract(request: QueryFetchContractRequest): Promise<QueryFetchContractResponse>;
   ContractAll(request: QueryAllContractRequest): Promise<QueryAllContractResponse>;
+  /** Queries a list of ActiveContract items. */
+  ActiveContract(request: QueryActiveContractRequest): Promise<QueryActiveContractResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -613,6 +710,7 @@ export class QueryClientImpl implements Query {
     this.ProviderAll = this.ProviderAll.bind(this);
     this.FetchContract = this.FetchContract.bind(this);
     this.ContractAll = this.ContractAll.bind(this);
+    this.ActiveContract = this.ActiveContract.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -643,11 +741,36 @@ export class QueryClientImpl implements Query {
     const promise = this.rpc.request("arkeo.arkeo.Query", "ContractAll", data);
     return promise.then((data) => QueryAllContractResponse.decode(new _m0.Reader(data)));
   }
+
+  ActiveContract(request: QueryActiveContractRequest): Promise<QueryActiveContractResponse> {
+    const data = QueryActiveContractRequest.encode(request).finish();
+    const promise = this.rpc.request("arkeo.arkeo.Query", "ActiveContract", data);
+    return promise.then((data) => QueryActiveContractResponse.decode(new _m0.Reader(data)));
+  }
 }
 
 interface Rpc {
   request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
 }
+
+declare var self: any | undefined;
+declare var window: any | undefined;
+declare var global: any | undefined;
+var globalThis: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
@@ -659,6 +782,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	fmt "fmt"
+	"strconv"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -20,22 +21,22 @@ func (p Provider) Key() string {
 	return fmt.Sprintf("%s/%s", p.PubKey, p.Chain)
 }
 
-func NewContract(pubkey common.PubKey, chain common.Chain, client common.PubKey) Contract {
+func NewContract(provider common.PubKey, chain common.Chain, client common.PubKey) Contract {
 	return Contract{
-		ProviderPubKey: pubkey,
-		Chain:          chain,
-		Client:         client,
-		Delegate:       common.EmptyPubKey,
-		Deposit:        cosmos.ZeroInt(),
-		Paid:           cosmos.ZeroInt(),
+		Provider: provider,
+		Chain:    chain,
+		Client:   client,
+		Delegate: common.EmptyPubKey,
+		Deposit:  cosmos.ZeroInt(),
+		Paid:     cosmos.ZeroInt(),
 	}
 }
 
 func (c Contract) Key() string {
-	return fmt.Sprintf("%s/%s/%s", c.ProviderPubKey, c.Chain, c.FetchSpender())
+	return strconv.FormatUint(c.Id, 10)
 }
 
-func (c Contract) FetchSpender() common.PubKey {
+func (c Contract) GetSpender() common.PubKey {
 	if !c.Delegate.IsEmpty() {
 		return c.Delegate
 	}
@@ -59,7 +60,7 @@ func (c Contract) IsOpen(h int64) bool {
 	return true
 }
 
-func (c Contract) IsClose(h int64) bool {
+func (c Contract) IsClosed(h int64) bool {
 	return !c.IsOpen(h)
 }
 
@@ -73,14 +74,6 @@ func (c Contract) ClientAddress() cosmos.AccAddress {
 		panic(err)
 	}
 	return addr
-}
-
-func NewContractExpiration(pubkey common.PubKey, chain common.Chain, client common.PubKey) *ContractExpiration {
-	return &ContractExpiration{
-		ProviderPubKey: pubkey,
-		Chain:          chain,
-		Client:         client,
-	}
 }
 
 func (ct *ContractType) UnmarshalJSON(b []byte) error {

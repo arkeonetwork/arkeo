@@ -14,10 +14,10 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, pubkey common.PubKey, chain string, client, delegate common.PubKey, contractType ContractType, duration, rate int64, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator string, provider common.PubKey, chain string, client, delegate common.PubKey, contractType ContractType, duration, rate int64, deposit cosmos.Int) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:      creator,
-		PubKey:       pubkey,
+		Provider:     provider,
 		Chain:        chain,
 		ContractType: contractType,
 		Duration:     duration,
@@ -57,7 +57,7 @@ func (msg *MsgOpenContract) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgOpenContract) FetchSpender() common.PubKey {
+func (msg *MsgOpenContract) GetSpender() common.PubKey {
 	if !msg.Delegate.IsEmpty() {
 		return msg.Delegate
 	}
@@ -71,7 +71,7 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 	}
 
 	// verify pubkey
-	_, err = common.NewPubKey(msg.PubKey.String())
+	_, err = common.NewPubKey(msg.Provider.String())
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
@@ -94,7 +94,7 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return err
 	}
 	if !signer.Equals(client) {
-		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
+		return errors.Wrapf(ErrInvalidPubKey, "Signer: %s, Client Address: %s", msg.GetSigners(), client)
 	}
 
 	if msg.Duration <= 0 {

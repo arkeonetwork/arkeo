@@ -27,8 +27,8 @@ func (MsgBondProviderSuite) TestValidateBasic(c *C) {
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgBondProvider{
-		Creator: acct.String(),
-		PubKey:  pubkey,
+		Creator:  acct.String(),
+		Provider: pubkey,
 	}
 	err = msg.ValidateBasic()
 	c.Check(err, ErrIs, ErrInvalidChain)

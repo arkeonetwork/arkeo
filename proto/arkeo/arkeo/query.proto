@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
@@ -6,12 +7,14 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "arkeo/arkeo/params.proto";
 import "arkeo/arkeo/keeper.proto";
+
 // this line is used by starport scaffolding # 1
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 // Query defines the gRPC querier service.
 service Query {
+
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/arkeo/params";
@@ -23,22 +26,27 @@ service Query {
   rpc ProviderAll(QueryAllProviderRequest) returns (QueryAllProviderResponse) {
     option (google.api.http).get = "/arkeo/providers";
   }
-
   rpc FetchContract(QueryFetchContractRequest)
       returns (QueryFetchContractResponse) {
-    option (google.api.http).get = "/arkeo/contract/{pubkey}/{chain}/{client}";
+    option (google.api.http).get = "/arkeo/contract/{contract_id}";
   }
   rpc ContractAll(QueryAllContractRequest) returns (QueryAllContractResponse) {
     option (google.api.http).get = "/arkeo/contracts";
   }
-  // this line is used by starport scaffolding # 2
-}
 
+  // Queries an active contract by spender, provider and chain.
+  rpc ActiveContract(QueryActiveContractRequest)
+      returns (QueryActiveContractResponse) {
+    option (google.api.http).get =
+        "/arkeo/active-contract/{spender}/{provider}/{chain}";
+  }
+}
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
+
   // params holds all the parameters of this module.
   Params params = 1 [ (gogoproto.nullable) = false ];
 }
@@ -61,11 +69,7 @@ message QueryAllProviderResponse {
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-message QueryFetchContractRequest {
-  string pubkey = 1;
-  string chain = 2;
-  string client = 3;
-}
+message QueryFetchContractRequest { uint64 contract_id = 1; }
 
 message QueryFetchContractResponse {
   Contract contract = 1 [ (gogoproto.nullable) = false ];
@@ -81,3 +85,12 @@ message QueryAllContractResponse {
 }
 
 // this line is used by starport scaffolding # 3
+message QueryActiveContractRequest {
+  string spender = 1;
+  string provider = 2;
+  string chain = 3;
+}
+
+message QueryActiveContractResponse {
+  Contract contract = 1 [ (gogoproto.nullable) = false ];
+}

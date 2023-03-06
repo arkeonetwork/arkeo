@@ -41,15 +41,19 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 		return err
 	}
 
-	for _, exp := range set.Contracts {
-		contract, err := mgr.keeper.GetContract(ctx, exp.ProviderPubKey, exp.Chain, exp.Client)
+	if set.ContractSet == nil || len(set.ContractSet.ContractIds) == 0 {
+		return nil
+	}
+
+	for _, contractId := range set.ContractSet.ContractIds {
+		contract, err := mgr.keeper.GetContract(ctx, contractId)
 		if err != nil {
-			ctx.Logger().Error("unable to fetch contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
+			ctx.Logger().Error("unable to fetch contract", "id", contractId, "error", err)
 			continue
 		}
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
-			ctx.Logger().Error("unable settle contract", "pubkey", exp.ProviderPubKey, "chain", exp.Chain, "client", exp.Client, "error", err)
+			ctx.Logger().Error("unable to settle contract", "id", contractId, "error", err)
 			continue
 		}
 	}
@@ -168,7 +172,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 	if !debt.IsZero() {
-		provider, err := contract.ProviderPubKey.GetMyAddress()
+		provider, err := contract.Provider.GetMyAddress()
 		if err != nil {
 			return contract, err
 		}

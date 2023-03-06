@@ -1,54 +1,34 @@
 package cli
 
 import (
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
 func CmdCloseContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "close-contract [pubkey] [chain] [client] [delegate-optional]",
+		Use:   "close-contract [contract-id]",
 		Short: "Broadcast message closeContract",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argPubkey := args[0]
-			argChain := args[1]
-			argClient := args[2]
+			argContractId, err := cast.ToUint64E(args[0])
+			if err != nil {
+				return err
+			}
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			pubkey, err := common.NewPubKey(argPubkey)
-			if err != nil {
-				return err
-			}
-
-			client, err := common.NewPubKey(argClient)
-			if err != nil {
-				return err
-			}
-
-			delegate := common.EmptyPubKey
-			if len(args) > 3 {
-				delegate, err = common.NewPubKey(args[3])
-				if err != nil {
-					return err
-				}
-			}
-
 			msg := types.NewMsgCloseContract(
 				clientCtx.GetFromAddress().String(),
-				pubkey,
-				argChain,
-				client,
-				delegate,
+				argContractId,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

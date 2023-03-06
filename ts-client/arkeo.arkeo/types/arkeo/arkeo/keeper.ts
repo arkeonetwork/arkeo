@@ -5,19 +5,19 @@ import _m0 from "protobufjs/minimal";
 export const protobufPackage = "arkeo.arkeo";
 
 export enum ProviderStatus {
-  Offline = 0,
-  Online = 1,
+  OFFLINE = 0,
+  ONLINE = 1,
   UNRECOGNIZED = -1,
 }
 
 export function providerStatusFromJSON(object: any): ProviderStatus {
   switch (object) {
     case 0:
-    case "Offline":
-      return ProviderStatus.Offline;
+    case "OFFLINE":
+      return ProviderStatus.OFFLINE;
     case 1:
-    case "Online":
-      return ProviderStatus.Online;
+    case "ONLINE":
+      return ProviderStatus.ONLINE;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -27,10 +27,10 @@ export function providerStatusFromJSON(object: any): ProviderStatus {
 
 export function providerStatusToJSON(object: ProviderStatus): string {
   switch (object) {
-    case ProviderStatus.Offline:
-      return "Offline";
-    case ProviderStatus.Online:
-      return "Online";
+    case ProviderStatus.OFFLINE:
+      return "OFFLINE";
+    case ProviderStatus.ONLINE:
+      return "ONLINE";
     case ProviderStatus.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -38,19 +38,19 @@ export function providerStatusToJSON(object: ProviderStatus): string {
 }
 
 export enum ContractType {
-  Subscription = 0,
-  PayAsYouGo = 1,
+  SUBSCRIPTION = 0,
+  PAY_AS_YOU_GO = 1,
   UNRECOGNIZED = -1,
 }
 
 export function contractTypeFromJSON(object: any): ContractType {
   switch (object) {
     case 0:
-    case "Subscription":
-      return ContractType.Subscription;
+    case "SUBSCRIPTION":
+      return ContractType.SUBSCRIPTION;
     case 1:
-    case "PayAsYouGo":
-      return ContractType.PayAsYouGo;
+    case "PAY_AS_YOU_GO":
+      return ContractType.PAY_AS_YOU_GO;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -60,10 +60,10 @@ export function contractTypeFromJSON(object: any): ContractType {
 
 export function contractTypeToJSON(object: ContractType): string {
   switch (object) {
-    case ContractType.Subscription:
-      return "Subscription";
-    case ContractType.PayAsYouGo:
-      return "PayAsYouGo";
+    case ContractType.SUBSCRIPTION:
+      return "SUBSCRIPTION";
+    case ContractType.PAY_AS_YOU_GO:
+      return "PAY_AS_YOU_GO";
     case ContractType.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -73,7 +73,7 @@ export function contractTypeToJSON(object: ContractType): string {
 export interface Provider {
   pubKey: string;
   chain: number;
-  metadataURI: string;
+  metadataUri: string;
   metadataNonce: number;
   status: ProviderStatus;
   minContractDuration: number;
@@ -97,24 +97,28 @@ export interface Contract {
   paid: string;
   nonce: number;
   closedHeight: number;
+  id: number;
 }
 
-export interface ContractExpiration {
-  providerPubKey: string;
-  chain: number;
-  client: string;
+export interface ContractSet {
+  contractIds: number[];
 }
 
 export interface ContractExpirationSet {
   height: number;
-  contracts: ContractExpiration[];
+  contractSet: ContractSet | undefined;
+}
+
+export interface UserContractSet {
+  user: string;
+  contractSet: ContractSet | undefined;
 }
 
 function createBaseProvider(): Provider {
   return {
     pubKey: "",
     chain: 0,
-    metadataURI: "",
+    metadataUri: "",
     metadataNonce: 0,
     status: 0,
     minContractDuration: 0,
@@ -134,8 +138,8 @@ export const Provider = {
     if (message.chain !== 0) {
       writer.uint32(16).int32(message.chain);
     }
-    if (message.metadataURI !== "") {
-      writer.uint32(26).string(message.metadataURI);
+    if (message.metadataUri !== "") {
+      writer.uint32(26).string(message.metadataUri);
     }
     if (message.metadataNonce !== 0) {
       writer.uint32(32).uint64(message.metadataNonce);
@@ -178,7 +182,7 @@ export const Provider = {
           message.chain = reader.int32();
           break;
         case 3:
-          message.metadataURI = reader.string();
+          message.metadataUri = reader.string();
           break;
         case 4:
           message.metadataNonce = longToNumber(reader.uint64() as Long);
@@ -216,7 +220,7 @@ export const Provider = {
     return {
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
       chain: isSet(object.chain) ? Number(object.chain) : 0,
-      metadataURI: isSet(object.metadataURI) ? String(object.metadataURI) : "",
+      metadataUri: isSet(object.metadataUri) ? String(object.metadataUri) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
       status: isSet(object.status) ? providerStatusFromJSON(object.status) : 0,
       minContractDuration: isSet(object.minContractDuration) ? Number(object.minContractDuration) : 0,
@@ -232,7 +236,7 @@ export const Provider = {
     const obj: any = {};
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
     message.chain !== undefined && (obj.chain = Math.round(message.chain));
-    message.metadataURI !== undefined && (obj.metadataURI = message.metadataURI);
+    message.metadataUri !== undefined && (obj.metadataUri = message.metadataUri);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
     message.status !== undefined && (obj.status = providerStatusToJSON(message.status));
     message.minContractDuration !== undefined && (obj.minContractDuration = Math.round(message.minContractDuration));
@@ -248,7 +252,7 @@ export const Provider = {
     const message = createBaseProvider();
     message.pubKey = object.pubKey ?? "";
     message.chain = object.chain ?? 0;
-    message.metadataURI = object.metadataURI ?? "";
+    message.metadataUri = object.metadataUri ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
     message.status = object.status ?? 0;
     message.minContractDuration = object.minContractDuration ?? 0;
@@ -275,6 +279,7 @@ function createBaseContract(): Contract {
     paid: "",
     nonce: 0,
     closedHeight: 0,
+    id: 0,
   };
 }
 
@@ -315,6 +320,9 @@ export const Contract = {
     }
     if (message.closedHeight !== 0) {
       writer.uint32(96).int64(message.closedHeight);
+    }
+    if (message.id !== 0) {
+      writer.uint32(104).uint64(message.id);
     }
     return writer;
   },
@@ -362,6 +370,9 @@ export const Contract = {
         case 12:
           message.closedHeight = longToNumber(reader.int64() as Long);
           break;
+        case 13:
+          message.id = longToNumber(reader.uint64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -384,6 +395,7 @@ export const Contract = {
       paid: isSet(object.paid) ? String(object.paid) : "",
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
       closedHeight: isSet(object.closedHeight) ? Number(object.closedHeight) : 0,
+      id: isSet(object.id) ? Number(object.id) : 0,
     };
   },
 
@@ -401,6 +413,7 @@ export const Contract = {
     message.paid !== undefined && (obj.paid = message.paid);
     message.nonce !== undefined && (obj.nonce = Math.round(message.nonce));
     message.closedHeight !== undefined && (obj.closedHeight = Math.round(message.closedHeight));
+    message.id !== undefined && (obj.id = Math.round(message.id));
     return obj;
   },
 
@@ -418,43 +431,41 @@ export const Contract = {
     message.paid = object.paid ?? "";
     message.nonce = object.nonce ?? 0;
     message.closedHeight = object.closedHeight ?? 0;
+    message.id = object.id ?? 0;
     return message;
   },
 };
 
-function createBaseContractExpiration(): ContractExpiration {
-  return { providerPubKey: "", chain: 0, client: "" };
+function createBaseContractSet(): ContractSet {
+  return { contractIds: [] };
 }
 
-export const ContractExpiration = {
-  encode(message: ContractExpiration, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.providerPubKey !== "") {
-      writer.uint32(10).string(message.providerPubKey);
+export const ContractSet = {
+  encode(message: ContractSet, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    writer.uint32(18).fork();
+    for (const v of message.contractIds) {
+      writer.uint64(v);
     }
-    if (message.chain !== 0) {
-      writer.uint32(16).int32(message.chain);
-    }
-    if (message.client !== "") {
-      writer.uint32(26).string(message.client);
-    }
+    writer.ldelim();
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): ContractExpiration {
+  decode(input: _m0.Reader | Uint8Array, length?: number): ContractSet {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseContractExpiration();
+    const message = createBaseContractSet();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          message.providerPubKey = reader.string();
-          break;
         case 2:
-          message.chain = reader.int32();
-          break;
-        case 3:
-          message.client = reader.string();
+          if ((tag & 7) === 2) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.contractIds.push(longToNumber(reader.uint64() as Long));
+            }
+          } else {
+            message.contractIds.push(longToNumber(reader.uint64() as Long));
+          }
           break;
         default:
           reader.skipType(tag & 7);
@@ -464,33 +475,29 @@ export const ContractExpiration = {
     return message;
   },
 
-  fromJSON(object: any): ContractExpiration {
-    return {
-      providerPubKey: isSet(object.providerPubKey) ? String(object.providerPubKey) : "",
-      chain: isSet(object.chain) ? Number(object.chain) : 0,
-      client: isSet(object.client) ? String(object.client) : "",
-    };
+  fromJSON(object: any): ContractSet {
+    return { contractIds: Array.isArray(object?.contractIds) ? object.contractIds.map((e: any) => Number(e)) : [] };
   },
 
-  toJSON(message: ContractExpiration): unknown {
+  toJSON(message: ContractSet): unknown {
     const obj: any = {};
-    message.providerPubKey !== undefined && (obj.providerPubKey = message.providerPubKey);
-    message.chain !== undefined && (obj.chain = Math.round(message.chain));
-    message.client !== undefined && (obj.client = message.client);
+    if (message.contractIds) {
+      obj.contractIds = message.contractIds.map((e) => Math.round(e));
+    } else {
+      obj.contractIds = [];
+    }
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<ContractExpiration>, I>>(object: I): ContractExpiration {
-    const message = createBaseContractExpiration();
-    message.providerPubKey = object.providerPubKey ?? "";
-    message.chain = object.chain ?? 0;
-    message.client = object.client ?? "";
+  fromPartial<I extends Exact<DeepPartial<ContractSet>, I>>(object: I): ContractSet {
+    const message = createBaseContractSet();
+    message.contractIds = object.contractIds?.map((e) => e) || [];
     return message;
   },
 };
 
 function createBaseContractExpirationSet(): ContractExpirationSet {
-  return { height: 0, contracts: [] };
+  return { height: 0, contractSet: undefined };
 }
 
 export const ContractExpirationSet = {
@@ -498,8 +505,8 @@ export const ContractExpirationSet = {
     if (message.height !== 0) {
       writer.uint32(8).int64(message.height);
     }
-    for (const v of message.contracts) {
-      ContractExpiration.encode(v!, writer.uint32(18).fork()).ldelim();
+    if (message.contractSet !== undefined) {
+      ContractSet.encode(message.contractSet, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -515,7 +522,7 @@ export const ContractExpirationSet = {
           message.height = longToNumber(reader.int64() as Long);
           break;
         case 2:
-          message.contracts.push(ContractExpiration.decode(reader, reader.uint32()));
+          message.contractSet = ContractSet.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -528,27 +535,85 @@ export const ContractExpirationSet = {
   fromJSON(object: any): ContractExpirationSet {
     return {
       height: isSet(object.height) ? Number(object.height) : 0,
-      contracts: Array.isArray(object?.contracts)
-        ? object.contracts.map((e: any) => ContractExpiration.fromJSON(e))
-        : [],
+      contractSet: isSet(object.contractSet) ? ContractSet.fromJSON(object.contractSet) : undefined,
     };
   },
 
   toJSON(message: ContractExpirationSet): unknown {
     const obj: any = {};
     message.height !== undefined && (obj.height = Math.round(message.height));
-    if (message.contracts) {
-      obj.contracts = message.contracts.map((e) => e ? ContractExpiration.toJSON(e) : undefined);
-    } else {
-      obj.contracts = [];
-    }
+    message.contractSet !== undefined
+      && (obj.contractSet = message.contractSet ? ContractSet.toJSON(message.contractSet) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<ContractExpirationSet>, I>>(object: I): ContractExpirationSet {
     const message = createBaseContractExpirationSet();
     message.height = object.height ?? 0;
-    message.contracts = object.contracts?.map((e) => ContractExpiration.fromPartial(e)) || [];
+    message.contractSet = (object.contractSet !== undefined && object.contractSet !== null)
+      ? ContractSet.fromPartial(object.contractSet)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseUserContractSet(): UserContractSet {
+  return { user: "", contractSet: undefined };
+}
+
+export const UserContractSet = {
+  encode(message: UserContractSet, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.user !== "") {
+      writer.uint32(10).string(message.user);
+    }
+    if (message.contractSet !== undefined) {
+      ContractSet.encode(message.contractSet, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UserContractSet {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUserContractSet();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.user = reader.string();
+          break;
+        case 2:
+          message.contractSet = ContractSet.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UserContractSet {
+    return {
+      user: isSet(object.user) ? String(object.user) : "",
+      contractSet: isSet(object.contractSet) ? ContractSet.fromJSON(object.contractSet) : undefined,
+    };
+  },
+
+  toJSON(message: UserContractSet): unknown {
+    const obj: any = {};
+    message.user !== undefined && (obj.user = message.user);
+    message.contractSet !== undefined
+      && (obj.contractSet = message.contractSet ? ContractSet.toJSON(message.contractSet) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<UserContractSet>, I>>(object: I): UserContractSet {
+    const message = createBaseUserContractSet();
+    message.user = object.user ?? "";
+    message.contractSet = (object.contractSet !== undefined && object.contractSet !== null)
+      ? ContractSet.fromPartial(object.contractSet)
+      : undefined;
     return message;
   },
 };

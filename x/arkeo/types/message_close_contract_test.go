@@ -1,8 +1,6 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common"
-
 	. "gopkg.in/check.v1"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -26,28 +24,9 @@ func (MsgCloseContractSuite) TestValidateBasic(c *C) {
 	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgCloseContract{
-		Creator: acct.String(),
-		PubKey:  pubkey,
-		Client:  pubkey,
+		Creator:    acct.String(),
+		ContractId: 50,
 	}
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidChain)
-
-	msg.Chain = common.BTCChain.String()
 	err = msg.ValidateBasic()
 	c.Assert(err, IsNil)
-
-	// check auth to cancel a specific contract
-	msg = MsgCloseContract{
-		Creator: GetRandomBech32Addr().String(),
-		PubKey:  pubkey,
-		Client:  pubkey,
-		Chain:   common.BTCChain.String(),
-	}
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrProviderBadSigner)
-
-	msg.Client = common.PubKey("bogus")
-	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
 }

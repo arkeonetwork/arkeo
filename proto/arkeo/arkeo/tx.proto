@@ -20,7 +20,7 @@ service Msg {
 
 message MsgBondProvider {
   string creator = 1;
-  string pub_key = 2
+  string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string chain = 3;
   string bond = 4 [
@@ -34,7 +34,7 @@ message MsgBondProviderResponse {}
 
 message MsgModProvider {
   string creator = 1;
-  string pub_key = 2
+  string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string chain = 3;
   string metadata_uri = 4;
@@ -50,7 +50,7 @@ message MsgModProviderResponse {}
 
 message MsgOpenContract {
   string creator = 1;
-  string pub_key = 2
+  string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string chain = 3;
   string client = 4
@@ -71,27 +71,19 @@ message MsgOpenContractResponse {}
 
 message MsgCloseContract {
   string creator = 1;
-  string pub_key = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
-  string client = 4
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  uint64 contract_id = 2;
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
   string creator = 1;
-  string pub_key = 2
+  uint64 contract_id = 2;
+  string spender = 3
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
-  string spender = 4
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  bytes signature = 5;
-  int64 nonce = 6;
-  int64 height = 7;
+  bytes signature = 4;
+  int64 nonce = 5;
+  int64 height = 6;
 }
 
 message MsgClaimContractIncomeResponse {}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
@@ -45,22 +46,21 @@ func CmdListContracts() *cobra.Command {
 
 func CmdShowContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show-contract [provider] [chain] [client]",
+		Use:   "show-contract [contract-id] ",
 		Short: "shows a contract",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			argPubKey := args[0]
-			argChain := args[1]
-			argClient := args[2]
+			argContractId, err := cast.ToUint64E(args[0])
+			if err != nil {
+				return err
+			}
 
 			params := &types.QueryFetchContractRequest{
-				Pubkey: argPubKey,
-				Chain:  argChain,
-				Client: argClient,
+				ContractId: argContractId,
 			}
 
 			res, err := queryClient.FetchContract(context.Background(), params)

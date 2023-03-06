@@ -3,9 +3,9 @@ package sentinel
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -20,24 +20,23 @@ type ClaimStore struct {
 }
 
 type Claim struct {
-	Provider  common.PubKey
-	Chain     common.Chain
-	Spender   common.PubKey
-	Nonce     int64
-	Height    int64
-	Signature string
-	Claimed   bool
+	Provider   common.PubKey
+	ContractId uint64
+	Spender    common.PubKey
+	Nonce      int64
+	Height     int64
+	Signature  string
+	Claimed    bool
 }
 
-func NewClaim(provider common.PubKey, chain common.Chain, spender common.PubKey, nonce, height int64, signature string) Claim {
+func NewClaim(contractId uint64, spender common.PubKey, nonce, height int64, signature string) Claim {
 	return Claim{
-		Provider:  provider,
-		Chain:     chain,
-		Spender:   spender,
-		Nonce:     nonce,
-		Height:    height,
-		Signature: signature,
-		Claimed:   false,
+		ContractId: contractId,
+		Spender:    spender,
+		Nonce:      nonce,
+		Height:     height,
+		Signature:  signature,
+		Claimed:    false,
 	}
 }
 
@@ -150,5 +149,5 @@ func (s *ClaimStore) GetInternalDb() *leveldb.DB {
 }
 
 func (c Claim) Key() string {
-	return types.NewContract(c.Provider, c.Chain, c.Spender).Key()
+	return strconv.FormatUint(c.ContractId, 10)
 }

@@ -59,12 +59,12 @@ func (k *MemStore) Get(key string) (types.Contract, error) {
 	defer k.storeLock.Unlock()
 	contract, ok := k.db[key]
 	// contract is not in cache or contract expired , fetch it
-	if !ok || contract.IsClose(k.blockHeight) {
+	if !ok || contract.IsClosed(k.blockHeight) {
 		crtUpStream, err := k.fetchContract(key)
 		if err != nil {
 			return crtUpStream, err
 		}
-		if !crtUpStream.IsClose(k.blockHeight) {
+		if !crtUpStream.IsClosed(k.blockHeight) {
 			k.db[key] = crtUpStream
 		}
 		return crtUpStream, nil
@@ -73,14 +73,15 @@ func (k *MemStore) Get(key string) (types.Contract, error) {
 	return contract, nil
 }
 
-func (k *MemStore) Put(key string, value types.Contract) {
+func (k *MemStore) Put(contract types.Contract) {
 	k.storeLock.Lock()
 	defer k.storeLock.Unlock()
-	if value.IsClose(k.blockHeight) {
+	key := contract.Key()
+	if contract.IsClosed(k.blockHeight) {
 		delete(k.db, key)
 		return
 	}
-	k.db[key] = value
+	k.db[key] = contract
 }
 
 func (k *MemStore) fetchContract(key string) (types.Contract, error) {
@@ -132,7 +133,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
-	contract.ProviderPubKey = data.Contract.ProviderPubKey
+	contract.Provider = data.Contract.ProviderPubKey
 	contract.Chain = data.Contract.Chain
 	contract.Client = data.Contract.Client
 	contract.Delegate = data.Contract.Delegate
