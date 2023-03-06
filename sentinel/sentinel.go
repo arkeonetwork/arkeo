@@ -171,7 +171,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	contractId, err := strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[3])
+		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[0])
 		respondWithError(w, fmt.Sprintf("bad contractId: %s", err), http.StatusBadRequest)
 		return
 	}
