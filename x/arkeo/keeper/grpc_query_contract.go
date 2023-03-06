@@ -48,7 +48,7 @@ func (k KVStore) FetchContract(c context.Context, req *types.QueryFetchContractR
 
 	val, err := k.GetContract(ctx, req.ContractId)
 	if err != nil {
-		return nil, status.Error(codes.Aborted, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	if val.Height <= 0 {
