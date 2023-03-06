@@ -6,7 +6,7 @@ arkeod
 tmp-swagger-gen/
 
 .trunk
-
+bin/
 vue/node_modules
 vue/dist
 release/
