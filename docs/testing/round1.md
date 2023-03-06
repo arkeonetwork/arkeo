@@ -42,6 +42,12 @@ then update your client config as follows:
 $ arkeod config chain-id arkeo
 $ arkeod config node tcp://testnet-seed.arkeo.shapeshift.com:26657
 ```
+
+optionally set the backend keyring. the default value "os" uses the operating system's keyring.
+```bash
+$ arkeod config keyring-backend <os|test|file>
+```
+
 you can verify the configuration applied successfully:
 ```bash
 $ arkeod config
@@ -55,41 +61,86 @@ $ arkeod config
 ```
 and query the current block height:
 ```
-$ arkeod query block | jq '.block.header.height'
-"157326"
+$ arkeod query block | jq -r '.block.header.height'
+205160
 ```
 ## Step 2: Setup a wallet
-Create a wallet using the cli and find your address and pubkey.
+Create or Import a wallet using the cli. Replace `adam` below with a name of your choice. add `--recover` if you have a
+mnemonic you'd like to use.
 
+assign a name to the $ark_user variable. this will become the key/wallet/user name.
 ```bash
-$ arkeod keys add <user> --keyring-backend file
-```
-__Note__: optionally recover from an existing bip39 mnemonic by adding `--recover` to the `keys add` command above
-
-You should see your address from the output of this command. It will start with `arkeo1`
-
-To find your pubkey, take the `key` of the pubkey in the output of our last command
-
-```bash
-$ arkeod debug pubkey-raw <raw pubkey>
+$ ark_user=adam
 ```
 
-This should output your pubkey. It will start with `arkeopub1`.
+```bash
+$ arkeod keys add $ark_user
+```
+__or__
+```bash
+$ arkeod keys add $ark_user --recover
+```
+This will output your arkeo address and pubkey along with the name you selected, as well as the mnemonic
+if you opted to generate one. Save this somewhere safe.
+
+```
+- address: arkeo14q4qnm4tmkm9xuhjwu0vw0f8xy7ztexeesvflj
+  name: adam
+  pubkey: '{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"ApcnOwEDoO6smze46IPUgC/5bC8DohEpLJ9ZZnrKky0w"}'
+  type: local
+```
+
+In order to interact with arkeo providers, you will need to have the `Acc` (account) pubkey encoded bech32 with the standard prefix. Execute the command below to obtain it.
+
+```bash
+$ arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r '.key') | grep '^Bech32 Acc: ' | awk '{ print $NF }'
+arkeopub1addwnpepq2tjwwcpqwswatymx7uw3q75sqhljmp0qw3pz2fvnavkv7k2jvknq9k9lr0
+```
+
+Store your menemonic somewhere safe along with the pubkey (`arkeopub1addwnpepq...9lr0` above) and your address.
 
 ## Step 2: Get funded
 
-Reach out to Odin with your address and request for funds sent to you.
+Reach out to the arkeo development team with your address (starts with `arkeo1`) to request funds.
 
 ## Step 3: Open a Contract
 
-Open both a subscription and pay-as-you-go contract (not at the same time, as only one contract is allowed open at a time between a provider and client/delegate) with the sole data provider.
-
+Get a list of Online providers from the Directory Service:
 ```bash
-$ CTYPE=0 # contract type, 0 is subscription, 1 is pay-as-you-go
-$ DEPOSIT=<amt> # amount of tokens you want to deposit. Subscriptions should make sense in that duration and rate equal deposit
-$ DURATION=<blocks> # number of blocks to make a subscription. There are lower and higher limits to this number
-$ RATE=<rate> # should equal the porvider's rate which you can lookup at (`curl http://seed.arkeo.network:3636/metadata.json | jq .`)
-$ arkeod tx arkeo open-contract -y --from <user> --keyring-backend file --node "tcp://seed.arkeo.network:26657" -- arkeopub1addwnpepqtrc0rrpkwn2esula68zl3dvqqfxfjhr5dyfxy3uq97dssntrq8twhy9nvu btc-mainnet-fullnode "<your pubkey>" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
+$ curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "Online")|[{pubkey: .Pubkey, chain: .Chain, meta: .MetadataURI}]'
+[
+  {
+    "pubkey": "arkeopub1addwnpepqdtyf722w22r8grkecpnzgwm6stm2x3yhphre2wwnwwxkpa9ym5fyfyxdum",
+    "chain": "gaia-mainnet-rpc-archive",
+    "meta": "http://testnet-sentinel.arkeo.shapeshift.com:3636/metadata.json"
+  }
+]
+```
+
+Choose the `gaia-mainnet-rpc-archive` provider:
+```bash
+$ ark_provider=arkeopub1addwnpepqdtyf722w22r8grkecpnzgwm6stm2x3yhphre2wwnwwxkpa9ym5fyfyxdum
+$ ark_chain=gaia-mainnet-rpc-archive
+```
+
+Open a Subscription contract. This example opens a subscription contract for 20 blocks at a rate of 10 arkeo, depositing 200 to cover the subscription cost.
+```bash
+$ ark_contract_type=0
+$ ark_deposit=200
+$ ark_duration=20
+$ ark_rate=10
+$ ark_pubkey=`arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r '.key') | grep '^Bech32 Acc: ' | awk '{ print $NF }'`
+$ arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate
+```
+
+Open a Pay-As-You-Go contract. This example opens a subscription contract for 20 blocks at a rate of 20 arkeo, depositing 400 to cover the subscription cost.
+```bash
+$ ark_contract_type=1
+$ ark_deposit=400
+$ ark_duration=20
+$ ark_rate=20
+$ ark_pubkey=`arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r '.key') | grep '^Bech32 Acc: ' | awk '{ print $NF }'`
+$ arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate
 ```
 
 ## Step 4: Make Requests
