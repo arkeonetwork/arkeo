@@ -450,11 +450,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryActiveContract
    * @summary Queries a list of ActiveContract items.
-   * @request GET:/arkeonetwork/arkeo/arkeo/active_contract/{spender}/{provider}/{chain}
+   * @request GET:/arkeonetwork/arkeo/arkeo/active-contract/{spender}/{provider}/{chain}
    */
   queryActiveContract = (spender: string, provider: string, chain: string, params: RequestParams = {}) =>
     this.request<ArkeoQueryActiveContractResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/arkeo/active_contract/${spender}/${provider}/${chain}`,
+      path: `/arkeonetwork/arkeo/arkeo/active-contract/${spender}/${provider}/${chain}`,
       method: "GET",
       format: "json",
       ...params,

@@ -115,7 +115,7 @@ func main() {
 }
 
 func (c Curl) getActiveContract(provider, chain, spender string) types.Contract {
-	u := fmt.Sprintf("%s/active_contract/%s/%s/%s", c.baseURL, spender, provider, chain)
+	u := fmt.Sprintf("%s/active-contract/%s/%s/%s", c.baseURL, spender, provider, chain)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)

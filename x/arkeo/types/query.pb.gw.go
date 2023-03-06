@@ -642,7 +642,7 @@ var (
 
 	pattern_Query_ContractAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"arkeo", "contracts"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ActiveContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeo", "active_contract", "spender", "provider", "chain"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ActiveContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeo", "active-contract", "spender", "provider", "chain"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

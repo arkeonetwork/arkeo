@@ -38,7 +38,7 @@ service Query {
   rpc ActiveContract(QueryActiveContractRequest)
       returns (QueryActiveContractResponse) {
     option (google.api.http).get =
-        "/arkeo/active_contract/{spender}/{provider}/{chain}";
+        "/arkeo/active-contract/{spender}/{provider}/{chain}";
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.

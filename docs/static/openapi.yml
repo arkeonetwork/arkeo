@@ -4,7 +4,7 @@ info:
   name: ''
   description: ''
 paths:
-  /arkeo/active_contract/{spender}/{provider}/{chain}:
+  /arkeo/active-contract/{spender}/{provider}/{chain}:
     get:
       summary: Queries an active contract by spender, provider and chain.
       operationId: ArkeoArkeoActiveContract
