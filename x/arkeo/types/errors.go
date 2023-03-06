@@ -33,4 +33,5 @@ var (
 	ErrClaimContractIncomeClosed             = errors.Register(ModuleName, 24, "contract is closed")
 	ErrClaimContractIncomeInvalidSignature   = errors.Register(ModuleName, 25, "invalid signature")
 	ErrProviderNotFound                      = errors.Register(ModuleName, 26, "provider not found")
+	ErrContractNotFound                      = errors.Register(ModuleName, 27, "contract not found")
 )

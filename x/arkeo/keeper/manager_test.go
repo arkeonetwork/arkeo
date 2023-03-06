@@ -208,7 +208,8 @@ func (ManagerSuite) TestContractEndBlock(c *C) {
 
 	// advance 100 blocks and call end block
 	ctx = ctx.WithBlockHeight(110)
-	mgr.ContractEndBlock(ctx)
+	err = mgr.ContractEndBlock(ctx)
+	c.Assert(err, IsNil)
 
 	// user 2 should only have 1 contract left in their set.
 	contractSet, err = k.GetUserContractSet(ctx, user2PubKey)
@@ -226,7 +227,8 @@ func (ManagerSuite) TestContractEndBlock(c *C) {
 
 	// advance 100 more blocks and call end block to ensure user 2 has no contracts left.
 	ctx = ctx.WithBlockHeight(210)
-	mgr.ContractEndBlock(ctx)
+	err = mgr.ContractEndBlock(ctx)
+	c.Assert(err, IsNil)
 	contractSet, err = k.GetUserContractSet(ctx, user2PubKey)
 	c.Assert(err, IsNil)
 	c.Assert(contractSet.ContractSet, IsNil)
