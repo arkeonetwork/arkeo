@@ -84,6 +84,20 @@ func (k *MemStore) Put(contract types.Contract) {
 	k.db[key] = contract
 }
 
+func (k *MemStore) GetActiveContract(provider common.PubKey, chain common.Chain, spender common.PubKey) (types.Contract, error) {
+	k.storeLock.Lock()
+	defer k.storeLock.Unlock()
+	// iterate through the map to find the contract
+	for _, contract := range k.db {
+		if contract.Provider.Equals(provider) && contract.Chain == chain && contract.GetSpender().Equals(spender) {
+			// TODO: do we need to contract is expired here?
+			return contract, nil
+		}
+	}
+	// we should also probably call arkeo if we don't find the contract as we do below.
+	return types.Contract{}, fmt.Errorf("contract not found")
+}
+
 func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	// TODO: this should cache a "miss" for 5 seconds, to stop DoS/thrashing
 	var contract types.Contract
