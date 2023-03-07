@@ -103,17 +103,11 @@ func (userContractSet *UserContractSet) RemoveContractFromSet(contractIdToRemove
 		return nil, fmt.Errorf("contract set is empty")
 	}
 
-	isFound := false
 	for i, contractId := range userContractSet.ContractSet.ContractIds {
 		if contractId == contractIdToRemove {
 			userContractSet.ContractSet.ContractIds = append(userContractSet.ContractSet.ContractIds[:i], userContractSet.ContractSet.ContractIds[i+1:]...)
-			isFound = true
-			break
+			return userContractSet, nil
 		}
 	}
-
-	if !isFound {
-		return userContractSet, fmt.Errorf("contract %d not found in user contract set", contractIdToRemove)
-	}
-	return userContractSet, nil
+	return userContractSet, fmt.Errorf("contract %d not found in user contract set", contractIdToRemove)
 }
