@@ -45,6 +45,10 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return err
 	}
 
+	if contract.IsEmpty() {
+		return errors.Wrapf(types.ErrContractNotFound, "id: %d", msg.ContractId)
+	}
+
 	signerAccountAddress := msg.MustGetSigner()
 
 	clientPublicKey, err := common.NewPubKey(contract.Client.String())

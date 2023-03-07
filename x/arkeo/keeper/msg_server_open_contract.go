@@ -55,6 +55,10 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
+	if provider.LastUpdate == 0 {
+		return errors.Wrapf(types.ErrProviderNotFound, "provider %s for chain %s not found", msg.Provider, msg.Chain)
+	}
+
 	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
 	if provider.Bond.LT(cosmos.NewInt(minBond)) {
 		return errors.Wrapf(types.ErrInvalidBond, "not enough provider bond to open a contract (%d/%d)", provider.Bond.Int64(), minBond)
@@ -117,17 +121,21 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	contract := types.NewContract(msg.Provider, chain, msg.GetSpender())
-	contract.Id = k.Keeper.GetAndIncrementNextContractId(ctx)
-	contract.Client = msg.Client
-	contract.Type = msg.ContractType
-	contract.Height = ctx.BlockHeight()
-	contract.Duration = msg.Duration
-	contract.Rate = msg.Rate
-	contract.Deposit = msg.Deposit
+	contract := types.Contract{
+		Provider: msg.Provider,
+		Id:       k.Keeper.GetAndIncrementNextContractId(ctx),
+		Chain:    chain,
+		Type:     msg.ContractType,
+		Client:   msg.Client,
+		Delegate: msg.Delegate,
+		Duration: msg.Duration,
+		Rate:     msg.Rate,
+		Deposit:  msg.Deposit,
+		Paid:     cosmos.ZeroInt(),
+		Height:   ctx.BlockHeight(),
+	}
 
 	// create expiration set
-
 	expirationSet, err := k.GetContractExpirationSet(ctx, contract.Expiration())
 	if err != nil {
 		return err

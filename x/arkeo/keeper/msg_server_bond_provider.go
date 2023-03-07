@@ -92,6 +92,9 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 		k.BondProviderEvent(ctx, provider.Bond, msg)
 		return nil
 	}
+
+	provider.LastUpdate = ctx.BlockHeight()
+
 	err = k.SetProvider(ctx, provider)
 	if err == nil {
 		k.BondProviderEvent(ctx, provider.Bond, msg)

@@ -48,32 +48,47 @@ func (CloseContractSuite) TestValidate(c *C) {
 
 func (CloseContractSuite) TestHandle(c *C) {
 	ctx, k, sk := SetupKeeperWithStaking(c)
-	ctx = ctx.WithBlockHeight(14)
-
+	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 
 	// setup
-	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(500)), IsNil)
-	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(500)), IsNil)
-	pubkey := types.GetRandomPubKey()
-	provider, err := pubkey.GetMyAddress()
+	providerPubKey := types.GetRandomPubKey()
+	provider, err := providerPubKey.GetMyAddress()
 	c.Assert(err, IsNil)
-	acc := types.GetRandomPubKey()
+	clientPubKey := types.GetRandomPubKey()
+	clientAccount, err := clientPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+
 	chain := common.BTCChain
 	c.Check(k.GetBalance(ctx, provider).IsZero(), Equals, true)
 
-	contract := types.NewContract(pubkey, chain, acc)
-	contract.Type = types.ContractType_SUBSCRIPTION
-	contract.Duration = 100
-	contract.Height = 10
-	contract.Rate = 5
-	contract.Deposit = cosmos.NewInt(500)
-	contract.Id = 1
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+	openContractMessage := types.MsgOpenContract{
+		Creator:      clientAccount.String(),
+		Client:       clientPubKey,
+		Chain:        chain.String(),
+		Provider:     providerPubKey,
+		Deposit:      cosmos.NewInt(500),
+		Rate:         5,
+		Duration:     100,
+		ContractType: types.ContractType_SUBSCRIPTION,
+	}
+
+	c.Assert(k.MintAndSendToAccount(ctx, clientAccount, getCoin(common.Tokens(10))), IsNil)
+	err = s.OpenContractHandle(ctx, &openContractMessage)
+	c.Assert(err, IsNil)
+
+	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
+	c.Check(bal.Int64(), Equals, int64(500))
+
+	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+	c.Check(contract.IsEmpty(), Equals, false)
+
+	ctx = ctx.WithBlockHeight(14)
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    acc.String(),
+		Creator:    clientAccount.String(),
 		ContractId: contract.Id,
 	}
 	c.Assert(s.CloseContractHandle(ctx, &msg), IsNil)
@@ -83,12 +98,12 @@ func (CloseContractSuite) TestHandle(c *C) {
 	c.Check(contract.Paid.Int64(), Equals, int64(20))
 	c.Check(contract.ClosedHeight, Equals, ctx.BlockHeight())
 
-	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
+	bal = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(0))
 	c.Check(k.HasCoins(ctx, provider, getCoins(18)), Equals, true)
 	c.Check(k.HasCoins(ctx, contract.ClientAddress(), getCoins(480)), Equals, true)
 	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
-	c.Check(bal.Int64(), Equals, int64(2))
+	c.Check(bal.Int64(), Equals, int64(100000002)) // open cost + fee
 }
 
 func (CloseContractSuite) TestCloseSubscriptionContract(c *C) {
@@ -139,10 +154,13 @@ func (CloseContractSuite) TestCloseSubscriptionContract(c *C) {
 
 	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
 	c.Assert(err, IsNil)
+	c.Assert(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(0))
+	c.Check(contract.Client, Equals, userPubKey)
 
 	// confirm that another user cannot close the contract
-	use2PubKey := types.GetRandomPubKey()
-	user2Address, err := use2PubKey.GetMyAddress()
+	user2PubKey := types.GetRandomPubKey()
+	user2Address, err := user2PubKey.GetMyAddress()
 	c.Assert(err, IsNil)
 
 	closeContractMsg := types.MsgCloseContract{
@@ -156,15 +174,25 @@ func (CloseContractSuite) TestCloseSubscriptionContract(c *C) {
 	closeContractMsg.Creator = userAddress.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	c.Check(err, IsNil)
+	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	c.Check(err, IsNil)
+	c.Check(contract.IsEmpty(), Equals, true)
 
 	// reopen contract this time with a delagate address.
-	openContractMessage.Delegate = use2PubKey
+	openContractMessage.Delegate = user2PubKey
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	c.Assert(err, IsNil)
 
-	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	contract, err = s.GetActiveContractForUser(ctx, user2PubKey, providerPubKey, chain)
 	c.Assert(err, IsNil)
+	c.Assert(contract.Id, Equals, uint64(1))
+	c.Assert(contract.IsEmpty(), Equals, false)
+	c.Assert(contract.Delegate.Equals(user2PubKey), Equals, true)
 	closeContractMsg.ContractId = contract.Id
+
+	user2ContractSet, err := s.GetUserContractSet(ctx, user2PubKey)
+	c.Assert(err, IsNil)
+	c.Check(user2ContractSet.ContractSet.ContractIds, HasLen, 1)
 
 	// confirm that the contract cannot be closed by the delegate
 	closeContractMsg.Creator = user2Address.String()

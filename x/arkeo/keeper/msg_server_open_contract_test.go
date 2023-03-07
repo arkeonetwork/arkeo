@@ -36,6 +36,7 @@ func (OpenContractSuite) TestValidate(c *C) {
 	provider.MinContractDuration = 10
 	provider.SubscriptionRate = 15
 	provider.PayAsYouGoRate = 2
+	provider.LastUpdate = 1
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 
 	// happy path
@@ -154,6 +155,7 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	chain := common.BTCChain
 	provider := types.NewProvider(providerPubKey, chain)
 	provider.Bond = cosmos.NewInt(10000000000)
+	provider.LastUpdate = ctx.BlockHeight()
 	c.Assert(k.SetProvider(ctx, provider), IsNil)
 
 	modProviderMsg := types.MsgModProvider{
