@@ -28,13 +28,12 @@ func (s *ClaimStoreSuite) TestStore(c *C) {
 	pk2 := types.GetRandomPubKey()
 	contractId := uint64(57)
 	c.Assert(err, IsNil)
-	claim := NewClaim(contractId, pk2, 30, 10, "signature")
+	claim := NewClaim(contractId, pk2, 30, "signature")
 
 	c.Assert(store.Set(claim), IsNil)
 	c.Assert(store.Has(claim.Key()), Equals, true)
 	claim, err = store.Get(claim.Key())
 	c.Assert(err, IsNil)
-	c.Check(claim.Height, Equals, int64(10))
 
 	claims := store.List()
 	c.Assert(claims, HasLen, 1)

@@ -24,17 +24,15 @@ type Claim struct {
 	ContractId uint64
 	Spender    common.PubKey
 	Nonce      int64
-	Height     int64
 	Signature  string
 	Claimed    bool
 }
 
-func NewClaim(contractId uint64, spender common.PubKey, nonce, height int64, signature string) Claim {
+func NewClaim(contractId uint64, spender common.PubKey, nonce int64, signature string) Claim {
 	return Claim{
 		ContractId: contractId,
 		Spender:    spender,
 		Nonce:      nonce,
-		Height:     height,
 		Signature:  signature,
 		Claimed:    false,
 	}

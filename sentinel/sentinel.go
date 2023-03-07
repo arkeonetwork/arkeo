@@ -176,7 +176,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claim := NewClaim(contractId, "", 0, 0, "")
+	claim := NewClaim(contractId, "", 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())

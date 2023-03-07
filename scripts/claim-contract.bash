@@ -29,17 +29,6 @@ NONCE="$3"
 CLIENT_PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-HEIGHT=$(curl -s localhost:1317/arkeo/contract/"$CONTRACT_ID" | jq -r .contract.height)
+SIGNATURE=$(signhere -u "$USER" -m "$CONTRACT_ID:$CLIENT_PUBKEY:$NONCE")
 
-if [ -z "$HEIGHT" ]; then
-	echo "No open contract to claim"
-	exit 1
-fi
-if [ "$HEIGHT" == "null" ]; then
-	echo "No open contract to claim"
-	exit 1
-fi
-
-SIGNATURE=$(signhere -u "$USER" -m "$CONTRACT_ID:$CLIENT_PUBKEY:$HEIGHT:$NONCE")
-
-$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$CONTRACT_ID" "$CLIENT_PUBKEY" "$NONCE" "$HEIGHT" "$SIGNATURE"
+$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$CONTRACT_ID" "$CLIENT_PUBKEY" "$NONCE" "$SIGNATURE"
