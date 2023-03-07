@@ -90,24 +90,24 @@ func (ct *ContractType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (userContractSet *UserContractSet) RemoveContractFromSet(contractIdToRemove uint64) (*UserContractSet, error) {
+func (userContractSet *UserContractSet) RemoveContractFromSet(contractIdToRemove uint64) error {
 	if userContractSet == nil {
-		return nil, fmt.Errorf("user contract set is nil")
+		return fmt.Errorf("user contract set is nil")
 	}
 
 	if userContractSet.ContractSet == nil {
-		return nil, fmt.Errorf("contract set is nil")
+		return fmt.Errorf("contract set is nil")
 	}
 
 	if len(userContractSet.ContractSet.ContractIds) == 0 {
-		return nil, fmt.Errorf("contract set is empty")
+		return fmt.Errorf("contract set is empty")
 	}
 
 	for i, contractId := range userContractSet.ContractSet.ContractIds {
 		if contractId == contractIdToRemove {
 			userContractSet.ContractSet.ContractIds = append(userContractSet.ContractSet.ContractIds[:i], userContractSet.ContractSet.ContractIds[i+1:]...)
-			return userContractSet, nil
+			return nil
 		}
 	}
-	return userContractSet, fmt.Errorf("contract %d not found in user contract set", contractIdToRemove)
+	return fmt.Errorf("contract %d not found in user contract set", contractIdToRemove)
 }

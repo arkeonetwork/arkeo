@@ -224,7 +224,7 @@ func (k KVStore) RemoveFromUserContractSet(ctx cosmos.Context, user common.PubKe
 		return err
 	}
 
-	_, err = contractSet.RemoveContractFromSet(contractId)
+	err = contractSet.RemoveContractFromSet(contractId)
 	if err != nil {
 		return err
 	}
