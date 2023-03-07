@@ -43,7 +43,8 @@ func TestGenesisWithContracts(t *testing.T) {
 	provider := types.NewProvider(providerPubkey, common.BTCChain)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.LastUpdate = 100
-	k.SetProvider(ctx, provider)
+	err := k.SetProvider(ctx, provider)
+	require.NoError(t, err)
 
 	// create contracts
 	contracts := []types.Contract{
@@ -101,7 +102,7 @@ func TestGenesisWithContracts(t *testing.T) {
 		},
 	}
 
-	err := k.SetUserContractSet(ctx, user1ContractSet)
+	err = k.SetUserContractSet(ctx, user1ContractSet)
 	require.NoError(t, err)
 	err = k.SetUserContractSet(ctx, user2ContractSet)
 	require.NoError(t, err)
