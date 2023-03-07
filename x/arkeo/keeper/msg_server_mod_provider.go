@@ -26,6 +26,7 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 		"max contract duration", msg.MaxContractDuration,
 		"subscription rate", msg.SubscriptionRate,
 		"pay-as-you-go rate", msg.PayAsYouGoRate,
+		"settlement duration", msg.SettlementDuration,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()

@@ -24,6 +24,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"contract type", msg.ContractType,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
+		"settlement duration", msg.SettlementDuration,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -100,7 +101,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
-	if !activeContract.IsEmpty() && activeContract.IsExpired(ctx.BlockHeight()) {
+	if !activeContract.IsEmpty() && !activeContract.IsExpired(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
 	}
 
