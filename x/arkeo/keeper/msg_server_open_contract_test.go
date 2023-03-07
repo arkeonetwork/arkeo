@@ -255,7 +255,6 @@ func (OpenContractSuite) TestOpenContractWithSettlementPeriod(c *C) {
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 
 	c.Assert(err, IsNil)
-	//c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
 
 	clientPubKey := types.GetRandomPubKey()
 	clientAddress, err := clientPubKey.GetMyAddress()

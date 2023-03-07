@@ -233,3 +233,85 @@ func (ManagerSuite) TestContractEndBlock(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(contractSet.ContractSet, IsNil)
 }
+
+func (ManagerSuite) TestContractEndBlockWithSettlementDuration(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+	mgr := NewManager(k, sk)
+
+	// create a provider for 2 chains
+	providerPubKey := types.GetRandomPubKey()
+	provider := types.NewProvider(providerPubKey, common.BTCChain)
+	provider.Bond = cosmos.NewInt(20000000000)
+	provider.LastUpdate = ctx.BlockHeight()
+	provider.SettlementDuration = 10
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+	provider.Chain = common.ETHChain
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
+	modProviderMsg := types.MsgModProvider{
+		Provider:            provider.PubKey,
+		Chain:               common.BTCChain.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_ONLINE,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+		SettlementDuration:  10,
+	}
+
+	err := s.ModProviderHandle(ctx, &modProviderMsg)
+	c.Assert(err, IsNil)
+	modProviderMsg.Chain = common.ETHChain.String()
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
+	c.Assert(err, IsNil)
+
+	// create user1 to open a contract against the provider.
+	user1PubKey := types.GetRandomPubKey()
+	user1Address, err := user1PubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+	c.Assert(k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))), IsNil)
+
+	msg := types.MsgOpenContract{
+		Provider:           providerPubKey,
+		Chain:              common.BTCChain.String(),
+		Creator:            user1Address.String(),
+		Client:             user1PubKey,
+		ContractType:       types.ContractType_PAY_AS_YOU_GO,
+		Duration:           100,
+		Rate:               15,
+		Deposit:            cosmos.NewInt(1500),
+		SettlementDuration: 10,
+	}
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// get the active contract for user 1
+	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	c.Assert(err, IsNil)
+	c.Check(activeContract.IsEmpty(), Equals, false)
+	c.Check(activeContract.IsOpen(ctx.BlockHeight()), Equals, true)
+
+	// advance 100 blocks and call end block
+	ctx = ctx.WithBlockHeight(111)
+	c.Check(activeContract.IsExpired(ctx.BlockHeight()), Equals, true)
+
+	// call end block which shouldn't yet do anything as the settlement duration hasn't been reached
+	err = mgr.ContractEndBlock(ctx)
+	c.Assert(err, IsNil)
+
+	activeContract, err = k.GetContract(ctx, activeContract.Id)
+	c.Assert(err, IsNil)
+	c.Check(activeContract.SettlementHeight, Equals, int64(0))
+
+	// advance 10 more blocks and call end block
+	ctx = ctx.WithBlockHeight(activeContract.SettlementPeriodEnd())
+	err = mgr.ContractEndBlock(ctx)
+	c.Assert(err, IsNil)
+
+	// the end block should have settled the contract and set the settlement height
+	activeContract, err = k.GetContract(ctx, activeContract.Id)
+	c.Assert(err, IsNil)
+	c.Check(activeContract.SettlementHeight, Equals, activeContract.SettlementPeriodEnd())
+}
