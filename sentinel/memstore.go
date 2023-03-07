@@ -100,7 +100,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		Deposit          string             `protobuf:"varint,9,opt,name=deposit,proto3" json:"deposit,omitempty"`
 		Paid             string             `protobuf:"varint,10,opt,name=paid,proto3" json:"paid,omitempty"`
 		Nonce            string             `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
-		SettlementHeight string             `protobuf:"varint,12,opt,name=settlement_height,json=settlement_height,proto3" json:"settlement_height,omitempty"`
+		SettlementHeight string             `protobuf:"varint,12,opt,name=settlement_height,json=settlementHeight,proto3" json:"settlement_height,omitempty"`
 	}
 
 	type fetch struct {
