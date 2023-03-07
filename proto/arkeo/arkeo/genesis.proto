@@ -14,5 +14,7 @@ message GenesisState {
   repeated Provider providers = 2 [ (gogoproto.nullable) = false ];
   repeated Contract contracts = 3 [ (gogoproto.nullable) = false ];
   uint64 next_contract_id = 4;
+  repeated ContractExpirationSet contract_expiration_sets = 5 [ (gogoproto.nullable) = false ];
+  repeated UserContractSet user_contract_sets = 6 [ (gogoproto.nullable) = false ];
   // this line is used by starport scaffolding # genesis/proto/state
 }
