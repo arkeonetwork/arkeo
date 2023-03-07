@@ -317,4 +317,8 @@ func (OpenContractSuite) TestOpenContractWithSettlementPeriod(c *C) {
 	c.Check(contract.IsExpired(ctx.BlockHeight()), Equals, true)
 	c.Check(contract.IsSettlementPeriod(ctx.BlockHeight()), Equals, false)
 	c.Check(contract.IsSettled(ctx.BlockHeight()), Equals, true)
+
+	claimMsg.Nonce = 21
+	_, err = s.ClaimContractIncome(ctx, &claimMsg)
+	c.Check(err, ErrIs, types.ErrClaimContractIncomeClosed)
 }
