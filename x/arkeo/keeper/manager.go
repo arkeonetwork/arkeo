@@ -52,10 +52,6 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			continue
 		}
 
-		if contract.IsSettled(ctx.BlockHeight()) {
-			continue
-		}
-
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
 			ctx.Logger().Error("unable to settle contract", "id", contractId, "error", err)
@@ -190,11 +186,6 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 	}
 
 	contract.Paid = contract.Paid.Add(totalDebt)
-
-	// if this is a pay as you go contract in the settlement period, this will finalize all of the needed state and we
-	// can at this point consider the contract settled.
-	isFinal = isFinal || (contract.Type == types.ContractType_PAY_AS_YOU_GO && contract.IsSettlementPeriod(ctx.BlockHeight()))
-
 	if isFinal {
 		remainder := contract.Deposit.Sub(contract.Paid)
 		if !remainder.IsZero() {

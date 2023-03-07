@@ -229,3 +229,92 @@ func (OpenContractSuite) TestOpenContract(c *C) {
 	c.Check(contract.IsEmpty(), Equals, false)
 	c.Check(contract.Id, Equals, uint64(2))
 }
+
+func (OpenContractSuite) TestOpenContractWithSettlementPeriod(c *C) {
+	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+
+	providerPubKey := types.GetRandomPubKey()
+	chain := common.BTCChain
+	provider := types.NewProvider(providerPubKey, chain)
+	provider.Bond = cosmos.NewInt(10000000000)
+	provider.LastUpdate = ctx.BlockHeight()
+	c.Assert(k.SetProvider(ctx, provider), IsNil)
+
+	modProviderMsg := types.MsgModProvider{
+		Provider:            provider.PubKey,
+		Chain:               provider.Chain.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_ONLINE,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+		SettlementDuration:  10,
+	}
+	err := s.ModProviderHandle(ctx, &modProviderMsg)
+
+	c.Assert(err, IsNil)
+	//c.Assert(k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))), IsNil)
+
+	clientPubKey := types.GetRandomPubKey()
+	clientAddress, err := clientPubKey.GetMyAddress()
+	c.Assert(err, IsNil)
+	c.Assert(k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))), IsNil)
+
+	msg := types.MsgOpenContract{
+		Provider:     providerPubKey,
+		Chain:        chain.String(),
+		Creator:      clientAddress.String(),
+		Client:       clientPubKey,
+		ContractType: types.ContractType_PAY_AS_YOU_GO,
+		Duration:     100,
+		Rate:         15,
+		Deposit:      cosmos.NewInt(1500),
+	}
+	_, err = s.OpenContract(ctx, &msg)
+	c.Check(err, ErrIs, types.ErrOpenContractMismatchSettlementDuration)
+
+	msg.SettlementDuration = 10
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	c.Assert(err, IsNil)
+
+	c.Check(contract.IsEmpty(), Equals, false)
+	c.Check(contract.Id, Equals, uint64(0))
+
+	// confirm opening a new contract will fail since the user have an active one
+	_, err = s.OpenContract(ctx, &msg)
+	c.Check(err, ErrIs, types.ErrOpenContractAlreadyOpen)
+
+	// move to a block where out contract should be expired, but not settled.
+	ctx = ctx.WithBlockHeight(contract.Expiration() + 1)
+
+	c.Check(contract.IsExpired(ctx.BlockHeight()), Equals, true)
+	c.Check(contract.IsSettlementPeriod(ctx.BlockHeight()), Equals, true)
+	c.Check(contract.IsSettled(ctx.BlockHeight()), Equals, false)
+
+	// client should be able to open another contract.
+	_, err = s.OpenContract(ctx, &msg)
+	c.Assert(err, IsNil)
+
+	// confirm contract income can be claimed while the first contract is in the
+	// settlement period.
+	claimMsg := types.MsgClaimContractIncome{
+		ContractId: contract.Id,
+		Creator:    clientAddress.String(),
+		Spender:    clientPubKey,
+		Nonce:      20,
+	}
+	_, err = s.ClaimContractIncome(ctx, &claimMsg)
+	c.Assert(err, IsNil)
+
+	// advance beyond settlement period to confirm the contract is settled and no more
+	// income can be claimed.
+	ctx = ctx.WithBlockHeight(contract.SettlementPeriodEnd())
+	c.Check(contract.IsExpired(ctx.BlockHeight()), Equals, true)
+	c.Check(contract.IsSettlementPeriod(ctx.BlockHeight()), Equals, false)
+	c.Check(contract.IsSettled(ctx.BlockHeight()), Equals, true)
+}

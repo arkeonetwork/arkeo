@@ -16,13 +16,12 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator string, contractId uint64, spender common.PubKey, nonce, height int64, sig []byte) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, contractId uint64, spender common.PubKey, nonce int64, sig []byte) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator:    creator,
 		ContractId: contractId,
 		Spender:    spender,
 		Nonce:      nonce,
-		Height:     height,
 		Signature:  sig,
 	}
 }
@@ -66,11 +65,11 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 }
 
 func (msg *MsgClaimContractIncome) GetBytesToSign() []byte {
-	return GetBytesToSign(msg.ContractId, msg.Spender, msg.Height, msg.Nonce)
+	return GetBytesToSign(msg.ContractId, msg.Spender, msg.Nonce)
 }
 
-func GetBytesToSign(contractId uint64, spender common.PubKey, height, nonce int64) []byte {
-	return []byte(fmt.Sprintf("%d:%s:%d:%d", contractId, spender, height, nonce))
+func GetBytesToSign(contractId uint64, spender common.PubKey, nonce int64) []byte {
+	return []byte(fmt.Sprintf("%d:%s:%d", contractId, spender, nonce))
 }
 
 func (msg *MsgClaimContractIncome) ValidateBasic() error {
@@ -88,10 +87,6 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 
 	if len(msg.Signature) > 100 {
 		return errors.Wrap(ErrClaimContractIncomeInvalidSignature, "too long")
-	}
-
-	if msg.Height <= 0 {
-		return errors.Wrap(ErrClaimContractIncomeBadHeight, "")
 	}
 
 	if msg.Nonce <= 0 {

@@ -53,7 +53,6 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 	msg = MsgClaimContractIncome{
 		Creator:    acct.String(),
 		ContractId: 1,
-		Height:     12,
 		Nonce:      24,
 		Spender:    spenderPubKey,
 	}
@@ -86,7 +85,6 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	msg := MsgClaimContractIncome{
 		Creator:    acct.String(),
 		Spender:    pubkey,
-		Height:     100,
 		Nonce:      48,
 		ContractId: 500,
 	}
@@ -99,7 +97,7 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	c.Assert(err, IsNil)
 
-	message := []byte(fmt.Sprintf("%d:%s:%d:%d", msg.ContractId, msg.Spender, msg.Height, msg.Nonce))
+	message := []byte(fmt.Sprintf("%d:%s:%d", msg.ContractId, msg.Spender, msg.Nonce))
 	msg.Signature, pub, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 

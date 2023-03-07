@@ -85,7 +85,6 @@ message MsgClaimContractIncome {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes signature = 4;
   int64 nonce = 5;
-  int64 height = 6;
 }
 
 message MsgClaimContractIncomeResponse {}

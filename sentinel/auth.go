@@ -84,7 +84,7 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	if err != nil {
 		return fmt.Errorf("internal server error: %w", err)
 	}
-	msg := types.NewMsgClaimContractIncome(creator.String(), aa.ContractId, aa.Spender, aa.Nonce, aa.Height, aa.Signature)
+	msg := types.NewMsgClaimContractIncome(creator.String(), aa.ContractId, aa.Spender, aa.Nonce, aa.Signature)
 	return msg.ValidateBasic()
 }
 
