@@ -84,6 +84,7 @@ type KeeperContract interface {
 	ContractExists(_ cosmos.Context, _ uint64) bool
 	RemoveContract(_ cosmos.Context, _ uint64)
 	GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator
+	GetUserContractSetIterator(_ cosmos.Context) cosmos.Iterator
 	GetContractExpirationSet(_ cosmos.Context, _ int64) (types.ContractExpirationSet, error)
 	SetContractExpirationSet(_ cosmos.Context, _ types.ContractExpirationSet) error
 	RemoveContractExpirationSet(_ cosmos.Context, _ int64)
@@ -102,6 +103,7 @@ const (
 	prefixContract              dbPrefix = "c/"
 	prefixContractNextId        dbPrefix = "cni/"
 	prefixContractExpirationSet dbPrefix = "ces/"
+	prefixUserContractSet       dbPrefix = "ucs/"
 )
 
 type KVStore struct {

@@ -93,7 +93,7 @@ func (k KVStore) getContractExpirationSetKey(ctx cosmos.Context, height int64) s
 }
 
 func (k KVStore) getUserContractSetKey(ctx cosmos.Context, userPubKey common.PubKey) string {
-	return k.GetKey(ctx, prefixContractExpirationSet, userPubKey.String())
+	return k.GetKey(ctx, prefixUserContractSet, userPubKey.String())
 }
 
 func (k KVStore) GetContractKey(ctx cosmos.Context, id uint64) string {
@@ -236,4 +236,8 @@ func (k KVStore) RemoveFromUserContractSet(ctx cosmos.Context, user common.PubKe
 	}
 
 	return k.SetUserContractSet(ctx, contractSet)
+}
+
+func (k KVStore) GetUserContractSetIterator(ctx cosmos.Context) cosmos.Iterator {
+	return k.getIterator(ctx, prefixUserContractSet)
 }
