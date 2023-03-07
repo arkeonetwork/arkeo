@@ -47,6 +47,18 @@ func (contract Contract) Expiration() int64 {
 	return contract.Height + contract.Duration
 }
 
+// SettlementPeriodEnd returns the end of the settlement period
+// for a contract. For PAY_AS_YOU_GO contracts, the settlement period is
+// a period of time in which no additional API calls should be allowed
+// but a claim can still be posted for previously made calls in order
+// to correctly settle the contract.
+func (contract Contract) SettlementPeriodEnd() int64 {
+	if contract.Type == ContractType_PAY_AS_YOU_GO {
+		return contract.Expiration() + contract.SettlementDuration
+	}
+	return contract.Expiration()
+}
+
 func (c Contract) IsOpen(height int64) bool {
 	if c.IsEmpty() {
 		return false
@@ -62,6 +74,13 @@ func (c Contract) IsOpen(height int64) bool {
 
 func (contract Contract) IsClosed(h int64) bool {
 	return !contract.IsOpen(h)
+}
+
+func (contract Contract) IsSettled(height int64) bool {
+	if contract.IsOpen(height) {
+		return false
+	}
+	return contract.SettlementPeriodEnd() >= height
 }
 
 func (contract Contract) IsEmpty() bool {

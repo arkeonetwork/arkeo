@@ -140,7 +140,9 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	// create expiration set
-	expirationSet, err := k.GetContractExpirationSet(ctx, contract.Expiration())
+	// these are used by the end blocker to settle contracts. We need to
+	// use the additional settlement period for pay as you go contracts.
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
 	if err != nil {
 		return err
 	}

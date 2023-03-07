@@ -54,8 +54,8 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
-	if contract.IsClosed(ctx.BlockHeight()) {
-		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
+	if contract.IsSettled(ctx.BlockHeight()) {
+		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "settled on block: %d", contract.SettlementPeriodEnd())
 	}
 
 	return nil
@@ -67,6 +67,6 @@ func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgC
 		return err
 	}
 
-	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
+	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false) // TODO: if we are in the settlement period, we should actually close this contract out.
 	return err
 }
