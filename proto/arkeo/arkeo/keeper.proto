@@ -61,7 +61,7 @@ message Contract {
     (gogoproto.nullable) = false
   ];
   int64 nonce = 11;
-  int64 closed_height = 12;
+  int64 settlement_height = 12;
   uint64 id = 13;
   int64 settlement_duration = 14;
 }

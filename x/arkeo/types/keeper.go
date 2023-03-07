@@ -43,6 +43,11 @@ func (contract Contract) GetSpender() common.PubKey {
 	return contract.Client
 }
 
+// Contracts progress through the following states
+// Open -> Expired -> Settled
+// for Subscription contracts, they expire and settle on the same block
+// for PayAsYouGo contracts, they can expire and settle on different blocks, based on the settlement duration
+
 func (contract Contract) Expiration() int64 {
 	return contract.Height + contract.Duration
 }
@@ -59,28 +64,43 @@ func (contract Contract) SettlementPeriodEnd() int64 {
 	return contract.Expiration()
 }
 
-func (c Contract) IsOpen(height int64) bool {
-	if c.IsEmpty() {
+func (contract Contract) IsOpen(height int64) bool {
+	if contract.IsEmpty() {
 		return false
 	}
-	if c.Expiration() < height {
+	if contract.Expiration() < height {
 		return false
 	}
-	if c.ClosedHeight > 0 && c.ClosedHeight < height {
+	if contract.SettlementHeight > 0 && contract.SettlementHeight < height {
 		return false
 	}
 	return true
 }
 
-func (contract Contract) IsClosed(h int64) bool {
-	return !contract.IsOpen(h)
+func (contract Contract) IsExpired(height int64) bool {
+	return !contract.IsOpen(height)
 }
 
 func (contract Contract) IsSettled(height int64) bool {
 	if contract.IsOpen(height) {
 		return false
 	}
-	return contract.SettlementPeriodEnd() >= height
+	if contract.SettlementHeight > 0 {
+		return true // contract has already been settled.
+	}
+	return contract.SettlementPeriodEnd() <= height
+}
+
+func (contract Contract) IsSettlementPeriod(height int64) bool {
+	if contract.IsOpen(height) {
+		return false
+	}
+
+	if contract.SettlementHeight > 0 {
+		return false // contract has already been settled.
+	}
+
+	return contract.Expiration() < height && contract.SettlementPeriodEnd() > height
 }
 
 func (contract Contract) IsEmpty() bool {

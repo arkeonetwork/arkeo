@@ -100,7 +100,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
-	if !activeContract.IsEmpty() {
+	if !activeContract.IsEmpty() && activeContract.IsExpired(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
 	}
 

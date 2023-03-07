@@ -96,7 +96,7 @@ func (CloseContractSuite) TestHandle(c *C) {
 	contract, err = k.GetContract(ctx, contract.Id)
 	c.Assert(err, IsNil)
 	c.Check(contract.Paid.Int64(), Equals, int64(20))
-	c.Check(contract.ClosedHeight, Equals, ctx.BlockHeight())
+	c.Check(contract.SettlementHeight, Equals, ctx.BlockHeight())
 
 	bal = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
 	c.Check(bal.Int64(), Equals, int64(0))

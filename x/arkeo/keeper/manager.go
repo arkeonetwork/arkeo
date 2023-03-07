@@ -51,6 +51,11 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Error("unable to fetch contract", "id", contractId, "error", err)
 			continue
 		}
+
+		if contract.IsSettled(ctx.BlockHeight()) {
+			continue
+		}
+
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
 			ctx.Logger().Error("unable to settle contract", "id", contractId, "error", err)
@@ -161,7 +166,7 @@ func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 }
 
 // any owed debt is paid to data provider
-func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonce int64, closed bool) (types.Contract, error) {
+func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonce int64, isFinal bool) (types.Contract, error) {
 	if nonce > contract.Nonce {
 		contract.Nonce = nonce
 	}
@@ -185,7 +190,12 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 	}
 
 	contract.Paid = contract.Paid.Add(totalDebt)
-	if closed {
+
+	// if this is a pay as you go contract in the settlement period, this will finalize all of the needed state and we
+	// can at this point consider the contract settled.
+	isFinal = isFinal || (contract.Type == types.ContractType_PAY_AS_YOU_GO && contract.IsSettlementPeriod(ctx.BlockHeight()))
+
+	if isFinal {
 		remainder := contract.Deposit.Sub(contract.Paid)
 		if !remainder.IsZero() {
 			client, err := contract.Client.GetMyAddress()
@@ -196,7 +206,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 				return contract, err
 			}
 		}
-		contract.ClosedHeight = ctx.BlockHeight()
+		contract.SettlementHeight = ctx.BlockHeight()
 		// this contract can now be removed from the users list of contracts
 		err = mgr.keeper.RemoveFromUserContractSet(ctx, contract.GetSpender(), contract.Id)
 		if err != nil {

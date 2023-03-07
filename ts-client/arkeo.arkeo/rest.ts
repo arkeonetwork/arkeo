@@ -33,7 +33,7 @@ export interface ArkeoContract {
   nonce?: string;
 
   /** @format int64 */
-  closed_height?: string;
+  settlement_height?: string;
 
   /** @format uint64 */
   id?: string;

@@ -59,12 +59,12 @@ func (k *MemStore) Get(key string) (types.Contract, error) {
 	defer k.storeLock.Unlock()
 	contract, ok := k.db[key]
 	// contract is not in cache or contract expired , fetch it
-	if !ok || contract.IsClosed(k.blockHeight) {
+	if !ok || contract.IsExpired(k.blockHeight) {
 		crtUpStream, err := k.fetchContract(key)
 		if err != nil {
 			return crtUpStream, err
 		}
-		if !crtUpStream.IsClosed(k.blockHeight) {
+		if !crtUpStream.IsExpired(k.blockHeight) {
 			k.db[key] = crtUpStream
 		}
 		return crtUpStream, nil
@@ -77,7 +77,7 @@ func (k *MemStore) Put(contract types.Contract) {
 	k.storeLock.Lock()
 	defer k.storeLock.Unlock()
 	key := contract.Key()
-	if contract.IsClosed(k.blockHeight) {
+	if contract.IsExpired(k.blockHeight) {
 		delete(k.db, key)
 		return
 	}
@@ -89,18 +89,18 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	var contract types.Contract
 
 	type fetchContract struct {
-		ProviderPubKey common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
-		Chain          common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=github.com/arkeonetwork/arkeo/common.Chain" json:"chain,omitempty"`
-		Client         common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
-		Delegate       common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"delegate,omitempty"`
-		Type           types.ContractType `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
-		Height         string             `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
-		Duration       string             `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`
-		Rate           string             `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
-		Deposit        string             `protobuf:"varint,9,opt,name=deposit,proto3" json:"deposit,omitempty"`
-		Paid           string             `protobuf:"varint,10,opt,name=paid,proto3" json:"paid,omitempty"`
-		Nonce          string             `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
-		ClosedHeight   string             `protobuf:"varint,12,opt,name=closed_height,json=closedHeight,proto3" json:"closed_height,omitempty"`
+		ProviderPubKey   common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
+		Chain            common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=github.com/arkeonetwork/arkeo/common.Chain" json:"chain,omitempty"`
+		Client           common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
+		Delegate         common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"delegate,omitempty"`
+		Type             types.ContractType `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
+		Height           string             `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
+		Duration         string             `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`
+		Rate             string             `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
+		Deposit          string             `protobuf:"varint,9,opt,name=deposit,proto3" json:"deposit,omitempty"`
+		Paid             string             `protobuf:"varint,10,opt,name=paid,proto3" json:"paid,omitempty"`
+		Nonce            string             `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
+		SettlementHeight string             `protobuf:"varint,12,opt,name=settlement_height,json=SettlementHeight,proto3" json:"settlement_height,omitempty"`
 	}
 
 	type fetch struct {
@@ -144,7 +144,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Deposit, _ = cosmos.NewIntFromString(data.Contract.Deposit)
 	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
-	contract.ClosedHeight, _ = strconv.ParseInt(data.Contract.ClosedHeight, 10, 64)
+	contract.SettlementHeight, _ = strconv.ParseInt(data.Contract.SettlementHeight, 10, 64)
 
 	return contract, nil
 }

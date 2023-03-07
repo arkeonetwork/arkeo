@@ -184,7 +184,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
-	if contract.IsClosed(p.MemStore.GetHeight()) {
+	if contract.IsExpired(p.MemStore.GetHeight()) {
 		return http.StatusPaymentRequired, fmt.Errorf("open a contract")
 	}
 

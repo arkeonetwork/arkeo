@@ -38,7 +38,7 @@ func (s *MemStoreSuite) SetUpTest(c *C) {
 				"deposit": "500",
 				"paid": "0",
 				"nonce": "9",
-				"closed_height": "0"
+				"settlement_height": "0"
 			}}`)
 		default:
 			fmt.Println(req.RequestURI)

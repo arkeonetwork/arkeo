@@ -33,7 +33,7 @@ export interface MercuryContract {
   nonce?: string;
 
   /** @format int64 */
-  closed_height?: string;
+  settlement_height?: string;
 }
 
 export enum MercuryContractType {
