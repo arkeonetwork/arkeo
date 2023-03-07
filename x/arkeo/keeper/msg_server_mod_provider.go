@@ -103,6 +103,7 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	// update contract rates
 	provider.SubscriptionRate = msg.SubscriptionRate
 	provider.PayAsYouGoRate = msg.PayAsYouGoRate
+	provider.SettlementDuration = msg.SettlementDuration
 
 	provider.LastUpdate = ctx.BlockHeight()
 

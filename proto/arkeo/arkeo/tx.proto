@@ -44,6 +44,7 @@ message MsgModProvider {
   int64 max_contract_duration = 8;
   int64 subscription_rate = 9;
   int64 pay_as_you_go_rate = 10;
+  int64 settlement_duration = 11;
 }
 
 message MsgModProviderResponse {}
@@ -65,6 +66,7 @@ message MsgOpenContract {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
+  int64 settlement_duration = 10;
 }
 
 message MsgOpenContractResponse {}

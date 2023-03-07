@@ -13,7 +13,9 @@ const TypeMsgModProvider = "mod_provider"
 
 var _ sdk.Msg = &MsgModProvider{}
 
-func NewMsgModProvider(creator string, provider common.PubKey, chain, metadataUri string, metadataNonce uint64, status ProviderStatus, minContractDuration, maxContractDuration, subscriptionRate, payAsYouGoRate int64) *MsgModProvider {
+func NewMsgModProvider(creator string, provider common.PubKey, chain, metadataUri string,
+	metadataNonce uint64, status ProviderStatus, minContractDuration,
+	maxContractDuration, subscriptionRate, payAsYouGoRate, settlementDuration int64) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
 		Provider:            provider,
@@ -25,6 +27,7 @@ func NewMsgModProvider(creator string, provider common.PubKey, chain, metadataUr
 		MaxContractDuration: maxContractDuration,
 		SubscriptionRate:    subscriptionRate,
 		PayAsYouGoRate:      payAsYouGoRate,
+		SettlementDuration:  settlementDuration,
 	}
 }
 
@@ -103,6 +106,10 @@ func (msg *MsgModProvider) ValidateBasic() error {
 
 	if msg.MinContractDuration > msg.MaxContractDuration {
 		return errors.Wrapf(ErrInvalidModProviderMinContractDuration, "min contract duration is too long (%d/%d)", msg.MaxContractDuration, msg.MaxContractDuration)
+	}
+
+	if msg.SettlementDuration < 0 {
+		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
 	}
 
 	return nil

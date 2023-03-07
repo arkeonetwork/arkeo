@@ -16,9 +16,9 @@ import (
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [provider_pubkey] [chain] [client_pubkey] [c-type] [deposit] [duration] [rate] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [chain] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
 		Short: "Broadcast message openContract",
-		Args:  cobra.ExactArgs(7),
+		Args:  cobra.ExactArgs(8),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			argChain := args[1]
@@ -43,7 +43,13 @@ func CmdOpenContract() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			argRate, err := cast.ToInt64E(args[6])
+			if err != nil {
+				return err
+			}
+
+			argSettlementDuration, err := cast.ToInt64E(args[7])
 			if err != nil {
 				return err
 			}
@@ -54,8 +60,8 @@ func CmdOpenContract() *cobra.Command {
 			}
 
 			delegate := common.EmptyPubKey
-			if len(args) > 7 {
-				delegate, err = common.NewPubKey(args[7])
+			if len(args) > 8 {
+				delegate, err = common.NewPubKey(args[8])
 				if err != nil {
 					return err
 				}
@@ -74,6 +80,7 @@ func CmdOpenContract() *cobra.Command {
 				delegate,
 				types.ContractType(argContractType),
 				argDuration,
+				argSettlementDuration,
 				argRate,
 				deposit,
 			)

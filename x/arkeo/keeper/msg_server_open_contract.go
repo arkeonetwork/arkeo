@@ -88,6 +88,9 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		if msg.Rate != provider.PayAsYouGoRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}
+		if msg.SettlementDuration != provider.SettlementDuration {
+			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-as-you-go provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
+		}
 	default:
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
@@ -122,17 +125,18 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	contract := types.Contract{
-		Provider: msg.Provider,
-		Id:       k.Keeper.GetAndIncrementNextContractId(ctx),
-		Chain:    chain,
-		Type:     msg.ContractType,
-		Client:   msg.Client,
-		Delegate: msg.Delegate,
-		Duration: msg.Duration,
-		Rate:     msg.Rate,
-		Deposit:  msg.Deposit,
-		Paid:     cosmos.ZeroInt(),
-		Height:   ctx.BlockHeight(),
+		Provider:           msg.Provider,
+		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
+		Chain:              chain,
+		Type:               msg.ContractType,
+		Client:             msg.Client,
+		Delegate:           msg.Delegate,
+		Duration:           msg.Duration,
+		Rate:               msg.Rate,
+		Deposit:            msg.Deposit,
+		Paid:               cosmos.ZeroInt(),
+		Height:             ctx.BlockHeight(),
+		SettlementDuration: msg.SettlementDuration,
 	}
 
 	// create expiration set
