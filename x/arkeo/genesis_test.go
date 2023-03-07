@@ -56,6 +56,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Id:       0,
 			Deposit:  cosmos.NewInt(500),
 			Paid:     cosmos.ZeroInt(),
+			Height:   100,
 		},
 		{
 			Provider: providerPubkey,
@@ -66,6 +67,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Id:       1,
 			Deposit:  cosmos.NewInt(500),
 			Paid:     cosmos.ZeroInt(),
+			Height:   100,
 		},
 		{
 			Provider: providerPubkey,
@@ -76,6 +78,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Id:       2,
 			Deposit:  cosmos.NewInt(200),
 			Paid:     cosmos.ZeroInt(),
+			Height:   100,
 		},
 	}
 
@@ -127,7 +130,24 @@ func TestGenesisWithContracts(t *testing.T) {
 	require.NotNil(t, exportedGenesis)
 
 	// check if the exported genesis is the same as the state we just set.
-	require.Equal(t, exportedGenesis.Contracts, contracts)
-	require.Equal(t, exportedGenesis.UserContractSets, []types.UserContractSet{user1ContractSet, user2ContractSet})
-	require.Equal(t, exportedGenesis.ContractExpirationSets, []types.ContractExpirationSet{contractExpirationSet1, contractExpirationSet2})
+	require.ElementsMatch(t, exportedGenesis.Providers, []types.Provider{provider})
+	require.ElementsMatch(t, exportedGenesis.Contracts, contracts)
+	require.ElementsMatch(t, exportedGenesis.UserContractSets, []types.UserContractSet{user1ContractSet, user2ContractSet})
+	require.ElementsMatch(t, exportedGenesis.ContractExpirationSets, []types.ContractExpirationSet{contractExpirationSet1, contractExpirationSet2})
+
+	ctx, freshKeeper := keepertest.ArkeoKeeper(t)
+	contract, err := freshKeeper.GetContract(ctx, 0)
+	require.NoError(t, err)
+	require.True(t, contract.IsEmpty())
+	arkeo.InitGenesis(ctx, freshKeeper, *exportedGenesis)
+
+	contract, err = freshKeeper.GetContract(ctx, 0)
+	require.NoError(t, err)
+	require.False(t, contract.IsEmpty())
+
+	exportedGenesis2 := arkeo.ExportGenesis(ctx, freshKeeper)
+	require.ElementsMatch(t, exportedGenesis2.Providers, []types.Provider{provider})
+	require.ElementsMatch(t, exportedGenesis2.Contracts, contracts)
+	require.ElementsMatch(t, exportedGenesis2.UserContractSets, []types.UserContractSet{user1ContractSet, user2ContractSet})
+	require.ElementsMatch(t, exportedGenesis2.ContractExpirationSets, []types.ContractExpirationSet{contractExpirationSet1, contractExpirationSet2})
 }
