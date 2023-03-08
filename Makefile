@@ -21,10 +21,10 @@ DOCKER         := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 VERSION:=$(shell cat version)
-TAG?=testnet
-ldflags = -X gitlab.com/arkeonetwork/arkeo/config.Version=$(VERSION) \
-          -X gitlab.com/arkeonetwork/arkeo/config.GitCommit=$(COMMIT) \
-          -X gitlab.com/arkeonetwork/arkeo/config.BuildTime=${NOW} \
+TAG?=latest
+ldflags = -X github.com/arkeonetwork/arkeo/config.Version=$(VERSION) \
+          -X github.com/arkeonetwork/arkeo/config.GitCommit=$(COMMIT) \
+          -X github.com/arkeonetwork/arkeo/config.BuildTime=${NOW} \
 		  -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
@@ -86,7 +86,7 @@ coverage-report: test-coverage
 	@go tool cover -html=coverage.txt
 
 tools:
-	go install ./tools/signhere ./tools/curleo
+	go install ${BUILD_FLAGS} ./tools/signhere ./tools/curleo
 
 test-coverage-sum:
 	@go run gotest.tools/gotestsum --junitfile report.xml --format testname -- ${TEST_BUILD_FLAGS} -v -coverprofile=coverage.txt -covermode count ${TEST_DIR}
@@ -148,3 +148,28 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+# arkeod binaries
+dist:
+	rm -rf bin && mkdir -p bin/linux_amd64 bin/linux_arm64 bin/darwin_amd64 bin/darwin_arm64
+	env GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=darwin GOARCH=amd64 go build -o bin/darwin_amd64 ${BUILD_FLAGS} ./cmd/arkeod
+	env GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm64 ${BUILD_FLAGS} ./cmd/arkeod
+
+	env GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64 ${BUILD_FLAGS} ./tools/curleo
+	env GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64 ${BUILD_FLAGS} ./tools/curleo
+	env GOOS=darwin GOARCH=amd64 go build -o bin/darwin_amd64 ${BUILD_FLAGS} ./tools/curleo
+	env GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm64 ${BUILD_FLAGS} ./tools/curleo
+	
+	cd bin && \
+	sha256sum linux_amd64/* > arkeo_linux_amd64.sha256 && \
+	sha256sum linux_arm64/* > arkeo_linux_arm64.sha256 && \
+	sha256sum darwin_amd64/* > arkeo_darwin_amd64.sha256 && \
+	sha256sum darwin_arm64/* > arkeo_darwin_arm64.sha256 && \
+	tar -czvf arkeo_linux_amd64.tar.gz linux_amd64 && \
+	tar -czvf arkeo_linux_arm64.tar.gz linux_arm64 && \
+	tar -czvf arkeo_darwin_amd64.tar.gz darwin_amd64 && \
+	tar -czvf arkeo_darwin_arm64.tar.gz darwin_arm64
+
+	rm -rf bin/linux_amd64 bin/linux_arm64 bin/darwin_amd64 bin/darwin_arm64
