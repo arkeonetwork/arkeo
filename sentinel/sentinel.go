@@ -127,23 +127,23 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spenderPK, err := common.NewPubKey(parts[0])
+	spenderPK, err := common.NewPubKey(parts[2])
 	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[0])
+		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[2])
 		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
-	providerPK, err := common.NewPubKey(parts[1])
+	providerPK, err := common.NewPubKey(parts[3])
 	if err != nil {
-		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
+		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[3])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	chain, err := common.NewChain(parts[2])
+	chain, err := common.NewChain(parts[4])
 	if err != nil {
-		p.logger.Error("fail to parse chain", "error", err, "chain", parts[2])
+		p.logger.Error("fail to parse chain", "error", err, "chain", parts[4])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -165,14 +165,14 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	parts := strings.Split(path, "/")
 	if len(parts) < 3 {
-		// note: the length is 3 if we have 2 vars because the path starts with a slash
+		// note: the length is 3 if we have 2 vars because the path and the leading slash
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
-	contractId, err := strconv.ParseUint(parts[0], 10, 64)
+	contractId, err := strconv.ParseUint(parts[2], 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[0])
+		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[2])
 		respondWithError(w, fmt.Sprintf("bad contractId: %s", err), http.StatusBadRequest)
 		return
 	}
