@@ -15,9 +15,9 @@ import (
 
 func CmdClaimContractIncome() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-contract-income [contract-id] [spender] [nonce] [height] [signature]",
+		Use:   "claim-contract-income [contract-id] [spender] [nonce] [signature]",
 		Short: "Broadcast message claimContractIncome",
-		Args:  cobra.ExactArgs(5),
+		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -37,11 +37,7 @@ func CmdClaimContractIncome() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argHeight, err := cast.ToInt64E(args[3])
-			if err != nil {
-				return err
-			}
-			signature, err := hex.DecodeString(args[4])
+			signature, err := hex.DecodeString(args[3])
 			if err != nil {
 				return err
 			}
@@ -50,7 +46,6 @@ func CmdClaimContractIncome() *cobra.Command {
 				argContractId,
 				spender,
 				argNonce,
-				argHeight,
 				signature,
 			)
 			if err := msg.ValidateBasic(); err != nil {

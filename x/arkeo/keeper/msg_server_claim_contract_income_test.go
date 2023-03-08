@@ -41,17 +41,10 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 		ContractId: contract.Id,
 		Creator:    acc.String(),
 		Nonce:      20,
-		Height:     10,
 	}
 	c.Assert(s.ClaimContractIncomeValidate(ctx, &msg), IsNil)
 
-	// check bad height
-	msg.Height = contract.Height * 2
-	err = s.ClaimContractIncomeValidate(ctx, &msg)
-	c.Check(err, ErrIs, types.ErrClaimContractIncomeBadHeight)
-
 	// check closed contract
-	msg.Height = contract.Height
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + contract.Duration)
 	err = s.ClaimContractIncomeValidate(ctx, &msg)
 	c.Check(err, ErrIs, types.ErrClaimContractIncomeClosed)
@@ -84,7 +77,6 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 		ContractId: contract.Id,
 		Creator:    acc.String(),
 		Nonce:      20,
-		Height:     ctx.BlockHeight(),
 	}
 	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
 
@@ -150,7 +142,6 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 		ContractId: contract.Id,
 		Creator:    acc.String(),
 		Nonce:      20,
-		Height:     ctx.BlockHeight(),
 	}
 	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
 

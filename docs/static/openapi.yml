@@ -48,7 +48,7 @@ paths:
                   nonce:
                     type: string
                     format: int64
-                  closed_height:
+                  settlement_height:
                     type: string
                     format: int64
                   id:
@@ -130,7 +130,7 @@ paths:
                   nonce:
                     type: string
                     format: int64
-                  closed_height:
+                  settlement_height:
                     type: string
                     format: int64
                   id:
@@ -207,7 +207,7 @@ paths:
                     nonce:
                       type: string
                       format: int64
-                    closed_height:
+                    settlement_height:
                       type: string
                       format: int64
                     id:
@@ -44017,7 +44017,7 @@ definitions:
       nonce:
         type: string
         format: int64
-      closed_height:
+      settlement_height:
         type: string
         format: int64
       id:
@@ -44121,7 +44121,7 @@ definitions:
           nonce:
             type: string
             format: int64
-          closed_height:
+          settlement_height:
             type: string
             format: int64
           id:
@@ -44166,7 +44166,7 @@ definitions:
             nonce:
               type: string
               format: int64
-            closed_height:
+            settlement_height:
               type: string
               format: int64
             id:
@@ -44302,7 +44302,7 @@ definitions:
           nonce:
             type: string
             format: int64
-          closed_height:
+          settlement_height:
             type: string
             format: int64
           id:

@@ -29,6 +29,7 @@ message Provider {
     (gogoproto.nullable) = false
   ];
   int64 last_update = 11;
+  int64 settlement_duration = 12;
 }
 
 enum ContractType {
@@ -60,8 +61,9 @@ message Contract {
     (gogoproto.nullable) = false
   ];
   int64 nonce = 11;
-  int64 closed_height = 12;
+  int64 settlement_height = 12;
   uint64 id = 13;
+  int64 settlement_duration = 14;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }

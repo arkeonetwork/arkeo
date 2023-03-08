@@ -108,13 +108,13 @@ func (p Proxy) EventListener(host string) {
 					if spender.IsEmpty() {
 						spender = evt.Contract.Client
 					}
-					newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+					newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
 					currClaim, err := p.ClaimStore.Get(newClaim.Key())
 					if err != nil {
 						logger.Error("failed to get claim", "error", err)
 						continue
 					}
-					if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
+					if currClaim.Nonce == newClaim.Nonce {
 						currClaim.Claimed = true
 						if err := p.ClaimStore.Set(currClaim); err != nil {
 							logger.Error("failed to set claimed", "error", err)
@@ -159,13 +159,13 @@ func (p Proxy) EventListener(host string) {
 			if spender.IsEmpty() {
 				spender = evt.Contract.Client
 			}
-			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, evt.Contract.Height, "")
+			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
 				logger.Error("failed to get claim", "error", err)
 				continue
 			}
-			if currClaim.Nonce == newClaim.Nonce && currClaim.Height == newClaim.Height {
+			if currClaim.Nonce == newClaim.Nonce {
 				currClaim.Claimed = true
 				if err := p.ClaimStore.Set(currClaim); err != nil {
 					logger.Error("failed to set claimed", "error", err)

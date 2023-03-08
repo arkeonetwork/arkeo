@@ -44,22 +44,21 @@ func (s *AuthSuite) TestArkAuth(c *C) {
 	c.Assert(err, IsNil)
 
 	var signature []byte
-	height := int64(12)
 	nonce := int64(3)
 	chain := common.BTCChain
 	contractId := uint64(50)
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", pubkey.String(), chain, pk, height, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 
 	// happy path
-	raw := GenerateArkAuthString(contractId, pk, height, nonce, signature)
+	raw := GenerateArkAuthString(contractId, pk, nonce, signature)
 	_, err = parseArkAuth(raw)
 	c.Assert(err, IsNil)
 
 	// bad signature
-	raw = GenerateArkAuthString(contractId, pk, height, nonce, signature)
+	raw = GenerateArkAuthString(contractId, pk, nonce, signature)
 	_, err = parseArkAuth(raw + "randome not hex!")
 	c.Assert(err, NotNil)
 }
@@ -100,11 +99,10 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	c.Assert(err, IsNil)
 
 	var signature []byte
-	height := int64(12)
 	nonce := int64(3)
 	chain := common.BTCChain.String()
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", pubkey.String(), chain, pk, height, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 
@@ -129,7 +127,6 @@ func (s *AuthSuite) TestPaidTier(c *C) {
 	// happy path
 	aa := ArkAuth{
 		ContractId: contract.Id,
-		Height:     height,
 		Nonce:      nonce,
 		Spender:    pk,
 		Signature:  signature,
@@ -175,11 +172,10 @@ func (s *AuthSuite) TestPaidTierFailFallbackToFreeTier(c *C) {
 	c.Assert(err, IsNil)
 
 	var signature []byte
-	height := int64(12)
 	nonce := int64(3)
 	chain := common.BTCChain.String()
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d:%d", pubkey.String(), chain, pk, height, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	c.Assert(err, IsNil)
 
@@ -207,7 +203,6 @@ func (s *AuthSuite) TestPaidTierFailFallbackToFreeTier(c *C) {
 	handlerForTest := proxy.auth(nextHandler)
 	c.Assert(handlerForTest, NotNil)
 	aa := ArkAuth{
-		Height:     height,
 		Nonce:      nonce,
 		ContractId: contract.Id,
 		Spender:    pk,

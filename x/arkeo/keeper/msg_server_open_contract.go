@@ -24,6 +24,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"contract type", msg.ContractType,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
+		"settlement duration", msg.SettlementDuration,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -88,6 +89,9 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		if msg.Rate != provider.PayAsYouGoRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
 		}
+		if msg.SettlementDuration != provider.SettlementDuration {
+			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-as-you-go provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
+		}
 	default:
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
@@ -97,7 +101,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return err
 	}
 
-	if !activeContract.IsEmpty() {
+	if !activeContract.IsEmpty() && !activeContract.IsExpired(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
 	}
 
@@ -122,21 +126,24 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	contract := types.Contract{
-		Provider: msg.Provider,
-		Id:       k.Keeper.GetAndIncrementNextContractId(ctx),
-		Chain:    chain,
-		Type:     msg.ContractType,
-		Client:   msg.Client,
-		Delegate: msg.Delegate,
-		Duration: msg.Duration,
-		Rate:     msg.Rate,
-		Deposit:  msg.Deposit,
-		Paid:     cosmos.ZeroInt(),
-		Height:   ctx.BlockHeight(),
+		Provider:           msg.Provider,
+		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
+		Chain:              chain,
+		Type:               msg.ContractType,
+		Client:             msg.Client,
+		Delegate:           msg.Delegate,
+		Duration:           msg.Duration,
+		Rate:               msg.Rate,
+		Deposit:            msg.Deposit,
+		Paid:               cosmos.ZeroInt(),
+		Height:             ctx.BlockHeight(),
+		SettlementDuration: msg.SettlementDuration,
 	}
 
 	// create expiration set
-	expirationSet, err := k.GetContractExpirationSet(ctx, contract.Expiration())
+	// these are used by the end blocker to settle contracts. We need to
+	// use the additional settlement period for pay as you go contracts.
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
 	if err != nil {
 		return err
 	}

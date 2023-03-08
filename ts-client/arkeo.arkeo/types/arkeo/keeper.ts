@@ -96,7 +96,7 @@ export interface Contract {
   deposit: string;
   paid: string;
   nonce: number;
-  closedHeight: number;
+  SettlementHeight: number;
 }
 
 export interface ContractExpiration {
@@ -274,7 +274,7 @@ function createBaseContract(): Contract {
     deposit: "",
     paid: "",
     nonce: 0,
-    closedHeight: 0,
+    SettlementHeight: 0,
   };
 }
 
@@ -313,8 +313,8 @@ export const Contract = {
     if (message.nonce !== 0) {
       writer.uint32(88).int64(message.nonce);
     }
-    if (message.closedHeight !== 0) {
-      writer.uint32(96).int64(message.closedHeight);
+    if (message.SettlementHeight !== 0) {
+      writer.uint32(96).int64(message.SettlementHeight);
     }
     return writer;
   },
@@ -360,7 +360,7 @@ export const Contract = {
           message.nonce = longToNumber(reader.int64() as Long);
           break;
         case 12:
-          message.closedHeight = longToNumber(reader.int64() as Long);
+          message.SettlementHeight = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -383,7 +383,7 @@ export const Contract = {
       deposit: isSet(object.deposit) ? String(object.deposit) : "",
       paid: isSet(object.paid) ? String(object.paid) : "",
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
-      closedHeight: isSet(object.closedHeight) ? Number(object.closedHeight) : 0,
+      SettlementHeight: isSet(object.SettlementHeight) ? Number(object.SettlementHeight) : 0,
     };
   },
 
@@ -400,7 +400,7 @@ export const Contract = {
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
     message.nonce !== undefined && (obj.nonce = Math.round(message.nonce));
-    message.closedHeight !== undefined && (obj.closedHeight = Math.round(message.closedHeight));
+    message.SettlementHeight !== undefined && (obj.SettlementHeight = Math.round(message.SettlementHeight));
     return obj;
   },
 
@@ -417,7 +417,7 @@ export const Contract = {
     message.deposit = object.deposit ?? "";
     message.paid = object.paid ?? "";
     message.nonce = object.nonce ?? 0;
-    message.closedHeight = object.closedHeight ?? 0;
+    message.SettlementHeight = object.SettlementHeight ?? 0;
     return message;
   },
 };

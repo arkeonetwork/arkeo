@@ -102,7 +102,7 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if contract.IsClosed(p.MemStore.GetHeight()) {
+		if contract.IsExpired(p.MemStore.GetHeight()) {
 			_ = p.ClaimStore.Remove(claim.Key()) // clear expired
 			p.logger.Info("claim expired")
 			continue
@@ -176,7 +176,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claim := NewClaim(contractId, "", 0, 0, "")
+	claim := NewClaim(contractId, "", 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
 		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())

@@ -17,8 +17,8 @@ func NewProvider(pubkey common.PubKey, chain common.Chain) Provider {
 	}
 }
 
-func (p Provider) Key() string {
-	return fmt.Sprintf("%s/%s", p.PubKey, p.Chain)
+func (provider Provider) Key() string {
+	return fmt.Sprintf("%s/%s", provider.PubKey, provider.Chain)
 }
 
 func NewContract(provider common.PubKey, chain common.Chain, client common.PubKey) Contract {
@@ -32,60 +32,98 @@ func NewContract(provider common.PubKey, chain common.Chain, client common.PubKe
 	}
 }
 
-func (c Contract) Key() string {
-	return strconv.FormatUint(c.Id, 10)
+func (contract Contract) Key() string {
+	return strconv.FormatUint(contract.Id, 10)
 }
 
-func (c Contract) GetSpender() common.PubKey {
-	if !c.Delegate.IsEmpty() {
-		return c.Delegate
+func (contract Contract) GetSpender() common.PubKey {
+	if !contract.Delegate.IsEmpty() {
+		return contract.Delegate
 	}
-	return c.Client
+	return contract.Client
 }
 
-func (c Contract) Expiration() int64 {
-	return c.Height + c.Duration
+// Expiration Contracts progress through the following states
+// Open -> Expired -> Settled
+// for Subscription contracts, they expire and settle on the same block
+// for PayAsYouGo contracts, they can expire and settle on different blocks, based on the settlement duration
+func (contract Contract) Expiration() int64 {
+	return contract.Height + contract.Duration
 }
 
-func (c Contract) IsOpen(height int64) bool {
-	if c.IsEmpty() {
+// SettlementPeriodEnd returns the end of the settlement period
+// for a contract. For PAY_AS_YOU_GO contracts, the settlement period is
+// a period of time in which no additional API calls should be allowed
+// but a claim can still be posted for previously made calls in order
+// to correctly settle the contract.
+func (contract Contract) SettlementPeriodEnd() int64 {
+	if contract.Type == ContractType_PAY_AS_YOU_GO {
+		return contract.Expiration() + contract.SettlementDuration
+	}
+	return contract.Expiration()
+}
+
+func (contract Contract) IsOpen(height int64) bool {
+	if contract.IsEmpty() {
 		return false
 	}
-	if c.Expiration() < height {
+	if contract.Expiration() < height {
 		return false
 	}
-	if c.ClosedHeight > 0 && c.ClosedHeight < height {
+	if contract.SettlementHeight > 0 && contract.SettlementHeight < height {
 		return false
 	}
 	return true
 }
 
-func (c Contract) IsClosed(h int64) bool {
-	return !c.IsOpen(h)
+func (contract Contract) IsExpired(height int64) bool {
+	return !contract.IsOpen(height)
 }
 
-func (c Contract) IsEmpty() bool {
-	return c.Height == 0
+func (contract Contract) IsSettled(height int64) bool {
+	if contract.IsOpen(height) {
+		return false
+	}
+	if contract.SettlementHeight > 0 {
+		return true // contract has already been settled.
+	}
+	return contract.SettlementPeriodEnd() <= height
 }
 
-func (c Contract) ClientAddress() cosmos.AccAddress {
-	addr, err := c.Client.GetMyAddress()
+func (contract Contract) IsSettlementPeriod(height int64) bool {
+	if contract.IsOpen(height) {
+		return false
+	}
+
+	if contract.SettlementHeight > 0 {
+		return false // contract has already been settled.
+	}
+
+	return contract.Expiration() < height && contract.SettlementPeriodEnd() > height
+}
+
+func (contract Contract) IsEmpty() bool {
+	return contract.Height == 0
+}
+
+func (contract Contract) ClientAddress() cosmos.AccAddress {
+	addr, err := contract.Client.GetMyAddress()
 	if err != nil {
 		panic(err)
 	}
 	return addr
 }
 
-func (ct *ContractType) UnmarshalJSON(b []byte) error {
+func (contractType *ContractType) UnmarshalJSON(b []byte) error {
 	var item interface{}
 	if err := json.Unmarshal(b, &item); err != nil {
 		return err
 	}
 	switch v := item.(type) {
 	case int:
-		*ct = ContractType(v)
+		*contractType = ContractType(v)
 	case string:
-		*ct = ContractType(ContractType_value[v])
+		*contractType = ContractType(ContractType_value[v])
 	}
 	return nil
 }

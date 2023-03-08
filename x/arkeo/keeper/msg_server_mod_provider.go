@@ -26,6 +26,7 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 		"max contract duration", msg.MaxContractDuration,
 		"subscription rate", msg.SubscriptionRate,
 		"pay-as-you-go rate", msg.PayAsYouGoRate,
+		"settlement duration", msg.SettlementDuration,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -103,6 +104,7 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	// update contract rates
 	provider.SubscriptionRate = msg.SubscriptionRate
 	provider.PayAsYouGoRate = msg.PayAsYouGoRate
+	provider.SettlementDuration = msg.SettlementDuration
 
 	provider.LastUpdate = ctx.BlockHeight()
 

@@ -18,7 +18,6 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 		"receive MsgClaimContractIncome",
 		"contract_id", msg.ContractId,
 		"nonce", msg.Nonce,
-		"height", msg.Height,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -46,16 +45,12 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return err
 	}
 
-	if contract.Height != msg.Height {
-		return errors.Wrapf(types.ErrClaimContractIncomeBadHeight, "contract height (%d) doesn't match msg height (%d)", contract.Height, msg.Height)
-	}
-
 	if contract.Nonce >= msg.Nonce {
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
-	if contract.IsClosed(ctx.BlockHeight()) {
-		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "closed %d", contract.Expiration())
+	if contract.IsSettled(ctx.BlockHeight()) {
+		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "settled on block: %d", contract.SettlementPeriodEnd())
 	}
 
 	return nil
