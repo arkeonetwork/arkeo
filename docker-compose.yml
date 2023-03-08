@@ -11,9 +11,9 @@ services:
     volumes:
       - ".arkeo:/.arkeo:rw"
     environment:
-      NET: "testnet"
+      NET: "mocknet"
     entrypoint: /scripts/genesis.sh
-    # command: arkeod start --home /.arkeo --pruning nothing
+    command: arkeod start --home /.arkeo --pruning nothing
 
   arkeod-1:
     image: arkeo
@@ -37,7 +37,7 @@ services:
     ports:
       - "3636:3636"
     environment:
-      NET: "testnet"
+      NET: "mocknet"
       MONIKER: "local"
       WEBSITE: "n/a"
       DESCRIPTION: "n/a"
@@ -53,7 +53,6 @@ services:
       AS_GO_RATE_LIMIT: 10
       AS_GO_RATE_LIMIT_DURATION: "1m"
       CLAIM_STORE_LOCATION: "/root/.arkeo/claims"
-      TMHOME: "/root/.arkeo"
       GAIA_RPC_ARCHIVE_HOST: "http://176.34.207.130:26657"
     entrypoint: "/scripts/sentinel.sh"
     command: sentinel
