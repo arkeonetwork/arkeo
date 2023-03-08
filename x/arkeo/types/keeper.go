@@ -43,11 +43,10 @@ func (contract Contract) GetSpender() common.PubKey {
 	return contract.Client
 }
 
-// Contracts progress through the following states
+// Expiration Contracts progress through the following states
 // Open -> Expired -> Settled
 // for Subscription contracts, they expire and settle on the same block
 // for PayAsYouGo contracts, they can expire and settle on different blocks, based on the settlement duration
-
 func (contract Contract) Expiration() int64 {
 	return contract.Height + contract.Duration
 }
