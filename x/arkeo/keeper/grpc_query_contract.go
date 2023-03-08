@@ -82,5 +82,9 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 
+	if activeContract.IsEmpty() {
+		return nil, status.Error(codes.NotFound, "not found")
+	}
+
 	return &types.QueryActiveContractResponse{Contract: activeContract}, nil
 }
