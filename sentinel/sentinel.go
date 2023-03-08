@@ -121,7 +121,8 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 3 {
+	if len(parts) < 5 {
+		// note: the length is 5 if we have 3 vars because the path starts with a slash
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
@@ -163,7 +164,8 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 1 {
+	if len(parts) < 3 {
+		// note: the length is 3 if we have 2 vars because the path starts with a slash
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
