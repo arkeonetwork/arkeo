@@ -2,81 +2,59 @@ package common
 
 import (
 	"encoding/json"
-	"fmt"
+	"testing"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
-	. "gopkg.in/check.v1"
 )
 
-type PubKeyTestSuite struct{}
-
-var _ = Suite(&PubKeyTestSuite{})
-
-// TestPubKey implementation
-func (s *PubKeyTestSuite) TestPubKey(c *C) {
+func TestPubKey(t *testing.T) {
 	_, pubKey, _ := testdata.KeyTestPubAddr()
 	spk, err := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, pubKey)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	pk, err := NewPubKey(spk)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	hexStr := pk.String()
-	c.Assert(len(hexStr) > 0, Equals, true)
+	require.True(t, len(hexStr) > 0)
 	pk1, err := NewPubKey(hexStr)
-	c.Assert(err, IsNil)
-	c.Assert(pk.Equals(pk1), Equals, true)
+	require.NoError(t, err)
+	require.True(t, pk.Equals(pk1))
 
 	result, err := json.Marshal(pk)
-	c.Assert(err, IsNil)
-	c.Log(result, Equals, fmt.Sprintf(`"%s"`, hexStr))
+	require.NoError(t, err)
+
 	var pk2 PubKey
 	err = json.Unmarshal(result, &pk2)
-	c.Assert(err, IsNil)
-	c.Assert(pk2.Equals(pk), Equals, true)
+	require.NoError(t, err)
+	require.True(t, pk2.Equals(pk))
 }
 
-func (s *PubKeyTestSuite) TestEquals(c *C) {
+func TestEquals(t *testing.T) {
 	var pk1, pk2, pk3, pk4 PubKey
 	_, pubKey1, _ := testdata.KeyTestPubAddr()
 	tpk1, err1 := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, pubKey1)
-	c.Assert(err1, IsNil)
+	require.NoError(t, err1)
 	pk1 = PubKey(tpk1)
 
 	_, pubKey2, _ := testdata.KeyTestPubAddr()
 	tpk2, err2 := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, pubKey2)
-	c.Assert(err2, IsNil)
+	require.NoError(t, err2)
 	pk2 = PubKey(tpk2)
 
 	_, pubKey3, _ := testdata.KeyTestPubAddr()
 	tpk3, err3 := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, pubKey3)
-	c.Assert(err3, IsNil)
+	require.NoError(t, err3)
 	pk3 = PubKey(tpk3)
 
 	_, pubKey4, _ := testdata.KeyTestPubAddr()
 	tpk4, err4 := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, pubKey4)
-	c.Assert(err4, IsNil)
+	require.NoError(t, err4)
 	pk4 = PubKey(tpk4)
 
-	c.Assert(PubKeys{
-		pk1, pk2,
-	}.Equals(nil), Equals, false)
-
-	c.Assert(PubKeys{
-		pk1, pk2, pk3,
-	}.Equals(PubKeys{
-		pk1, pk2,
-	}), Equals, false)
-
-	c.Assert(PubKeys{
-		pk1, pk2, pk3, pk4,
-	}.Equals(PubKeys{
-		pk4, pk3, pk2, pk1,
-	}), Equals, true)
-
-	c.Assert(PubKeys{ // nolint
-		pk1, pk2, pk3, pk4,
-	}.Equals(PubKeys{
-		pk1, pk2, pk3, pk4,
-	}), Equals, true)
+	require.False(t, PubKeys{pk1, pk2}.Equals(nil))
+	require.False(t, PubKeys{pk1, pk2, pk3}.Equals(PubKeys{pk1, pk2}))
+	require.True(t, PubKeys{pk1, pk2, pk3, pk4}.Equals(PubKeys{pk4, pk3, pk2, pk1}))
+	require.True(t, PubKeys{pk1, pk2, pk3, pk4}.Equals(PubKeys{pk1, pk2, pk3, pk4})) //nolint
 }

@@ -1,29 +1,26 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common"
+	"testing"
 
-	. "gopkg.in/check.v1"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/stretchr/testify/require"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-type MsgModProviderSuite struct{}
-
-var _ = Suite(&MsgModProviderSuite{})
-
-func (MsgModProviderSuite) TestValidateBasic(c *C) {
+func TestModProviderValidateBasic(t *testing.T) {
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// invalid address
 	msg := MsgModProvider{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
 	// happy path
 	msg = MsgModProvider{
@@ -35,10 +32,10 @@ func (MsgModProviderSuite) TestValidateBasic(c *C) {
 		MetadataUri:         "http://mad.hatter.net/test?foo=baz",
 	}
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// URI is too long
 	msg.MetadataUri = "http://mad.hatter.net/testsdkfjlsdkfjlsdfjsldfjkdsljflsdjfkdsjflsdjkfsdjlfsdjkfldsjflksjdfljsdlkfjsdlkfjdsklfjsdlkfjsdkljflksdjfklsdjflskdjflksdjflksdjfldsjflksdjfldskjflsdkfjsdlkjfksdljflskdjfsdlkjfdksljflsdkjfkldsjfsdlkfjlksdjfklsdjflkdsjfklsdjfsdkljflksdjflksdfjdklsjfl?foo=baz"
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidModProviderMetdataURI)
+	require.ErrorIs(t, err, ErrInvalidModProviderMetdataURI)
 }

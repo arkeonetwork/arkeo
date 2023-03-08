@@ -1,32 +1,29 @@
 package types
 
 import (
-	. "gopkg.in/check.v1"
+	"testing"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/stretchr/testify/require"
 )
 
-type MsgCloseContractSuite struct{}
-
-var _ = Suite(&MsgCloseContractSuite{})
-
-func (MsgCloseContractSuite) TestValidateBasic(c *C) {
+func TestCloseContractValidateBasic(t *testing.T) {
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// invalid address
 	msg := MsgCloseContract{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgCloseContract{
 		Creator:    acct.String(),
 		ContractId: 50,
 	}
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 }

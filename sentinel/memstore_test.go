@@ -6,26 +6,26 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"testing"
 
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	. "gopkg.in/check.v1"
 )
 
 type MemStoreSuite struct {
+	suite.Suite
 	server *httptest.Server
 }
 
-var _ = Suite(&MemStoreSuite{})
-
-func (s *MemStoreSuite) SetUpTest(c *C) {
+func (s *MemStoreSuite) SetUpTest() {
 	s.server = httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		switch {
 		case strings.HasSuffix(req.RequestURI, "/arkeo/contract/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu/arkeo-mainnet/cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu"):
-			httpTestHandler(c, rw, `
+			httpTestHandler(s.T(), rw, `
 { "contract": {
 				"provider_pub_key": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"chain": 1,
@@ -47,7 +47,7 @@ func (s *MemStoreSuite) SetUpTest(c *C) {
 	}))
 }
 
-func httpTestHandler(c *C, rw http.ResponseWriter, content string) {
+func httpTestHandler(t *testing.T, rw http.ResponseWriter, content string) {
 	if content == "500" {
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
@@ -55,19 +55,19 @@ func httpTestHandler(c *C, rw http.ResponseWriter, content string) {
 
 	rw.Header().Set("Content-Type", "application/json")
 	if _, err := rw.Write([]byte(content)); err != nil {
-		c.Fatal(err)
+		t.Fatal(err)
 	}
 }
 
-func (s *MemStoreSuite) TestMemStore(c *C) {
+func (s *MemStoreSuite) TestMemStore() {
 	var err error
 	baseURL := fmt.Sprintf("http://%s", s.server.Listener.Addr().String())
 	mem := NewMemStore(baseURL, log.NewTMLogger(log.NewSyncWriter(os.Stdout)))
 
-	c.Check(mem.Key("foo", "bar", "baz"), Equals, "foo/bar/baz")
+	require.Equal(s.T(), mem.Key("foo", "bar", "baz"), "foo/bar/baz")
 
 	mem.SetHeight(30)
-	c.Check(mem.GetHeight(), Equals, int64(30))
+	require.Equal(s.T(), mem.GetHeight(), int64(30))
 
 	pk1 := types.GetRandomPubKey()
 	pk2 := types.GetRandomPubKey()
@@ -79,17 +79,17 @@ func (s *MemStoreSuite) TestMemStore(c *C) {
 	mem.Put(contract)
 
 	contract, err = mem.Get(contract.Key())
-	c.Assert(err, IsNil)
-	c.Check(contract.Height, Equals, int64(4))
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), contract.Height, int64(4))
 
 	// fetch from server
 	pk, err := common.NewPubKey("cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
-	c.Assert(err, IsNil)
+	require.NoError(s.T(), err)
 
 	key := mem.Key(pk.String(), "arkeo-mainnet", pk.String())
 	contract, err = mem.Get(key)
-	c.Assert(err, IsNil)
-	c.Check(contract.Rate, Equals, int64(3))
-	c.Check(contract.Deposit.Int64(), Equals, int64(500))
-	c.Check(contract.Paid.Int64(), Equals, int64(0))
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), contract.Rate, int64(3))
+	require.Equal(s.T(), contract.Deposit.Int64(), int64(500))
+	require.Equal(s.T(), contract.Paid.Int64(), int64(0))
 }

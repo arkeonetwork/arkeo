@@ -2,11 +2,11 @@ package types
 
 import (
 	fmt "fmt"
+	"testing"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -20,11 +20,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
-type MsgClaimContractIncomeSuite struct{}
-
-var _ = Suite(&MsgClaimContractIncomeSuite{})
-
-func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
+func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	// setup
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
@@ -34,21 +30,21 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	kb := cKeys.NewInMemory(cdc)
 	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	pub, err := info.GetPubKey()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	spenderPubKey, err := common.NewPubKeyFromCrypto(pub)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// invalid address
 	msg := MsgClaimContractIncome{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgClaimContractIncome{
 		Creator:    acct.String(),
@@ -59,22 +55,22 @@ func (MsgClaimContractIncomeSuite) TestValidateBasic(c *C) {
 
 	message := msg.GetBytesToSign()
 	msg.Signature, _, err = kb.Sign("whatever", message)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// check bad client
 	msg.Spender = common.PubKey("bogus")
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidPubKey)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidPubKey)
 }
 
-func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
-	c.Skip("kept here for archival / 'working with pubkeys' purposes")
+func TestValidateSignature(t *testing.T) {
+	t.Skip("kept here for archival / 'working with pubkeys' purposes")
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
@@ -89,29 +85,29 @@ func (MsgClaimContractIncomeSuite) TestValidateSignature(c *C) {
 		ContractId: 500,
 	}
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// setup
 	var pub cryptotypes.PubKey
 	kb := cKeys.NewInMemory(cdc)
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	message := []byte(fmt.Sprintf("%d:%s:%d", msg.ContractId, msg.Spender, msg.Nonce))
 	msg.Signature, pub, err = kb.Sign("whatever", message)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
-	c.Check(pub.VerifySignature(message, msg.Signature), Equals, true)
+	require.True(t, pub.VerifySignature(message, msg.Signature))
 
 	pk, err := common.NewPubKeyFromCrypto(pub)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	pk2, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, pk.String())
-	c.Assert(err, IsNil)
-	c.Check(pk2.Equals(pub), Equals, true)
+	require.NoError(t, err)
+	require.True(t, pk2.Equals(pub))
 
 	acc, err := pk.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	account := authtypes.NewBaseAccountWithAddress(acc)
-	c.Check(pk2.Equals(account.GetPubKey()), Equals, true)
+	require.True(t, pk2.Equals(account.GetPubKey()))
 }

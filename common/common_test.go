@@ -4,28 +4,21 @@ import (
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 )
 
-func TestPackage(t *testing.T) { TestingT(t) }
-
-type CommonSuite struct{}
-
-var _ = Suite(&CommonSuite{})
-
-func (s CommonSuite) TestGetUncappedShare(c *C) {
+func TestGetUncappedShare(t *testing.T) {
 	part := cosmos.NewInt(149506590)
 	total := cosmos.NewInt(50165561086)
 	alloc := cosmos.NewInt(50000000)
 	share := GetUncappedShare(part, total, alloc)
-	c.Assert(share.Equal(cosmos.NewInt(149013)), Equals, true)
+	require.True(t, share.Equal(cosmos.NewInt(149013)))
 }
 
-func (s CommonSuite) TestGetSafeShare(c *C) {
+func TestGetSafeShare(t *testing.T) {
 	part := cosmos.NewInt(14950659000000000)
 	total := cosmos.NewInt(50165561086)
 	alloc := cosmos.NewInt(50000000)
 	share := GetSafeShare(part, total, alloc)
-	c.Assert(share.Equal(cosmos.NewInt(50000000)), Equals, true)
+	require.True(t, share.Equal(cosmos.NewInt(50000000)))
 }

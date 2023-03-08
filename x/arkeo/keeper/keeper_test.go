@@ -1,16 +1,14 @@
 package keeper
 
 import (
-	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/stretchr/testify/require"
 
 	"github.com/blang/semver"
-	. "gopkg.in/check.v1"
 
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -29,9 +27,7 @@ import (
 	tmdb "github.com/tendermint/tm-db"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-func SetupKeeper(c *C) (cosmos.Context, Keeper) {
+func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
@@ -48,7 +44,7 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
-	c.Assert(stateStore.LoadLatestVersion(), IsNil)
+	require.NoError(t, stateStore.LoadLatestVersion())
 
 	encodingConfig := simappparams.MakeTestEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
@@ -96,7 +92,7 @@ func SetupKeeper(c *C) (cosmos.Context, Keeper) {
 	return ctx, *k
 }
 
-func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper) {
+func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper.Keeper) {
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
@@ -114,7 +110,7 @@ func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper)
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
-	c.Assert(stateStore.LoadLatestVersion(), IsNil)
+	require.NoError(t, stateStore.LoadLatestVersion())
 
 	encodingConfig := simappparams.MakeTestEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
@@ -162,27 +158,4 @@ func SetupKeeperWithStaking(c *C) (cosmos.Context, Keeper, stakingkeeper.Keeper)
 	k.SetParams(ctx, types.DefaultParams())
 
 	return ctx, *k, sk
-}
-
-type errIsChecker struct {
-	*CheckerInfo
-}
-
-var ErrIs Checker = &errIsChecker{
-	&CheckerInfo{Name: "ErrIs", Params: []string{"obtained", "expected"}},
-}
-
-func (errIsChecker) Check(params []interface{}, names []string) (result bool, err string) {
-	p1, ok1 := params[0].(error)
-	p2, ok2 := params[1].(error)
-	if !ok1 || !ok2 {
-		result = false
-		err = "must pass error types"
-		return
-	}
-	result = errors.Is(p1, p2)
-	if !result {
-		err = fmt.Sprintf("Errors do not match!\nObtained: %s\nExpected: %s", p1, p2)
-	}
-	return
 }

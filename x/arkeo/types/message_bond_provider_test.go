@@ -1,43 +1,39 @@
 package types
 
 import (
+	"testing"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-
-	. "gopkg.in/check.v1"
-
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/stretchr/testify/require"
 )
 
-type MsgBondProviderSuite struct{}
-
-var _ = Suite(&MsgBondProviderSuite{})
-
-func (MsgBondProviderSuite) TestValidateBasic(c *C) {
+func TestValidateBasic(t *testing.T) {
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// invalid address
 	msg := MsgBondProvider{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgBondProvider{
 		Creator:  acct.String(),
 		Provider: pubkey,
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidChain)
+	require.ErrorIs(t, err, ErrInvalidChain)
 
 	msg.Chain = common.BTCChain.String()
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrInvalidBond)
+	require.ErrorIs(t, err, ErrInvalidBond)
 
 	msg.Bond = cosmos.NewInt(500)
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 }

@@ -1,26 +1,24 @@
 package common
 
 import (
-	. "gopkg.in/check.v1"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-type ChainSuite struct{}
-
-var _ = Suite(&ChainSuite{})
-
-func (s ChainSuite) TestChain(c *C) {
+func TestChain(t *testing.T) {
 	chn, err := NewChain("btc-mainnet-fullnode")
-	c.Assert(err, IsNil)
-	c.Check(chn.Equals(BTCChain), Equals, true)
-	c.Check(chn.IsEmpty(), Equals, false)
-	c.Check(chn.String(), Equals, "btc-mainnet-fullnode")
+	require.NoError(t, err)
+	require.True(t, chn.Equals(BTCChain))
+	require.False(t, chn.IsEmpty())
+	require.Equal(t, chn.String(), "btc-mainnet-fullnode")
 
 	chn, err = NewChain("swapi.dev")
-	c.Assert(err, IsNil)
-	c.Check(chn.Equals(StarWarsChain), Equals, true)
-	c.Check(chn.IsEmpty(), Equals, false)
-	c.Check(chn.String(), Equals, "swapi.dev")
+	require.NoError(t, err)
+	require.True(t, chn.Equals(StarWarsChain))
+	require.False(t, chn.IsEmpty())
+	require.Equal(t, chn.String(), "swapi.dev")
 
 	_, err = NewChain("B") // invalid
-	c.Assert(err, NotNil)
+	require.Error(t, err)
 }

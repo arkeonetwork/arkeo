@@ -1,31 +1,25 @@
 package keeper
 
 import (
+	"testing"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 )
 
-type BondProviderSuite struct{}
-
-var _ = Suite(&BondProviderSuite{})
-
-func (BondProviderSuite) TestValidate(c *C) {
-}
-
-func (BondProviderSuite) TestHandle(c *C) {
-	ctx, k, sk := SetupKeeperWithStaking(c)
+func TestHandle(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
 
 	s := newMsgServer(k, sk)
 
 	// setup
 	providerPubKey := types.GetRandomPubKey()
 	acct, err := providerPubKey.GetMyAddress()
-	c.Assert(err, IsNil)
-	c.Assert(k.MintAndSendToAccount(ctx, acct, getCoin(common.Tokens(10))), IsNil)
+	require.NoError(t, err)
+	require.NoError(t, k.MintAndSendToAccount(ctx, acct, getCoin(common.Tokens(10))))
 
 	// Add to bond
 	msg := types.MsgBondProvider{
@@ -34,35 +28,36 @@ func (BondProviderSuite) TestHandle(c *C) {
 		Chain:    common.BTCChain.String(),
 		Bond:     cosmos.NewInt(common.Tokens(8)),
 	}
-	c.Assert(s.BondProviderHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.BondProviderHandle(ctx, &msg))
 	// check balance as drawn down by two
 	bal := k.GetBalance(ctx, acct)
-	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, common.Tokens(2))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
 	// check that provider now exists
-	c.Check(k.ProviderExists(ctx, msg.Provider, common.BTCChain), Equals, true)
+	require.True(t, k.ProviderExists(ctx, msg.Provider, common.BTCChain))
 	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCChain)
-	c.Assert(err, IsNil)
-	c.Check(provider.Bond.Int64(), Equals, common.Tokens(8))
+	require.NoError(t, err)
+	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
 	// remove too much bond
 	msg.Bond = cosmos.NewInt(common.Tokens(-20))
 	err = s.BondProviderHandle(ctx, &msg)
-	c.Check(err, ErrIs, types.ErrInsufficientFunds)
+	require.ErrorIs(t, err, types.ErrInsufficientFunds)
 
 	// check balance hasn't changed
 	bal = k.GetBalance(ctx, acct)
-	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, common.Tokens(2))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
+
 	// check provider has same bond
 	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCChain)
-	c.Assert(err, IsNil)
-	c.Check(provider.Bond.Int64(), Equals, common.Tokens(8))
+	require.NoError(t, err)
+	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
 	// remove all bond
 	msg.Bond = cosmos.NewInt(common.Tokens(-8))
 	err = s.BondProviderHandle(ctx, &msg)
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	bal = k.GetBalance(ctx, acct) // check balance
-	c.Check(bal.AmountOf(configs.Denom).Int64(), Equals, common.Tokens(10))
-	c.Check(k.ProviderExists(ctx, msg.Provider, common.BTCChain), Equals, false) // should be removed
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(10))
+	require.False(t, k.ProviderExists(ctx, msg.Provider, common.BTCChain)) // should be removed
 }

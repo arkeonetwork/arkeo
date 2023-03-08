@@ -1,21 +1,18 @@
 package keeper
 
 import (
+	"testing"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 )
 
-type ClaimContractIncomeSuite struct{}
-
-var _ = Suite(&ClaimContractIncomeSuite{})
-
-func (ClaimContractIncomeSuite) TestValidate(c *C) {
+func TestValidate(t *testing.T) {
 	var err error
-	ctx, k, sk := SetupKeeperWithStaking(c)
+	ctx, k, sk := SetupKeeperWithStaking(t)
 	ctx = ctx.WithBlockHeight(20)
 
 	s := newMsgServer(k, sk)
@@ -34,7 +31,7 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 	contract.Type = types.ContractType_PAY_AS_YOU_GO
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 1
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+	require.NoError(t, k.SetContract(ctx, contract))
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
@@ -42,27 +39,27 @@ func (ClaimContractIncomeSuite) TestValidate(c *C) {
 		Creator:    acc.String(),
 		Nonce:      20,
 	}
-	c.Assert(s.ClaimContractIncomeValidate(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeValidate(ctx, &msg))
 
 	// check closed contract
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + contract.Duration)
 	err = s.ClaimContractIncomeValidate(ctx, &msg)
-	c.Check(err, ErrIs, types.ErrClaimContractIncomeClosed)
+	require.ErrorIs(t, err, types.ErrClaimContractIncomeClosed)
 }
 
-func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
-	ctx, k, sk := SetupKeeperWithStaking(c)
+func TestHandlePayAsYouGo(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
 
 	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
 	acc, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	chain := common.BTCChain
 	client := types.GetRandomPubKey()
-	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))), IsNil)
-	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)), IsNil)
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
 
 	contract := types.NewContract(pubkey, chain, client)
 	contract.Duration = 100
@@ -70,7 +67,7 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 	contract.Type = types.ContractType_PAY_AS_YOU_GO
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 2
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+	require.NoError(t, k.SetContract(ctx, contract))
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
@@ -78,43 +75,43 @@ func (ClaimContractIncomeSuite) TestHandlePayAsYouGo(c *C) {
 		Creator:    acc.String(),
 		Nonce:      20,
 	}
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 
-	c.Check(k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), Equals, int64(180))
-	c.Check(k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), Equals, int64(800))
-	c.Check(k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), Equals, int64(20))
+	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(180))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(800))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(20))
 
 	// repeat the same thing and ensure we don't pay providers twice
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
-	c.Check(k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), Equals, int64(180))
-	c.Check(k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), Equals, int64(800))
-	c.Check(k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), Equals, int64(20))
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
+	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(180))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(800))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(20))
 
 	// increase the nonce and get slightly more funds for the provider
 	msg.Nonce = 25
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 	acct := k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64()
-	c.Check(acct, Equals, int64(225))
+	require.Equal(t, acct, int64(225))
 	cname := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
-	c.Check(cname, Equals, int64(750))
+	require.Equal(t, cname, int64(750))
 	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	c.Check(rname, Equals, int64(25))
-	c.Check(rname+cname+acct, Equals, contract.Rate*contract.Duration)
+	require.Equal(t, rname, int64(25))
+	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
 	msg.Nonce = contract.Deposit.Int64() / contract.Rate * 1000000000000
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 	acct = k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64()
-	c.Check(acct, Equals, int64(900))
+	require.Equal(t, acct, int64(900))
 	cname = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
-	c.Check(cname, Equals, int64(0))
+	require.Equal(t, cname, int64(0))
 	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	c.Check(rname, Equals, int64(100))
-	c.Check(rname+cname+acct, Equals, contract.Rate*contract.Duration)
+	require.Equal(t, rname, int64(100))
+	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
 }
 
-func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
-	ctx, k, sk := SetupKeeperWithStaking(c)
+func TestHandleSubscription(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
 	ctx = ctx.WithBlockHeight(20)
 
 	s := newMsgServer(k, sk)
@@ -122,11 +119,11 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 	// setup
 	pubkey := types.GetRandomPubKey()
 	acc, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 	chain := common.BTCChain
 	client := types.GetRandomPubKey()
-	c.Assert(k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))), IsNil)
-	c.Assert(k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)), IsNil)
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
 
 	contract := types.NewContract(pubkey, chain, client)
 	contract.Duration = 100
@@ -135,7 +132,7 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 3
-	c.Assert(k.SetContract(ctx, contract), IsNil)
+	require.NoError(t, k.SetContract(ctx, contract))
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
@@ -143,37 +140,37 @@ func (ClaimContractIncomeSuite) TestHandleSubscription(c *C) {
 		Creator:    acc.String(),
 		Nonce:      20,
 	}
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 
-	c.Check(k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), Equals, int64(90))
-	c.Check(k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), Equals, int64(900))
-	c.Check(k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), Equals, int64(10))
+	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(90))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(900))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(10))
 
 	// repeat the same thing and ensure we don't pay providers twice
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
-	c.Check(k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), Equals, int64(90))
-	c.Check(k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), Equals, int64(900))
-	c.Check(k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), Equals, int64(10))
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
+	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(90))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(900))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(10))
 
 	// increase the nonce and get slightly more funds for the provider
 	ctx = ctx.WithBlockHeight(30)
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 	acct := k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64()
-	c.Check(acct, Equals, int64(180))
+	require.Equal(t, acct, int64(180))
 	cname := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
-	c.Check(cname, Equals, int64(800))
+	require.Equal(t, cname, int64(800))
 	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	c.Check(rname, Equals, int64(20))
-	c.Check(rname+cname+acct, Equals, contract.Rate*contract.Duration)
+	require.Equal(t, rname, int64(20))
+	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
 	ctx = ctx.WithBlockHeight(30000000)
-	c.Assert(s.ClaimContractIncomeHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 	acct = k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64()
-	c.Check(acct, Equals, int64(900))
+	require.Equal(t, acct, int64(900))
 	cname = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
-	c.Check(cname, Equals, int64(0))
+	require.Equal(t, cname, int64(0))
 	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	c.Check(rname, Equals, int64(100))
-	c.Check(rname+cname+acct, Equals, contract.Rate*contract.Duration)
+	require.Equal(t, rname, int64(100))
+	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
 }
