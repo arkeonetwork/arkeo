@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -64,7 +65,11 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if !signerAccountAddress.Equals(clientAccountAddress) {
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
-	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
+	providerUnbonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Chain)
+	if err != nil {
+		return err
+	}
+	if !providerUnbonded && contract.Type == types.ContractType_PAY_AS_YOU_GO {
 		// clients are not allowed to cancel a pay-as-you-go contract as it
 		// could be a way to game providers. IE, the client make 1,000 requests
 		// and before the provider can claim the rewards, the client cancels
@@ -78,6 +83,14 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	}
 
 	return nil
+}
+
+func (k msgServer) hasProviderUnbonded(ctx cosmos.Context, providerKey common.PubKey, chain common.Chain) (bool, error) {
+	provider, err := k.Keeper.GetProvider(ctx, providerKey, chain)
+	if err != nil {
+		return false, fmt.Errorf("fail to get provider,err: %w", err)
+	}
+	return provider.Bond.IsZero(), nil
 }
 
 func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseContract) error {

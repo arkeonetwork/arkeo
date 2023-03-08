@@ -291,4 +291,9 @@ func (CloseContractSuite) TestClosePayAsYouGoContract(c *C) {
 	closeContractMsg.Creator = userAddress.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	c.Check(err, ErrIs, types.ErrCloseContractUnauthorized)
+
+	// unbond provider , unbond 100% will remove the provider
+	k.RemoveProvider(ctx, providerPubKey, chain)
+	_, err = s.CloseContract(ctx, &closeContractMsg)
+	c.Assert(err, IsNil)
 }
