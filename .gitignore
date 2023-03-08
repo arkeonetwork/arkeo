@@ -4,7 +4,7 @@ arkeod
 .arkeo/
 .sentinel*
 tmp-swagger-gen/
-
+cmd/**/__debug_bin
 .trunk
 bin/
 vue/node_modules
