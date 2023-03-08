@@ -116,7 +116,7 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(d)
 }
 
-func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
+func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
 	path := r.URL.Path
 
@@ -147,10 +147,9 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	key := p.MemStore.Key(providerPK.String(), chain.String(), spenderPK.String())
-	contract, err := p.MemStore.Get(key)
+	contract, err := p.MemStore.GetActiveContract(providerPK, chain, spenderPK)
 	if err != nil {
-		p.logger.Error("fail to get contract from memstore", "error", err, "key", key)
+		p.logger.Error("fail to get contract from memstore", "error", err, "provider", providerPK, "chain", chain, "spender", spenderPK)
 		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -198,7 +197,7 @@ func (p Proxy) Run() {
 
 	// start server
 	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
-	mux.Handle("/contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
+	mux.Handle("/active-contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleActiveContract)))
 	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
 	mux.Handle("/open_claims/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
 	mux.Handle("/", p.auth(
