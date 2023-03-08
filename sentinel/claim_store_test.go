@@ -3,45 +3,50 @@ package sentinel
 import (
 	"io/ioutil"
 	"os"
+	"testing"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 type ClaimStoreSuite struct {
+	suite.Suite
 	dir string
 }
 
-var _ = Suite(&ClaimStoreSuite{})
-
-func (s *ClaimStoreSuite) SetUpTest(c *C) {
+func (s *ClaimStoreSuite) SetUpTest() {
 	var err error
 	s.dir, err = ioutil.TempDir("/tmp", "claim-store")
-	c.Assert(err, IsNil)
+	require.NoError(s.T(), err)
 }
 
-func (s *ClaimStoreSuite) TestStore(c *C) {
+func (s *ClaimStoreSuite) TestStore() {
 	store, err := NewClaimStore(s.dir)
-	c.Assert(err, IsNil)
+	require.NoError(s.T(), err)
 
 	pk2 := types.GetRandomPubKey()
 	contractId := uint64(57)
-	c.Assert(err, IsNil)
+	require.NoError(s.T(), err)
 	claim := NewClaim(contractId, pk2, 30, "signature")
 
-	c.Assert(store.Set(claim), IsNil)
-	c.Assert(store.Has(claim.Key()), Equals, true)
+	require.Nil(s.T(), store.Set(claim))
+
+	require.True(s.T(), store.Has(claim.Key()))
 	claim, err = store.Get(claim.Key())
-	c.Assert(err, IsNil)
+	require.NoError(s.T(), err)
 
 	claims := store.List()
-	c.Assert(claims, HasLen, 1)
+	require.Len(s.T(), claims, 1)
 
-	c.Assert(store.Remove(claim.Key()), IsNil)
-	c.Assert(store.Has(claim.Key()), Equals, false)
+	require.NoError(s.T(), store.Remove(claim.Key()))
+	require.False(s.T(), store.Has(claim.Key()))
 }
 
-func (s *ClaimStoreSuite) TearDownSuite(c *C) {
+func (s *ClaimStoreSuite) TearDownSuite(t *testing.T) {
 	defer os.RemoveAll(s.dir)
+}
+
+func TestClaimStoreSuite(t *testing.T) {
+	suite.Run(t, new(ClaimStoreSuite))
 }

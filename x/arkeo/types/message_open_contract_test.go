@@ -1,29 +1,26 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common"
+	"testing"
 
-	. "gopkg.in/check.v1"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/stretchr/testify/require"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-type MsgOpenContractSuite struct{}
-
-var _ = Suite(&MsgOpenContractSuite{})
-
-func (MsgOpenContractSuite) TestValidateBasic(c *C) {
+func TestBondProviderValidateBasic(t *testing.T) {
 	// setup
 	pubkey := GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// invalid address
 	msg := MsgOpenContract{
 		Creator: "invalid address",
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, sdkerrors.ErrInvalidAddress)
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
 	msg = MsgOpenContract{
 		Creator:  acct.String(),
@@ -32,13 +29,13 @@ func (MsgOpenContractSuite) TestValidateBasic(c *C) {
 		Chain:    common.BTCChain.String(),
 	}
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrOpenContractDuration)
+	require.ErrorIs(t, err, ErrOpenContractDuration)
 
 	msg.Duration = 100
 	err = msg.ValidateBasic()
-	c.Check(err, ErrIs, ErrOpenContractRate)
+	require.ErrorIs(t, err, ErrOpenContractRate)
 
 	msg.Rate = 100
 	err = msg.ValidateBasic()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 }

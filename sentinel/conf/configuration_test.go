@@ -5,16 +5,10 @@ import (
 	"testing"
 	"time"
 
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-type ConfigurationSuite struct{}
-
-var _ = Suite(&ConfigurationSuite{})
-
-func (ConfigurationSuite) TestConfiguration(c *C) {
+func TestConfiguration(t *testing.T) {
 	os.Setenv("MONIKER", "monkey")
 	os.Setenv("WEBSITE", "webby")
 	os.Setenv("DESCRIPTION", "dezy")
@@ -35,19 +29,19 @@ func (ConfigurationSuite) TestConfiguration(c *C) {
 
 	config := NewConfiguration()
 
-	c.Check(config.Moniker, Equals, "monkey")
-	c.Check(config.Website, Equals, "webby")
-	c.Check(config.Location, Equals, "locy")
-	c.Check(config.Port, Equals, "4000")
-	c.Check(config.ProxyHost, Equals, "proxxy")
-	c.Check(config.SourceChain, Equals, "sourcey")
-	c.Check(config.EventStreamHost, Equals, "hosty")
-	c.Check(config.ProviderPubKey.String(), Equals, "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
-	c.Check(config.FreeTierRateLimit, Equals, 99)
-	c.Check(config.FreeTierRateLimitDuration, Equals, time.Hour)
-	c.Check(config.SubTierRateLimit, Equals, 98)
-	c.Check(config.SubTierRateLimitDuration, Equals, 2*time.Minute)
-	c.Check(config.AsGoTierRateLimit, Equals, 97)
-	c.Check(config.AsGoTierRateLimitDuration, Equals, 3*time.Hour)
-	c.Check(config.ClaimStoreLocation, Equals, "clammy")
+	require.Equal(t, config.Moniker, "monkey")
+	require.Equal(t, config.Website, "webby")
+	require.Equal(t, config.Location, "locy")
+	require.Equal(t, config.Port, "4000")
+	require.Equal(t, config.ProxyHost, "proxxy")
+	require.Equal(t, config.SourceChain, "sourcey")
+	require.Equal(t, config.EventStreamHost, "hosty")
+	require.Equal(t, config.ProviderPubKey.String(), "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
+	require.Equal(t, config.FreeTierRateLimit, 99)
+	require.Equal(t, config.FreeTierRateLimitDuration, time.Hour)
+	require.Equal(t, config.SubTierRateLimit, 98)
+	require.Equal(t, config.SubTierRateLimitDuration, 2*time.Minute)
+	require.Equal(t, config.AsGoTierRateLimit, 97)
+	require.Equal(t, config.AsGoTierRateLimitDuration, 3*time.Hour)
+	require.Equal(t, config.ClaimStoreLocation, "clammy")
 }

@@ -1,19 +1,16 @@
 package keeper
 
 import (
+	"testing"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	. "gopkg.in/check.v1"
+	"github.com/stretchr/testify/require"
 )
 
-type ModProviderSuite struct{}
-
-var _ = Suite(&ModProviderSuite{})
-
-func (ModProviderSuite) TestValidate(c *C) {
-	ctx, k, sk := SetupKeeperWithStaking(c)
+func TestModProviderValidate(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
 
 	s := newMsgServer(k, sk)
 
@@ -22,7 +19,7 @@ func (ModProviderSuite) TestValidate(c *C) {
 
 	provider := types.NewProvider(pubkey, common.BTCChain)
 	provider.Bond = cosmos.NewInt(500)
-	c.Assert(k.SetProvider(ctx, provider), IsNil)
+	require.NoError(t, k.SetProvider(ctx, provider))
 
 	// happy path
 	msg := types.MsgModProvider{
@@ -32,29 +29,29 @@ func (ModProviderSuite) TestValidate(c *C) {
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
 	}
-	c.Assert(s.ModProviderValidate(ctx, &msg), IsNil)
+	require.NoError(t, s.ModProviderValidate(ctx, &msg))
 
 	// bad min duration
 	msg.MinContractDuration = 5256000 * 2
 	err := s.ModProviderValidate(ctx, &msg)
-	c.Check(err, ErrIs, types.ErrInvalidModProviderMinContractDuration)
+	require.ErrorIs(t, err, types.ErrInvalidModProviderMinContractDuration)
 
 	// bad max duration
 	msg.MinContractDuration = 10
 	msg.MaxContractDuration = 5256000 * 2
 	err = s.ModProviderValidate(ctx, &msg)
-	c.Check(err, ErrIs, types.ErrInvalidModProviderMaxContractDuration)
+	require.ErrorIs(t, err, types.ErrInvalidModProviderMaxContractDuration)
 }
 
-func (ModProviderSuite) TestHandle(c *C) {
-	ctx, k, sk := SetupKeeperWithStaking(c)
+func TestModProviderHandle(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
 
 	s := newMsgServer(k, sk)
 
 	// setup
 	pubkey := types.GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
-	c.Assert(err, IsNil)
+	require.NoError(t, err)
 
 	// happy path
 	msg := types.MsgModProvider{
@@ -69,15 +66,15 @@ func (ModProviderSuite) TestHandle(c *C) {
 		SubscriptionRate:    11,
 		PayAsYouGoRate:      12,
 	}
-	c.Assert(s.ModProviderHandle(ctx, &msg), IsNil)
+	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
 	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCChain)
-	c.Assert(err, IsNil)
-	c.Check(provider.MetadataUri, Equals, "foobar")
-	c.Check(provider.MetadataNonce, Equals, uint64(3))
-	c.Check(provider.MinContractDuration, Equals, int64(10))
-	c.Check(provider.MaxContractDuration, Equals, int64(500))
-	c.Check(provider.Status, Equals, types.ProviderStatus_ONLINE)
-	c.Check(provider.SubscriptionRate, Equals, int64(11))
-	c.Check(provider.PayAsYouGoRate, Equals, int64(12))
+	require.NoError(t, err)
+	require.Equal(t, provider.MetadataUri, "foobar")
+	require.Equal(t, provider.MetadataNonce, uint64(3))
+	require.Equal(t, provider.MinContractDuration, int64(10))
+	require.Equal(t, provider.MaxContractDuration, int64(500))
+	require.Equal(t, provider.Status, types.ProviderStatus_ONLINE)
+	require.Equal(t, provider.SubscriptionRate, int64(11))
+	require.Equal(t, provider.PayAsYouGoRate, int64(12))
 }
