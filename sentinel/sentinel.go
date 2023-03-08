@@ -121,29 +121,29 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 5 {
+	if len(parts) < 3 {
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
-	providerPK, err := common.NewPubKey(parts[2])
+	spenderPK, err := common.NewPubKey(parts[0])
+	if err != nil {
+		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[0])
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
+		return
+	}
+
+	providerPK, err := common.NewPubKey(parts[1])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	chain, err := common.NewChain(parts[3])
+	chain, err := common.NewChain(parts[2])
 	if err != nil {
-		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
+		p.logger.Error("fail to parse chain", "error", err, "chain", parts[2])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	spenderPK, err := common.NewPubKey(parts[4])
-	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
