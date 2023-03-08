@@ -126,24 +126,24 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	providerPK, err := common.NewPubKey(parts[2])
+	spenderPK, err := common.NewPubKey(parts[2])
+	if err != nil {
+		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
+		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
+		return
+	}
+
+	providerPK, err := common.NewPubKey(parts[3])
 	if err != nil {
 		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	chain, err := common.NewChain(parts[3])
+	chain, err := common.NewChain(parts[4])
 	if err != nil {
 		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	spenderPK, err := common.NewPubKey(parts[4])
-	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
-		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
@@ -163,14 +163,14 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 
 	parts := strings.Split(path, "/")
-	if len(parts) < 1 {
+	if len(parts) < 3 {
 		respondWithError(w, "not enough parameters", http.StatusBadRequest)
 		return
 	}
 
-	contractId, err := strconv.ParseUint(parts[0], 10, 64)
+	contractId, err := strconv.ParseUint(parts[2], 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[0])
+		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[2])
 		respondWithError(w, fmt.Sprintf("bad contractId: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -178,7 +178,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	claim := NewClaim(contractId, "", 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
 	if err != nil {
-		p.logger.Error("fail to get contract from memstore", "error", err, "key", claim.Key())
+		p.logger.Error("fail to get claim from memstore", "error", err, "key", claim.Key())
 		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}
