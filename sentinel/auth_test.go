@@ -58,7 +58,6 @@ func TestArkAuth(t *testing.T) {
 	raw = GenerateArkAuthString(contractId, pk, nonce, signature)
 	_, err = parseArkAuth(raw + "randome not hex!")
 	require.Error(t, err)
-
 }
 
 func TestFreeTier(t *testing.T) {
