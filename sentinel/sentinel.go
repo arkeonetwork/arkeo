@@ -196,11 +196,11 @@ func (p Proxy) Run() {
 	mux := http.NewServeMux()
 
 	// start server
-	mux.Handle("/metadata.json", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
-	mux.Handle("/active-contract/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleActiveContract)))
-	mux.Handle("/claim/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
-	mux.Handle("/open_claims/", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
-	mux.Handle("/", p.auth(
+	mux.Handle(RoutesMetaData, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
+	mux.Handle(RoutesActiveContract, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleActiveContract)))
+	mux.Handle(RoutesClaim, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
+	mux.Handle(RoutesOpenClaims, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
+	mux.Handle(RoutesDefault, p.auth(
 		handlers.LoggingHandler(
 			os.Stdout,
 			handlers.ProxyHeaders(
