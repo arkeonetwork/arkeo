@@ -7,15 +7,15 @@ Either clone and build arkeo and its tools from source as outlined in [readme.md
 or download a binary for your operating system below:
 
 - [macOS (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_darwin_amd64.tar.gz)
-  - [sha256](sums/arkeo_darwin_amd64.sha256)
+  - [sha256](sums/arkeo_darwin_amd64.sha256?raw=true)
 - [macOS (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_darwin_arm64.tar.gz)
-  - [sha256](sums/arkeo_darwin_arm64.sha256)
+  - [sha256](sums/arkeo_darwin_arm64.sha256?raw=true)
 - [linux (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_linux_arm64.tar.gz)
-  - [sha256](sums/arkeo_linux_arm64.sha256)
+  - [sha256](sums/arkeo_linux_arm64.sha256?raw=true)
 - [linux (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_linux_arm64.tar.gz)
-  - [sha256](sums/arkeo_linux_arm64.sha256)
+  - [sha256](sums/arkeo_linux_arm64.sha256?raw=true)
 
-after downloading the executable, verify the integrity of the downloaded artifact:
+after downloading the executable and corresponding checksum file (right click->save as/link/target), verify the integrity of the downloaded artifact:
 ```bash
 $ cd /path/to/downloads
 # replace the sha256 sum we echo below with the appropriate sum for your os listed above
