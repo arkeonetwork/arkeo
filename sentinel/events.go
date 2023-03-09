@@ -234,7 +234,7 @@ type ClaimContractIncome struct {
 	Reserve  cosmos.Int
 }
 
-func parseClaimContractIncome(input map[string]string) (ClaimContractIncome, error) {
+func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome, error) {
 	var err error
 	var ok bool
 	evt := ClaimContractIncome{}

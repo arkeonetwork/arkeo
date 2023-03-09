@@ -14,29 +14,30 @@ import (
 	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
+var testConfig = conf.Configuration{
+	Moniker:                   "Testy McTestface",
+	Website:                   "testing.com",
+	Description:               "the best testnet ever",
+	Location:                  "100,100",
+	Port:                      "3636",
+	ProxyHost:                 "localhost:3637",
+	SourceChain:               "localhost", // this should point to arkeo rpc endpoints, but we can ignore for testing
+	EventStreamHost:           "localhost",
+	ProviderPubKey:            types.GetRandomPubKey(),
+	FreeTierRateLimit:         10,
+	FreeTierRateLimitDuration: time.Second,
+	SubTierRateLimit:          10,
+	SubTierRateLimitDuration:  time.Second,
+	AsGoTierRateLimit:         10,
+	AsGoTierRateLimitDuration: time.Second,
+	ClaimStoreLocation:        "",
+	GaiaRpcArchiveHost:        "gaia-host",
+}
+
 func TestHandleOpenContractEvent(t *testing.T) {
-	config := conf.Configuration{
-		Moniker:                   "Testy McTestface",
-		Website:                   "testing.com",
-		Description:               "the best testnet ever",
-		Location:                  "100,100",
-		Port:                      "3636",
-		ProxyHost:                 "localhost:3637",
-		SourceChain:               "localhost", // this should point to arkeo rpc endpoints, but we can ignore for testing
-		EventStreamHost:           "localhost",
-		ProviderPubKey:            types.GetRandomPubKey(),
-		FreeTierRateLimit:         10,
-		FreeTierRateLimitDuration: time.Second,
-		SubTierRateLimit:          10,
-		SubTierRateLimitDuration:  time.Second,
-		AsGoTierRateLimit:         10,
-		AsGoTierRateLimitDuration: time.Second,
-		ClaimStoreLocation:        "",
-		GaiaRpcArchiveHost:        "gaia-host",
-	}
-	proxy := NewProxy(config)
+	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
-		Provider:           config.ProviderPubKey,
+		Provider:           testConfig.ProviderPubKey,
 		Chain:              common.BTCChain,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
@@ -78,7 +79,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Chain, inputContract.Client)
 	require.Error(t, err) // contract not found since its expired.
 
-	inputContract.Provider = config.ProviderPubKey
+	inputContract.Provider = testConfig.ProviderPubKey
 	inputContract.Id = 3
 	inputContract.Height = 200
 	events = sdk.Events{
@@ -92,11 +93,111 @@ func TestHandleOpenContractEvent(t *testing.T) {
 }
 
 func TestHandleCloseContractEvent(t *testing.T) {
+	proxy := NewProxy(testConfig)
+	inputContract := types.Contract{
+		Provider:           testConfig.ProviderPubKey,
+		Chain:              common.BTCChain,
+		Client:             types.GetRandomPubKey(),
+		Delegate:           common.EmptyPubKey,
+		Type:               types.ContractType_PAY_AS_YOU_GO,
+		Height:             100,
+		Duration:           100,
+		Rate:               1,
+		Deposit:            sdk.NewInt(100),
+		Nonce:              0,
+		Id:                 1,
+		SettlementDuration: 10,
+	}
+	openCost := int64(100)
+	events := sdk.Events{
+		types.NewOpenContractEvent(openCost, &inputContract),
+	}
+	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
 
+	// confirm that our memstore
+	outputContract, err := proxy.MemStore.Get(inputContract.Key())
+	require.NoError(t, err)
+	require.Equal(t, inputContract, outputContract)
+
+	// confirm that we can close the contract
+	proxy.MemStore.SetHeight(200)
+	inputContract.SettlementHeight = 200
+	closeEvents := sdk.Events{
+		types.NewCloseContractEvent(&inputContract),
+	}
+	proxy.handleCloseContractEvent(convertEventsToResultEvent(closeEvents))
+	_, err = proxy.MemStore.Get(inputContract.Key()) // contract should be deleted from store since its closed
+	require.Error(t, err)
 }
 
-func TestHandleClaimContractIncomeEevent(t *testing.T) {
+func TestHandleHandleContractSettlementEvent(t *testing.T) {
+	proxy := NewProxy(testConfig)
+	inputContract := types.Contract{
+		Provider:           testConfig.ProviderPubKey,
+		Chain:              common.BTCChain,
+		Client:             types.GetRandomPubKey(),
+		Delegate:           common.EmptyPubKey,
+		Type:               types.ContractType_PAY_AS_YOU_GO,
+		Height:             100,
+		Duration:           100,
+		Rate:               1,
+		Deposit:            sdk.NewInt(100),
+		Nonce:              0,
+		Id:                 1,
+		SettlementDuration: 10,
+	}
+	openCost := int64(100)
+	events := sdk.Events{
+		types.NewOpenContractEvent(openCost, &inputContract),
+	}
+	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
 
+	// confirm that our memstore has the contract.
+	outputContract, err := proxy.MemStore.Get(inputContract.Key())
+	require.NoError(t, err)
+	require.Equal(t, inputContract, outputContract)
+
+	// simulate 10 calls being made to sentinel on the contract.
+	arkAuth := ArkAuth{
+		ContractId: inputContract.Id,
+		Spender:    inputContract.Client,
+		Nonce:      10,
+	}
+	_, err = proxy.paidTier(arkAuth, "")
+	require.NoError(t, err)
+
+	// confirm our claim exists in the claim store
+	claim, err := proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
+	require.NoError(t, err)
+	require.Equal(t, claim.ContractId, inputContract.Id)
+	require.Equal(t, claim.Nonce, arkAuth.Nonce)
+
+	// confirm is a settlement event is emitted with a lower nonce, we handle it correctly, by not setting our claim to Claimed.
+	inputContract.Nonce = 8
+	proxy.MemStore.SetHeight(150)
+	settlementEvents := sdk.Events{
+		types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract),
+	}
+	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
+
+	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
+	require.NoError(t, err)
+	require.Equal(t, claim.ContractId, inputContract.Id)
+	require.Equal(t, claim.Nonce, arkAuth.Nonce)
+	require.False(t, claim.Claimed)
+
+	// confirm is a settlement event is emitted with the samce nonce, we handle it correctly, by setting our claim to Claimed.
+	inputContract.Nonce = 10
+	proxy.MemStore.SetHeight(160)
+	settlementEvents = sdk.Events{
+		types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract),
+	}
+	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
+	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
+	require.NoError(t, err)
+	require.Equal(t, claim.ContractId, inputContract.Id)
+	require.Equal(t, claim.Nonce, arkAuth.Nonce)
+	require.True(t, claim.Claimed)
 }
 
 func TestHandleNewBlockHeaderEvent(t *testing.T) {

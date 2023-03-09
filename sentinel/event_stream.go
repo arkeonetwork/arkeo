@@ -74,28 +74,25 @@ func (p Proxy) EventListener(host string) {
 			p.handleOpenContractEvent(result)
 		case result := <-closeContractOut:
 			p.handleCloseContractEvent(result)
-		case result := <-claimContractOut:
-			p.handleClaimContractIncomeEvent(result)
+		case result := <-claimContractOut: // MsgClaimContractIncome emits a contract settlement event
+			p.handleContractSettlementEvent(result)
 		case <-quit:
 			return
 		}
 	}
 }
 
-// handleClaimContractIncomeEvent
-func (p Proxy) handleClaimContractIncomeEvent(result tmCoreTypes.ResultEvent) {
-	evt, err := parseClaimContractIncome(convertEvent(arkeoTypes.EventTypeContractSettlement, result.Events))
+// handleContractSettlementEvent
+func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
+	evt, err := parseContractSettlementEvent(convertEvent(arkeoTypes.EventTypeContractSettlement, result.Events))
 	if err != nil {
-		p.logger.Error("failed to get close contract event", "error", err)
+		p.logger.Error("failed to get contract settlement event", "error", err)
 		return
 	}
 	if !p.isMyPubKey(evt.Contract.Provider) {
 		return
 	}
-	spender := evt.Contract.Delegate
-	if spender.IsEmpty() {
-		spender = evt.Contract.Client
-	}
+	spender := evt.Contract.GetSpender()
 	newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
 	currClaim, err := p.ClaimStore.Get(newClaim.Key())
 	if err != nil {
@@ -155,7 +152,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 			for _, attr := range evt.Attributes {
 				input[string(attr.Key)] = string(attr.Value)
 			}
-			evt, err := parseClaimContractIncome(input)
+			evt, err := parseContractSettlementEvent(input)
 			if err != nil {
 				p.logger.Error("failed to get close contract event", "error", err)
 				continue
@@ -163,10 +160,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 			if !p.isMyPubKey(evt.Contract.Provider) {
 				continue
 			}
-			spender := evt.Contract.Delegate
-			if spender.IsEmpty() {
-				spender = evt.Contract.Client
-			}
+			spender := evt.Contract.GetSpender()
 			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
