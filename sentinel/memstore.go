@@ -89,8 +89,7 @@ func (k *MemStore) GetActiveContract(provider common.PubKey, chain common.Chain,
 	defer k.storeLock.Unlock()
 	// iterate through the map to find the contract
 	for _, contract := range k.db {
-		if contract.Provider.Equals(provider) && contract.Chain == chain && contract.GetSpender().Equals(spender) {
-			// TODO: do we need to contract is expired here?
+		if !contract.IsExpired(k.GetHeight()) && contract.Provider.Equals(provider) && contract.Chain == chain && contract.GetSpender().Equals(spender) {
 			return contract, nil
 		}
 	}
