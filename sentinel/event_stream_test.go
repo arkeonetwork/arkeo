@@ -201,7 +201,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 }
 
 func TestHandleNewBlockHeaderEvent(t *testing.T) {
-
+	// TODO: add tests
 }
 
 func convertEventsToResultEvent(events sdk.Events) tmCoreTypes.ResultEvent {
