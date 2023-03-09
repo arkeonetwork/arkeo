@@ -161,6 +161,11 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
+		case "settlement_duration":
+			evt.Contract.SettlementDuration, err = strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				return evt, err
+			}
 		case "rate":
 			evt.Contract.Rate, err = strconv.ParseInt(v, 10, 64)
 			if err != nil {
