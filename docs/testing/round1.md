@@ -6,14 +6,14 @@ This phase of testing is about getting the complete full stack of a working envi
 Either clone and build arkeo and its tools from source as outlined in [readme.md](../readme.md),
 or download a binary for your operating system below:
 
-- [macOS (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/darwin_amd64/arkeod)
-  - sha256 `427f3edfd0d7d58719f8a33d65826d39fa45a9fa2fa4e5e70835d8b4117b8ef0`
-- [macOS (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/darwin_arm64/arkeod)
-  - sha256 `3d55c33393aa744fbc619b70fe802413394503e6c941023316f99137d8944792`
-- [linux (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/linux_amd64/arkeod)
-  - sha256 `12a66411c342c0874778066a9548ff220850deb4265c79ccfa98e508d939d80d`
-- [linux (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/linux_arm64/arkeod)
-  - sha256 `69acb1916a5715fbf00eb733252999665d4f71a8a35c07e2c8e360cb7d78caad`
+- [macOS (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_darwin_amd64.tar.gz)
+  - [sha256](sums/arkeo_darwin_amd64.sha256)
+- [macOS (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_darwin_arm64.tar.gz)
+  - [sha256](sums/arkeo_darwin_arm64.sha256)
+- [linux (x86-64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_linux_arm64.tar.gz)
+  - [sha256](sums/arkeo_linux_arm64.sha256)
+- [linux (arm64)](https://arkeo.s3.eu-west-1.amazonaws.com/bin/arkeo_linux_arm64.tar.gz)
+  - [sha256](sums/arkeo_linux_arm64.sha256)
 
 after downloading the executable, verify the integrity of the downloaded artifact:
 ```bash
