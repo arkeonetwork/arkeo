@@ -180,6 +180,6 @@ func TestHandleOpenClaims(t *testing.T) {
 	require.Equal(t, http.StatusOK, response.Code)
 
 	openClaims := make([]Claim, 0)
-	json.Unmarshal(response.Body.Bytes(), &openClaims)
+	require.NoError(t, json.Unmarshal(response.Body.Bytes(), &openClaims))
 	require.Equal(t, 2, len(openClaims))
 }
