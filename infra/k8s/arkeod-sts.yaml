@@ -18,8 +18,13 @@ spec:
     spec:
       containers:
         - name: arkeod
-          image: ghcr.io/arkeonetwork/arkeo:latest
+          image: ghcr.io/arkeonetwork/arkeo:testnet
           imagePullPolicy: Always
+          command:
+            - "arkeod"
+            - "start"
+            - "--pruning"
+            - "nothing"
           env:
             - name: MONIKER
               value: "foundation"
@@ -37,7 +42,7 @@ spec:
               cpu: 8000m
               memory: 32Gi
           volumeMounts:
-            - mountPath: "/.arkeo"
+            - mountPath: "/root/.arkeo"
               name: arkeod-volume-claim
           ports:
             - containerPort: 26656
