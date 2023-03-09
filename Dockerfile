@@ -48,4 +48,4 @@ ARG TAG=testnet
 ENV NET=$TAG
 
 # default to fullnode
-CMD ["arkeod", "start", "--home", "/.arkeo"]
+CMD ["arkeod", "start"]

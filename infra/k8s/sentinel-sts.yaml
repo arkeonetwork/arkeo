@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: sentinel
-          image: ghcr.io/arkeonetwork/arkeo:latest
+          image: ghcr.io/arkeonetwork/arkeo:testnet
           imagePullPolicy: Always
           command:
             - "/scripts/sentinel.sh"

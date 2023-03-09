@@ -9,11 +9,11 @@ services:
       - "26656:26656"
       - "26657:26657"
     volumes:
-      - ".arkeo:/.arkeo:rw"
+      - ".arkeo:/root/.arkeo:rw"
     environment:
       NET: "mocknet"
     entrypoint: /scripts/genesis.sh
-    command: arkeod start --home /.arkeo --pruning nothing
+    command: arkeod start --pruning nothing
 
   arkeod-1:
     image: arkeo
