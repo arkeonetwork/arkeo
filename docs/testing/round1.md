@@ -17,19 +17,24 @@ or download a binary for your operating system below:
 
 after downloading the executable and corresponding checksum file (right click->save as/link/target), verify the integrity of the downloaded artifact:
 ```bash
+# using macOS arm64 as the example, substitute your platform as needed. the below will extract arkeod, curleo, and signhere
+# to /usr/local/bin. replace "-C /usr/local/bin" with a different path if desired.
 $ cd /path/to/downloads
-# replace the sha256 sum we echo below with the appropriate sum for your os listed above
-$ echo '12a66411c342c0874778066a9548ff220850deb4265c79ccfa98e508d939d80d arkeod' | sha256sum -c -       
-arkeod: OK
+$ sha256sum -c arkeo_darwin_arm64.sha256
+arkeo_darwin_arm64.tar.gz: OK
+$ tar -C /usr/local/bin -zxvf arkeo_darwin_arm64.tar.gz # add sudo if needed
+curleo
+arkeod
+signhere
 ```
 note the output "`arkeod: OK`"
 
-now move the `arkeod` file to a directory that's on your PATH, or add the containing directory to your PATH:
+if the path you extracted the binaries to is not on your PATH (/usr/local/bin generally is on *nix), add the directory to your PATH:
 ```bash
 $ export PATH=$PATH:/path/to/directory_containing
 ```
-/path/to/directory is the directory you placed the arkeod binary you downloaded in. to make this permanent,
-add the `export PATH=...` statement above to your shell initialization scripts (.bashrc, .zshrc, etc.)
+/path/to/directory is the directory you extracted the binaries you downloaded to with the tar command above. to make this permanent,
+add the prior `export PATH=...` statement to your shell initialization scripts (.bashrc, .zshrc, etc.)
 
 verify installation by executing the arkeod command:
 ```
@@ -84,7 +89,7 @@ This will output your arkeo address and pubkey along with the name you selected,
 if you opted to generate one. Save this somewhere safe.
 
 ```
-- address: arkeo14q4qnm4tmkm9xuhjwu0vw0f8xy7ztexeesvflj
+- address: tarkeo14q4qnm4tmkm9xuhjwu0vw0f8xy7ztexek44nw3
   name: adam
   pubkey: '{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"ApcnOwEDoO6smze46IPUgC/5bC8DohEpLJ9ZZnrKky0w"}'
   type: local
@@ -94,7 +99,7 @@ In order to interact with arkeo providers, you will need to have the `Acc` (acco
 
 ```bash
 $ arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r '.key') | grep '^Bech32 Acc: ' | awk '{ print $NF }'
-arkeopub1addwnpepq2tjwwcpqwswatymx7uw3q75sqhljmp0qw3pz2fvnavkv7k2jvknq9k9lr0
+tarkeopub1addwnpepq2tjwwcpqwswatymx7uw3q75sqhljmp0qw3pz2fvnavkv7k2jvknqk25q7j
 ```
 
 Store your menemonic somewhere safe along with the pubkey (`arkeopub1addwnpepq...9lr0` above) and your address.
