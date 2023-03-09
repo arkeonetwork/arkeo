@@ -12,8 +12,9 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
+	arkeoTypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	tmclient "github.com/tendermint/tendermint/rpc/client/http"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
@@ -32,7 +33,7 @@ func convertEvent(etype string, raw map[string][]string) map[string]string {
 	return newEvt
 }
 
-func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan ctypes.ResultEvent {
+func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tmCoreTypes.ResultEvent {
 	out, err := client.Subscribe(context.Background(), "", query)
 	if err != nil {
 		logger.Error("Failed to subscribe to query", "err", err, "query", query)
@@ -45,7 +46,7 @@ func (p Proxy) EventListener(host string) {
 	logger := p.logger
 	client, err := tmclient.New(fmt.Sprintf("tcp://%s", host), "/websocket")
 	if err != nil {
-		logger.Error("failure to create websocket cliennt", "error", err)
+		logger.Error("failure to create websocket client", "error", err)
 		panic(err)
 	}
 	client.SetLogger(logger)
@@ -57,122 +58,125 @@ func (p Proxy) EventListener(host string) {
 	defer client.Stop() // nolint
 
 	// receive height changes
-	heightOut := subscribe(client, logger, "tm.event = 'NewBlockHeader'")
+	newBlockOut := subscribe(client, logger, "tm.event = 'NewBlockHeader'")
 	openContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'")
 	closeContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'")
 	claimContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'")
-	// miscOut := subscribe(client, logger, "tm.event = 'Tx'")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
-	isMyPubKey := func(pk common.PubKey) bool {
-		return pk.Equals(p.Config.ProviderPubKey)
-	}
-
 	for {
 		select {
-		/*
-			case result := <-miscOut:
-				for k, v := range result.Events {
-					// fmt.Printf("Tx: %s --> %s\n", k, v[0])
-				}
-		*/
-		case result := <-heightOut:
-			data, ok := result.Data.(tmtypes.EventDataNewBlockHeader)
-			if !ok {
-				logger.Error("failed cast data")
-				continue
-			}
-			height := data.Header.Height
-			logger.Info("New height detected", "height", height)
-			p.MemStore.SetHeight(height)
-
-			// for _, evt := range data.ResultBeginBlock.Events {}
-
-			for _, evt := range data.ResultEndBlock.Events {
-				if evt.Type == "contract_settlement" {
-					input := make(map[string]string)
-					for _, attr := range evt.Attributes {
-						input[string(attr.Key)] = string(attr.Value)
-					}
-					evt, err := parseClaimContractIncome(input)
-					if err != nil {
-						logger.Error("failed to get close contract event", "error", err)
-						continue
-					}
-					if !isMyPubKey(evt.Contract.Provider) {
-						continue
-					}
-					spender := evt.Contract.Delegate
-					if spender.IsEmpty() {
-						spender = evt.Contract.Client
-					}
-					newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
-					currClaim, err := p.ClaimStore.Get(newClaim.Key())
-					if err != nil {
-						logger.Error("failed to get claim", "error", err)
-						continue
-					}
-					if currClaim.Nonce == newClaim.Nonce {
-						currClaim.Claimed = true
-						if err := p.ClaimStore.Set(currClaim); err != nil {
-							logger.Error("failed to set claimed", "error", err)
-						}
-					}
-				}
-			}
+		case result := <-newBlockOut:
+			p.handleNewBlockHeaderEvent(result)
 		case result := <-openContractOut:
-			evt, err := parseOpenContract(convertEvent("open_contract", result.Events))
-			if err != nil {
-				logger.Error("failed to get open contract event", "error", err)
-				continue
-			}
-			if !isMyPubKey(evt.Contract.Provider) {
-				continue
-			}
-			if evt.Contract.Deposit.IsZero() {
-				logger.Error("contract's deposit is zero")
-				continue
-			}
-			p.MemStore.Put(evt.Contract)
+			p.handleOpenContractEvent(result)
 		case result := <-closeContractOut:
-			evt, err := parseCloseContract(convertEvent("close_contract", result.Events))
+			p.handleCloseContractEvent(result)
+		case result := <-claimContractOut: // MsgClaimContractIncome emits a contract settlement event
+			p.handleContractSettlementEvent(result)
+		case <-quit:
+			return
+		}
+	}
+}
+
+// handleContractSettlementEvent
+func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
+	evt, err := parseContractSettlementEvent(convertEvent(arkeoTypes.EventTypeContractSettlement, result.Events))
+	if err != nil {
+		p.logger.Error("failed to get contract settlement event", "error", err)
+		return
+	}
+	if !p.isMyPubKey(evt.Contract.Provider) {
+		return
+	}
+	spender := evt.Contract.GetSpender()
+	newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
+	currClaim, err := p.ClaimStore.Get(newClaim.Key())
+	if err != nil {
+		p.logger.Error("failed to get claim", "error", err)
+		return
+	}
+	if currClaim.Nonce == newClaim.Nonce {
+		currClaim.Claimed = true
+		if err := p.ClaimStore.Set(currClaim); err != nil {
+			p.logger.Error("failed to set claimed", "error", err)
+		}
+	}
+}
+
+// handleCloseContractEvent
+func (p Proxy) handleCloseContractEvent(result tmCoreTypes.ResultEvent) {
+	evt, err := parseCloseContract(convertEvent(arkeoTypes.EventTypeCloseContract, result.Events))
+	if err != nil {
+		p.logger.Error("failed to get close contract event", "error", err)
+		return
+	}
+	if !p.isMyPubKey(evt.Contract.Provider) {
+		return
+	}
+	p.MemStore.Put(evt.Contract)
+}
+
+func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
+	evt, err := parseOpenContract(convertEvent(arkeoTypes.EventTypeOpenContract, result.Events))
+	if err != nil {
+		p.logger.Error("failed to get open contract event", "error", err)
+		return
+	}
+	if !p.isMyPubKey(evt.Contract.Provider) {
+		return
+	}
+	if evt.Contract.Deposit.IsZero() {
+		p.logger.Error("contract's deposit is zero")
+		return
+	}
+	p.MemStore.Put(evt.Contract)
+}
+
+func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
+	data, ok := result.Data.(tmtypes.EventDataNewBlockHeader)
+	if !ok {
+		p.logger.Error("failed cast data")
+		return
+	}
+	height := data.Header.Height
+	p.logger.Info("New height detected", "height", height)
+	p.MemStore.SetHeight(height)
+
+	for _, evt := range data.ResultEndBlock.Events {
+		if evt.Type == arkeoTypes.EventTypeContractSettlement {
+			input := make(map[string]string)
+			for _, attr := range evt.Attributes {
+				input[string(attr.Key)] = string(attr.Value)
+			}
+			evt, err := parseContractSettlementEvent(input)
 			if err != nil {
-				logger.Error("failed to get close contract event", "error", err)
+				p.logger.Error("failed to get close contract event", "error", err)
 				continue
 			}
-			if !isMyPubKey(evt.Contract.Provider) {
+			if !p.isMyPubKey(evt.Contract.Provider) {
 				continue
 			}
-			p.MemStore.Put(evt.Contract)
-		case result := <-claimContractOut:
-			evt, err := parseClaimContractIncome(convertEvent("contract_settlement", result.Events))
-			if err != nil {
-				logger.Error("failed to get close contract event", "error", err)
-				continue
-			}
-			if !isMyPubKey(evt.Contract.Provider) {
-				continue
-			}
-			spender := evt.Contract.Delegate
-			if spender.IsEmpty() {
-				spender = evt.Contract.Client
-			}
+			spender := evt.Contract.GetSpender()
 			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
-				logger.Error("failed to get claim", "error", err)
+				p.logger.Error("failed to get claim", "error", err)
 				continue
 			}
 			if currClaim.Nonce == newClaim.Nonce {
 				currClaim.Claimed = true
 				if err := p.ClaimStore.Set(currClaim); err != nil {
-					logger.Error("failed to set claimed", "error", err)
+					p.logger.Error("failed to set claimed", "error", err)
 				}
 			}
-		case <-quit:
-			break
 		}
 	}
+}
+
+func (p Proxy) isMyPubKey(pk common.PubKey) bool {
+	return pk.Equals(p.Config.ProviderPubKey)
 }
