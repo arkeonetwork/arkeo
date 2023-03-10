@@ -184,7 +184,7 @@ mnemonic you'd like to use.
     "failed to execute message; message index: 0: expires in 7 blocks: contract is already open"
     ```
     
-    Open a Pay-As-You-Go contract. This example opens a subscription contract for 20 blocks at a rate of 20 arkeo, depositing 400 to cover the subscription cost.  
+    Open a Pay-As-You-Go contract. This example opens a pay-as-you-go contract for 20 blocks at a rate of 20 arkeo, depositing 400 to cover the duration.
       define vars:
     ```bash
     ark_contract_type=1
