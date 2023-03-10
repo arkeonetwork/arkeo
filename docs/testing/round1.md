@@ -1,9 +1,17 @@
-# Testnet Documentation Round 1
+# Testnet Documentation Round
 
 1. Prerequisites
     - a macOS or linux computer (docker can be used for windows)
     - a command shell and basic working knowledge
-    - jq (used in example commands)
+    - jq (used in example commands). install via package manager or [source](https://github.com/stedolan/jq).
+        - macOS
+        ```bash
+        brew install jq
+        ```
+        - debian
+        ```bash
+        apt-get install jq
+        ```
 1. Install client binaries  
     Either clone and build arkeo and its tools from source as outlined in [readme.md](../readme.md),
   or download a binary for your operating system below:
