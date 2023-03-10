@@ -74,7 +74,7 @@ func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) sdk.Event {
 func NewModProviderEvent(provider *Provider) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeProviderMod,
-		sdk.NewAttribute("pubkey", provider.PubKey.String()),
+		sdk.NewAttribute("provider", provider.PubKey.String()),
 		sdk.NewAttribute("chain", provider.Chain.String()),
 		sdk.NewAttribute("metadata_uri", provider.MetadataUri),
 		sdk.NewAttribute("metadata_nonce", strconv.FormatUint(provider.MetadataNonce, 10)),
