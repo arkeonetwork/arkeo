@@ -125,7 +125,7 @@ mnemonic you'd like to use.
     tarkeopub1addwnpepq2tjwwcpqwswatymx7uw3q75sqhljmp0qw3pz2fvnavkv7k2jvknqk25q7j
     ```
 
-1. Get Test Funds
+1. Get Test Funds  
   Reach out to the arkeo development team with your address (starts with `tarkeo1`) to request funds.
 
 1. Open a Contract
