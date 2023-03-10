@@ -161,15 +161,22 @@ dist:
 	env GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64 ${BUILD_FLAGS} ./tools/curleo
 	env GOOS=darwin GOARCH=amd64 go build -o bin/darwin_amd64 ${BUILD_FLAGS} ./tools/curleo
 	env GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm64 ${BUILD_FLAGS} ./tools/curleo
+
+	env GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64 ${BUILD_FLAGS} ./tools/signhere
+	env GOOS=linux GOARCH=arm64 go build -o bin/linux_arm64 ${BUILD_FLAGS} ./tools/signhere
+	env GOOS=darwin GOARCH=amd64 go build -o bin/darwin_amd64 ${BUILD_FLAGS} ./tools/signhere
+	env GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm64 ${BUILD_FLAGS} ./tools/signhere
 	
-	cd bin && \
-	sha256sum linux_amd64/* > arkeo_linux_amd64.sha256 && \
-	sha256sum linux_arm64/* > arkeo_linux_arm64.sha256 && \
-	sha256sum darwin_amd64/* > arkeo_darwin_amd64.sha256 && \
-	sha256sum darwin_arm64/* > arkeo_darwin_arm64.sha256 && \
-	tar -czvf arkeo_linux_amd64.tar.gz linux_amd64 && \
-	tar -czvf arkeo_linux_arm64.tar.gz linux_arm64 && \
-	tar -czvf arkeo_darwin_amd64.tar.gz darwin_amd64 && \
-	tar -czvf arkeo_darwin_arm64.tar.gz darwin_arm64
+	/usr/bin/tar -C bin/linux_amd64 --uid 0  --no-fflags --no-mac-metadata --strip-components 1 -czvf bin/arkeo_linux_amd64.tar.gz .
+	/usr/bin/tar -C bin/linux_arm64 --uid 0  --no-fflags --no-mac-metadata --strip-components 1 -czvf bin/arkeo_linux_arm64.tar.gz .
+	/usr/bin/tar -C bin/darwin_amd64 --uid 0  --no-fflags --no-mac-metadata --strip-components 1 -czvf bin/arkeo_darwin_amd64.tar.gz .
+	/usr/bin/tar -C bin/darwin_arm64 --uid 0  --no-fflags --no-mac-metadata --strip-components 1 -czvf bin/arkeo_darwin_arm64.tar.gz .
+
+	pushd bin && \
+	sha256sum arkeo_linux_amd64.tar.gz > ../docs/testing/sums/arkeo_linux_amd64.sha256 && \
+	sha256sum arkeo_linux_arm64.tar.gz > ../docs/testing/sums/arkeo_linux_arm64.sha256 && \
+	sha256sum arkeo_darwin_amd64.tar.gz > ../docs/testing/sums/arkeo_darwin_amd64.sha256 && \
+	sha256sum arkeo_darwin_arm64.tar.gz > ../docs/testing/sums/arkeo_darwin_arm64.sha256 && \
+	popd
 
 	rm -rf bin/linux_amd64 bin/linux_arm64 bin/darwin_amd64 bin/darwin_arm64
