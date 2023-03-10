@@ -3,12 +3,12 @@
 1. Prerequisites
     - a macOS or linux computer (docker can be used for windows)
     - a command shell and basic working knowledge
-    - jq (used in example commands). install via package manager or [source](https://github.com/stedolan/jq).
-        - macOS
+    - jq (used in example commands). install via package manager or [source](https://github.com/stedolan/jq).  
+        macOS:
         ```bash
         brew install jq
         ```
-        - debian
+        debian:
         ```bash
         apt-get install jq
         ```
@@ -30,19 +30,19 @@
       the below will extract arkeod, curleo, and signhere
     to /usr/local/bin. replace "-C /usr/local/bin" with a different path if desired.  
 
-    - change your working directory to the directory you downloaded the archive and checksum files to.
+    change your working directory to the directory you downloaded the archive and checksum files to.
     ```bash
     cd /path/to/downloads
     ```
-    - use the `sha256sum` command to check the archive against the checksum file
+    use the `sha256sum` command to check the archive against the checksum file
     ```bash
     sha256sum -c arkeo_darwin_arm64.sha256
     # Output:
     arkeo_darwin_arm64.tar.gz: OK
     ```
-    - note the output "`arkeo_darwin_arm64.tar.gz: OK`"
+    note the output "`arkeo_darwin_arm64.tar.gz: OK`"
     
-    - extract the binaries from the archive.
+    extract the binaries from the archive.
     ```bash
     # add sudo if needed
     tar -C /usr/local/bin -zxvf arkeo_darwin_arm64.tar.gz
@@ -51,20 +51,20 @@
     arkeod
     signhere
     ```
-    - if the path you extracted the binaries to in the prior step is not on your PATH (/usr/local/bin generally is on *nix), add the directory to your PATH:
+    if the path you extracted the binaries to in the prior step is not on your PATH (/usr/local/bin generally is on *nix), add the directory to your PATH:
     ```bash
     export PATH=$PATH:/path/to/directory_containing
     ```
-    - /path/to/directory is the directory you extracted the binaries you downloaded to with the tar command above. to make this permanent,
+    /path/to/directory is the directory you extracted the binaries you downloaded to with the tar command above. to make this permanent,
     add the prior `export PATH=...` statement to your shell initialization scripts (.bashrc, .zshrc, etc.)
 
-    - verify installation by executing the arkeod command:
+    verify installation by executing the arkeod command:
     ```bash
     arkeod version --long -o json | jq '.commit'
     # Output
     "793e955ba9d8d49609bb96fda6c85b0676419b58"
     ```
-    - update your client config as follows:
+    update your client config as follows:
     ```bash
     arkeod config chain-id arkeo
     ```
@@ -72,7 +72,7 @@
     arkeod config node tcp://testnet-seed.arkeo.shapeshift.com:26657
     ```
 
-    - optionally set the backend keyring. the default value "os" uses the operating system's keyring.
+    optionally set the backend keyring. the default value "os" uses the operating system's keyring.
     ```bash
     arkeod config keyring-backend <os|test|file>
     ```
@@ -97,15 +97,15 @@
   Create or Import a wallet using the cli. Replace `adam` below with a name of your choice. add `--recover` if you have a
 mnemonic you'd like to use.
 
-    - assign a name to the $ark_user variable. this will become the key/wallet/user name.
+    assign a name to the $ark_user variable. this will become the key/wallet/user name.
     ```bash
     ark_user=adam
     ```
-    - create a new wallet (keypair)
+    create a new wallet (keypair)
     ```bash
     arkeod keys add $ark_user
     ```
-    - `OR` recover an existing wallet from bip39 mnemonic
+    `OR` recover an existing wallet from bip39 mnemonic
     ```bash
     arkeod keys add $ark_user --recover
     ```
@@ -118,7 +118,7 @@ mnemonic you'd like to use.
       type: local
     ```
 
-    - In order to interact with arkeo providers, you will need to have the `Acc` (account) pubkey encoded bech32 with the standard prefix. Execute the command below to obtain it.
+    In order to interact with arkeo providers, you will need to have the `Acc` (account) pubkey encoded bech32 with the standard prefix. Execute the command below to obtain it.
     ```bash
     arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r '.key') | grep '^Bech32 Acc: ' | awk '{ print $NF }'
     # Output
@@ -130,9 +130,11 @@ mnemonic you'd like to use.
 
 1. Open a Contract
 
-    - Get a list of Online providers from the Directory Service:
+    Get a list of Online providers from the Directory Service:
     ```bash
     curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE")|[{pubkey: .Pubkey, chain: .Chain, meta: .MetadataURI}]'
+
+    # Output
     [
       {
         "pubkey": "tarkeopub1addwnpepq0h7hn9jzhkfwkxgp6kl3ljtjxfvz48emzdrrt5epzjrumpx9kz3w9mjsq9",
