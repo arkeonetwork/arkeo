@@ -1,6 +1,6 @@
 *.pb.go
 generated
-arkeod
+/arkeod
 .arkeo/
 .sentinel*
 tmp-swagger-gen/
