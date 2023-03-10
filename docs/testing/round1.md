@@ -167,7 +167,10 @@ mnemonic you'd like to use.
     ```bash
     arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
     ```
-
+    check the status of your open-contract tx:
+    ```bash
+    arkeod query tx -o json --type=hash 813A6B9A761F5A26E32EAECE5AFE73ED9D383D61C289AF515BC8D438B522883E | jq .
+    ```
     Open a Pay-As-You-Go contract. This example opens a subscription contract for 20 blocks at a rate of 20 arkeo, depositing 400 to cover the subscription cost.  
       define vars:
     ```bash
@@ -185,7 +188,23 @@ mnemonic you'd like to use.
     ```bash
     arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
     ```
-
+    if things went well, the last line of output will be the txhash:
+    ```bash
+    txhash: 0B0AB5F982BFBB50E7518B114E02AF37D6A08E4E555FB47048461A632B1D0AC3
+    ```
+    check the status of your tx:
+    ```bash
+    arkeod query tx -o json --type=hash 0B0AB5F982BFBB50E7518B114E02AF37D6A08E4E555FB47048461A632B1D0AC3 | jq .code
+    
+    # Output
+    0
+    ```
+    if the output is anything besides `0`, the tx didn't complete successfully. check the tx's raw_log:
+    ```bash
+    arkeod query tx -o json --type=hash 813A6B9A761F5A26E32EAECE5AFE73ED9D383D61C289AF515BC8D438B522883E | jq .raw_log
+    # Output
+    "failed to execute message; message index: 0: expires in 7 blocks: contract is already open"
+    ```
 1. Make Requests  
 Use arkeo's `curleo` command to subchain rpc requests to the GAIA node:
 
