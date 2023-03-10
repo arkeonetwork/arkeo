@@ -127,6 +127,9 @@ var httpClient = &http.Client{
 // Module Addresses
 ////////////////////////////////////////////////////////////////////////////////////////
 
+// trunk-ignore-all(golangci-lint/gosec)
+// trunk-ignore-all(gitleaks/generic-api-key)
+
 const (
 	ModuleAddrBondedTokensPool    = "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43"
 	ModuleAddrNotBondedTokensPool = "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9"
