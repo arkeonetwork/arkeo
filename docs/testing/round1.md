@@ -163,21 +163,29 @@ making POST request to http://testnet-sentinel.arkeo.shapeshift.com:3636/gaia-ma
 {"jsonrpc":"2.0","id":1,"result":{}}
 ```
 
-## Step 4: Claim Rewards for the Provider TODO - continue
+## Step 5: Claim Rewards for the Provider
 
 On the provider’s behalf, you can claim the rewards for them (for testing purposes). To do use the following command. 
 
 ```bash
-NONCE=<num> # the nonce represents the number of queries made between the client/provider and provider during this contract
-HEIGHT=<height> # the block height the contract was open
-SIGNATURE=$(signhere -u <user> -m "arkeopub1addwnpepqtrc0rrpkwn2esula68zl3dvqqfxfjhr5dyfxy3uq97dssntrq8twhy9nvu:btc-mainnet-fullnode:<your pubkey>:$HEIGHT:$NONCE") # signature
-arkeod tx arkeo claim-contract-income -y --from <user> -- arkeopub1addwnpepqtrc0rrpkwn2esula68zl3dvqqfxfjhr5dyfxy3uq97dssntrq8twhy9nvu btc-mainnet-fullnode <your pubkey> "$NONCE" "$HEIGHT" "$SIGNATURE"
+# nonce represents the number of requests made, must increase with each call for given contract
+ark_nonce=20
+ark_chain=gaia-mainnet-rpc-archive
+ark_provider=$(curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE" and .Chain == "gaia-mainnet-rpc-archive")|[{pubkey: .Pubkey, chain: .Chain, meta: .MetadataURI}]' | jq -r '.[0].pubkey')
+ark_spender=$(arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r .key) | grep "Bech32 Acc" | awk '{ print $NF }')
+ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_chain | jq -r '.contract.id')
+# if you get `rpc error: code = NotFound desc = not found: key not found` - it's likely there is no open contract
+ark_sig=$(signhere -u $ark_user -m "$ark_contract_id:$ark_spender:$ark_nonce")
+arkeod tx arkeo claim-contract-income --from $ark_user -- $ark_contract_id $ark_spender $ark_nonce $ark_sig
 ```
 
-## Step 5: Close a Contract
+## Step 6: Close a Contract
 
 If the contract is a subscription, it can be cancelled. Pay-as-you-go isn’t available to cancel as you can stop making requests as a form of cancelling (providers can cancel though). Closing a contract should also trigger a payout to the provider.
 
 ```bash
-arkeod tx arkeo close-contract -y --from <user> -- arkeopub1addwnpepqtrc0rrpkwn2esula68zl3dvqqfxfjhr5dyfxy3uq97dssntrq8twhy9nvu btc-mainnet-fullnode "<your pubkey>"
+ark_chain=gaia-mainnet-rpc-archive
+ark_spender=$(arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r .key) | grep "Bech32 Acc" | awk '{ print $NF }')
+ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_chain | jq -r '.contract.id')
+arkeod tx arkeo close-contract --from $ark_user -- $contract_id
 ```
