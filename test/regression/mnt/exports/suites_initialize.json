@@ -144,7 +144,7 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "3213171660",
+              "amount": "2142114514",
               "denom": "stake"
             }
           ]
@@ -166,7 +166,7 @@
       },
       "supply": [
         {
-          "amount": "3213171660",
+          "amount": "2142114514",
           "denom": "stake"
         },
         {
@@ -245,7 +245,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "64263433.200000000000000000",
+            "amount": "42842290.280000000000000000",
             "denom": "stake"
           }
         ]
@@ -254,7 +254,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "3148908226.800000000000000000",
+              "amount": "2099272223.720000000000000000",
               "denom": "stake"
             }
           ],
@@ -273,7 +273,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "314890822.680000000000000000",
+                "amount": "209927222.372000000000000000",
                 "denom": "stake"
               }
             ]
@@ -287,7 +287,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "2834017404.120000000000000000",
+                "amount": "1889345001.348000000000000000",
                 "denom": "stake"
               }
             ]
@@ -403,8 +403,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6759998601845892.676000000000000000",
-        "inflation": "0.129999973112421013"
+        "annual_provisions": "6759999067897261.784000000000000000",
+        "inflation": "0.129999982074947342"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -435,7 +435,7 @@
           "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
           "validator_signing_info": {
             "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
-            "index_offset": "2",
+            "index_offset": "1",
             "jailed_until": "1970-01-01T00:00:00Z",
             "missed_blocks_counter": "0",
             "start_height": "0",
@@ -531,7 +531,7 @@
     },
     "version": {}
   },
-  "initial_height": "4",
+  "initial_height": "3",
   "validators": [
     {
       "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",
