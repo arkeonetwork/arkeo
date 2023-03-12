@@ -1,4 +1,14 @@
 {{ template "default-state.yaml" }}
 ---
 type: create-blocks
-count: 3
+count: 1
+---
+type: tx-send
+from_address: {{ addr_dog }}
+to_address: {{ addr_fox }}
+amount:
+  - amount: "1000000"
+    denom: uarkeo
+---
+type: create-blocks
+count: 1

@@ -51,6 +51,9 @@ func init() {
 		log.Fatal().Err(err).Msg("failed to create tendermint client")
 	}
 
+	// create keyring
+	keyRing = keyring.NewInMemory(encodingConfig.Marshaler)
+
 	// create cosmos-sdk client context
 	clientCtx = client.Context{
 		Client:            rpcClient,
@@ -73,9 +76,6 @@ func init() {
 	txFactory = txFactory.WithChainID(clientCtx.ChainID)
 	txFactory = txFactory.WithGas(1e8)
 	txFactory = txFactory.WithSignMode(signing.SignMode_SIGN_MODE_DIRECT)
-
-	// create keyring
-	keyRing = keyring.NewInMemory(encodingConfig.Marshaler)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
