@@ -192,6 +192,14 @@ func run(path string) error {
 		log.Fatal().Err(err).Msg("failed to overwrite private validator key")
 	}
 
+	// overwrite cosmos config
+	log.Debug().Msg("Overwriting tendermint config")
+	cmd = exec.Command("cp", "/mnt/app.toml", "/regtest/.arkeo/config/app.toml")
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to overwrite private validator key")
+	}
+
 	// setup process io
 	arkeo := exec.Command("/regtest/cover-arkeod", "start")
 	arkeo.Env = append(os.Environ(), "GOCOVERDIR=/mnt/coverage")
