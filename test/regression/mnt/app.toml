@@ -180,7 +180,7 @@ denom-to-suggest = "uatom"
 [grpc]
 
 # Enable defines if the gRPC server should be enabled.
-enable = true
+enable = false
 
 # Address defines the gRPC server address to bind to.
 address = "0.0.0.0:9090"
