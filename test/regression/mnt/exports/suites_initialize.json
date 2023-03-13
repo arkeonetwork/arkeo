@@ -75,7 +75,7 @@
             "@type": "/cosmos.crypto.secp256k1.PubKey",
             "key": "AxWka6zc7psOvVNg+O5R1bnZ752jS0M7PyBs0sdXz2mS"
           },
-          "sequence": "1"
+          "sequence": "2"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
