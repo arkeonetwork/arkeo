@@ -56,6 +56,10 @@ func NewOperation(opMap map[string]any) Operation {
 		op = &OpCreateBlocks{}
 	case "tx-send":
 		op = &OpTxSend{}
+	case "tx-bond-provider":
+		op = &OpTxBondProvider{}
+	case "tx-mod-provider":
+		op = &OpTxModProvider{}
 	case "tx-open-contract":
 		op = &OpTxOpenContract{}
 	case "tx-close-contract":
@@ -77,7 +81,7 @@ func NewOperation(opMap map[string]any) Operation {
 
 	switch op.(type) {
 	// internal types have MarshalJSON methods necessary to decode
-	case *OpTxSend, *OpTxOpenContract, *OpTxCloseContract:
+	case *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract:
 		// encode as json
 		buf := bytes.NewBuffer(nil)
 		enc := json.NewEncoder(buf)
@@ -323,6 +327,34 @@ type OpTxSend struct {
 func (op *OpTxSend) Execute(_ *os.Process, logs chan string) error {
 	signer := sdk.MustAccAddressFromBech32(op.FromAddress)
 	return sendMsg(&op.MsgSend, signer, op.Sequence, op, logs)
+}
+
+// ------------------------------ OpTxBondProvider ------------------------------
+
+type OpTxBondProvider struct {
+	OpBase                `yaml:",inline"`
+	arkeo.MsgBondProvider `yaml:",inline"`
+	Signer                string `json:"signer"`
+	Sequence              *int64 `json:"sequence"`
+}
+
+func (op *OpTxBondProvider) Execute(_ *os.Process, logs chan string) error {
+	signer := sdk.MustAccAddressFromBech32(op.Signer)
+	return sendMsg(&op.MsgBondProvider, signer, op.Sequence, op, logs)
+}
+
+// ------------------------------ OpTxModProvider ------------------------------
+
+type OpTxModProvider struct {
+	OpBase               `yaml:",inline"`
+	arkeo.MsgModProvider `yaml:",inline"`
+	Signer               string `json:"signer"`
+	Sequence             *int64 `json:"sequence"`
+}
+
+func (op *OpTxModProvider) Execute(_ *os.Process, logs chan string) error {
+	signer := sdk.MustAccAddressFromBech32(op.Signer)
+	return sendMsg(&op.MsgModProvider, signer, op.Sequence, op, logs)
 }
 
 // ------------------------------ OpTxOpenContract ------------------------------
