@@ -115,7 +115,7 @@ test-watch:
 
 test-regression:
 	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
-	@docker run --rm ${DOCKER_TTY_ARGS} \
+	@docker run --rm -it \
 		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
 		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
 		-p 1317:1317 -p 26657:26657 \
