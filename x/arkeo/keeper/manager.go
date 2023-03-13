@@ -169,6 +169,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 	totalDebt, err := mgr.contractDebt(ctx, contract)
 	valIncome := common.GetSafeShare(cosmos.NewInt(mgr.FetchConfig(ctx, configs.ReserveTax)), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
 	debt := totalDebt.Sub(valIncome)
+	ctx.Logger().Info("Settle Contract", "total debt", totalDebt, "provider income", debt)
 	if err != nil {
 		return contract, err
 	}
