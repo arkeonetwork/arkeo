@@ -57,7 +57,7 @@ func init() {
 	// create cosmos-sdk client context
 	clientCtx = client.Context{
 		Client:            rpcClient,
-		ChainID:           "arkeonetwork",
+		ChainID:           "arkeo",
 		Codec:             encodingConfig.Marshaler,
 		InterfaceRegistry: encodingConfig.InterfaceRegistry,
 		Keyring:           keyRing,

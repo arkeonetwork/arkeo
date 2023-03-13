@@ -30,6 +30,12 @@ func main() {
 		if info.IsDir() {
 			return nil
 		}
+
+		// skip files that are not yaml
+		if filepath.Ext(path) != ".yaml" && filepath.Ext(path) != ".yml" {
+			return nil
+		}
+
 		if runRegex.MatchString(path) {
 			files = append(files, path)
 		}
