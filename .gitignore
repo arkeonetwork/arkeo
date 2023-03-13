@@ -1,10 +1,12 @@
 *.pb.go
 generated
-arkeod
+/arkeod
 .arkeo/
 .sentinel*
 tmp-swagger-gen/
 cmd/**/__debug_bin
+test/regression/mnt/coverage
+
 .trunk
 bin/
 vue/node_modules
