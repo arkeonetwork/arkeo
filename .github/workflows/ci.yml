@@ -53,4 +53,4 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Regression Tests
         run: |
-          make test-regression
+          make test-regression-ci

@@ -124,6 +124,17 @@ test-regression:
 		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
 		-w /app arkeo-regtest sh -c 'make _test-regression'
 
+test-regression-ci:
+	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
+	@docker run --rm \
+		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
+		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
+		-p 1317:1317 -p 26657:26657 \
+		-v $(shell pwd)/test/regression/mnt:/mnt \
+		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
+		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
+		-w /app arkeo-regtest sh -c 'make _test-regression'
+
 test-regression-coverage:
 	@go tool cover -html=test/regression/mnt/coverage/coverage.txt
 
