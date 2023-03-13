@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"text/template"
 	"time"
@@ -79,7 +80,7 @@ func run(path string) error {
 	scanner := bufio.NewScanner(bytes.NewBuffer(fileBytes))
 	for i := 0; scanner.Scan(); i++ {
 		line := scanner.Text()
-		if line == "---" {
+		if strings.TrimSpace(line) == "---" {
 			opLines = append(opLines, i+2)
 		}
 	}

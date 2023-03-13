@@ -2,23 +2,12 @@
   "app_hash": "",
   "app_state": {
     "arkeo": {
+      "contract_expiration_sets": [],
       "contracts": [],
+      "next_contract_id": "0",
       "params": {},
-      "providers": [
-        {
-          "bond": "100000",
-          "chain": 3,
-          "last_update": "0",
-          "max_contract_duration": "0",
-          "metadata_nonce": "0",
-          "metadata_uri": "",
-          "min_contract_duration": "0",
-          "pay_as_you_go_rate": "0",
-          "pub_key": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "status": "Offline",
-          "subscription_rate": "0"
-        }
-      ]
+      "providers": [],
+      "user_contract_sets": []
     },
     "auth": {
       "accounts": [
@@ -69,7 +58,7 @@
             "@type": "/cosmos.crypto.secp256k1.PubKey",
             "key": "AuCDwIMOJ6etU5snddtBgM4DfGt0rHHsNrmsVhCus0+X"
           },
-          "sequence": "1"
+          "sequence": "5"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -151,15 +140,6 @@
     "bank": {
       "balances": [
         {
-          "address": "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k",
-          "coins": [
-            {
-              "amount": "100000",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
           "address": "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43",
           "coins": [
             {
@@ -172,7 +152,7 @@
           "address": "tarkeo1v0n7wer498vqq6yddkr4clg3lck7kaw9lstp4k",
           "coins": [
             {
-              "amount": "999999999900000",
+              "amount": "1000000000000000",
               "denom": "uarkeo"
             }
           ]
@@ -181,7 +161,7 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "2142114514",
+              "amount": "6426342655",
               "denom": "stake"
             }
           ]
@@ -203,7 +183,7 @@
       },
       "supply": [
         {
-          "amount": "2142114514",
+          "amount": "6426342655",
           "denom": "stake"
         },
         {
@@ -282,7 +262,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "42842290.280000000000000000",
+            "amount": "128526853.100000000000000000",
             "denom": "stake"
           }
         ]
@@ -291,7 +271,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "2099272223.720000000000000000",
+              "amount": "6297815801.900000000000000000",
               "denom": "stake"
             }
           ],
@@ -310,7 +290,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "209927222.372000000000000000",
+                "amount": "629781580.190000000000000000",
                 "denom": "stake"
               }
             ]
@@ -324,7 +304,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "1889345001.348000000000000000",
+                "amount": "5668034221.710000000000000000",
                 "denom": "stake"
               }
             ]
@@ -440,8 +420,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6759999067897261.784000000000000000",
-        "inflation": "0.129999982074947342"
+        "annual_provisions": "6759997203691785.352000000000000000",
+        "inflation": "0.129999946224842026"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -472,7 +452,7 @@
           "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
           "validator_signing_info": {
             "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
-            "index_offset": "1",
+            "index_offset": "5",
             "jailed_until": "1970-01-01T00:00:00Z",
             "missed_blocks_counter": "0",
             "start_height": "0",
@@ -568,7 +548,7 @@
     },
     "version": {}
   },
-  "initial_height": "3",
+  "initial_height": "7",
   "validators": [
     {
       "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",
