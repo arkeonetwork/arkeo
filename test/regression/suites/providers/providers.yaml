@@ -13,9 +13,20 @@ pub_key: {{ pubkey_fox }}
 chain: "btc-mainnet-fullnode"
 bond: "100000"
 ---
+type: create-blocks
+count: 1
+---
 type: check
 description: only one of the sends with sequence 0 is valid
 endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
 asserts:
-  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 999999999990000
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 999999999900000
 ---
+# TODO: lookup specific provider should work
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 1
+  - .provider[0] | .pub_key == "{{ pubkey_fox }}"
+  - .provider[0] | .bond | tonumber == 100000
