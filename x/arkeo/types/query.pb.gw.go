@@ -73,15 +73,15 @@ func request_Query_FetchProvider_0(ctx context.Context, marshaler runtime.Marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pubkey", err)
 	}
 
-	val, ok = pathParams["chain"]
+	val, ok = pathParams["service"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "service")
 	}
 
 	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "service", err)
 	}
 
 	msg, err := client.FetchProvider(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -110,15 +110,15 @@ func local_request_Query_FetchProvider_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "pubkey", err)
 	}
 
-	val, ok = pathParams["chain"]
+	val, ok = pathParams["service"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "service")
 	}
 
 	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "service", err)
 	}
 
 	msg, err := server.FetchProvider(ctx, &protoReq)
@@ -274,15 +274,15 @@ func request_Query_ActiveContract_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	val, ok = pathParams["chain"]
+	val, ok = pathParams["service"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "service")
 	}
 
 	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "service", err)
 	}
 
 	msg, err := client.ActiveContract(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -322,15 +322,15 @@ func local_request_Query_ActiveContract_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider", err)
 	}
 
-	val, ok = pathParams["chain"]
+	val, ok = pathParams["service"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "service")
 	}
 
 	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "service", err)
 	}
 
 	msg, err := server.ActiveContract(ctx, &protoReq)
@@ -634,7 +634,7 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 var (
 	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"arkeo", "params"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_FetchProvider_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"arkeo", "provider", "pubkey", "chain"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_FetchProvider_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3}, []string{"arkeo", "provider", "pubkey", "service"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_Query_ProviderAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"arkeo", "providers"}, "", runtime.AssumeColonVerbOpt(true)))
 
@@ -642,7 +642,7 @@ var (
 
 	pattern_Query_ContractAll_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"arkeo", "contracts"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Query_ActiveContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeo", "active-contract", "spender", "provider", "chain"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Query_ActiveContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"arkeo", "active-contract", "spender", "provider", "service"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
