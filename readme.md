@@ -170,29 +170,6 @@ curl https://get.ignite.com/username/arkeo@latest! | sudo bash
 repository to which the source code was pushed. Learn more about [the install
 process](https://github.com/allinbits/starport-installer).
 
-### Regression Tests
-
-We expose a testing framework that allows the definition of test cases and suites using a DSL in YAML. Providing a regular expression to the `RUN` environment variable will match against files in `test/regression/suites` to filter tests to run.
-
-```bash
-make test-regression
-
-# with more detailed logs
-DEBUG=1 make test-regression
-
-# with specific test filters
-RUN=initialize make test-regression
-RUN=free-query test-regression
-
-# overwrite export state
-EXPORT=1 make test-regression
-
-# check last run coverage
-make test-regression-coverager
-```
-
-See more detailed information in [test/regression/README.md](test/regression/README.md).
-
 ### Learn more
 
 - [Ignite CLI](https://ignite.com/cli)
