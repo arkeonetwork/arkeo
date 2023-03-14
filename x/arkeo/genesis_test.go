@@ -40,7 +40,7 @@ func TestGenesisWithContracts(t *testing.T) {
 	user2PubKey := types.GetRandomPubKey()
 
 	// create provider
-	provider := types.NewProvider(providerPubkey, common.BTCChain)
+	provider := types.NewProvider(providerPubkey, common.BTCService)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.LastUpdate = 100
 	err := k.SetProvider(ctx, provider)
@@ -50,7 +50,7 @@ func TestGenesisWithContracts(t *testing.T) {
 	contracts := []types.Contract{
 		{
 			Provider: providerPubkey,
-			Chain:    common.BTCChain,
+			Service:  common.BTCService,
 			Client:   user1PubKey,
 			Duration: 100,
 			Rate:     100,
@@ -61,7 +61,7 @@ func TestGenesisWithContracts(t *testing.T) {
 		},
 		{
 			Provider: providerPubkey,
-			Chain:    common.ETHChain,
+			Service:  common.ETHService,
 			Client:   user1PubKey,
 			Duration: 100,
 			Rate:     100,
@@ -72,7 +72,7 @@ func TestGenesisWithContracts(t *testing.T) {
 		},
 		{
 			Provider: providerPubkey,
-			Chain:    common.BTCChain,
+			Service:  common.BTCService,
 			Client:   user2PubKey,
 			Duration: 150,
 			Rate:     100,

@@ -29,7 +29,7 @@ func TestValidateBasic(t *testing.T) {
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrInvalidChain)
 
-	msg.Chain = common.BTCChain.String()
+	msg.Service = common.BTCService.String()
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrInvalidBond)
 

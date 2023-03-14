@@ -11,7 +11,7 @@ import (
 
 type ProviderBondEvent struct {
 	PubKey       common.PubKey
-	Chain        common.Chain
+	Service      common.Service
 	BondRelative cosmos.Int
 	BondAbsolute cosmos.Int
 }
@@ -29,8 +29,8 @@ func parseProviderBondEvent(input map[string]string) (ProviderBondEvent, error) 
 			if err != nil {
 				return evt, err
 			}
-		case "chain":
-			evt.Chain, err = common.NewChain(v)
+		case "service":
+			evt.Service, err = common.NewService(v)
 			if err != nil {
 				return evt, err
 			}
@@ -66,8 +66,8 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 			if err != nil {
 				return evt, err
 			}
-		case "chain":
-			evt.Provider.Chain, err = common.NewChain(v)
+		case "service":
+			evt.Provider.Service, err = common.NewService(v)
 			if err != nil {
 				return evt, err
 			}
@@ -131,8 +131,8 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
-		case "chain":
-			evt.Contract.Chain, err = common.NewChain(v)
+		case "service":
+			evt.Contract.Service, err = common.NewService(v)
 			if err != nil {
 				return evt, err
 			}
@@ -207,8 +207,8 @@ func parseCloseContract(input map[string]string) (CloseContract, error) {
 			if err != nil {
 				return evt, err
 			}
-		case "chain":
-			evt.Contract.Chain, err = common.NewChain(v)
+		case "service":
+			evt.Contract.Service, err = common.NewService(v)
 			if err != nil {
 				return evt, err
 			}
@@ -251,8 +251,8 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		case "chain":
-			evt.Contract.Chain, err = common.NewChain(v)
+		case "service":
+			evt.Contract.Service, err = common.NewService(v)
 			if err != nil {
 				return evt, err
 			}

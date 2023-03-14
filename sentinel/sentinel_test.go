@@ -17,7 +17,7 @@ func TestHandleActiveContract(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,
@@ -35,7 +35,7 @@ func TestHandleActiveContract(t *testing.T) {
 	}
 	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
 
-	url := fmt.Sprintf("%s%s/%s/%s", RoutesActiveContract, inputContract.GetSpender(), testConfig.ProviderPubKey, inputContract.Chain)
+	url := fmt.Sprintf("%s%s/%s/%s", RoutesActiveContract, inputContract.GetSpender(), testConfig.ProviderPubKey, inputContract.Service)
 
 	req, err := http.NewRequest("GET", url, nil)
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestHandleClaim(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,
@@ -126,7 +126,7 @@ func TestHandleOpenClaims(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,

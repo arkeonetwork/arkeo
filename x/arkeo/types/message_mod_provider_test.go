@@ -26,7 +26,7 @@ func TestModProviderValidateBasic(t *testing.T) {
 	msg = MsgModProvider{
 		Creator:             acct.String(),
 		Provider:            pubkey,
-		Chain:               common.BTCChain.String(),
+		Service:             common.BTCService.String(),
 		MinContractDuration: 12,
 		MaxContractDuration: 30,
 		MetadataUri:         "http://mad.hatter.net/test?foo=baz",

@@ -51,12 +51,12 @@ func (k KVStore) FetchProvider(c context.Context, req *types.QueryFetchProviderR
 		return nil, status.Error(codes.NotFound, "pubkey not found")
 	}
 
-	chain, err := common.NewChain(req.Chain)
+	service, err := common.NewService(req.Service)
 	if err != nil {
-		return nil, status.Error(codes.NotFound, "chain not found")
+		return nil, status.Error(codes.NotFound, "service not found")
 	}
 
-	val, err := k.GetProvider(ctx, pk, chain)
+	val, err := k.GetProvider(ctx, pk, service)
 	if err != nil {
 		return nil, status.Error(codes.Aborted, err.Error())
 	}

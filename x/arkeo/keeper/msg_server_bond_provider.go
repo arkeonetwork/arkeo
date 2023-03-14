@@ -19,7 +19,7 @@ func (k msgServer) BondProvider(goCtx context.Context, msg *types.MsgBondProvide
 	ctx.Logger().Info(
 		"receive MsgBondProvider",
 		"provider", msg.Provider,
-		"chain", msg.Chain,
+		"service", msg.Service,
 		"bond", msg.Bond,
 	)
 
@@ -45,7 +45,7 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 
 	// We allow providers to unbond WHILE active contracts are underway. This
 	// is because A) users can cancel their owned contracts at any time, and B)
-	// this is the way the provider signals to the chain that they don't want
+	// this is the way the provider signals to the service that they don't want
 	// to open any new contracts (as there is a min bond requirement for new
 	// contracts to be opened)
 
@@ -53,11 +53,11 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 }
 
 func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProvider) error {
-	chain, err := common.NewChain(msg.Chain)
+	service, err := common.NewService(msg.Service)
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, service)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	}
 	provider.Bond = provider.Bond.Add(msg.Bond)
 	if provider.Bond.IsZero() {
-		k.RemoveProvider(ctx, provider.PubKey, provider.Chain)
+		k.RemoveProvider(ctx, provider.PubKey, provider.Service)
 		k.BondProviderEvent(ctx, provider.Bond, msg)
 		return nil
 	}

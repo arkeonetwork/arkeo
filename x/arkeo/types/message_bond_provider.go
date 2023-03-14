@@ -13,11 +13,11 @@ const TypeMsgBondProvider = "bond_provider"
 
 var _ sdk.Msg = &MsgBondProvider{}
 
-func NewMsgBondProvider(creator string, provider common.PubKey, chain string, bond cosmos.Int) *MsgBondProvider {
+func NewMsgBondProvider(creator string, provider common.PubKey, service string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
 		Creator:  creator,
 		Provider: provider,
-		Chain:    chain,
+		Service:  service,
 		Bond:     bond,
 	}
 }
@@ -72,10 +72,10 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	// verify chain
-	_, err = common.NewChain(msg.Chain)
+	// verify service
+	_, err = common.NewService(msg.Service)
 	if err != nil {
-		return errors.Wrapf(ErrInvalidChain, "invalid chain (%s): %s", msg.Chain, err)
+		return errors.Wrapf(ErrInvalidChain, "invalid service (%s): %s", msg.Service, err)
 	}
 
 	if msg.Bond.IsNil() || msg.Bond.IsZero() {

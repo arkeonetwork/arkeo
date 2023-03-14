@@ -78,7 +78,7 @@ func request_Query_FetchProvider_0(ctx context.Context, marshaler runtime.Marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
 	}
 
-	protoReq.Chain, err = runtime.String(val)
+	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
@@ -115,7 +115,7 @@ func local_request_Query_FetchProvider_0(ctx context.Context, marshaler runtime.
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
 	}
 
-	protoReq.Chain, err = runtime.String(val)
+	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
@@ -279,7 +279,7 @@ func request_Query_ActiveContract_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
 	}
 
-	protoReq.Chain, err = runtime.String(val)
+	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)
@@ -327,7 +327,7 @@ func local_request_Query_ActiveContract_0(ctx context.Context, marshaler runtime
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "chain")
 	}
 
-	protoReq.Chain, err = runtime.String(val)
+	protoReq.Service, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "chain", err)

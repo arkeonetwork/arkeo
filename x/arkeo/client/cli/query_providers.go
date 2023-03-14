@@ -45,7 +45,7 @@ func CmdListProviders() *cobra.Command {
 
 func CmdShowProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "show-provider [pubkey] [chain]",
+		Use:   "show-provider [pubkey] [service]",
 		Short: "shows a provider",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -57,8 +57,8 @@ func CmdShowProvider() *cobra.Command {
 			argChain := args[1]
 
 			params := &types.QueryFetchProviderRequest{
-				Pubkey: argPubKey,
-				Chain:  argChain,
+				Pubkey:  argPubKey,
+				Service: argChain,
 			}
 
 			res, err := queryClient.FetchProvider(context.Background(), params)

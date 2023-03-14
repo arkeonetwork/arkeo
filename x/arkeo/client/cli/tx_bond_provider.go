@@ -15,7 +15,7 @@ import (
 
 func CmdBondProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bond-provider [pubkey] [chain] [bond]",
+		Use:   "bond-provider [pubkey] [service] [bond]",
 		Short: "Broadcast message bondProvider",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

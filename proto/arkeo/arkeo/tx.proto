@@ -22,7 +22,7 @@ message MsgBondProvider {
   string creator = 1;
   string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
+  string service = 3;
   string bond = 4 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
@@ -36,7 +36,7 @@ message MsgModProvider {
   string creator = 1;
   string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
+  string service = 3;
   string metadata_uri = 4;
   uint64 metadata_nonce = 5;
   ProviderStatus status = 6;
@@ -53,7 +53,7 @@ message MsgOpenContract {
   string creator = 1;
   string provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string chain = 3;
+  string service = 3;
   string client = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5

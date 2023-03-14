@@ -71,10 +71,10 @@ type Keeper interface {
 
 type KeeperProvider interface {
 	GetProviderIterator(_ cosmos.Context) cosmos.Iterator
-	GetProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain) (types.Provider, error)
+	GetProvider(_ cosmos.Context, _ common.PubKey, _ common.Service) (types.Provider, error)
 	SetProvider(_ cosmos.Context, _ types.Provider) error
-	ProviderExists(_ cosmos.Context, _ common.PubKey, _ common.Chain) bool
-	RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain)
+	ProviderExists(_ cosmos.Context, _ common.PubKey, _ common.Service) bool
+	RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Service)
 }
 
 type KeeperContract interface {
@@ -94,7 +94,7 @@ type KeeperContract interface {
 	GetAndIncrementNextContractId(ctx cosmos.Context) uint64
 	SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error
 	GetUserContractSet(ctx cosmos.Context, pubkey common.PubKey) (types.UserContractSet, error)
-	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error)
+	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, service common.Service) (types.Contract, error)
 }
 
 const (

@@ -25,7 +25,7 @@ func TestHandle(t *testing.T) {
 	msg := types.MsgBondProvider{
 		Creator:  acct.String(),
 		Provider: providerPubKey,
-		Chain:    common.BTCChain.String(),
+		Service:  common.BTCService.String(),
 		Bond:     cosmos.NewInt(common.Tokens(8)),
 	}
 	require.NoError(t, s.BondProviderHandle(ctx, &msg))
@@ -33,8 +33,8 @@ func TestHandle(t *testing.T) {
 	bal := k.GetBalance(ctx, acct)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
 	// check that provider now exists
-	require.True(t, k.ProviderExists(ctx, msg.Provider, common.BTCChain))
-	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCChain)
+	require.True(t, k.ProviderExists(ctx, msg.Provider, common.BTCService))
+	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
@@ -48,7 +48,7 @@ func TestHandle(t *testing.T) {
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
 
 	// check provider has same bond
-	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCChain)
+	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
@@ -59,5 +59,5 @@ func TestHandle(t *testing.T) {
 
 	bal = k.GetBalance(ctx, acct) // check balance
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(10))
-	require.False(t, k.ProviderExists(ctx, msg.Provider, common.BTCChain)) // should be removed
+	require.False(t, k.ProviderExists(ctx, msg.Provider, common.BTCService)) // should be removed
 }

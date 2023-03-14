@@ -28,7 +28,7 @@ func (s *MemStoreSuite) SetUpTest() {
 			httpTestHandler(s.T(), rw, `
 { "contract": {
 				"provider_pub_key": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
-				"chain": 1,
+				"service": 1,
 				"client": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"delegate": "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu",
 				"type": 0,
@@ -71,7 +71,7 @@ func (s *MemStoreSuite) TestMemStore() {
 
 	pk1 := types.GetRandomPubKey()
 	pk2 := types.GetRandomPubKey()
-	contract := types.NewContract(pk1, common.Chain(0), pk2)
+	contract := types.NewContract(pk1, common.Service(0), pk2)
 	contract.Height = 4
 	contract.Duration = 100
 	contract.Id = 55786

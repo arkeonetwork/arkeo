@@ -21,7 +21,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 		EventTypeOpenContract,
 		sdk.NewAttribute("provider", contract.Provider.String()),
 		sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
-		sdk.NewAttribute("chain", contract.Chain.String()),
+		sdk.NewAttribute("service", contract.Service.String()),
 		sdk.NewAttribute("client", contract.Client.String()),
 		sdk.NewAttribute("delegate", contract.Delegate.String()),
 		sdk.NewAttribute("type", contract.Type.String()),
@@ -39,7 +39,7 @@ func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract 
 		EventTypeContractSettlement,
 		sdk.NewAttribute("provider", contract.Provider.String()),
 		sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
-		sdk.NewAttribute("chain", contract.Chain.String()),
+		sdk.NewAttribute("service", contract.Service.String()),
 		sdk.NewAttribute("client", contract.Client.String()),
 		sdk.NewAttribute("delegate", contract.Delegate.String()),
 		sdk.NewAttribute("type", contract.Type.String()),
@@ -55,7 +55,7 @@ func NewCloseContractEvent(contract *Contract) sdk.Event {
 		EventTypeCloseContract,
 		sdk.NewAttribute("contract_id", strconv.FormatUint(contract.Id, 10)),
 		sdk.NewAttribute("provider", contract.Provider.String()),
-		sdk.NewAttribute("chain", contract.Chain.String()),
+		sdk.NewAttribute("service", contract.Service.String()),
 		sdk.NewAttribute("client", contract.Client.String()),
 		sdk.NewAttribute("delegate", contract.Delegate.String()),
 	)
@@ -65,7 +65,7 @@ func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeProviderBond,
 		sdk.NewAttribute("provider", msg.Provider.String()),
-		sdk.NewAttribute("chain", msg.Chain),
+		sdk.NewAttribute("service", msg.Service),
 		sdk.NewAttribute("bond_rel", msg.Bond.String()),
 		sdk.NewAttribute("bond_abs", bond.String()),
 	)
@@ -75,7 +75,7 @@ func NewModProviderEvent(provider *Provider) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeProviderMod,
 		sdk.NewAttribute("provider", provider.PubKey.String()),
-		sdk.NewAttribute("chain", provider.Chain.String()),
+		sdk.NewAttribute("service", provider.Service.String()),
 		sdk.NewAttribute("metadata_uri", provider.MetadataUri),
 		sdk.NewAttribute("metadata_nonce", strconv.FormatUint(provider.MetadataNonce, 10)),
 		sdk.NewAttribute("status", provider.Status.String()),

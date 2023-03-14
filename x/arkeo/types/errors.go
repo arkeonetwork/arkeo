@@ -18,7 +18,7 @@ var (
 	ErrInvalidModProviderStatus               = errors.Register(ModuleName, 9, "invalid mod provider bad provider status")
 	ErrInvalidModProviderNoBond               = errors.Register(ModuleName, 10, "no bond")
 	ErrDisabledHandler                        = errors.Register(ModuleName, 11, "disabled handler")
-	ErrInvalidChain                           = errors.Register(ModuleName, 12, "invalid chain")
+	ErrInvalidChain                           = errors.Register(ModuleName, 12, "invalid service")
 	ErrOpenContractBadProviderStatus          = errors.Register(ModuleName, 13, "provider must have status 'online'")
 	ErrOpenContractDuration                   = errors.Register(ModuleName, 14, "invalid contract duration")
 	ErrOpenContractMismatchRate               = errors.Register(ModuleName, 15, "mismatch contract rate")

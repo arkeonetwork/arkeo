@@ -16,7 +16,7 @@ import (
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [provider_pubkey] [chain] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
 		Short: "Broadcast message openContract",
 		Args:  cobra.ExactArgs(8),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {

@@ -37,8 +37,8 @@ func (k KVStore) GetProviderIterator(ctx cosmos.Context) cosmos.Iterator {
 }
 
 // GetProvider get the entire Provider metadata struct based on given asset
-func (k KVStore) GetProvider(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain) (types.Provider, error) {
-	record := types.NewProvider(pubkey, chain)
+func (k KVStore) GetProvider(ctx cosmos.Context, pubkey common.PubKey, service common.Service) (types.Provider, error) {
+	record := types.NewProvider(pubkey, service)
 	_, err := k.getProvider(ctx, k.GetKey(ctx, prefixProvider, record.Key()), &record)
 
 	return record, err
@@ -46,20 +46,20 @@ func (k KVStore) GetProvider(ctx cosmos.Context, pubkey common.PubKey, chain com
 
 // SetProvider save the entire Provider metadata struct to key value store
 func (k KVStore) SetProvider(ctx cosmos.Context, provider types.Provider) error {
-	if provider.PubKey.IsEmpty() || provider.Chain.IsEmpty() {
-		return errors.New("cannot save a provider with an empty pubkey or chain")
+	if provider.PubKey.IsEmpty() || provider.Service.IsEmpty() {
+		return errors.New("cannot save a provider with an empty pubkey or service")
 	}
 	k.setProvider(ctx, k.GetKey(ctx, prefixProvider, provider.Key()), provider)
 	return nil
 }
 
 // ProviderExists check whether the given provider exist in the data store
-func (k KVStore) ProviderExists(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain) bool {
-	record := types.NewProvider(pubkey, chain)
+func (k KVStore) ProviderExists(ctx cosmos.Context, pubkey common.PubKey, service common.Service) bool {
+	record := types.NewProvider(pubkey, service)
 	return k.has(ctx, k.GetKey(ctx, prefixProvider, record.Key()))
 }
 
-func (k KVStore) RemoveProvider(ctx cosmos.Context, pubkey common.PubKey, chain common.Chain) {
-	record := types.NewProvider(pubkey, chain)
+func (k KVStore) RemoveProvider(ctx cosmos.Context, pubkey common.PubKey, service common.Service) {
+	record := types.NewProvider(pubkey, service)
 	k.del(ctx, k.GetKey(ctx, prefixProvider, record.Key()))
 }

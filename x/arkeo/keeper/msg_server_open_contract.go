@@ -18,7 +18,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 	ctx.Logger().Info(
 		"receive MsgOpenContract",
 		"provder", msg.Provider,
-		"chain", msg.Chain,
+		"service", msg.Service,
 		"client", msg.Client,
 		"delegate", msg.Delegate,
 		"contract type", msg.ContractType,
@@ -47,17 +47,17 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrDisabledHandler, "open contract")
 	}
 
-	chain, err := common.NewChain(msg.Chain)
+	service, err := common.NewService(msg.Service)
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, service)
 	if err != nil {
 		return err
 	}
 
 	if provider.LastUpdate == 0 {
-		return errors.Wrapf(types.ErrProviderNotFound, "provider %s for chain %s not found", msg.Provider, msg.Chain)
+		return errors.Wrapf(types.ErrProviderNotFound, "provider %s for service %s not found", msg.Provider, msg.Service)
 	}
 
 	minBond := k.FetchConfig(ctx, configs.MinProviderBond)
@@ -96,7 +96,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, chain)
+	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, service)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Int64())
 	}
 
-	chain, err := common.NewChain(msg.Chain)
+	service, err := common.NewService(msg.Service)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	contract := types.Contract{
 		Provider:           msg.Provider,
 		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
-		Chain:              chain,
+		Service:            service,
 		Type:               msg.ContractType,
 		Client:             msg.Client,
 		Delegate:           msg.Delegate,

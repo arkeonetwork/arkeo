@@ -21,7 +21,7 @@ service Query {
   }
   rpc FetchProvider(QueryFetchProviderRequest)
       returns (QueryFetchProviderResponse) {
-    option (google.api.http).get = "/arkeo/provider/{pubkey}/{chain}";
+    option (google.api.http).get = "/arkeo/provider/{pubkey}/{service}";
   }
   rpc ProviderAll(QueryAllProviderRequest) returns (QueryAllProviderResponse) {
     option (google.api.http).get = "/arkeo/providers";
@@ -34,11 +34,11 @@ service Query {
     option (google.api.http).get = "/arkeo/contracts";
   }
 
-  // Queries an active contract by spender, provider and chain.
+  // Queries an active contract by spender, provider and service.
   rpc ActiveContract(QueryActiveContractRequest)
       returns (QueryActiveContractResponse) {
     option (google.api.http).get =
-        "/arkeo/active-contract/{spender}/{provider}/{chain}";
+        "/arkeo/active-contract/{spender}/{provider}/{service}";
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -53,7 +53,7 @@ message QueryParamsResponse {
 
 message QueryFetchProviderRequest {
   string pubkey = 1;
-  string chain = 2;
+  string service = 2;
 }
 
 message QueryFetchProviderResponse {
@@ -88,7 +88,7 @@ message QueryAllContractResponse {
 message QueryActiveContractRequest {
   string spender = 1;
   string provider = 2;
-  string chain = 3;
+  string service = 3;
 }
 
 message QueryActiveContractResponse {

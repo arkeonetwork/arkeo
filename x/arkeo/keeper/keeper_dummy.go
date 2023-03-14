@@ -114,24 +114,24 @@ func (k KVStoreDummy) GetActiveValidators(ctx cosmos.Context) []stakingtypes.Val
 }
 
 func (k KVStoreDummy) GetProviderIterator(_ cosmos.Context) cosmos.Iterator { return nil }
-func (k KVStoreDummy) GetProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain) (types.Provider, error) {
+func (k KVStoreDummy) GetProvider(_ cosmos.Context, _ common.PubKey, _ common.Service) (types.Provider, error) {
 	return types.Provider{}, kaboom
 }
 func (k KVStoreDummy) SetProvider(_ cosmos.Context, _ types.Provider) error { return kaboom }
-func (k KVStoreDummy) ProviderExists(_ cosmos.Context, _ common.PubKey, _ common.Chain) bool {
+func (k KVStoreDummy) ProviderExists(_ cosmos.Context, _ common.PubKey, _ common.Service) bool {
 	return false
 }
-func (k KVStoreDummy) RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Chain) {}
-func (k KVStoreDummy) GetContractIterator(_ cosmos.Context) cosmos.Iterator             { return nil }
-func (k KVStoreDummy) GetContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) (types.Contract, error) {
+func (k KVStoreDummy) RemoveProvider(_ cosmos.Context, _ common.PubKey, _ common.Service) {}
+func (k KVStoreDummy) GetContractIterator(_ cosmos.Context) cosmos.Iterator               { return nil }
+func (k KVStoreDummy) GetContract(_ cosmos.Context, _ common.PubKey, _ common.Service, _ common.PubKey) (types.Contract, error) {
 	return types.Contract{}, kaboom
 }
 func (k KVStoreDummy) SetContract(_ cosmos.Context, _ types.Contract) error { return kaboom }
-func (k KVStoreDummy) ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) bool {
+func (k KVStoreDummy) ContractExists(_ cosmos.Context, _ common.PubKey, _ common.Service, _ common.PubKey) bool {
 	return false
 }
 
-func (k KVStoreDummy) RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Chain, _ common.PubKey) {
+func (k KVStoreDummy) RemoveContract(_ cosmos.Context, _ common.PubKey, _ common.Service, _ common.PubKey) {
 }
 
 func (k KVStoreDummy) GetContractExpirationSetIterator(_ cosmos.Context) cosmos.Iterator { return nil }

@@ -9,7 +9,7 @@ import (
 
 func CmdActiveContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "active-contract [spender] [provider] [chain]",
+		Use:   "active-contract [spender] [provider] [service]",
 		Short: "Query active-contract",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -27,7 +27,7 @@ func CmdActiveContract() *cobra.Command {
 			params := &types.QueryActiveContractRequest{
 				Spender:  reqSpender,
 				Provider: reqProvider,
-				Chain:    reqChain,
+				Service:  reqChain,
 			}
 
 			res, err := queryClient.ActiveContract(cmd.Context(), params)

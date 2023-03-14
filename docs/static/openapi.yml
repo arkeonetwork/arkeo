@@ -44754,7 +44754,7 @@ definitions:
                   "@type": "type.googleapis.com/google.protobuf.Duration",
                   "value": "1.212s"
                 }
-  arkeonetwork.arkeo.claim.Chain:
+  arkeonetwork.arkeo.claim.Service:
     type: string
     enum:
       - ARKEO

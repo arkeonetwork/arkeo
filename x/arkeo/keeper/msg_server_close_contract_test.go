@@ -22,9 +22,9 @@ func TestCloseContractValidate(t *testing.T) {
 	clientPubKey := types.GetRandomPubKey()
 	clientAcct, err := clientPubKey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
+	service := common.BTCService
 
-	contract := types.NewContract(providerPubkey, chain, clientPubKey)
+	contract := types.NewContract(providerPubkey, service, clientPubKey)
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Id = 1
@@ -56,13 +56,13 @@ func TestCloseContractHandle(t *testing.T) {
 	clientAccount, err := clientPubKey.GetMyAddress()
 	require.NoError(t, err)
 
-	chain := common.BTCChain
+	service := common.BTCService
 	require.True(t, k.GetBalance(ctx, provider).IsZero())
 
 	openContractMessage := types.MsgOpenContract{
 		Creator:      clientAccount.String(),
 		Client:       clientPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Provider:     providerPubKey,
 		Deposit:      cosmos.NewInt(500),
 		Rate:         5,
@@ -77,7 +77,7 @@ func TestCloseContractHandle(t *testing.T) {
 	bal := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
 	require.Equal(t, bal.Int64(), int64(500))
 
-	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, service)
 	require.NoError(t, err)
 	require.False(t, contract.IsEmpty())
 
@@ -112,14 +112,14 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	providerPubKey := types.GetRandomPubKey()
 	providerAddress, err := providerPubKey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
-	provider := types.NewProvider(providerPubKey, chain)
+	service := common.BTCService
+	provider := types.NewProvider(providerPubKey, service)
 	provider.Bond = cosmos.NewInt(10000000000)
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               provider.Chain.String(),
+		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -138,7 +138,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 
 	openContractMessage := types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      providerAddress.String(),
 		Client:       userPubKey,
 		ContractType: types.ContractType_SUBSCRIPTION,
@@ -149,7 +149,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 
-	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
 	require.NoError(t, err)
 	require.False(t, contract.IsEmpty())
 	require.Equal(t, contract.Id, uint64(0))
@@ -171,7 +171,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	closeContractMsg.Creator = userAddress.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
-	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
 	require.NoError(t, err)
 	require.True(t, contract.IsEmpty())
 
@@ -180,7 +180,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 
-	contract, err = s.GetActiveContractForUser(ctx, user2PubKey, providerPubKey, chain)
+	contract, err = s.GetActiveContractForUser(ctx, user2PubKey, providerPubKey, service)
 	require.NoError(t, err)
 	require.Equal(t, contract.Id, uint64(1))
 	require.False(t, contract.IsEmpty())
@@ -212,14 +212,14 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	providerPubKey := types.GetRandomPubKey()
 	providerAddress, err := providerPubKey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
-	provider := types.NewProvider(providerPubKey, chain)
+	service := common.BTCService
+	provider := types.NewProvider(providerPubKey, service)
 	provider.Bond = cosmos.NewInt(10000000000)
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               provider.Chain.String(),
+		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -238,7 +238,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 
 	openContractMessage := types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      providerAddress.String(),
 		Client:       userPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -249,7 +249,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 
-	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	// confirm that another user cannot close the contract
@@ -274,7 +274,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 
-	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, chain)
+	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	closeContractMsg.ContractId = contract.Id
@@ -290,7 +290,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// unbond provider , unbond 100% will remove the provider
-	k.RemoveProvider(ctx, providerPubKey, chain)
+	k.RemoveProvider(ctx, providerPubKey, service)
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
 }

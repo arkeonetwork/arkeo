@@ -11,7 +11,7 @@ if [ -z "$2" ]; then
 fi
 
 if [ -z "$3" ]; then
-	echo "No chain supplied"
+	echo "No service supplied"
 	exit 1
 fi
 
@@ -29,7 +29,7 @@ BIN="arkeod"
 BIN_TX="arkeo"
 USER="$1"
 PROVIDER="$2"
-CHAIN="$3"
+SERVICE="$3"
 CTYPE="$4"
 DURATION="$5"
 RATE="10"
@@ -43,4 +43,4 @@ CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" |
 # nolint
 DEPOSIT=$((RATE * DURATION))
 
-$BIN tx $BIN_TX open-contract -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$CHAIN" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
+$BIN tx $BIN_TX open-contract -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
