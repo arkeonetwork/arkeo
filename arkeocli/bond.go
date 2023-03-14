@@ -7,18 +7,25 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 )
 
-var (
-	bondProviderCmd = &cobra.Command{
+func newBondProviderCmd() *cobra.Command {
+	bondProviderCmd := &cobra.Command{
 		Use:   "bond-provider",
 		Short: "bond or modify provider bond",
 		Args:  cobra.ExactArgs(0),
 		RunE:  runBondProviderCmd,
 	}
-)
+
+	flags.AddTxFlagsToCmd(bondProviderCmd)
+	bondProviderCmd.Flags().StringP("pubkey", "p", "", "provider pubkey")
+	bondProviderCmd.Flags().StringP("chain", "c", "", "provider chain")
+	bondProviderCmd.Flags().String("bond", "", "provider bond amount")
+	return bondProviderCmd
+}
 
 func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 	clientCtx, err := client.GetClientTxContext(cmd)
