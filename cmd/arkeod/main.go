@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/arkeocli"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
@@ -20,6 +21,8 @@ func main() {
 		app.New,
 		// this line is used by starport scaffolding # root/arguments
 	)
+	// add in arkeo specific utilities
+	rootCmd.AddCommand(arkeocli.GetArkeoCmd())
 	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {
 		os.Exit(1)
 	}
