@@ -86,30 +86,9 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-
-	// cosmos.ParseCoins fails negative numbers
-	bondIntArr := make([]rune, 0, len(argBond))
-	var i int
-	var c rune
-	for i, c = range argBond {
-		if i == 0 && c == '-' {
-			bondIntArr = append(bondIntArr, c)
-			continue
-		}
-		if c >= '0' && c <= '9' {
-			bondIntArr = append(bondIntArr, c)
-			continue
-		}
-		break
-	}
-	bondDenom := argBond[i:]
-	if bondDenom != "uarkeo" {
-		return fmt.Errorf("bad bond denom, expected \"uarkeo\" got \"%s\"", bondDenom)
-	}
-
-	bond, ok := cosmos.NewIntFromString(string(bondIntArr))
-	if !ok {
-		return fmt.Errorf("bad bond amount: %s", argBond)
+	bond, err := parseBondAmount(argBond)
+	if err != nil {
+		return err
 	}
 
 	pubkey, err := common.NewPubKey(argPubkey)
@@ -126,4 +105,36 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 	return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+}
+
+func parseBondAmount(bondStr string) (amount cosmos.Int, err error) {
+	// cosmos.ParseCoins fails negative numbers
+	bondIntArr := make([]rune, 0, len(bondStr))
+	var i int
+	var c rune
+	for i, c = range bondStr {
+		if i == 0 && c == '-' {
+			bondIntArr = append(bondIntArr, c)
+			continue
+		}
+		if c >= '0' && c <= '9' {
+			bondIntArr = append(bondIntArr, c)
+			continue
+		}
+		break
+	}
+	bondDenom := bondStr[i:]
+	if bondDenom != "uarkeo" {
+		err = fmt.Errorf("bad bond denom, expected \"uarkeo\" got \"%s\"", bondDenom)
+		return
+	}
+
+	var ok bool
+	amount, ok = cosmos.NewIntFromString(string(bondIntArr))
+	if !ok {
+		err = fmt.Errorf("bad bond amount: %s", bondStr)
+		return
+	}
+
+	return
 }
