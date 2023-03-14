@@ -40,9 +40,6 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		// readFrom := "alice"
-		// readFrom := "tarkeo1up3pwhguqvr7l7pr8t53nmjrlxx03x0y0axw9z"
-
 		var accAddr cosmos.AccAddress
 		key, err := clientCtx.Keyring.Key(readFrom)
 		if err != nil {
