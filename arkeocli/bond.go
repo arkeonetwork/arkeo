@@ -79,12 +79,6 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	// ensure valid chain
-	_, err = common.NewChain(argChain)
-	if err != nil {
-		return
-	}
-
 	argBond, _ := cmd.Flags().GetString("bond")
 	if argBond == "" {
 		argBond, err = promptForArg(cmd, "Specify bond amount (e.g. 100uarkeo, negative to unbond): ")
