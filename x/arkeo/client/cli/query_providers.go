@@ -54,11 +54,11 @@ func CmdShowProvider() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			argPubKey := args[0]
-			argChain := args[1]
+			argService := args[1]
 
 			params := &types.QueryFetchProviderRequest{
 				Pubkey:  argPubKey,
-				Service: argChain,
+				Service: argService,
 			}
 
 			res, err := queryClient.FetchProvider(context.Background(), params)

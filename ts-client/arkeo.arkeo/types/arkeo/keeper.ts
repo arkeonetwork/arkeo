@@ -72,7 +72,7 @@ export function contractTypeToJSON(object: ContractType): string {
 
 export interface Provider {
   pubKey: string;
-  chain: number;
+  service: number;
   metadataURI: string;
   metadataNonce: number;
   status: ProviderStatus;
@@ -86,7 +86,7 @@ export interface Provider {
 
 export interface Contract {
   providerPubKey: string;
-  chain: number;
+  service: number;
   client: string;
   delegate: string;
   type: ContractType;
@@ -101,7 +101,7 @@ export interface Contract {
 
 export interface ContractExpiration {
   providerPubKey: string;
-  chain: number;
+  service: number;
   client: string;
 }
 
@@ -113,7 +113,7 @@ export interface ContractExpirationSet {
 function createBaseProvider(): Provider {
   return {
     pubKey: "",
-    chain: 0,
+    service: 0,
     metadataURI: "",
     metadataNonce: 0,
     status: 0,
@@ -131,8 +131,8 @@ export const Provider = {
     if (message.pubKey !== "") {
       writer.uint32(10).string(message.pubKey);
     }
-    if (message.chain !== 0) {
-      writer.uint32(16).int32(message.chain);
+    if (message.service !== 0) {
+      writer.uint32(16).int32(message.service);
     }
     if (message.metadataURI !== "") {
       writer.uint32(26).string(message.metadataURI);
@@ -175,7 +175,7 @@ export const Provider = {
           message.pubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.int32();
+          message.service = reader.int32();
           break;
         case 3:
           message.metadataURI = reader.string();
@@ -215,7 +215,7 @@ export const Provider = {
   fromJSON(object: any): Provider {
     return {
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? Number(object.chain) : 0,
+      service: isSet(object.service) ? Number(object.service) : 0,
       metadataURI: isSet(object.metadataURI) ? String(object.metadataURI) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
       status: isSet(object.status) ? providerStatusFromJSON(object.status) : 0,
@@ -231,7 +231,7 @@ export const Provider = {
   toJSON(message: Provider): unknown {
     const obj: any = {};
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = Math.round(message.chain));
+    message.service !== undefined && (obj.service = Math.round(message.service));
     message.metadataURI !== undefined && (obj.metadataURI = message.metadataURI);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
     message.status !== undefined && (obj.status = providerStatusToJSON(message.status));
@@ -247,7 +247,7 @@ export const Provider = {
   fromPartial<I extends Exact<DeepPartial<Provider>, I>>(object: I): Provider {
     const message = createBaseProvider();
     message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? 0;
+    message.service = object.service ?? 0;
     message.metadataURI = object.metadataURI ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
     message.status = object.status ?? 0;
@@ -264,7 +264,7 @@ export const Provider = {
 function createBaseContract(): Contract {
   return {
     providerPubKey: "",
-    chain: 0,
+    service: 0,
     client: "",
     delegate: "",
     type: 0,
@@ -283,8 +283,8 @@ export const Contract = {
     if (message.providerPubKey !== "") {
       writer.uint32(10).string(message.providerPubKey);
     }
-    if (message.chain !== 0) {
-      writer.uint32(16).int32(message.chain);
+    if (message.service !== 0) {
+      writer.uint32(16).int32(message.service);
     }
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
@@ -330,7 +330,7 @@ export const Contract = {
           message.providerPubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.int32();
+          message.service = reader.int32();
           break;
         case 3:
           message.client = reader.string();
@@ -373,7 +373,7 @@ export const Contract = {
   fromJSON(object: any): Contract {
     return {
       providerPubKey: isSet(object.providerPubKey) ? String(object.providerPubKey) : "",
-      chain: isSet(object.chain) ? Number(object.chain) : 0,
+      service: isSet(object.service) ? Number(object.service) : 0,
       client: isSet(object.client) ? String(object.client) : "",
       delegate: isSet(object.delegate) ? String(object.delegate) : "",
       type: isSet(object.type) ? contractTypeFromJSON(object.type) : 0,
@@ -390,7 +390,7 @@ export const Contract = {
   toJSON(message: Contract): unknown {
     const obj: any = {};
     message.providerPubKey !== undefined && (obj.providerPubKey = message.providerPubKey);
-    message.chain !== undefined && (obj.chain = Math.round(message.chain));
+    message.service !== undefined && (obj.service = Math.round(message.service));
     message.client !== undefined && (obj.client = message.client);
     message.delegate !== undefined && (obj.delegate = message.delegate);
     message.type !== undefined && (obj.type = contractTypeToJSON(message.type));
@@ -407,7 +407,7 @@ export const Contract = {
   fromPartial<I extends Exact<DeepPartial<Contract>, I>>(object: I): Contract {
     const message = createBaseContract();
     message.providerPubKey = object.providerPubKey ?? "";
-    message.chain = object.chain ?? 0;
+    message.service = object.service ?? 0;
     message.client = object.client ?? "";
     message.delegate = object.delegate ?? "";
     message.type = object.type ?? 0;
@@ -423,7 +423,7 @@ export const Contract = {
 };
 
 function createBaseContractExpiration(): ContractExpiration {
-  return { providerPubKey: "", chain: 0, client: "" };
+  return { providerPubKey: "", service: 0, client: "" };
 }
 
 export const ContractExpiration = {
@@ -431,8 +431,8 @@ export const ContractExpiration = {
     if (message.providerPubKey !== "") {
       writer.uint32(10).string(message.providerPubKey);
     }
-    if (message.chain !== 0) {
-      writer.uint32(16).int32(message.chain);
+    if (message.service !== 0) {
+      writer.uint32(16).int32(message.service);
     }
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
@@ -451,7 +451,7 @@ export const ContractExpiration = {
           message.providerPubKey = reader.string();
           break;
         case 2:
-          message.chain = reader.int32();
+          message.service = reader.int32();
           break;
         case 3:
           message.client = reader.string();
@@ -467,7 +467,7 @@ export const ContractExpiration = {
   fromJSON(object: any): ContractExpiration {
     return {
       providerPubKey: isSet(object.providerPubKey) ? String(object.providerPubKey) : "",
-      chain: isSet(object.chain) ? Number(object.chain) : 0,
+      service: isSet(object.service) ? Number(object.service) : 0,
       client: isSet(object.client) ? String(object.client) : "",
     };
   },
@@ -475,7 +475,7 @@ export const ContractExpiration = {
   toJSON(message: ContractExpiration): unknown {
     const obj: any = {};
     message.providerPubKey !== undefined && (obj.providerPubKey = message.providerPubKey);
-    message.chain !== undefined && (obj.chain = Math.round(message.chain));
+    message.service !== undefined && (obj.service = Math.round(message.service));
     message.client !== undefined && (obj.client = message.client);
     return obj;
   },
@@ -483,7 +483,7 @@ export const ContractExpiration = {
   fromPartial<I extends Exact<DeepPartial<ContractExpiration>, I>>(object: I): ContractExpiration {
     const message = createBaseContractExpiration();
     message.providerPubKey = object.providerPubKey ?? "";
-    message.chain = object.chain ?? 0;
+    message.service = object.service ?? 0;
     message.client = object.client ?? "";
     return message;
   },

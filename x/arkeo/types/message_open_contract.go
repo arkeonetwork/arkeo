@@ -80,7 +80,7 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 	// verify service
 	_, err = common.NewService(msg.Service)
 	if err != nil {
-		return errors.Wrapf(ErrInvalidChain, "invalid service (%s): %s", msg.Service, err)
+		return errors.Wrapf(ErrInvalidService, "invalid service (%s): %s", msg.Service, err)
 	}
 
 	// verify client

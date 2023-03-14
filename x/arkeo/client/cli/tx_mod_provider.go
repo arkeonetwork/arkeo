@@ -22,7 +22,7 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argChain := args[1]
+			argService := args[1]
 
 			argMetatadataURI := args[2]
 			argMetadataNonce, err := cast.ToUint64E(args[3])
@@ -63,7 +63,7 @@ func CmdModProvider() *cobra.Command {
 			msg := types.NewMsgModProvider(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				argChain,
+				argService,
 				argMetatadataURI,
 				argMetadataNonce,
 				types.ProviderStatus(argStatus),
