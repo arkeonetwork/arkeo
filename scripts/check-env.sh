@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # skip checks if there is no tty (this is being called in a build script)
-if [ -f /.dockerenv ] || [ ! -f /dev/tty ] || [ -t 0 ]; then
-	exit 0
-fi
+[ -t 0 ] || exit 0
 
 set -euo pipefail
 

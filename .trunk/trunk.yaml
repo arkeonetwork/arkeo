@@ -24,8 +24,3 @@ lint:
         - "x/claim/docs/**"
     - linters:
         - prettier
-      paths:
-        - "test/regression/README.md"
-        - "test/regression/mnt/exports/*"
-        - "test/regression/suites/*"
-        - "test/regression/templates/*"

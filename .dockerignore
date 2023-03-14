@@ -1,7 +1,0 @@
-.trunk
-LICENSE.md
-docker-compose.yaml
-readme.md
-test/regression/mnt
-test/regression/suites
-test/regression/templates
