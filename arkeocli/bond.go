@@ -90,23 +90,34 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 
 	argBond, _ := cmd.Flags().GetString("bond")
 	if argBond == "" {
-		argBond, err = promptForArg(cmd, "Specify bond amount (e.g. 100uarkeo): ")
+		argBond, err = promptForArg(cmd, "Specify bond amount (e.g. 100uarkeo, negative to unbond): ")
 		if err != nil {
 			return err
 		}
 	}
 
-	coins, err := cosmos.ParseCoins(argBond)
-	if err != nil {
-		return err
+	// cosmos.ParseCoins fails negative numbers
+	bondIntArr := make([]rune, 0, len(argBond))
+	var i int
+	var c rune
+	for i, c = range argBond {
+		if i == 0 && c == '-' {
+			bondIntArr = append(bondIntArr, c)
+			continue
+		}
+		if c >= '0' && c <= '9' {
+			bondIntArr = append(bondIntArr, c)
+			continue
+		}
+		break
 	}
-	if len(coins) != 1 {
-		return fmt.Errorf("1 coins as bond amount, got %d", len(coins))
+	bondDenom := argBond[i:]
+	if bondDenom != "uarkeo" {
+		return fmt.Errorf("bad bond denom, expected \"uarkeo\" got \"%s\"", bondDenom)
 	}
-	if coins[0].Denom != "uarkeo" {
-		return fmt.Errorf("bad bond denom, expected \"uarkeo\" got \"%s\"", coins[0].Denom)
-	}
-	if coins[0].Amount.IsNegative() || coins[0].Amount.IsZero() {
+
+	bond, ok := cosmos.NewIntFromString(string(bondIntArr))
+	if !ok {
 		return fmt.Errorf("bad bond amount: %s", argBond)
 	}
 
@@ -118,7 +129,7 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		clientCtx.GetFromAddress().String(),
 		pubkey,
 		argChain,
-		coins[0].Amount,
+		bond,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err
