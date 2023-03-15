@@ -1,0 +1,43 @@
+{{ template "default-state.yaml" }}
+---
+{{ template "provider.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# open pay-as-you-go contract
+########################################################################################
+type: tx-open-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+provider: {{ pubkey_fox }}
+chain: "swapi.dev"
+client: {{ pubkey_cat }}
+contract_type: "PAY_AS_YOU_GO"
+duration: 10
+rate: 3
+deposit: "100"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is created
+endpoint: http://localhost:1317/arkeo/contracts
+asserts:
+  - .contract | length == 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.paid == "0"
+---
+type: check
+description: cat account balance should decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
