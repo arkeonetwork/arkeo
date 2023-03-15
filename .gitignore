@@ -13,6 +13,7 @@ release/
 .idea/
 .vscode/
 .DS_Store
+test/regression/mnt/coverage/
 # Created by https://www.toptal.com/developers/gitignore/api/macOs,vim,windows,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=macOs,vim,windows,python
 
