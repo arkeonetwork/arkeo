@@ -28,21 +28,20 @@ var ServiceLookup = map[string]int32{
 	"gaia-mainnet-rpc-archive":                       5,
 }
 
-func (c Service) String() string {
-	switch c {
-	case BaseService:
-		return "arkeo-mainnet-fullnode"
-	case BTCService:
-		return "btc-mainnet-fullnode"
-	case ETHService:
-		return "eth-mainnet-fullnode"
-	case StarWarsService:
-		return "swapi.dev"
-	case GAIAChainRPCArchiveService:
-		return "gaia-mainnet-rpc-archive"
-	default:
-		return "unknown"
+var ServiceReverseLookup = map[Service]string{
+	0: "unknown",
+	1: "swapi.dev",
+	2: "github.com/arkeonetwork/arkeo-mainnet-fullnode",
+	3: "btc-mainnet-fullnode",
+	4: "eth-mainnet-fullnode",
+	5: "gaia-mainnet-rpc-archive",
+}
+
+func (service Service) String() string {
+	if r, ok := ServiceReverseLookup[service]; ok {
+		return r
 	}
+	return "unknown"
 }
 
 // NewService create a new service
