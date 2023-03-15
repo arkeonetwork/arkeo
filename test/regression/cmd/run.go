@@ -239,6 +239,65 @@ func run(path string) error {
 		}
 	}
 
+	// setup process for sentinel
+	sentinel := exec.Command("sentinel")
+	sentinel.Env = append(
+		os.Environ(),
+		"PROVIDER_PUBKEY=tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh", // fox pubkey
+		"NET=regtest",
+		"MONIKER=regtest",
+		"WEBSITE=n/a",
+		"DESCRIPTION=n/a",
+		"LOCATION=n/a",
+		"PORT=3636",
+		"PROXY_HOST=https://swapi.dev", // TODO: remove me
+		"SOURCE_CHAIN=localhost:1317",
+		"EVENT_STREAM_HOST=localhost:26657",
+		"FREE_RATE_LIMIT=10",
+		"FREE_RATE_LIMIT_DURATION=1m",
+		"SUB_RATE_LIMIT=10",
+		"SUB_RATE_LIMIT_DURATION=1m",
+		"AS_GO_RATE_LIMIT=10",
+		"AS_GO_RATE_LIMIT_DURATION=1m",
+		"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
+		"GAIA_RPC_ARCHIVE_HOST=http://176.34.207.130:26657",
+	)
+	stderr, err = sentinel.StderrPipe()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to setup sentinel stderr")
+	}
+	stderrScanner2 := bufio.NewScanner(stderr)
+	stderrLines2 := make(chan string, 100)
+	go func() {
+		for stderrScanner2.Scan() {
+			stderrLines2 <- stderrScanner.Text()
+		}
+	}()
+	if os.Getenv("DEBUG") != "" {
+		sentinel.Stdout = os.Stdout
+		sentinel.Stderr = os.Stderr
+	}
+
+	// start arkeo process
+	log.Debug().Msg("Starting sentinel")
+	err = sentinel.Start()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to start sentinel")
+	}
+
+	// wait for sentinel to listen on block creation port
+	for i := 0; ; i++ {
+		time.Sleep(100 * time.Millisecond)
+		conn, err := net.Dial("tcp", "localhost:3636")
+		if err == nil {
+			conn.Close()
+			break
+		}
+		if i%100 == 0 {
+			log.Debug().Msg("Waiting for sentinel to listen")
+		}
+	}
+
 	// run the operations
 	var returnErr error
 	log.Info().Msgf("Executing %d operations", len(ops))
@@ -276,6 +335,19 @@ func run(path string) error {
 		log.Fatal().Err(err).Msg("failed to wait for arkeod")
 	}
 
+	// stop sentinel process
+	log.Debug().Msg("Stopping sentinel")
+	err = sentinel.Process.Signal(syscall.SIGKILL)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to stop sentinel")
+	}
+
+	// wait for process to exit
+	_, err = sentinel.Process.Wait()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to wait for sentinel")
+	}
+
 	// if failed and debug enabled restart to allow inspection
 	if returnErr != nil && os.Getenv("DEBUG") != "" {
 
@@ -298,11 +370,28 @@ func run(path string) error {
 			log.Fatal().Err(err).Msg("failed to restart arkeod")
 		}
 
+		// restart sentinel
+		log.Debug().Msg("Restarting sentinel")
+		sentinel = exec.Command("sentinel")
+		sentinel.Stdout = os.Stdout
+		sentinel.Stderr = os.Stderr
+		err = sentinel.Start()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to restart sentinel")
+		}
+
 		// wait for arkeo
 		log.Debug().Msg("Waiting for arkeod")
 		_, err = arkeo.Process.Wait()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to wait for arkeod")
+		}
+
+		// wait for sentinel
+		log.Debug().Msg("Waiting for sentinel")
+		_, err = sentinel.Process.Wait()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to wait for sentinel")
 		}
 	}
 
