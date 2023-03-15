@@ -21,7 +21,7 @@ func newBondProviderCmd() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(bondProviderCmd)
-	bondProviderCmd.Flags().String("pubkey", "", "provider pubkey")
+	bondProviderCmd.Flags().String("provider-pubkey", "", "provider pubkey")
 	bondProviderCmd.Flags().String("service", "", "provider service name")
 	bondProviderCmd.Flags().String("bond", "", "provider bond amount (negative to unbond)")
 	return bondProviderCmd
@@ -46,7 +46,7 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	argPubkey, _ := cmd.Flags().GetString("pubkey")
+	argPubkey, _ := cmd.Flags().GetString("provider-pubkey")
 	if argPubkey == "" {
 		argPubkey, err = toPubkey(cmd, addr)
 		if err != nil {
