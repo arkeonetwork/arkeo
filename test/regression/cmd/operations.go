@@ -362,12 +362,12 @@ func (op *OpTxModProvider) Execute(_ *os.Process, logs chan string) error {
 type OpTxOpenContract struct {
 	OpBase                `yaml:",inline"`
 	arkeo.MsgOpenContract `yaml:",inline"`
-	FromAddress           string `json:"from_address"`
+	Signer                string `json:"signer"`
 	Sequence              *int64 `json:"sequence"`
 }
 
 func (op *OpTxOpenContract) Execute(_ *os.Process, logs chan string) error {
-	signer := sdk.MustAccAddressFromBech32(op.FromAddress)
+	signer := sdk.MustAccAddressFromBech32(op.Signer)
 	return sendMsg(&op.MsgOpenContract, signer, op.Sequence, op, logs)
 }
 
@@ -376,12 +376,12 @@ func (op *OpTxOpenContract) Execute(_ *os.Process, logs chan string) error {
 type OpTxCloseContract struct {
 	OpBase                 `yaml:",inline"`
 	arkeo.MsgCloseContract `yaml:",inline"`
-	FromAddress            string `json:"from_address"`
+	Signer                 string `json:"signer"`
 	Sequence               *int64 `json:"sequence"`
 }
 
 func (op *OpTxCloseContract) Execute(_ *os.Process, logs chan string) error {
-	signer := sdk.MustAccAddressFromBech32(op.FromAddress)
+	signer := sdk.MustAccAddressFromBech32(op.Signer)
 	return sendMsg(&op.MsgCloseContract, signer, op.Sequence, op, logs)
 }
 

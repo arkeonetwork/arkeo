@@ -210,6 +210,14 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
+
+	// start an http server to unblock a block creation when a request is received
+	newBlock := func(w http.ResponseWriter, r *http.Request) {
+		begin <- struct{}{}
+		<-end
+	}
+	http.HandleFunc("/newBlock", newBlock)
+	go http.ListenAndServe(":8080", nil)
 }
 
 // App extends an ABCI application, but with most of its parameters exported.

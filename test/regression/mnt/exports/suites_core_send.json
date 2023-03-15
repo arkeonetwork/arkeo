@@ -2,9 +2,12 @@
   "app_hash": "",
   "app_state": {
     "arkeo": {
+      "contract_expiration_sets": [],
       "contracts": [],
+      "next_contract_id": "0",
       "params": {},
-      "providers": []
+      "providers": [],
+      "user_contract_sets": []
     },
     "auth": {
       "accounts": [
