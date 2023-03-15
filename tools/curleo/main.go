@@ -61,7 +61,7 @@ func main() {
 	values := u.Query()
 
 	parts := strings.Split(u.Path, "/")
-	chain := parts[1]
+	service := parts[1]
 
 	curl := Curl{
 		client:         http.Client{Timeout: time.Duration(5) * time.Second},
@@ -70,9 +70,9 @@ func main() {
 	}
 	metadata := curl.parseMetadata()
 	spender := curl.getSpender(*user)
-	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), chain, spender)
+	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), service, spender)
 	if contract.Height == 0 {
-		println(fmt.Sprintf("no active contract found for spender:%s provider:%s cbhain:%s - will attempt free tier", spender, metadata.Configuration.ProviderPubKey.String(), chain))
+		println(fmt.Sprintf("no active contract found for spender:%s provider:%s cbhain:%s - will attempt free tier", spender, metadata.Configuration.ProviderPubKey.String(), service))
 	} else {
 		claim := curl.getClaim(contract.Id)
 		auth := curl.sign(*user, contract.Id, spender, claim.Nonce+1)
@@ -110,8 +110,8 @@ func main() {
 	println(string(body))
 }
 
-func (c Curl) getActiveContract(provider, chain, spender string) types.Contract {
-	u := fmt.Sprintf("%s/active-contract/%s/%s/%s", c.baseURL, spender, provider, chain)
+func (c Curl) getActiveContract(provider, service, spender string) types.Contract {
+	u := fmt.Sprintf("%s/active-contract/%s/%s/%s", c.baseURL, spender, provider, service)
 	resp, err := c.client.Get(u)
 	if err != nil {
 		log.Fatal(err)

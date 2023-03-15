@@ -65,7 +65,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if !signerAccountAddress.Equals(clientAccountAddress) {
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
-	providerUnbonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Chain)
+	providerUnbonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Service)
 	if err != nil {
 		return err
 	}
@@ -85,8 +85,8 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	return nil
 }
 
-func (k msgServer) hasProviderUnbonded(ctx cosmos.Context, providerKey common.PubKey, chain common.Chain) (bool, error) {
-	provider, err := k.Keeper.GetProvider(ctx, providerKey, chain)
+func (k msgServer) hasProviderUnbonded(ctx cosmos.Context, providerKey common.PubKey, service common.Service) (bool, error) {
+	provider, err := k.Keeper.GetProvider(ctx, providerKey, service)
 	if err != nil {
 		return false, fmt.Errorf("fail to get provider,err: %w", err)
 	}

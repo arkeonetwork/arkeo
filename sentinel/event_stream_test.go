@@ -38,7 +38,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,
@@ -60,7 +60,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	outputContract, err := proxy.MemStore.Get(inputContract.Key())
 	require.NoError(t, err)
 	require.Equal(t, inputContract, outputContract)
-	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Chain, inputContract.Client)
+	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
 	require.NoError(t, err)
 
 	// confirm that a contract for a different provider doesn't get stored.
@@ -76,7 +76,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	// confirm that we return the correct active contract when multiple contracts are present.
 	proxy.MemStore.SetHeight(201) // contract with id 1 should now be expired
 
-	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Chain, inputContract.Client)
+	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
 	require.Error(t, err) // contract not found since its expired.
 
 	inputContract.Provider = testConfig.ProviderPubKey
@@ -87,7 +87,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	}
 	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
 
-	outputContract, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Chain, inputContract.Client)
+	outputContract, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
 	require.NoError(t, err)
 	require.Equal(t, inputContract, outputContract)
 }
@@ -96,7 +96,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,
@@ -134,7 +134,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
-		Chain:              common.BTCChain,
+		Service:            common.BTCService,
 		Client:             types.GetRandomPubKey(),
 		Delegate:           common.EmptyPubKey,
 		Type:               types.ContractType_PAY_AS_YOU_GO,

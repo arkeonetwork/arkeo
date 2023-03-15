@@ -122,18 +122,18 @@ func TestContractEndBlock(t *testing.T) {
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
 
-	// create a provider for 2 chains
+	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
-	provider := types.NewProvider(providerPubKey, common.BTCChain)
+	provider := types.NewProvider(providerPubKey, common.BTCService)
 	provider.Bond = cosmos.NewInt(20000000000)
 	provider.LastUpdate = ctx.BlockHeight()
 	require.NoError(t, k.SetProvider(ctx, provider))
-	provider.Chain = common.ETHChain
+	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               common.BTCChain.String(),
+		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -142,7 +142,7 @@ func TestContractEndBlock(t *testing.T) {
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
-	modProviderMsg.Chain = common.ETHChain.String()
+	modProviderMsg.Service = common.ETHService.String()
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
 
@@ -154,7 +154,7 @@ func TestContractEndBlock(t *testing.T) {
 
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        common.BTCChain.String(),
+		Service:      common.BTCService.String(),
 		Creator:      user1Address.String(),
 		Client:       user1PubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -184,7 +184,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	// confirm user 1 has an active and open contract
-	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCService)
 	require.NoError(t, err)
 	require.False(t, activeContract.IsEmpty())
 
@@ -192,7 +192,7 @@ func TestContractEndBlock(t *testing.T) {
 	// to ensure we properly handle a user contract set with multiples
 	// contracts with different expiries.
 	msg.Duration = 200
-	msg.Chain = common.ETHChain.String()
+	msg.Service = common.ETHService.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -218,7 +218,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NotEqual(t, contractIdExpiring, contractSet.ContractSet.ContractIds[0])
 
 	// cofirm user1 has no active contract.
-	activeContract, err = k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	activeContract, err = k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCService)
 	require.NoError(t, err)
 	require.True(t, activeContract.IsEmpty())
 
@@ -237,19 +237,19 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
 
-	// create a provider for 2 chains
+	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
-	provider := types.NewProvider(providerPubKey, common.BTCChain)
+	provider := types.NewProvider(providerPubKey, common.BTCService)
 	provider.Bond = cosmos.NewInt(20000000000)
 	provider.LastUpdate = ctx.BlockHeight()
 	provider.SettlementDuration = 10
 	require.NoError(t, k.SetProvider(ctx, provider))
-	provider.Chain = common.ETHChain
+	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               common.BTCChain.String(),
+		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -260,7 +260,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
-	modProviderMsg.Chain = common.ETHChain.String()
+	modProviderMsg.Service = common.ETHService.String()
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
 
@@ -272,7 +272,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 
 	msg := types.MsgOpenContract{
 		Provider:           providerPubKey,
-		Chain:              common.BTCChain.String(),
+		Service:            common.BTCService.String(),
 		Creator:            user1Address.String(),
 		Client:             user1PubKey,
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
@@ -285,7 +285,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 
 	// get the active contract for user 1
-	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCChain)
+	activeContract, err := k.GetActiveContractForUser(ctx, user1PubKey, providerPubKey, common.BTCService)
 	require.NoError(t, err)
 	require.False(t, activeContract.IsEmpty())
 	require.True(t, activeContract.IsOpen(ctx.BlockHeight()))

@@ -15,12 +15,12 @@ import (
 
 func CmdBondProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bond-provider [pubkey] [chain] [bond]",
+		Use:   "bond-provider [pubkey] [service] [bond]",
 		Short: "Broadcast message bondProvider",
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
-			argChain := args[1]
+			argService := args[1]
 			argBond := args[2]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -41,7 +41,7 @@ func CmdBondProvider() *cobra.Command {
 			msg := types.NewMsgBondProvider(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				argChain,
+				argService,
 				bond,
 			)
 			if err := msg.ValidateBasic(); err != nil {

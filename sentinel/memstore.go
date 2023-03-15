@@ -42,8 +42,8 @@ func NewMemStore(baseURL string, logger log.Logger) *MemStore {
 	}
 }
 
-func (k *MemStore) Key(pubkey, chain, spender string) string {
-	return fmt.Sprintf("%s/%s/%s", pubkey, chain, spender)
+func (k *MemStore) Key(pubkey, service, spender string) string {
+	return fmt.Sprintf("%s/%s/%s", pubkey, service, spender)
 }
 
 func (k *MemStore) GetHeight() int64 {
@@ -84,12 +84,12 @@ func (k *MemStore) Put(contract types.Contract) {
 	k.db[key] = contract
 }
 
-func (k *MemStore) GetActiveContract(provider common.PubKey, chain common.Chain, spender common.PubKey) (types.Contract, error) {
+func (k *MemStore) GetActiveContract(provider common.PubKey, service common.Service, spender common.PubKey) (types.Contract, error) {
 	k.storeLock.Lock()
 	defer k.storeLock.Unlock()
 	// iterate through the map to find the contract
 	for _, contract := range k.db {
-		if !contract.IsExpired(k.GetHeight()) && contract.Provider.Equals(provider) && contract.Chain == chain && contract.GetSpender().Equals(spender) {
+		if !contract.IsExpired(k.GetHeight()) && contract.Provider.Equals(provider) && contract.Service == service && contract.GetSpender().Equals(spender) {
 			return contract, nil
 		}
 	}
@@ -103,7 +103,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 
 	type fetchContract struct {
 		ProviderPubKey   common.PubKey      `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
-		Chain            common.Chain       `protobuf:"varint,2,opt,name=chain,proto3,casttype=github.com/arkeonetwork/arkeo/common.Chain" json:"chain,omitempty"`
+		Service          common.Service     `protobuf:"varint,2,opt,name=service,proto3,casttype=github.com/arkeonetwork/arkeo/common.Service" json:"service,omitempty"`
 		Client           common.PubKey      `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
 		Delegate         common.PubKey      `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"delegate,omitempty"`
 		Type             types.ContractType `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
@@ -147,7 +147,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	}
 
 	contract.Provider = data.Contract.ProviderPubKey
-	contract.Chain = data.Contract.Chain
+	contract.Service = data.Contract.Service
 	contract.Client = data.Contract.Client
 	contract.Delegate = data.Contract.Delegate
 	contract.Type = data.Contract.Type

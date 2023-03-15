@@ -13,16 +13,16 @@ func TestProvider(t *testing.T) {
 
 	require.Error(t, k.SetProvider(ctx, types.Provider{})) // empty asset should error
 
-	provider := types.NewProvider(types.GetRandomPubKey(), common.BTCChain)
+	provider := types.NewProvider(types.GetRandomPubKey(), common.BTCService)
 
 	err := k.SetProvider(ctx, provider)
 	require.NoError(t, err)
-	provider, err = k.GetProvider(ctx, provider.PubKey, provider.Chain)
+	provider, err = k.GetProvider(ctx, provider.PubKey, provider.Service)
 	require.NoError(t, err)
-	require.True(t, provider.Chain.Equals(common.BTCChain))
-	require.True(t, k.ProviderExists(ctx, provider.PubKey, provider.Chain))
-	require.False(t, k.ProviderExists(ctx, provider.PubKey, common.ETHChain))
+	require.True(t, provider.Service.Equals(common.BTCService))
+	require.True(t, k.ProviderExists(ctx, provider.PubKey, provider.Service))
+	require.False(t, k.ProviderExists(ctx, provider.PubKey, common.ETHService))
 
-	k.RemoveProvider(ctx, provider.PubKey, provider.Chain)
-	require.False(t, k.ProviderExists(ctx, provider.PubKey, provider.Chain))
+	k.RemoveProvider(ctx, provider.PubKey, provider.Service)
+	require.False(t, k.ProviderExists(ctx, provider.PubKey, provider.Service))
 }

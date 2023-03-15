@@ -13,7 +13,7 @@ import (
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [pubkey] [chain] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration]",
+		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration]",
 		Short: "Broadcast message modProvider",
 		Args:  cobra.ExactArgs(10),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -22,7 +22,7 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argChain := args[1]
+			argService := args[1]
 
 			argMetatadataURI := args[2]
 			argMetadataNonce, err := cast.ToUint64E(args[3])
@@ -63,7 +63,7 @@ func CmdModProvider() *cobra.Command {
 			msg := types.NewMsgModProvider(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
-				argChain,
+				argService,
 				argMetatadataURI,
 				argMetadataNonce,
 				types.ProviderStatus(argStatus),

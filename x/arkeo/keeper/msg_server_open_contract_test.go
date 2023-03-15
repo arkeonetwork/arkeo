@@ -22,9 +22,9 @@ func TestOpenContractValidate(t *testing.T) {
 	acc, err := clientPubKey.GetMyAddress()
 	require.NoError(t, err)
 
-	chain := common.BTCChain
+	service := common.BTCService
 
-	provider := types.NewProvider(providerPubkey, chain)
+	provider := types.NewProvider(providerPubkey, service)
 	provider.Bond = cosmos.NewInt(500_00000000)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.MaxContractDuration = 1000
@@ -37,7 +37,7 @@ func TestOpenContractValidate(t *testing.T) {
 	// happy path
 	msg := types.MsgOpenContract{
 		Provider:     providerPubkey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Client:       clientPubKey,
 		Creator:      acc.String(),
 		ContractType: types.ContractType_SUBSCRIPTION,
@@ -75,7 +75,7 @@ func TestOpenContractValidate(t *testing.T) {
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	ctx = ctx.WithBlockHeight(15)
-	contract := types.NewContract(providerPubkey, chain, clientPubKey)
+	contract := types.NewContract(providerPubkey, service, clientPubKey)
 	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
@@ -95,12 +95,12 @@ func TestOpenContractHandle(t *testing.T) {
 	pubkey := types.GetRandomPubKey()
 	acc, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
+	service := common.BTCService
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
 		Provider:     pubkey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      acc.String(),
 		Client:       pubkey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -110,7 +110,7 @@ func TestOpenContractHandle(t *testing.T) {
 	}
 	require.NoError(t, s.OpenContractHandle(ctx, &msg))
 
-	contract, err := k.GetActiveContractForUser(ctx, pubkey, pubkey, chain)
+	contract, err := k.GetActiveContractForUser(ctx, pubkey, pubkey, service)
 	require.NoError(t, err)
 
 	require.Equal(t, contract.Type, types.ContractType_PAY_AS_YOU_GO)
@@ -147,15 +147,15 @@ func TestOpenContract(t *testing.T) {
 	providerPubKey := types.GetRandomPubKey()
 	providerAddress, err := providerPubKey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
-	provider := types.NewProvider(providerPubKey, chain)
+	service := common.BTCService
+	provider := types.NewProvider(providerPubKey, service)
 	provider.Bond = cosmos.NewInt(10000000000)
 	provider.LastUpdate = ctx.BlockHeight()
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               provider.Chain.String(),
+		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -169,7 +169,7 @@ func TestOpenContract(t *testing.T) {
 
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      providerAddress.String(),
 		Client:       providerPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -180,7 +180,7 @@ func TestOpenContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
-	contract, err := k.GetActiveContractForUser(ctx, providerPubKey, providerPubKey, chain)
+	contract, err := k.GetActiveContractForUser(ctx, providerPubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
@@ -192,7 +192,7 @@ func TestOpenContract(t *testing.T) {
 
 	msg = types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      clientAddress.String(),
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -203,7 +203,7 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))))
 	require.NoError(t, s.OpenContractHandle(ctx, &msg))
 
-	contract, err = k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	contract, err = k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
@@ -218,7 +218,7 @@ func TestOpenContract(t *testing.T) {
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
-	contract, err = k.GetActiveContractForUser(ctx, delegatePubKey, providerPubKey, chain)
+	contract, err = k.GetActiveContractForUser(ctx, delegatePubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
@@ -231,15 +231,15 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	s := newMsgServer(k, sk)
 
 	providerPubKey := types.GetRandomPubKey()
-	chain := common.BTCChain
-	provider := types.NewProvider(providerPubKey, chain)
+	service := common.BTCService
+	provider := types.NewProvider(providerPubKey, service)
 	provider.Bond = cosmos.NewInt(10000000000)
 	provider.LastUpdate = ctx.BlockHeight()
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               provider.Chain.String(),
+		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -258,7 +258,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
-		Chain:        chain.String(),
+		Service:      service.String(),
 		Creator:      clientAddress.String(),
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
@@ -273,7 +273,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
-	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, chain)
+	contract, err := k.GetActiveContractForUser(ctx, clientPubKey, providerPubKey, service)
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())

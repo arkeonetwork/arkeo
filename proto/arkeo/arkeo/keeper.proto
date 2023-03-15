@@ -14,8 +14,8 @@ enum ProviderStatus {
 message Provider {
   string pub_key = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  int32 chain = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];
+  int32 service = 2
+      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Service" ];
   string metadata_uri = 3;
   uint64 metadata_nonce = 4;
   ProviderStatus status = 5;
@@ -40,8 +40,8 @@ enum ContractType {
 message Contract {
   string provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  int32 chain = 2
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Chain" ];
+  int32 service = 2
+      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Service" ];
   string client = 3
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 4

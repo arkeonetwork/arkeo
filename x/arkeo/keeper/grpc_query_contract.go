@@ -72,12 +72,12 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
 	}
-	chain, err := common.NewChain(req.Chain)
+	service, err := common.NewService(req.Service)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid chain")
+		return nil, status.Error(codes.InvalidArgument, "invalid service")
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, spenderPubKey, providerPubKey, chain)
+	activeContract, err := k.GetActiveContractForUser(ctx, spenderPubKey, providerPubKey, service)
 	if err != nil {
 		return nil, status.Error(codes.Aborted, err.Error())
 	}

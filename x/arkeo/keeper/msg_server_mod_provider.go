@@ -18,7 +18,7 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 	ctx.Logger().Info(
 		"receive MsgModProvider",
 		"proivder", msg.Provider,
-		"chain", msg.Chain,
+		"service", msg.Service,
 		"metatadata uri", msg.MetadataUri,
 		"metadata nonce", msg.MetadataNonce,
 		"status", msg.Status,
@@ -59,11 +59,11 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 		}
 	}
 
-	chain, err := common.NewChain(msg.Chain)
+	service, err := common.NewService(msg.Service)
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, service)
 	if err != nil {
 		return err
 	}
@@ -75,11 +75,11 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 }
 
 func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvider) error {
-	chain, err := common.NewChain(msg.Chain)
+	service, err := common.NewService(msg.Service)
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, chain)
+	provider, err := k.GetProvider(ctx, msg.Provider, service)
 	if err != nil {
 		return err
 	}

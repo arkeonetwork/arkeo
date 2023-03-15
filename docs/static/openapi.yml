@@ -4,9 +4,9 @@ info:
   name: ''
   description: ''
 paths:
-  /arkeo/active-contract/{spender}/{provider}/{chain}:
+  /arkeo/active-contract/{spender}/{provider}/{service}:
     get:
-      summary: Queries an active contract by spender, provider and chain.
+      summary: Queries an active contract by spender, provider and service.
       operationId: ArkeoArkeoActiveContract
       responses:
         '200':
@@ -19,7 +19,7 @@ paths:
                 properties:
                   provider:
                     type: string
-                  chain:
+                  service:
                     type: integer
                     format: int32
                   client:
@@ -54,6 +54,9 @@ paths:
                   id:
                     type: string
                     format: uint64
+                  settlement_duration:
+                    type: string
+                    format: int64
         default:
           description: An unexpected error response.
           schema:
@@ -81,7 +84,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: chain
+        - name: service
           in: path
           required: true
           type: string
@@ -101,7 +104,7 @@ paths:
                 properties:
                   provider:
                     type: string
-                  chain:
+                  service:
                     type: integer
                     format: int32
                   client:
@@ -136,6 +139,9 @@ paths:
                   id:
                     type: string
                     format: uint64
+                  settlement_duration:
+                    type: string
+                    format: int64
         default:
           description: An unexpected error response.
           schema:
@@ -178,7 +184,7 @@ paths:
                   properties:
                     provider:
                       type: string
-                    chain:
+                    service:
                       type: integer
                       format: int32
                     client:
@@ -213,6 +219,9 @@ paths:
                     id:
                       type: string
                       format: uint64
+                    settlement_duration:
+                      type: string
+                      format: int64
               pagination:
                 type: object
                 properties:
@@ -354,7 +363,7 @@ paths:
                   additionalProperties: {}
       tags:
         - Query
-  /arkeo/provider/{pubkey}/{chain}:
+  /arkeo/provider/{pubkey}/{service}:
     get:
       operationId: ArkeoArkeoFetchProvider
       responses:
@@ -368,7 +377,7 @@ paths:
                 properties:
                   pub_key:
                     type: string
-                  chain:
+                  service:
                     type: integer
                     format: int32
                   metadata_uri:
@@ -399,6 +408,9 @@ paths:
                   last_update:
                     type: string
                     format: int64
+                  settlement_duration:
+                    type: string
+                    format: int64
         default:
           description: An unexpected error response.
           schema:
@@ -422,7 +434,7 @@ paths:
           in: path
           required: true
           type: string
-        - name: chain
+        - name: service
           in: path
           required: true
           type: string
@@ -444,7 +456,7 @@ paths:
                   properties:
                     pub_key:
                       type: string
-                    chain:
+                    service:
                       type: integer
                       format: int32
                     metadata_uri:
@@ -473,6 +485,9 @@ paths:
                     bond:
                       type: string
                     last_update:
+                      type: string
+                      format: int64
+                    settlement_duration:
                       type: string
                       format: int64
               pagination:
@@ -43988,7 +44003,7 @@ definitions:
     properties:
       provider:
         type: string
-      chain:
+      service:
         type: integer
         format: int32
       client:
@@ -44023,6 +44038,9 @@ definitions:
       id:
         type: string
         format: uint64
+      settlement_duration:
+        type: string
+        format: int64
   arkeo.arkeo.ContractType:
     type: string
     enum:
@@ -44047,7 +44065,7 @@ definitions:
     properties:
       pub_key:
         type: string
-      chain:
+      service:
         type: integer
         format: int32
       metadata_uri:
@@ -44078,6 +44096,9 @@ definitions:
       last_update:
         type: string
         format: int64
+      settlement_duration:
+        type: string
+        format: int64
   arkeo.arkeo.ProviderStatus:
     type: string
     enum:
@@ -44092,7 +44113,7 @@ definitions:
         properties:
           provider:
             type: string
-          chain:
+          service:
             type: integer
             format: int32
           client:
@@ -44127,6 +44148,9 @@ definitions:
           id:
             type: string
             format: uint64
+          settlement_duration:
+            type: string
+            format: int64
   arkeo.arkeo.QueryAllContractResponse:
     type: object
     properties:
@@ -44137,7 +44161,7 @@ definitions:
           properties:
             provider:
               type: string
-            chain:
+            service:
               type: integer
               format: int32
             client:
@@ -44172,6 +44196,9 @@ definitions:
             id:
               type: string
               format: uint64
+            settlement_duration:
+              type: string
+              format: int64
       pagination:
         type: object
         properties:
@@ -44208,7 +44235,7 @@ definitions:
           properties:
             pub_key:
               type: string
-            chain:
+            service:
               type: integer
               format: int32
             metadata_uri:
@@ -44237,6 +44264,9 @@ definitions:
             bond:
               type: string
             last_update:
+              type: string
+              format: int64
+            settlement_duration:
               type: string
               format: int64
       pagination:
@@ -44273,7 +44303,7 @@ definitions:
         properties:
           provider:
             type: string
-          chain:
+          service:
             type: integer
             format: int32
           client:
@@ -44308,6 +44338,9 @@ definitions:
           id:
             type: string
             format: uint64
+          settlement_duration:
+            type: string
+            format: int64
   arkeo.arkeo.QueryFetchProviderResponse:
     type: object
     properties:
@@ -44316,7 +44349,7 @@ definitions:
         properties:
           pub_key:
             type: string
-          chain:
+          service:
             type: integer
             format: int32
           metadata_uri:
@@ -44345,6 +44378,9 @@ definitions:
           bond:
             type: string
           last_update:
+            type: string
+            format: int64
+          settlement_duration:
             type: string
             format: int64
   arkeo.arkeo.QueryParamsResponse:

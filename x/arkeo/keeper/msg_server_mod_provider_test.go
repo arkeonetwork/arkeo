@@ -17,14 +17,14 @@ func TestModProviderValidate(t *testing.T) {
 	// setup
 	pubkey := types.GetRandomPubKey()
 
-	provider := types.NewProvider(pubkey, common.BTCChain)
+	provider := types.NewProvider(pubkey, common.BTCService)
 	provider.Bond = cosmos.NewInt(500)
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	// happy path
 	msg := types.MsgModProvider{
 		Provider:            provider.PubKey,
-		Chain:               provider.Chain.String(),
+		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
@@ -57,7 +57,7 @@ func TestModProviderHandle(t *testing.T) {
 	msg := types.MsgModProvider{
 		Creator:             acct.String(),
 		Provider:            pubkey,
-		Chain:               common.BTCChain.String(),
+		Service:             common.BTCService.String(),
 		MetadataUri:         "foobar",
 		MetadataNonce:       3,
 		MinContractDuration: 10,
@@ -68,7 +68,7 @@ func TestModProviderHandle(t *testing.T) {
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
-	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCChain)
+	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.MetadataUri, "foobar")
 	require.Equal(t, provider.MetadataNonce, uint64(3))

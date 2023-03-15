@@ -9,22 +9,22 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
-func NewProvider(pubkey common.PubKey, chain common.Chain) Provider {
+func NewProvider(pubkey common.PubKey, service common.Service) Provider {
 	return Provider{
-		PubKey: pubkey,
-		Chain:  chain,
-		Bond:   cosmos.ZeroInt(),
+		PubKey:  pubkey,
+		Service: service,
+		Bond:    cosmos.ZeroInt(),
 	}
 }
 
 func (provider Provider) Key() string {
-	return fmt.Sprintf("%s/%s", provider.PubKey, provider.Chain)
+	return fmt.Sprintf("%s/%s", provider.PubKey, provider.Service)
 }
 
-func NewContract(provider common.PubKey, chain common.Chain, client common.PubKey) Contract {
+func NewContract(provider common.PubKey, service common.Service, client common.PubKey) Contract {
 	return Contract{
 		Provider: provider,
-		Chain:    chain,
+		Service:  service,
 		Client:   client,
 		Delegate: common.EmptyPubKey,
 		Deposit:  cosmos.ZeroInt(),

@@ -14,13 +14,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 
 	for _, provider := range genState.Providers {
 		if err := k.SetProvider(ctx, provider); err != nil {
-			ctx.Logger().Error("unable to set provider", "provider", provider.PubKey, "chain", provider.Chain, "error", err)
+			ctx.Logger().Error("unable to set provider", "provider", provider.PubKey, "service", provider.Service, "error", err)
 		}
 	}
 
 	for _, contract := range genState.Contracts {
 		if err := k.SetContract(ctx, contract); err != nil {
-			ctx.Logger().Error("unable to set contract", "provider", contract.Provider, "chain", contract.Chain, "client", contract.Client, "error", err)
+			ctx.Logger().Error("unable to set contract", "provider", contract.Provider, "service", contract.Service, "client", contract.Client, "error", err)
 		}
 	}
 	k.SetNextContractId(ctx, genState.NextContractId)

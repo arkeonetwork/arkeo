@@ -19,7 +19,7 @@ export interface QueryParamsResponse {
 
 export interface QueryFetchProviderRequest {
   pubkey: string;
-  chain: string;
+  service: string;
 }
 
 export interface QueryFetchProviderResponse {
@@ -56,7 +56,7 @@ export interface QueryAllContractResponse {
 export interface QueryActiveContractRequest {
   spender: string;
   provider: string;
-  chain: string;
+  service: string;
 }
 
 export interface QueryActiveContractResponse {
@@ -151,7 +151,7 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryFetchProviderRequest(): QueryFetchProviderRequest {
-  return { pubkey: "", chain: "" };
+  return { pubkey: "", service: "" };
 }
 
 export const QueryFetchProviderRequest = {
@@ -159,8 +159,8 @@ export const QueryFetchProviderRequest = {
     if (message.pubkey !== "") {
       writer.uint32(10).string(message.pubkey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(18).string(message.service);
     }
     return writer;
   },
@@ -176,7 +176,7 @@ export const QueryFetchProviderRequest = {
           message.pubkey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -189,21 +189,21 @@ export const QueryFetchProviderRequest = {
   fromJSON(object: any): QueryFetchProviderRequest {
     return {
       pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
     };
   },
 
   toJSON(message: QueryFetchProviderRequest): unknown {
     const obj: any = {};
     message.pubkey !== undefined && (obj.pubkey = message.pubkey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryFetchProviderRequest>, I>>(object: I): QueryFetchProviderRequest {
     const message = createBaseQueryFetchProviderRequest();
     message.pubkey = object.pubkey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     return message;
   },
 };
@@ -584,7 +584,7 @@ export const QueryAllContractResponse = {
 };
 
 function createBaseQueryActiveContractRequest(): QueryActiveContractRequest {
-  return { spender: "", provider: "", chain: "" };
+  return { spender: "", provider: "", service: "" };
 }
 
 export const QueryActiveContractRequest = {
@@ -595,8 +595,8 @@ export const QueryActiveContractRequest = {
     if (message.provider !== "") {
       writer.uint32(18).string(message.provider);
     }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(26).string(message.service);
     }
     return writer;
   },
@@ -615,7 +615,7 @@ export const QueryActiveContractRequest = {
           message.provider = reader.string();
           break;
         case 3:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -629,7 +629,7 @@ export const QueryActiveContractRequest = {
     return {
       spender: isSet(object.spender) ? String(object.spender) : "",
       provider: isSet(object.provider) ? String(object.provider) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
     };
   },
 
@@ -637,7 +637,7 @@ export const QueryActiveContractRequest = {
     const obj: any = {};
     message.spender !== undefined && (obj.spender = message.spender);
     message.provider !== undefined && (obj.provider = message.provider);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     return obj;
   },
 
@@ -645,7 +645,7 @@ export const QueryActiveContractRequest = {
     const message = createBaseQueryActiveContractRequest();
     message.spender = object.spender ?? "";
     message.provider = object.provider ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     return message;
   },
 };

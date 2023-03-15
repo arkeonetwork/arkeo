@@ -13,7 +13,7 @@ export interface ArkeoContract {
   provider_pub_key?: string;
 
   /** @format int32 */
-  chain?: number;
+  service?: number;
   client?: string;
   delegate?: string;
   type?: ArkeoContractType;
@@ -63,7 +63,7 @@ export interface ArkeoProvider {
   pub_key?: string;
 
   /** @format int32 */
-  chain?: number;
+  service?: number;
   metadata_uri?: string;
 
   /** @format uint64 */
@@ -409,11 +409,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    *
    * @tags Query
    * @name QueryFetchProvider
-   * @request GET:/arkeo/provider/{pubkey}/{chain}
+   * @request GET:/arkeo/provider/{pubkey}/{service}
    */
-  queryFetchProvider = (pubkey: string, chain: string, params: RequestParams = {}) =>
+  queryFetchProvider = (pubkey: string, service: string, params: RequestParams = {}) =>
     this.request<ArkeoQueryFetchProviderResponse, RpcStatus>({
-      path: `/arkeo/provider/${pubkey}/${chain}`,
+      path: `/arkeo/provider/${pubkey}/${service}`,
       method: "GET",
       format: "json",
       ...params,
@@ -450,11 +450,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryActiveContract
    * @summary Queries a list of ActiveContract items.
-   * @request GET:/arkeonetwork/arkeo/arkeo/active-contract/{spender}/{provider}/{chain}
+   * @request GET:/arkeonetwork/arkeo/arkeo/active-contract/{spender}/{provider}/{service}
    */
-  queryActiveContract = (spender: string, provider: string, chain: string, params: RequestParams = {}) =>
+  queryActiveContract = (spender: string, provider: string, service: string, params: RequestParams = {}) =>
     this.request<ArkeoQueryActiveContractResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/arkeo/active-contract/${spender}/${provider}/${chain}`,
+      path: `/arkeonetwork/arkeo/arkeo/active-contract/${spender}/${provider}/${service}`,
       method: "GET",
       format: "json",
       ...params,

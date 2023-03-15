@@ -15,7 +15,7 @@ export const protobufPackage = "arkeo.arkeo";
 export interface MsgBondProvider {
   creator: string;
   pubKey: string;
-  chain: string;
+  service: string;
   bond: string;
 }
 
@@ -25,7 +25,7 @@ export interface MsgBondProviderResponse {
 export interface MsgModProvider {
   creator: string;
   pubKey: string;
-  chain: string;
+  service: string;
   metadataUri: string;
   metadataNonce: number;
   status: ProviderStatus;
@@ -41,7 +41,7 @@ export interface MsgModProviderResponse {
 export interface MsgOpenContract {
   creator: string;
   pubKey: string;
-  chain: string;
+  service: string;
   client: string;
   delegate: string;
   contractType: ContractType;
@@ -74,7 +74,7 @@ export interface MsgClaimContractIncomeResponse {
 }
 
 function createBaseMsgBondProvider(): MsgBondProvider {
-  return { creator: "", pubKey: "", chain: "", bond: "" };
+  return { creator: "", pubKey: "", service: "", bond: "" };
 }
 
 export const MsgBondProvider = {
@@ -85,8 +85,8 @@ export const MsgBondProvider = {
     if (message.pubKey !== "") {
       writer.uint32(18).string(message.pubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(26).string(message.service);
     }
     if (message.bond !== "") {
       writer.uint32(34).string(message.bond);
@@ -108,7 +108,7 @@ export const MsgBondProvider = {
           message.pubKey = reader.string();
           break;
         case 3:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         case 4:
           message.bond = reader.string();
@@ -125,7 +125,7 @@ export const MsgBondProvider = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
       bond: isSet(object.bond) ? String(object.bond) : "",
     };
   },
@@ -134,7 +134,7 @@ export const MsgBondProvider = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     message.bond !== undefined && (obj.bond = message.bond);
     return obj;
   },
@@ -143,7 +143,7 @@ export const MsgBondProvider = {
     const message = createBaseMsgBondProvider();
     message.creator = object.creator ?? "";
     message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     message.bond = object.bond ?? "";
     return message;
   },
@@ -192,7 +192,7 @@ function createBaseMsgModProvider(): MsgModProvider {
   return {
     creator: "",
     pubKey: "",
-    chain: "",
+    service: "",
     metadataUri: "",
     metadataNonce: 0,
     status: 0,
@@ -211,8 +211,8 @@ export const MsgModProvider = {
     if (message.pubKey !== "") {
       writer.uint32(18).string(message.pubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(26).string(message.service);
     }
     if (message.metadataUri !== "") {
       writer.uint32(34).string(message.metadataUri);
@@ -252,7 +252,7 @@ export const MsgModProvider = {
           message.pubKey = reader.string();
           break;
         case 3:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         case 4:
           message.metadataUri = reader.string();
@@ -287,7 +287,7 @@ export const MsgModProvider = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
       metadataUri: isSet(object.metadataUri) ? String(object.metadataUri) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
       status: isSet(object.status) ? providerStatusFromJSON(object.status) : 0,
@@ -302,7 +302,7 @@ export const MsgModProvider = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     message.metadataUri !== undefined && (obj.metadataUri = message.metadataUri);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
     message.status !== undefined && (obj.status = providerStatusToJSON(message.status));
@@ -317,7 +317,7 @@ export const MsgModProvider = {
     const message = createBaseMsgModProvider();
     message.creator = object.creator ?? "";
     message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     message.metadataUri = object.metadataUri ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
     message.status = object.status ?? 0;
@@ -372,7 +372,7 @@ function createBaseMsgOpenContract(): MsgOpenContract {
   return {
     creator: "",
     pubKey: "",
-    chain: "",
+    service: "",
     client: "",
     delegate: "",
     contractType: 0,
@@ -390,8 +390,8 @@ export const MsgOpenContract = {
     if (message.pubKey !== "") {
       writer.uint32(18).string(message.pubKey);
     }
-    if (message.chain !== "") {
-      writer.uint32(26).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(26).string(message.service);
     }
     if (message.client !== "") {
       writer.uint32(34).string(message.client);
@@ -428,7 +428,7 @@ export const MsgOpenContract = {
           message.pubKey = reader.string();
           break;
         case 3:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         case 4:
           message.client = reader.string();
@@ -460,7 +460,7 @@ export const MsgOpenContract = {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
       pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
       client: isSet(object.client) ? String(object.client) : "",
       delegate: isSet(object.delegate) ? String(object.delegate) : "",
       contractType: isSet(object.contractType) ? contractTypeFromJSON(object.contractType) : 0,
@@ -474,7 +474,7 @@ export const MsgOpenContract = {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
     message.pubKey !== undefined && (obj.pubKey = message.pubKey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     message.client !== undefined && (obj.client = message.client);
     message.delegate !== undefined && (obj.delegate = message.delegate);
     message.contractType !== undefined && (obj.contractType = contractTypeToJSON(message.contractType));
@@ -488,7 +488,7 @@ export const MsgOpenContract = {
     const message = createBaseMsgOpenContract();
     message.creator = object.creator ?? "";
     message.pubKey = object.pubKey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     message.client = object.client ?? "";
     message.delegate = object.delegate ?? "";
     message.contractType = object.contractType ?? 0;

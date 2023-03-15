@@ -42,10 +42,10 @@ func TestArkAuth(t *testing.T) {
 
 	var signature []byte
 	nonce := int64(3)
-	chain := common.BTCChain
+	service := common.BTCService
 	contractId := uint64(50)
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	require.NoError(t, err)
 
@@ -98,9 +98,9 @@ func TestPaidTier(t *testing.T) {
 
 	var signature []byte
 	nonce := int64(3)
-	chain := common.BTCChain.String()
+	service := common.BTCService.String()
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	require.NoError(t, err)
 
@@ -115,7 +115,7 @@ func TestPaidTier(t *testing.T) {
 	}
 	proxy := NewProxy(config)
 
-	contract := types.NewContract(pubkey, common.BTCChain, pk)
+	contract := types.NewContract(pubkey, common.BTCService, pk)
 	contract.Height = 5
 	contract.Duration = 100
 	contract.Id = 545
@@ -171,9 +171,9 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 
 	var signature []byte
 	nonce := int64(3)
-	chain := common.BTCChain.String()
+	service := common.BTCService.String()
 
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), chain, pk, nonce))
+	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message)
 	require.NoError(t, err)
 
@@ -188,7 +188,7 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 	}
 	proxy := NewProxy(config)
 
-	contract := types.NewContract(pubkey, common.BTCChain, pk)
+	contract := types.NewContract(pubkey, common.BTCService, pk)
 	contract.Height = 5
 	contract.Duration = 100
 	contract.Id = 55556

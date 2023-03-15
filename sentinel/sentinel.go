@@ -128,7 +128,7 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 
 	spenderPK, err := common.NewPubKey(parts[2])
 	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "chain", parts[4])
+		p.logger.Error("fail to parse spender pubkey", "error", err, "service", parts[4])
 		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
@@ -140,16 +140,16 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chain, err := common.NewChain(parts[4])
+	service, err := common.NewService(parts[4])
 	if err != nil {
-		p.logger.Error("fail to parse chain", "error", err, "chain", parts[3])
+		p.logger.Error("fail to parse service", "error", err, "service", parts[3])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	contract, err := p.MemStore.GetActiveContract(providerPK, chain, spenderPK)
+	contract, err := p.MemStore.GetActiveContract(providerPK, service, spenderPK)
 	if err != nil {
-		p.logger.Error("fail to get contract from memstore", "error", err, "provider", providerPK, "chain", chain, "spender", spenderPK)
+		p.logger.Error("fail to get contract from memstore", "error", err, "provider", providerPK, "service", service, "spender", spenderPK)
 		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
 		return
 	}

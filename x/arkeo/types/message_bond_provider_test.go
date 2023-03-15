@@ -27,9 +27,9 @@ func TestValidateBasic(t *testing.T) {
 		Provider: pubkey,
 	}
 	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, ErrInvalidChain)
+	require.ErrorIs(t, err, ErrInvalidService)
 
-	msg.Chain = common.BTCChain.String()
+	msg.Service = common.BTCService.String()
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrInvalidBond)
 

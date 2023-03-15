@@ -132,13 +132,13 @@ mnemonic you'd like to use.
 
     Get a list of Online providers from the Directory Service:
     ```bash
-    curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE")|[{pubkey: .Pubkey, chain: .Chain, meta: .MetadataURI}]'
+    curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE")|[{pubkey: .Pubkey, service: .Service, meta: .MetadataURI}]'
 
     # Output
     [
       {
         "pubkey": "tarkeopub1addwnpepq0h7hn9jzhkfwkxgp6kl3ljtjxfvz48emzdrrt5epzjrumpx9kz3w9mjsq9",
-        "chain": "gaia-mainnet-rpc-archive",
+        "service": "gaia-mainnet-rpc-archive",
         "meta": "http://testnet-sentinel.arkeo.shapeshift.com:3636/metadata.json"
       }
     ]
@@ -147,7 +147,7 @@ mnemonic you'd like to use.
     Choose the `gaia-mainnet-rpc-archive` provider:
     ```bash
     ark_provider=tarkeopub1addwnpepq0h7hn9jzhkfwkxgp6kl3ljtjxfvz48emzdrrt5epzjrumpx9kz3w9mjsq9
-    ark_chain=gaia-mainnet-rpc-archive
+    ark_service=gaia-mainnet-rpc-archive
     ```
 
     Open a Subscription contract. This example opens a subscription contract for 20 blocks at a rate of 10 arkeo, depositing 200 to cover the subscription cost.  
@@ -165,7 +165,7 @@ mnemonic you'd like to use.
     ```
     open the contract by broadcasting an arkeo open-contract transaction to the chain:
     ```bash
-    arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
+    arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_service "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
     ```
     if things went well, the last line of output will be the txhash:
     ```bash
@@ -199,7 +199,7 @@ mnemonic you'd like to use.
     ```
     open the contract by broadcasting an arkeo open-contract transaction to the chain:
     ```bash
-    arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_chain "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
+    arkeod tx arkeo open-contract --from $ark_user -- $ark_provider $ark_service "$ark_pubkey" "$ark_contract_type" "$ark_deposit" "$ark_duration" $ark_rate "$ark_settle_duration"
     ```
 1. Make Requests  
 Use arkeo's `curleo` command to subchain rpc requests to the GAIA node:
@@ -223,11 +223,11 @@ On the provider’s behalf, you can claim the rewards for them (for testing purp
     ```bash
     # nonce represents the number of requests made, must increase with each call for given contract
     ark_nonce=20
-    ark_chain=gaia-mainnet-rpc-archive
+    ark_service=gaia-mainnet-rpc-archive
     ```
     
     ```bash
-    ark_provider=$(curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE" and .Chain == "gaia-mainnet-rpc-archive")|[{pubkey: .Pubkey, chain: .Chain, meta: .MetadataURI}]' | jq -r '.[0].pubkey')
+    ark_provider=$(curl -s http://directory.arkeo.shapeshift.com/provider/search/ | jq '.[]|select(.Status == "ONLINE" and .Service == "gaia-mainnet-rpc-archive")|[{pubkey: .Pubkey, service: .Service, meta: .MetadataURI}]' | jq -r '.[0].pubkey')
     ```
     obtain your (spender's) pubkey:
     ```bash
@@ -235,7 +235,7 @@ On the provider’s behalf, you can claim the rewards for them (for testing purp
     ```
     obtain the active contract id
     ```bash
-    ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_chain | jq -r '.contract.id')
+    ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_service | jq -r '.contract.id')
     ```
     use arkeo's `signhere` command to sign the authorization which must accompany paid tier requests
     ```bash
@@ -245,14 +245,14 @@ On the provider’s behalf, you can claim the rewards for them (for testing purp
 
 1. Close a Contract
 Subscription contracts can be cancelled. Pay-as-you-go isn’t available to cancel as you can stop making requests as a form of cancelling.  
-assign chain and obtain our (spender's) pubkey
+assign service and obtain our (spender's) pubkey
 ```bash
-ark_chain=gaia-mainnet-rpc-archive
+ark_service=gaia-mainnet-rpc-archive
 ark_spender=$(arkeod debug pubkey-raw $(arkeod keys show $ark_user -p | jq -r .key) | grep "Bech32 Acc" | awk '{ print $NF }')
 ```
 obtain the active contract id
 ```bash
-ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_chain | jq -r '.contract.id')
+ark_contract_id=$(arkeod query arkeo active-contract -o json $ark_spender $ark_provider $ark_service | jq -r '.contract.id')
 ```
 broadcast the arkeo close-contract transaction to the chain:
 ```bash

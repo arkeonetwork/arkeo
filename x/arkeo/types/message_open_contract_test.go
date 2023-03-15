@@ -26,7 +26,7 @@ func TestBondProviderValidateBasic(t *testing.T) {
 		Creator:  acct.String(),
 		Provider: pubkey,
 		Client:   pubkey,
-		Chain:    common.BTCChain.String(),
+		Service:  common.BTCService.String(),
 	}
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrOpenContractDuration)

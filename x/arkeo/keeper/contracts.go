@@ -49,8 +49,8 @@ func (k KVStore) GetContract(ctx cosmos.Context, id uint64) (types.Contract, err
 
 // SetContract save the entire Contract metadata struct to key value store
 func (k KVStore) SetContract(ctx cosmos.Context, contract types.Contract) error {
-	if contract.Provider.IsEmpty() || contract.Chain.IsEmpty() || contract.Client.IsEmpty() {
-		return errors.New("cannot save a contract with an empty provider pubkey, chain, or client address")
+	if contract.Provider.IsEmpty() || contract.Service.IsEmpty() || contract.Client.IsEmpty() {
+		return errors.New("cannot save a contract with an empty provider pubkey, service, or client address")
 	}
 	k.setContract(ctx, contract)
 	return nil
@@ -194,7 +194,7 @@ func (k KVStore) getUserContractSet(ctx cosmos.Context, key string, contractSet 
 	return true, nil
 }
 
-func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, chain common.Chain) (types.Contract, error) {
+func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, service common.Service) (types.Contract, error) {
 	contractSet, err := k.GetUserContractSet(ctx, user)
 	if err != nil {
 		return types.Contract{}, err
@@ -209,7 +209,7 @@ func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey
 		if err != nil {
 			return types.Contract{}, err
 		}
-		if contract.Provider.Equals(provider) && contract.Chain.Equals(chain) && contract.IsOpen(ctx.BlockHeight()) {
+		if contract.Provider.Equals(provider) && contract.Service.Equals(service) && contract.IsOpen(ctx.BlockHeight()) {
 			return contract, nil
 		}
 	}

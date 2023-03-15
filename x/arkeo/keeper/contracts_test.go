@@ -12,14 +12,14 @@ func TestContract(t *testing.T) {
 	ctx, k := SetupKeeper(t)
 	require.Error(t, k.SetContract(ctx, types.Contract{}))
 
-	contract := types.NewContract(types.GetRandomPubKey(), common.BTCChain, types.GetRandomPubKey())
+	contract := types.NewContract(types.GetRandomPubKey(), common.BTCService, types.GetRandomPubKey())
 	contract.Id = 1
 	err := k.SetContract(ctx, contract)
 	require.NoError(t, err)
 
 	contract, err = k.GetContract(ctx, contract.Id)
 	require.NoError(t, err)
-	require.Equal(t, contract.Chain, common.BTCChain)
+	require.Equal(t, contract.Service, common.BTCService)
 	require.True(t, k.ContractExists(ctx, contract.Id))
 	require.False(t, k.ContractExists(ctx, contract.Id+1))
 

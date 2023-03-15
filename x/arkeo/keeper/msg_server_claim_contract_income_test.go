@@ -20,10 +20,10 @@ func TestValidate(t *testing.T) {
 	// setup
 	pubkey := types.GetRandomPubKey()
 	acc := types.GetRandomBech32Addr()
-	chain := common.BTCChain
+	service := common.BTCService
 	client := types.GetRandomPubKey()
 
-	contract := types.NewContract(pubkey, chain, client)
+	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Rate = 10
 	contract.Height = 10
@@ -56,12 +56,12 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	pubkey := types.GetRandomPubKey()
 	acc, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
+	service := common.BTCService
 	client := types.GetRandomPubKey()
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
 	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
 
-	contract := types.NewContract(pubkey, chain, client)
+	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Rate = 10
 	contract.Type = types.ContractType_PAY_AS_YOU_GO
@@ -120,12 +120,12 @@ func TestHandleSubscription(t *testing.T) {
 	pubkey := types.GetRandomPubKey()
 	acc, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
-	chain := common.BTCChain
+	service := common.BTCService
 	client := types.GetRandomPubKey()
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
 	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
 
-	contract := types.NewContract(pubkey, chain, client)
+	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Rate = 10

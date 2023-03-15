@@ -18,7 +18,7 @@ export interface QueryParamsResponse {
 
 export interface QueryFetchProviderRequest {
   pubkey: string;
-  chain: string;
+  service: string;
 }
 
 export interface QueryFetchProviderResponse {
@@ -36,7 +36,7 @@ export interface QueryAllProviderResponse {
 
 export interface QueryFetchContractRequest {
   pubkey: string;
-  chain: string;
+  service: string;
   client: string;
 }
 
@@ -142,7 +142,7 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryFetchProviderRequest(): QueryFetchProviderRequest {
-  return { pubkey: "", chain: "" };
+  return { pubkey: "", service: "" };
 }
 
 export const QueryFetchProviderRequest = {
@@ -150,8 +150,8 @@ export const QueryFetchProviderRequest = {
     if (message.pubkey !== "") {
       writer.uint32(10).string(message.pubkey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(18).string(message.service);
     }
     return writer;
   },
@@ -167,7 +167,7 @@ export const QueryFetchProviderRequest = {
           message.pubkey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -180,21 +180,21 @@ export const QueryFetchProviderRequest = {
   fromJSON(object: any): QueryFetchProviderRequest {
     return {
       pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
     };
   },
 
   toJSON(message: QueryFetchProviderRequest): unknown {
     const obj: any = {};
     message.pubkey !== undefined && (obj.pubkey = message.pubkey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryFetchProviderRequest>, I>>(object: I): QueryFetchProviderRequest {
     const message = createBaseQueryFetchProviderRequest();
     message.pubkey = object.pubkey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     return message;
   },
 };
@@ -364,7 +364,7 @@ export const QueryAllProviderResponse = {
 };
 
 function createBaseQueryFetchContractRequest(): QueryFetchContractRequest {
-  return { pubkey: "", chain: "", client: "" };
+  return { pubkey: "", service: "", client: "" };
 }
 
 export const QueryFetchContractRequest = {
@@ -372,8 +372,8 @@ export const QueryFetchContractRequest = {
     if (message.pubkey !== "") {
       writer.uint32(10).string(message.pubkey);
     }
-    if (message.chain !== "") {
-      writer.uint32(18).string(message.chain);
+    if (message.service !== "") {
+      writer.uint32(18).string(message.service);
     }
     if (message.client !== "") {
       writer.uint32(26).string(message.client);
@@ -392,7 +392,7 @@ export const QueryFetchContractRequest = {
           message.pubkey = reader.string();
           break;
         case 2:
-          message.chain = reader.string();
+          message.service = reader.string();
           break;
         case 3:
           message.client = reader.string();
@@ -408,7 +408,7 @@ export const QueryFetchContractRequest = {
   fromJSON(object: any): QueryFetchContractRequest {
     return {
       pubkey: isSet(object.pubkey) ? String(object.pubkey) : "",
-      chain: isSet(object.chain) ? String(object.chain) : "",
+      service: isSet(object.service) ? String(object.service) : "",
       client: isSet(object.client) ? String(object.client) : "",
     };
   },
@@ -416,7 +416,7 @@ export const QueryFetchContractRequest = {
   toJSON(message: QueryFetchContractRequest): unknown {
     const obj: any = {};
     message.pubkey !== undefined && (obj.pubkey = message.pubkey);
-    message.chain !== undefined && (obj.chain = message.chain);
+    message.service !== undefined && (obj.service = message.service);
     message.client !== undefined && (obj.client = message.client);
     return obj;
   },
@@ -424,7 +424,7 @@ export const QueryFetchContractRequest = {
   fromPartial<I extends Exact<DeepPartial<QueryFetchContractRequest>, I>>(object: I): QueryFetchContractRequest {
     const message = createBaseQueryFetchContractRequest();
     message.pubkey = object.pubkey ?? "";
-    message.chain = object.chain ?? "";
+    message.service = object.service ?? "";
     message.client = object.client ?? "";
     return message;
   },
