@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 )
 
 func NewSingleHostReverseProxy(target *url.URL) *httputil.ReverseProxy {
@@ -30,6 +29,7 @@ func NewSingleHostReverseProxy(target *url.URL) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{Director: director}
 }
 
+/*
 func joinURLPath(a, b *url.URL) (path, rawpath string) {
 	if a.RawPath == "" && b.RawPath == "" {
 		return singleJoiningSlash(a.Path, b.Path), ""
@@ -62,3 +62,4 @@ func singleJoiningSlash(a, b string) string {
 	}
 	return a + b
 }
+*/

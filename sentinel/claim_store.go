@@ -20,12 +20,12 @@ type ClaimStore struct {
 }
 
 type Claim struct {
-	Provider   common.PubKey
-	ContractId uint64
-	Spender    common.PubKey
-	Nonce      int64
-	Signature  string
-	Claimed    bool
+	Provider   common.PubKey `json:"provider"`
+	ContractId uint64        `json:"contract_id"`
+	Spender    common.PubKey `json:"spender"`
+	Nonce      int64         `json:"nonce"`
+	Signature  string        `json:"signature"`
+	Claimed    bool          `json:"claimed"`
 }
 
 func NewClaim(contractId uint64, spender common.PubKey, nonce int64, signature string) Claim {

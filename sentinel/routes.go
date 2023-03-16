@@ -4,6 +4,6 @@ const (
 	RoutesMetaData       = "/metadata.json"
 	RoutesActiveContract = "/active-contract/"
 	RoutesClaim          = "/claim/"
-	RoutesOpenClaims     = "/open_claims/"
+	RoutesOpenClaims     = "/open-claims/"
 	RoutesDefault        = "/"
 )

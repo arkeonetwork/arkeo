@@ -63,6 +63,39 @@ type: create-blocks
 count: 1
 ---
 ########################################################################################
+# query active contracts on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/active-contract/{{ pubkey_cat }}/{{ pubkey_fox }}/swapi.dev
+asserts:
+  - .provider == "{{ pubkey_fox }}"
+  - .service == 1
+  - .client == "{{ pubkey_cat }}"
+---
+########################################################################################
+# query open claims on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/open-claims
+asserts:
+  - length == 1
+  - .[0].signature == "44a8ca110a13f596e449a95a41e512850c0eed53f08aeb965d12a53a5966c5f148b0502f2600b1aa8ef04376b0f72ede2e09f4e88ea39b0fa7d33e883d6cb6eb"
+  - .[0].claimed == false
+---
+########################################################################################
+# query specific claims on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/claim/0
+asserts:
+  - .signature == "44a8ca110a13f596e449a95a41e512850c0eed53f08aeb965d12a53a5966c5f148b0502f2600b1aa8ef04376b0f72ede2e09f4e88ea39b0fa7d33e883d6cb6eb"
+  - .claimed == false
+  - .contract_id == 0
+---
+########################################################################################
 # claim pay-as-you-go rewards
 ########################################################################################
 type: tx-claim-contract
@@ -94,6 +127,15 @@ endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
 asserts:
   - .balances|length == 1
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---
+########################################################################################
+# query open claims on sentinel, ensure its now "claimed"
+########################################################################################
+type: check
+description: show claims has been removed from active status
+endpoint: http://localhost:3636/open-claims
+asserts:
+  - length == 0
 ---
 ########################################################################################
 # claim pay-as-you-go rewards again, but SHOULD NOT double pay provider

@@ -132,21 +132,21 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 
 	spenderPK, err := common.NewPubKey(parts[2])
 	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "service", parts[4])
+		p.logger.Error("fail to parse spender pubkey", "error", err, "service", parts[2])
 		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
 
 	providerPK, err := common.NewPubKey(parts[3])
 	if err != nil {
-		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[2])
+		p.logger.Error("fail to parse provider pubkey", "error", err, "pubkey", parts[3])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	service, err := common.NewService(parts[4])
 	if err != nil {
-		p.logger.Error("fail to parse service", "error", err, "service", parts[3])
+		p.logger.Error("fail to parse service", "error", err, "service", parts[4])
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
