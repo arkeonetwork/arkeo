@@ -239,11 +239,25 @@ func run(path string) error {
 		}
 	}
 
+	// wait for arkeo to listen on block rpc port
+	for i := 0; ; i++ {
+		time.Sleep(100 * time.Millisecond)
+		conn, err := net.Dial("tcp", "localhost:26657")
+		if err == nil {
+			conn.Close()
+			break
+		}
+		if i%100 == 0 {
+			log.Debug().Msg("Waiting for arkeo to listen")
+		}
+	}
+
 	// setup process for sentinel
-	sentinel := exec.Command("sentinel")
+	sentinel := exec.Command("/regtest/cover-sentinel")
 	sentinel.Env = append(
 		os.Environ(),
-		"PROVIDER_PUBKEY=tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh", // fox pubkey
+		"GOCOVERDIR=/mnt/coverage",
+		fmt.Sprintf("PROVIDER_PUBKEY=%s", templatePubKey["pubkey_fox"]), // fox pubkey
 		"NET=regtest",
 		"MONIKER=regtest",
 		"WEBSITE=n/a",
@@ -372,9 +386,9 @@ func run(path string) error {
 
 		// restart sentinel
 		log.Debug().Msg("Restarting sentinel")
-		// sentinel = exec.Command("sentinel")
-		// sentinel.Stdout = os.Stdout
-		// sentinel.Stderr = os.Stderr
+		sentinel = exec.Command("sentinel")
+		sentinel.Stdout = os.Stdout
+		sentinel.Stderr = os.Stderr
 		err = sentinel.Start()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to restart sentinel")
