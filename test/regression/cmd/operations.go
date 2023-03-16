@@ -9,11 +9,16 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel"
 	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/mitchellh/mapstructure"
@@ -169,9 +174,87 @@ type OpCheck struct {
 	Description   string            `json:"description"`
 	Endpoint      string            `json:"endpoint"`
 	Params        map[string]string `json:"params"`
+	ArkAuth       map[string]string `json:"arkauth"`
 	Status        int               `json:"status"`
 	AssertHeaders map[string]string `json:"headers"`
 	Asserts       []string          `json:"asserts"`
+}
+
+func (op *OpCheck) arkauth() (string, bool, error) {
+	///////// create ark auth signature //////////////
+	if len(op.ArkAuth) == 0 {
+		return "", false, nil
+	}
+	// validate inputs
+	if len(op.ArkAuth["id"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: id")
+	}
+	if len(op.ArkAuth["spender"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: spender")
+	}
+	if len(op.ArkAuth["nonce"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: nonce")
+	}
+
+	id, err := strconv.ParseUint(op.ArkAuth["id"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse id: %s", err)
+	}
+	spender, err := common.NewPubKey(op.ArkAuth["spender"])
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse spender pubkey: %s", err)
+	}
+	nonce, err := strconv.ParseInt(op.ArkAuth["nonce"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
+	}
+
+	mnemonic := ""
+	switch op.ArkAuth["signer"] {
+	case "dog":
+		mnemonic = dogMnemonic
+	case "cat":
+		mnemonic = catMnemonic
+	case "fox":
+		mnemonic = foxMnemonic
+	case "pig":
+		mnemonic = pigMnemonic
+	default:
+		return "", true, fmt.Errorf("ark auth requires a valid signer (dog, cat, fox, pig): %s", op.ArkAuth["signer"])
+	}
+	// get default hd path
+	hdPath := hd.NewFundraiserParams(0, 118, 0).String()
+
+	// create pubkey for mnemonic
+	derivedPriv, err := hd.Secp256k1.Derive()(mnemonic, "", hdPath)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to derive private key")
+	}
+	privKey := hd.Secp256k1.Generate()(derivedPriv)
+
+	// sign our msg
+	msg := sentinel.GenerateMessageToSign(id, spender.String(), nonce)
+	sig, err := privKey.Sign([]byte(msg))
+	if err != nil {
+		return "", true, fmt.Errorf("failed to sign message: %s", err)
+	}
+	arkauth := sentinel.GenerateArkAuthString(id, spender, nonce, sig)
+	/*
+		s, err := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, privKey.PubKey())
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to bech32ify pubkey")
+		}
+		pk := common.PubKey(s)
+
+		// add key to keyring
+		_, err = keyRing.NewAccount(op.ArkAuth["signer"], m, "", hdPath, hd.Secp256k1)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to add account to keyring")
+		}
+	*/
+	//////////////////////////////////////////////////
+
+	return arkauth, true, nil
 }
 
 func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
@@ -191,6 +274,13 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	for k, v := range op.Params {
 		q.Add(k, v)
 	}
+	arkauth, authOK, err := op.arkauth()
+	if err != nil {
+		return err
+	}
+	if authOK {
+		q.Add(sentinel.QueryArkAuth, arkauth)
+	}
 	req.URL.RawQuery = q.Encode()
 
 	// send request
@@ -208,6 +298,9 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	}
 
 	// ensure status code matches
+	if op.Status == 0 { // default to 200
+		op.Status = 200
+	}
 	if resp.StatusCode != op.Status {
 		// dump pretty output for debugging
 		fmt.Println(ColorPurple + "\nOperation:" + ColorReset)
@@ -220,11 +313,11 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 
 	for k, v := range op.AssertHeaders {
 		if val, exists := resp.Header[k]; exists {
-			if val[0] != v {
-				return fmt.Errorf("Bad header: %s != %s", val, v)
-			} else {
-				return fmt.Errorf("Missing header: %s", k)
+			if !strings.EqualFold(val[0], v) {
+				return fmt.Errorf("Bad header: expected %s, got %s", v, val[0])
 			}
+		} else {
+			return fmt.Errorf("Missing header: %s", k)
 		}
 	}
 

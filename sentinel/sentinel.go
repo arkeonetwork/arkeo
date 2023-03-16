@@ -75,7 +75,6 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		r.URL.Host = gaiaHostUrl.Host
 		r.URL.Path = gaiaHostUrl.Path
 	}
-	fmt.Println("PROXY:", r.URL.String())
 
 	// Serve a reverse proxy for a given url
 	// create the reverse proxy

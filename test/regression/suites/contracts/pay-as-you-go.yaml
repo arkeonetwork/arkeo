@@ -34,6 +34,7 @@ endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
   - .contract.type == "PAY_AS_YOU_GO"
   - .contract.paid == "0"
+  - .contract.id == "0"
 ---
 type: check
 description: cat account balance should decrease
@@ -41,3 +42,20 @@ endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
 asserts:
   - .balances|length == 1
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
+---
+########################################################################################
+# check can make a paid request
+########################################################################################
+type: check
+description: check can make paid request
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "0"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+headers:
+  Tier: "paid"
+asserts:
+  - .name == "Luke Skywalker"
+---

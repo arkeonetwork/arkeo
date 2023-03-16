@@ -18,8 +18,8 @@ asserts:
 type: check
 description: check tier header
 endpoint: http://localhost:3636/swapi.dev/api/people/1
-assetheaders:
-  tier: "free"
+headers:
+  Tier: "free"
 status: 200
 asserts:
   - .name == "Luke Skywalker"

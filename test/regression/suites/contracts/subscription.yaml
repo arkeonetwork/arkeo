@@ -48,9 +48,13 @@ asserts:
 type: check
 description: check can make paid request
 endpoint: http://localhost:3636/swapi.dev/api/people/1
-assetheaders:
-  tier: "paid"
-status: 200
+arkauth:
+  signer: cat
+  id: "0"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+headers:
+  Tier: "paid"
 asserts:
   - .name == "Luke Skywalker"
 ---
