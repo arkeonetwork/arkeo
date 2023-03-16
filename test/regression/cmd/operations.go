@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -69,6 +70,8 @@ func NewOperation(opMap map[string]any) Operation {
 		op = &OpTxOpenContract{}
 	case "tx-close-contract":
 		op = &OpTxCloseContract{}
+	case "tx-claim-contract":
+		op = &OpTxClaimContract{}
 	default:
 		log.Fatal().Str("type", t).Msg("unknown operation type")
 	}
@@ -86,7 +89,7 @@ func NewOperation(opMap map[string]any) Operation {
 
 	switch op.(type) {
 	// internal types have MarshalJSON methods necessary to decode
-	case *OpCheck, *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract:
+	case *OpCheck, *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract, *OpTxClaimContract:
 		// encode as json
 		buf := bytes.NewBuffer(nil)
 		enc := json.NewEncoder(buf)
@@ -180,37 +183,37 @@ type OpCheck struct {
 	Asserts       []string          `json:"asserts"`
 }
 
-func (op *OpCheck) arkauth() (string, bool, error) {
+func createAuth(input map[string]string) (string, bool, error) {
 	///////// create ark auth signature //////////////
-	if len(op.ArkAuth) == 0 {
+	if len(input) == 0 {
 		return "", false, nil
 	}
 	// validate inputs
-	if len(op.ArkAuth["id"]) == 0 {
+	if len(input["id"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: id")
 	}
-	if len(op.ArkAuth["spender"]) == 0 {
+	if len(input["spender"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: spender")
 	}
-	if len(op.ArkAuth["nonce"]) == 0 {
+	if len(input["nonce"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: nonce")
 	}
 
-	id, err := strconv.ParseUint(op.ArkAuth["id"], 10, 64)
+	id, err := strconv.ParseUint(input["id"], 10, 64)
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse id: %s", err)
 	}
-	spender, err := common.NewPubKey(op.ArkAuth["spender"])
+	spender, err := common.NewPubKey(input["spender"])
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse spender pubkey: %s", err)
 	}
-	nonce, err := strconv.ParseInt(op.ArkAuth["nonce"], 10, 64)
+	nonce, err := strconv.ParseInt(input["nonce"], 10, 64)
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
 	}
 
 	mnemonic := ""
-	switch op.ArkAuth["signer"] {
+	switch input["signer"] {
 	case "dog":
 		mnemonic = dogMnemonic
 	case "cat":
@@ -220,7 +223,7 @@ func (op *OpCheck) arkauth() (string, bool, error) {
 	case "pig":
 		mnemonic = pigMnemonic
 	default:
-		return "", true, fmt.Errorf("ark auth requires a valid signer (dog, cat, fox, pig): %s", op.ArkAuth["signer"])
+		return "", true, fmt.Errorf("ark auth requires a valid signer (dog, cat, fox, pig): %s", input["signer"])
 	}
 	// get default hd path
 	hdPath := hd.NewFundraiserParams(0, 118, 0).String()
@@ -239,20 +242,6 @@ func (op *OpCheck) arkauth() (string, bool, error) {
 		return "", true, fmt.Errorf("failed to sign message: %s", err)
 	}
 	arkauth := sentinel.GenerateArkAuthString(id, spender, nonce, sig)
-	/*
-		s, err := cosmos.Bech32ifyPubKey(cosmos.Bech32PubKeyTypeAccPub, privKey.PubKey())
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to bech32ify pubkey")
-		}
-		pk := common.PubKey(s)
-
-		// add key to keyring
-		_, err = keyRing.NewAccount(op.ArkAuth["signer"], m, "", hdPath, hd.Secp256k1)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to add account to keyring")
-		}
-	*/
-	//////////////////////////////////////////////////
 
 	return arkauth, true, nil
 }
@@ -274,7 +263,7 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	for k, v := range op.Params {
 		q.Add(k, v)
 	}
-	arkauth, authOK, err := op.arkauth()
+	arkauth, authOK, err := createAuth(op.ArkAuth)
 	if err != nil {
 		return err
 	}
@@ -487,6 +476,35 @@ type OpTxCloseContract struct {
 func (op *OpTxCloseContract) Execute(_ *os.Process, logs chan string) error {
 	signer := sdk.MustAccAddressFromBech32(op.Signer)
 	return sendMsg(&op.MsgCloseContract, signer, op.Sequence, op, logs)
+}
+
+// ------------------------------ OpTxClaimContract ------------------------------
+
+type OpTxClaimContract struct {
+	OpBase                       `yaml:",inline"`
+	arkeo.MsgClaimContractIncome `yaml:",inline"`
+	Signer                       string            `json:"signer"`
+	ArkAuth                      map[string]string `json:"arkauth"`
+	Sequence                     *int64            `json:"sequence"`
+}
+
+func (op *OpTxClaimContract) Execute(_ *os.Process, logs chan string) error {
+	var err error
+	arkauth, authOK, err := createAuth(op.ArkAuth)
+	if err != nil {
+		return err
+	}
+	if !authOK {
+		return fmt.Errorf("missing required field: sig")
+	}
+	parts := strings.Split(arkauth, ":") // fetch the signature from the string
+	op.MsgClaimContractIncome.Signature, err = hex.DecodeString(parts[len(parts)-1])
+	if err != nil {
+		return fmt.Errorf("unable to decode signature: %s", err)
+	}
+
+	signer := sdk.MustAccAddressFromBech32(op.Signer)
+	return sendMsg(&op.MsgClaimContractIncome, signer, op.Sequence, op, logs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

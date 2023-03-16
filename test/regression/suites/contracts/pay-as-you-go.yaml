@@ -59,3 +59,72 @@ headers:
 asserts:
   - .name == "Luke Skywalker"
 ---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# claim pay-as-you-go rewards
+########################################################################################
+type: tx-claim-contract
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+contractId: 0
+spender: {{ pubkey_cat }}
+nonce: 1
+arkauth:
+  signer: cat
+  id: "0"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.paid == "3"
+  - .contract.id == "0"
+---
+type: check
+description: cat account balance should decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---
+########################################################################################
+# claim pay-as-you-go rewards again, but SHOULD NOT double pay provider
+########################################################################################
+type: tx-claim-contract
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+contractId: 0
+spender: {{ pubkey_cat }}
+nonce: 1
+arkauth:
+  signer: cat
+  id: "0"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.paid == "3"
+  - .contract.id == "0"
+---
+type: check
+description: cat account balance should NOT decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---
