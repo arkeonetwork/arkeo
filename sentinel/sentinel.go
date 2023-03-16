@@ -50,9 +50,13 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	parts := strings.Split(r.URL.Path, "/")
 	host := parts[1]
 	parts = append(parts[:1], parts[1+1:]...)
+	r.URL.Scheme = "http"
+	r.URL.Host = host
 	r.URL.Path = strings.Join(parts, "/")
 
 	switch host { // nolint
+	case "swapi.dev":
+		// TODO
 	case "btc-mainnet-fullnode":
 		// TODO
 	case "eth-mainnet-fullnode":
@@ -71,6 +75,7 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 		r.URL.Host = gaiaHostUrl.Host
 		r.URL.Path = gaiaHostUrl.Path
 	}
+	fmt.Println("PROXY:", r.URL.String())
 
 	// Serve a reverse proxy for a given url
 	// create the reverse proxy

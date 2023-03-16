@@ -372,9 +372,9 @@ func run(path string) error {
 
 		// restart sentinel
 		log.Debug().Msg("Restarting sentinel")
-		sentinel = exec.Command("sentinel")
-		sentinel.Stdout = os.Stdout
-		sentinel.Stderr = os.Stderr
+		// sentinel = exec.Command("sentinel")
+		// sentinel.Stdout = os.Stdout
+		// sentinel.Stderr = os.Stderr
 		err = sentinel.Start()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to restart sentinel")

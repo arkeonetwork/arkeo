@@ -81,7 +81,7 @@ func NewOperation(opMap map[string]any) Operation {
 
 	switch op.(type) {
 	// internal types have MarshalJSON methods necessary to decode
-	case *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract:
+	case *OpCheck, *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract:
 		// encode as json
 		buf := bytes.NewBuffer(nil)
 		enc := json.NewEncoder(buf)
@@ -165,12 +165,13 @@ func (op *OpState) Execute(*os.Process, chan string) error {
 ////////////////////////////////////////////////////////////////////////////////////////
 
 type OpCheck struct {
-	OpBase      `yaml:",inline"`
-	Description string            `json:"description"`
-	Endpoint    string            `json:"endpoint"`
-	Params      map[string]string `json:"params"`
-	Status      int               `json:"status"`
-	Asserts     []string          `json:"asserts"`
+	OpBase        `yaml:",inline"`
+	Description   string            `json:"description"`
+	Endpoint      string            `json:"endpoint"`
+	Params        map[string]string `json:"params"`
+	Status        int               `json:"status"`
+	AssertHeaders map[string]string `json:"headers"`
+	Asserts       []string          `json:"asserts"`
 }
 
 func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
@@ -215,6 +216,16 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 		fmt.Println(string(buf) + "\n")
 
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	for k, v := range op.AssertHeaders {
+		if val, exists := resp.Header[k]; exists {
+			if val[0] != v {
+				return fmt.Errorf("Bad header: %s != %s", val, v)
+			} else {
+				return fmt.Errorf("Missing header: %s", k)
+			}
+		}
 	}
 
 	// pipe response to jq for assertions
