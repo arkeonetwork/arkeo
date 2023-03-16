@@ -43,6 +43,18 @@ asserts:
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
 ---
 ########################################################################################
+# check can make a paid request
+########################################################################################
+type: check
+description: check can make paid request
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+assetheaders:
+  tier: "paid"
+status: 200
+asserts:
+  - .name == "Luke Skywalker"
+---
+########################################################################################
 # check subscription settles okay
 ########################################################################################
 type: create-blocks
@@ -125,4 +137,3 @@ description: ensure contract is closed
 endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "20"
-
