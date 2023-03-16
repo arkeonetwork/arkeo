@@ -10,7 +10,7 @@ type: tx-bond-provider
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 provider: {{ pubkey_fox }}
-chain: "btc-mainnet-fullnode"
+service: "btc-mainnet-fullnode"
 bond: "1000000000000001"
 ---
 type: create-blocks
@@ -35,7 +35,7 @@ type: tx-bond-provider
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 provider: {{ pubkey_fox }}
-chain: "btc-mainnet-fullnode"
+service: "btc-mainnet-fullnode"
 bond: "100000"
 ---
 type: create-blocks
@@ -62,7 +62,7 @@ type: tx-mod-provider
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 provider: {{ pubkey_fox }}
-chain: "btc-mainnet-fullnode"
+service: "btc-mainnet-fullnode"
 metadata_uri: "my_uri"
 metadata_nonce: 1
 status: 1
@@ -104,7 +104,7 @@ type: tx-bond-provider
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 provider: {{ pubkey_fox }}
-chain: "btc-mainnet-fullnode"
+service: "btc-mainnet-fullnode"
 bond: "-100001"
 ---
 type: create-blocks
@@ -131,7 +131,7 @@ type: tx-bond-provider
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 provider: {{ pubkey_fox }}
-chain: "btc-mainnet-fullnode"
+service: "btc-mainnet-fullnode"
 bond: "-100000"
 ---
 type: create-blocks

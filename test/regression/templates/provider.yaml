@@ -4,7 +4,7 @@ genesis:
     arkeo:
       providers:
         - pub_key: {{ pubkey_fox }}
-          chain: 1
+          service: 1
           metadata_uri: "localhost:3636"
           metadata_nonce: 0
           status: 1

@@ -12,7 +12,7 @@ type: tx-open-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
-chain: "swapi.dev"
+service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "PAY_AS_YOU_GO"
 duration: 10
