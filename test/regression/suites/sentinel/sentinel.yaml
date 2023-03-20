@@ -1,0 +1,25 @@
+{{ template "default-state.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# check metadata.json replies
+########################################################################################
+type: check
+description: check metadata.json
+endpoint: http://localhost:3636/metadata.json
+asserts:
+  - .config.moniker == "regtest"
+---
+########################################################################################
+# check force paid fails a request
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+headers:
+  Tier: "free"
+status: 200
+asserts:
+  - .name == "Luke Skywalker"

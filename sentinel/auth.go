@@ -96,6 +96,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		remoteAddr := p.getRemoteAddr(r)
 		if err == nil && aa.Validate(p.Config.ProviderPubKey) == nil {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
+			w.Header().Set("tier", "paid")
 			httpCode, err := p.paidTier(aa, remoteAddr)
 			// paidTier can serve the request
 			if err == nil {
@@ -104,7 +105,9 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			}
 			p.logger.Error("failed to serve paid tier request", "error", err, "http_code", httpCode)
 		}
+
 		p.logger.Info("serving free tier requests", "remote-addr", remoteAddr)
+		w.Header().Set("tier", "free")
 		httpCode, err := p.freeTier(remoteAddr)
 		if err != nil {
 			p.logger.Error("failed to serve free tier request", "error", err)

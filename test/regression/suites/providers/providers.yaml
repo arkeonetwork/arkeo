@@ -1,0 +1,150 @@
+{{ template "default-state.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# bond up a provider with too much bond
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+bond: "1000000000000001"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: check that bonding to a data provider works
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 1000000000000000
+---
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 0
+---
+########################################################################################
+# bond up a provider
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+bond: "100000"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: check that bonding to a data provider works
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 999999999900000
+---
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 1
+  - .provider[0] | .pub_key == "{{ pubkey_fox }}"
+  - .provider[0] | .bond | tonumber == 100000
+---
+########################################################################################
+# modify bond provider
+########################################################################################
+type: tx-mod-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+metadata_uri: "my_uri"
+metadata_nonce: 1
+status: 1
+min_contract_duration: 2
+max_contract_duration: 3
+subscription_rate: 4
+pay_as_you_go_rate: 5
+settlement_duration: 6
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: check that bonding to a data provider works
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 999999999900000
+---
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 1
+  - .provider[0] | .pub_key == "{{ pubkey_fox }}"
+  - .provider[0] | .bond | tonumber == 100000
+  - .provider[0] | .metadata_uri == "my_uri"
+  - .provider[0] | .metadata_nonce | tonumber == 1
+  - .provider[0] | .status == "ONLINE"
+  - .provider[0] | .min_contract_duration | tonumber == 2
+  - .provider[0] | .max_contract_duration | tonumber == 3
+  - .provider[0] | .subscription_rate | tonumber == 4
+  - .provider[0] | .pay_as_you_go_rate | tonumber == 5
+  - .provider[0] | .settlement_duration | tonumber == 6
+---
+########################################################################################
+# unbond up a provider (too much)
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+bond: "-100001"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: check that bonding to a data provider works
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 999999999900000
+---
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 1
+  - .provider[0] | .pub_key == "{{ pubkey_fox }}"
+  - .provider[0] | .bond | tonumber == 100000
+---
+########################################################################################
+# unbond up a provider
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+bond: "-100000"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: check that bonding to a data provider works
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 1000000000000000
+---
+type: check
+description: provider should exist
+endpoint: http://localhost:1317/arkeo/providers
+asserts:
+  - .provider | length == 0

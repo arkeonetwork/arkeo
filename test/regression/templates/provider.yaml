@@ -1,0 +1,16 @@
+type: state
+genesis:
+  app_state:
+    arkeo:
+      providers:
+        - pub_key: {{ pubkey_fox }}
+          service: 1
+          metadata_uri: "localhost:3636"
+          metadata_nonce: 0
+          status: 1
+          min_contract_duration: 3
+          max_contract_duration: 10
+          subscription_rate: 10
+          pay_as_you_go_rate: 3
+          bond: "1000000000000"
+          last_update: 1

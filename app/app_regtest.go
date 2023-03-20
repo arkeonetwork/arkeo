@@ -1,5 +1,5 @@
-//go:build !regtest
-// +build !regtest
+//go:build regtest
+// +build regtest
 
 package app
 
@@ -144,6 +144,9 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 }
 
 var (
+	begin = make(chan struct{})
+	end   = make(chan struct{})
+
 	// DefaultNodeHome default home directories for the application daemon
 	DefaultNodeHome string
 
@@ -207,6 +210,14 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+Name)
+
+	// start an http server to unblock a block creation when a request is received
+	newBlock := func(w http.ResponseWriter, r *http.Request) {
+		begin <- struct{}{}
+		<-end
+	}
+	http.HandleFunc("/newBlock", newBlock)
+	go http.ListenAndServe(":8080", nil)
 }
 
 // App extends an ABCI application, but with most of its parameters exported.
@@ -744,11 +755,13 @@ func (app App) GetBaseApp() *baseapp.BaseApp { return app.BaseApp }
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+	<-begin
 	return app.mm.BeginBlock(ctx, req)
 }
 
 // EndBlocker application updates every end block
 func (app *App) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+	defer func() { end <- struct{}{} }()
 	return app.mm.EndBlock(ctx, req)
 }
 
