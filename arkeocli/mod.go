@@ -21,7 +21,7 @@ func newModProviderCmd() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(modProviderCmd)
-	modProviderCmd.Flags().String("pubkey", "", "provider pubkey")
+	modProviderCmd.Flags().String("provider-pubkey", "", "provider pubkey")
 	modProviderCmd.Flags().String("service", "", "provider service name")
 	modProviderCmd.Flags().String("status", "", "provider status (online or offline)")
 	modProviderCmd.Flags().String("meta-uri", "", "public endpoint where metadata can be found")
@@ -53,7 +53,7 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	argPubkey, _ := cmd.Flags().GetString("pubkey")
+	argPubkey, _ := cmd.Flags().GetString("provider-pubkey")
 	if argPubkey == "" {
 		argPubkey, err = toPubkey(cmd, addr)
 		if err != nil {
