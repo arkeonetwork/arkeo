@@ -2,7 +2,7 @@
 # Arkeo
 #
 
-ARG GO_VERSION="1.18"
+ARG GO_VERSION="1.20"
 
 #
 # Build

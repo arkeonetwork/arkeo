@@ -1,6 +1,6 @@
 module github.com/arkeonetwork/arkeo
 
-go 1.18
+go 1.20
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
