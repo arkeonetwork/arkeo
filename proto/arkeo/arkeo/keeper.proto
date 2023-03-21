@@ -30,6 +30,7 @@ message Provider {
   ];
   int64 last_update = 11;
   int64 settlement_duration = 12;
+  bool support_pay_as_you_go = 13;
 }
 
 enum ContractType {
