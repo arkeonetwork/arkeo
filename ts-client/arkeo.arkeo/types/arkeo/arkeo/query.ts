@@ -60,6 +60,7 @@ export interface QueryActiveContractRequest {
 }
 
 export interface QueryActiveContractResponse {
+  contract: Contract | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -651,11 +652,14 @@ export const QueryActiveContractRequest = {
 };
 
 function createBaseQueryActiveContractResponse(): QueryActiveContractResponse {
-  return {};
+  return { contract: undefined };
 }
 
 export const QueryActiveContractResponse = {
-  encode(_: QueryActiveContractResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: QueryActiveContractResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.contract !== undefined) {
+      Contract.encode(message.contract, writer.uint32(10).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -666,6 +670,9 @@ export const QueryActiveContractResponse = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.contract = Contract.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -674,17 +681,21 @@ export const QueryActiveContractResponse = {
     return message;
   },
 
-  fromJSON(_: any): QueryActiveContractResponse {
-    return {};
+  fromJSON(object: any): QueryActiveContractResponse {
+    return { contract: isSet(object.contract) ? Contract.fromJSON(object.contract) : undefined };
   },
 
-  toJSON(_: QueryActiveContractResponse): unknown {
+  toJSON(message: QueryActiveContractResponse): unknown {
     const obj: any = {};
+    message.contract !== undefined && (obj.contract = message.contract ? Contract.toJSON(message.contract) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<QueryActiveContractResponse>, I>>(_: I): QueryActiveContractResponse {
+  fromPartial<I extends Exact<DeepPartial<QueryActiveContractResponse>, I>>(object: I): QueryActiveContractResponse {
     const message = createBaseQueryActiveContractResponse();
+    message.contract = (object.contract !== undefined && object.contract !== null)
+      ? Contract.fromPartial(object.contract)
+      : undefined;
     return message;
   },
 };
@@ -697,7 +708,7 @@ export interface Query {
   ProviderAll(request: QueryAllProviderRequest): Promise<QueryAllProviderResponse>;
   FetchContract(request: QueryFetchContractRequest): Promise<QueryFetchContractResponse>;
   ContractAll(request: QueryAllContractRequest): Promise<QueryAllContractResponse>;
-  /** Queries a list of ActiveContract items. */
+  /** Queries an active contract by spender, provider and service. */
   ActiveContract(request: QueryActiveContractRequest): Promise<QueryActiveContractResponse>;
 }
 
