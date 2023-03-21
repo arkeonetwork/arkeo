@@ -45,7 +45,8 @@
           "service": 1,
           "settlement_duration": "0",
           "status": "ONLINE",
-          "subscription_rate": "10"
+          "subscription_rate": "10",
+          "support_pay_as_you_go": true
         }
       ],
       "user_contract_sets": [

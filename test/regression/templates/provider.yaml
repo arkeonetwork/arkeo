@@ -14,3 +14,4 @@ genesis:
           pay_as_you_go_rate: 3
           bond: "1000000000000"
           last_update: 1
+          support_pay_as_you_go: true
