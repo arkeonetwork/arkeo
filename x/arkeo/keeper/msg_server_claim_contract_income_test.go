@@ -7,6 +7,12 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/std"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,10 +24,22 @@ func TestValidate(t *testing.T) {
 	s := newMsgServer(k, sk)
 
 	// setup
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
+	types.RegisterInterfaces(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+
 	pubkey := types.GetRandomPubKey()
 	acc := types.GetRandomBech32Addr()
 	service := common.BTCService
-	client := types.GetRandomPubKey()
+	kb := cKeys.NewInMemory(cdc)
+	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
+	require.NoError(t, err)
+	pk, err := info.GetPubKey()
+	require.NoError(t, err)
+	client, err := common.NewPubKeyFromCrypto(pk)
+	require.NoError(t, err)
 
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
@@ -34,11 +52,16 @@ func TestValidate(t *testing.T) {
 	require.NoError(t, k.SetContract(ctx, contract))
 
 	// happy path
+
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
 		Creator:    acc.String(),
 		Nonce:      20,
 	}
+
+	message := msg.GetBytesToSign()
+	msg.Signature, _, err = kb.Sign("whatever", message)
+	require.NoError(t, err)
 	require.NoError(t, s.ClaimContractIncomeValidate(ctx, &msg))
 
 	// check closed contract

@@ -58,11 +58,6 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 	err = msg.ValidateBasic()
 	require.NoError(t, err)
-
-	// check bad client
-	msg.Spender = common.PubKey("bogus")
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidPubKey)
 }
 
 func TestValidateSignature(t *testing.T) {
