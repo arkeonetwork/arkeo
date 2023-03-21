@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
@@ -34,11 +33,10 @@ type IndexerAppParams struct {
 }
 
 type IndexerApp struct {
-	Height   int64
-	IsSynced atomic.Bool
-	params   IndexerAppParams
-	db       *db.DirectoryDB
-	done     chan struct{}
+	Height int64
+	params IndexerAppParams
+	db     *db.DirectoryDB
+	done   chan struct{}
 }
 
 func NewIndexer(params IndexerAppParams) *IndexerApp {
