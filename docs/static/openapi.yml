@@ -595,10 +595,10 @@ paths:
           type: boolean
       tags:
         - Query
-  /arkeonetwork/arkeo/claim/claimrecord/{address}:
+  /arkeo/claim/claimrecord/{address}:
     get:
       summary: Queries a list of ClaimRecord items.
-      operationId: ArkeonetworkArkeoClaimClaimRecord
+      operationId: ArkeoClaimClaimRecord
       responses:
         '200':
           description: A successful response.
@@ -703,10 +703,10 @@ paths:
           default: ARKEO
       tags:
         - Query
-  /arkeonetwork/arkeo/claim/params:
+  /arkeo/claim/params:
     get:
       summary: Parameters queries the parameters of the module.
-      operationId: ArkeonetworkArkeoClaimParams
+      operationId: ArkeoClaimParams
       responses:
         '200':
           description: A successful response.
@@ -44790,13 +44790,13 @@ definitions:
                   "@type": "type.googleapis.com/google.protobuf.Duration",
                   "value": "1.212s"
                 }
-  arkeonetwork.arkeo.claim.Chain:
+  arkeo.claim.Chain:
     type: string
     enum:
       - ARKEO
       - ETHEREUM
     default: ARKEO
-  arkeonetwork.arkeo.claim.ClaimRecord:
+  arkeo.claim.ClaimRecord:
     type: object
     properties:
       chain:
@@ -44852,15 +44852,15 @@ definitions:
       is_transferable:
         type: boolean
     title: A Claim Records is the metadata of claim data per address
-  arkeonetwork.arkeo.claim.MsgAddClaimResponse:
+  arkeo.claim.MsgAddClaimResponse:
     type: object
-  arkeonetwork.arkeo.claim.MsgClaimArkeoResponse:
+  arkeo.claim.MsgClaimArkeoResponse:
     type: object
-  arkeonetwork.arkeo.claim.MsgClaimEthResponse:
+  arkeo.claim.MsgClaimEthResponse:
     type: object
-  arkeonetwork.arkeo.claim.MsgTransferClaimResponse:
+  arkeo.claim.MsgTransferClaimResponse:
     type: object
-  arkeonetwork.arkeo.claim.Params:
+  arkeo.claim.Params:
     type: object
     properties:
       airdrop_start_time:
@@ -44887,7 +44887,7 @@ definitions:
           signatures required by gogoproto.
         title: uarkeo to distribute to arkeo account for gas to make claiming easier
     description: Params defines the parameters for the module.
-  arkeonetwork.arkeo.claim.QueryClaimRecordResponse:
+  arkeo.claim.QueryClaimRecordResponse:
     type: object
     properties:
       claim_record:
@@ -44955,7 +44955,7 @@ definitions:
           is_transferable:
             type: boolean
         title: A Claim Records is the metadata of claim data per address
-  arkeonetwork.arkeo.claim.QueryParamsResponse:
+  arkeo.claim.QueryParamsResponse:
     type: object
     properties:
       params:
