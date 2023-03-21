@@ -113,15 +113,3 @@ func validateMetadataURI(uri string) bool {
 	}
 	return true
 }
-
-// not sure we need this, coming from the chain...
-func validateProviderStatus(s string) bool {
-	switch types.ProviderStatus(s) {
-	case types.ProviderStatusOffline:
-		return true
-	case types.ProviderStatusOnline:
-		return true
-	default:
-		return false
-	}
-}

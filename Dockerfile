@@ -23,16 +23,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 ARG TAG=testnet
-RUN make install
-
-# directory db migration utility
-RUN go install github.com/jackc/tern@latest
+RUN make install && go install github.com/jackc/tern@latest
 
 #
 # Main
 #
 FROM ubuntu:kinetic
 
+# hadolint ignore=DL3008,DL4006
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \

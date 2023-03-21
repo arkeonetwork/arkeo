@@ -177,11 +177,17 @@ func (a *IndexerApp) realtime() {
 		if err = client.Start(); err != nil {
 			panic(fmt.Sprintf("error starting ws client: %s: %+v", a.params.TendermintWs, err))
 		}
-		defer client.Stop()
+		defer func() {
+			if err := client.Stop(); err != nil {
+				log.Errorf("error stopping client: %+v", err)
+			}
+		}()
 		clients[i] = client
 	}
 
-	a.consumeEvents(clients)
+	if err := a.consumeEvents(clients); err != nil {
+		log.Errorf("error consuming events: %+v", err)
+	}
 	a.done <- struct{}{}
 }
 

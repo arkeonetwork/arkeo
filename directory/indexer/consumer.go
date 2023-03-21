@@ -58,7 +58,7 @@ func tmAttributeSource(tx tmtypes.Tx, evt abcitypes.Event, height int64) func() 
 
 	if tx != nil {
 		if _, ok := attribs["hash"]; !ok {
-			attribs["hash"] = strings.ToUpper(hex.EncodeToString(tx.Hash()[:]))
+			attribs["hash"] = strings.ToUpper(hex.EncodeToString(tx.Hash()))
 		}
 	}
 

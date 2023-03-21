@@ -38,14 +38,15 @@ func ParseCoordinates(coordinates string) (types.Coordinates, error) {
 	return types.Coordinates{Latitude: latitude, Longitude: longitude}, nil
 }
 
-func ParseContractType(contractType string) (types.ContractType, error) {
-	if types.ContractType(contractType) == types.ContractTypePayAsYouGo {
-		return types.ContractType(contractType), nil
-	} else if types.ContractType(contractType) == types.ContractTypeSubscription {
-		return types.ContractType(contractType), nil
-	} else {
-		return types.ContractTypePayAsYouGo, fmt.Errorf("unexpected contract type %s", contractType)
+func ParseContractType(contractTypeStr string) (types.ContractType, error) {
+	contractType := types.ContractType(contractTypeStr)
+	switch contractType {
+	case types.ContractTypePayAsYouGo:
+	case types.ContractTypeSubscription:
+	default:
+		return contractType, fmt.Errorf("unexpected contract type %s", contractTypeStr)
 	}
+	return contractType, nil
 }
 
 func IsNearEqual(a float64, b float64, epsilon float64) bool {

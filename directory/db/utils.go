@@ -56,6 +56,7 @@ func selectOne(conn *pgxpool.Conn, sql string, target interface{}, params ...int
 	return nil
 }
 
+// nolint
 func selectMany(conn *pgxpool.Conn, sql string, params ...interface{}) ([]map[string]interface{}, error) {
 	results := make([]map[string]interface{}, 0, 512)
 	if err := pgxscan.Select(context.Background(), conn, &results, sql, params...); err != nil {
