@@ -3,11 +3,12 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestOpenContractValidate(t *testing.T) {
@@ -32,6 +33,7 @@ func TestOpenContractValidate(t *testing.T) {
 	provider.SubscriptionRate = 15
 	provider.PayAsYouGoRate = 2
 	provider.LastUpdate = 1
+	provider.SupportPayAsYouGo = true
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	// happy path
@@ -161,6 +163,7 @@ func TestOpenContract(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
+		SupportPayAsYouGo:   true,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -246,6 +249,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
 		SettlementDuration:  10,
+		SupportPayAsYouGo:   true,
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -315,4 +319,50 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	claimMsg.Nonce = 21
 	_, err = s.ClaimContractIncome(ctx, &claimMsg)
 	require.ErrorIs(t, err, types.ErrClaimContractIncomeClosed)
+}
+
+func TestOpenContractNotSupportPayAsYouGo(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(10)
+	s := newMsgServer(k, sk)
+
+	providerPubKey := types.GetRandomPubKey()
+	service := common.BTCService
+	provider := types.NewProvider(providerPubKey, service)
+	provider.Bond = cosmos.NewInt(10000000000)
+	provider.LastUpdate = ctx.BlockHeight()
+	require.NoError(t, k.SetProvider(ctx, provider))
+
+	modProviderMsg := types.MsgModProvider{
+		Provider:            provider.PubKey,
+		Service:             provider.Service.String(),
+		MinContractDuration: 10,
+		MaxContractDuration: 500,
+		Status:              types.ProviderStatus_ONLINE,
+		PayAsYouGoRate:      15,
+		SubscriptionRate:    15,
+		SettlementDuration:  10,
+		SupportPayAsYouGo:   false,
+	}
+	err := s.ModProviderHandle(ctx, &modProviderMsg)
+	require.NoError(t, err)
+
+	clientPubKey := types.GetRandomPubKey()
+	clientAddress, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+	require.NoError(t, k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))))
+
+	msg := types.MsgOpenContract{
+		Provider:           providerPubKey,
+		Service:            service.String(),
+		Creator:            clientAddress.String(),
+		Client:             clientPubKey,
+		ContractType:       types.ContractType_PAY_AS_YOU_GO,
+		Duration:           100,
+		Rate:               15,
+		Deposit:            cosmos.NewInt(1500),
+		SettlementDuration: 10,
+	}
+	_, err = s.OpenContract(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrProviderNotSupportPayAsYouGo)
 }

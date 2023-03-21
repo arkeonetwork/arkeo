@@ -2,7 +2,7 @@ package types
 
 import (
 	"encoding/json"
-	fmt "fmt"
+	"fmt"
 	"strconv"
 
 	"github.com/arkeonetwork/arkeo/common"

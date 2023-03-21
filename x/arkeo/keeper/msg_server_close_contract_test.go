@@ -3,11 +3,12 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCloseContractValidate(t *testing.T) {
@@ -225,6 +226,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
+		SupportPayAsYouGo:   true,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 

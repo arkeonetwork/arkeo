@@ -45,6 +45,7 @@ message MsgModProvider {
   int64 subscription_rate = 9;
   int64 pay_as_you_go_rate = 10;
   int64 settlement_duration = 11;
+  bool support_pay_as_you_go = 12;
 }
 
 message MsgModProviderResponse {}

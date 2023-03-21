@@ -16,6 +16,7 @@ var _ sdk.Msg = &MsgModProvider{}
 func NewMsgModProvider(creator string, provider common.PubKey, service, metadataUri string,
 	metadataNonce uint64, status ProviderStatus, minContractDuration,
 	maxContractDuration, subscriptionRate, payAsYouGoRate, settlementDuration int64,
+	supportPayAsYouGo bool,
 ) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
@@ -29,6 +30,7 @@ func NewMsgModProvider(creator string, provider common.PubKey, service, metadata
 		SubscriptionRate:    subscriptionRate,
 		PayAsYouGoRate:      payAsYouGoRate,
 		SettlementDuration:  settlementDuration,
+		SupportPayAsYouGo:   supportPayAsYouGo,
 	}
 }
 
