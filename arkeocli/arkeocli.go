@@ -10,6 +10,5 @@ func GetArkeoCmd() *cobra.Command {
 		Short: "arkeo subcommands",
 	}
 	arkeoCmd.AddCommand(newBondProviderCmd())
-	arkeoCmd.AddCommand(newModProviderCmd())
 	return arkeoCmd
 }
