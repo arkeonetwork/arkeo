@@ -106,7 +106,7 @@ func DownloadProviderMetadata(metadataUrl string, retries int, maxBytes int) (*s
 		}
 	default:
 		if raw, err = readFromNetwork(u, retries, maxBytes); err != nil {
-			return nil, errors.Wrapf(err, "error reading metadata from fs")
+			return nil, errors.Wrapf(err, "error reading metadata from network")
 		}
 	}
 
