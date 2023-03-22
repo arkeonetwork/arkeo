@@ -368,5 +368,5 @@ func TestOpenContractNotSupportPayAsYouGo(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	_, err = s.OpenContract(ctx, &msg)
-	require.ErrorIs(t, err, types.ErrProviderNotSupportPayAsYouGo)
+	require.ErrorIs(t, err, types.ErrProviderPayAsYouGoDisabled)
 }

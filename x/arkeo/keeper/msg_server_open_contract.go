@@ -80,7 +80,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	switch msg.ContractType {
 	case types.ContractType_SUBSCRIPTION:
 		if !provider.SubscriptionEnabled {
-			return errors.Wrapf(types.ErrProviderNotSupportSubscription, "provider: %s doesn't support subscription", provider.PubKey)
+			return errors.Wrapf(types.ErrProviderSubscriptionDisabled, "provider: %s doesn't support subscription", provider.PubKey)
 		}
 		if msg.Rate != provider.SubscriptionRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
@@ -90,7 +90,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		}
 	case types.ContractType_PAY_AS_YOU_GO:
 		if !provider.PayAsYouGoEnabled {
-			return errors.Wrapf(types.ErrProviderNotSupportPayAsYouGo, "provider: %s doesn't support pay as you go", provider.PubKey)
+			return errors.Wrapf(types.ErrProviderPayAsYouGoDisabled, "provider: %s doesn't support pay as you go", provider.PubKey)
 		}
 		if msg.Rate != provider.PayAsYouGoRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)

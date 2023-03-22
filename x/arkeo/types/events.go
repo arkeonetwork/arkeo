@@ -3,8 +3,9 @@ package types
 import (
 	"strconv"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const (
@@ -85,6 +86,8 @@ func NewModProviderEvent(provider *Provider) sdk.Event {
 		sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
 		sdk.NewAttribute("bond", provider.Bond.String()),
 		sdk.NewAttribute("settlement_duration", strconv.FormatInt(provider.SettlementDuration, 10)),
+		sdk.NewAttribute("pay-as-you-go-enabled", strconv.FormatBool(provider.PayAsYouGoEnabled)),
+		sdk.NewAttribute("subscription-enabled", strconv.FormatBool(provider.SubscriptionEnabled)),
 	)
 }
 
