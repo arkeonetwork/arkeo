@@ -34,7 +34,10 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	nonce, _ := cmd.Flags().GetInt64("nonce")
+	nonce, err := cmd.Flags().GetInt64("nonce")
+	if err != nil {
+		return err
+	}
 	if nonce == 0 {
 		nonceString, err := promptForArg(cmd, "Specify nonce: ")
 		if err != nil {
@@ -78,7 +81,10 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	queryClient := types.NewQueryClient(queryCtx)
 
 	var contract types.Contract
-	contractID, _ := cmd.Flags().GetUint64("contract-id")
+	contractID, err := cmd.Flags().GetUint64("contract-id")
+	if err != nil {
+		return err
+	}
 	if contractID != 0 {
 		params := &types.QueryFetchContractRequest{ContractId: contractID}
 		res, err := queryClient.FetchContract(cmd.Context(), params)
@@ -90,7 +96,11 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 		contract = res.GetContract()
 	} else {
-		providerPubkey, _ := cmd.Flags().GetString("provider-pubkey")
+		var providerPubkey string
+		providerPubkey, err = cmd.Flags().GetString("provider-pubkey")
+		if err != nil {
+			return err
+		}
 		if providerPubkey == "" {
 			providerPubkey, err = promptForArg(cmd, "Specify provider pubkey: ")
 			if err != nil {
@@ -98,7 +108,10 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 			}
 		}
 
-		service, _ := cmd.Flags().GetString("service")
+		service, err := cmd.Flags().GetString("service")
+		if err != nil {
+			return err
+		}
 		if service == "" {
 			service, err = promptForArg(cmd, "Specify service (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
 			if err != nil {
