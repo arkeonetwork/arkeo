@@ -21,18 +21,16 @@ type DBConfig struct {
 	DBPoolMinConns int    `mapstructure:"DB_POOL_MIN_CONNS"`
 }
 
-var (
-	dbConfigNames = []string{
-		"DB_HOST",
-		"DB_PORT",
-		"DB_USER",
-		"DB_PASS",
-		"DB_NAME",
-		"DB_SSL_MODE",
-		"DB_POOL_MAX_CONNS",
-		"DB_POOL_MIN_CONNS",
-	}
-)
+var dbConfigNames = []string{
+	"DB_HOST",
+	"DB_PORT",
+	"DB_USER",
+	"DB_PASS",
+	"DB_NAME",
+	"DB_SSL_MODE",
+	"DB_POOL_MAX_CONNS",
+	"DB_POOL_MIN_CONNS",
+}
 
 func ReadDBConfig(envPath string) *DBConfig {
 	c := &DBConfig{}

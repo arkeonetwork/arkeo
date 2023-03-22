@@ -33,7 +33,8 @@ func TestOpenContractValidate(t *testing.T) {
 	provider.SubscriptionRate = 15
 	provider.PayAsYouGoRate = 2
 	provider.LastUpdate = 1
-	provider.SupportPayAsYouGo = true
+	provider.PayAsYouGoEnabled = true
+	provider.SubscriptionEnabled = true
 	require.NoError(t, k.SetProvider(ctx, provider))
 
 	// happy path
@@ -163,7 +164,8 @@ func TestOpenContract(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
-		SupportPayAsYouGo:   true,
+		PayAsYouGoEnabled:   true,
+		SubscriptionEnabled: true,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -249,7 +251,8 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
 		SettlementDuration:  10,
-		SupportPayAsYouGo:   true,
+		PayAsYouGoEnabled:   true,
+		SubscriptionEnabled: true,
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -342,7 +345,8 @@ func TestOpenContractNotSupportPayAsYouGo(t *testing.T) {
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
 		SettlementDuration:  10,
-		SupportPayAsYouGo:   false,
+		PayAsYouGoEnabled:   false,
+		SubscriptionEnabled: true,
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)

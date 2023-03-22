@@ -79,6 +79,9 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 
 	switch msg.ContractType {
 	case types.ContractType_SUBSCRIPTION:
+		if !provider.SubscriptionEnabled {
+			return errors.Wrapf(types.ErrProviderNotSupportSubscription, "provider: %s doesn't support subscription", provider.PubKey)
+		}
 		if msg.Rate != provider.SubscriptionRate {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
 		}
@@ -86,7 +89,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
 		}
 	case types.ContractType_PAY_AS_YOU_GO:
-		if !provider.SupportPayAsYouGo {
+		if !provider.PayAsYouGoEnabled {
 			return errors.Wrapf(types.ErrProviderNotSupportPayAsYouGo, "provider: %s doesn't support pay as you go", provider.PubKey)
 		}
 		if msg.Rate != provider.PayAsYouGoRate {

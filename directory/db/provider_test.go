@@ -10,7 +10,6 @@ import (
 )
 
 func TestInsertProvider(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -33,7 +32,6 @@ func TestInsertProvider(t *testing.T) {
 }
 
 func TestFindProvider(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -63,7 +61,6 @@ func TestFindProvider(t *testing.T) {
 }
 
 func TestUpsertProviderMetadata(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -78,7 +75,6 @@ func TestUpsertProviderMetadata(t *testing.T) {
 }
 
 func TestSearchProviders(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}

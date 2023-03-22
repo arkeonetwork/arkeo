@@ -4,12 +4,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func newModProviderCmd() *cobra.Command {
@@ -31,6 +32,8 @@ func newModProviderCmd() *cobra.Command {
 	modProviderCmd.Flags().Uint64("settlement-duration", 0, "settlement duration (in blocks)")
 	modProviderCmd.Flags().Uint64("subscription-rate", 0, "rate for subscription contracts")
 	modProviderCmd.Flags().Uint64("pay-as-you-go-rate", 0, "rate for pay-as-you-go contracts")
+	modProviderCmd.Flags().Bool("pay-as-you-go-enabled", true, "enable pay as you go")
+	modProviderCmd.Flags().Bool("subscription-enabled", true, "enable subscription")
 	return modProviderCmd
 }
 
@@ -156,7 +159,14 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-
+	argPayAsYouGoEnabled, err := cmd.Flags().GetBool("pay-as-you-go-enabled")
+	if err != nil {
+		return err
+	}
+	argSubscriptionEnabled, err := cmd.Flags().GetBool("subscription-enabled")
+	if err != nil {
+		return err
+	}
 	pubkey, err := common.NewPubKey(argPubkey)
 	if err != nil {
 		return err
@@ -176,7 +186,8 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		int64(argSubscriptionRate),
 		int64(argPayAsYouGoRate),
 		int64(argSettlementDuration),
-	)
+		argPayAsYouGoEnabled,
+		argSubscriptionEnabled)
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}

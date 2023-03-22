@@ -46,7 +46,8 @@
           "settlement_duration": "0",
           "status": "ONLINE",
           "subscription_rate": "10",
-          "support_pay_as_you_go": true
+          "pay_as_you_go_enabled": true,
+          "subscription_enabled": true
         }
       ],
       "user_contract_sets": [

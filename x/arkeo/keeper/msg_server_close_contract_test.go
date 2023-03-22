@@ -126,6 +126,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
+		SubscriptionEnabled: true,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -226,7 +227,8 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
-		SupportPayAsYouGo:   true,
+		PayAsYouGoEnabled:   true,
+		SubscriptionEnabled: true,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 

@@ -71,7 +71,8 @@ max_contract_duration: 3
 subscription_rate: 4
 pay_as_you_go_rate: 5
 settlement_duration: 6
-support_pay_as_you_go: true
+pay_as_you_go_enabled: true
+subscription_enabled: true
 ---
 type: create-blocks
 count: 1
@@ -97,7 +98,8 @@ asserts:
   - .provider[0] | .subscription_rate | tonumber == 4
   - .provider[0] | .pay_as_you_go_rate | tonumber == 5
   - .provider[0] | .settlement_duration | tonumber == 6
-  - .provider[0] | .support_pay_as_you_go == true
+  - .provider[0] | .pay_as_you_go_enabled == true
+  - .provider[0] | .subscription_enabled == true
 ---
 ########################################################################################
 # unbond up a provider (too much)

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -12,9 +14,6 @@ import (
 	"github.com/arkeonetwork/arkeo/directory/sentinel"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/pkg/errors"
-
-	"net/http"
-	"net/url"
 
 	resty "github.com/go-resty/resty/v2"
 )
@@ -92,7 +91,6 @@ func readFromFilesystem(u *url.URL) (raw []byte, err error) {
 }
 
 func DownloadProviderMetadata(metadataUrl string, retries int, maxBytes int) (*sentinel.Metadata, error) {
-
 	u, err := url.Parse(metadataUrl)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error parsing url %s", metadataUrl)

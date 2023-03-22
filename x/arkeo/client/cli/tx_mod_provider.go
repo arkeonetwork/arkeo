@@ -13,9 +13,9 @@ import (
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration] [support-pay-as-you-go]",
+		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration] [pay-as-you-go-enabled] [subscription-enabled]",
 		Short: "Broadcast message modProvider",
-		Args:  cobra.ExactArgs(11),
+		Args:  cobra.ExactArgs(12),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			pubkey, err := common.NewPubKey(argPubkey)
@@ -54,7 +54,11 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argSupportPayAsYouGo, err := cast.ToBoolE(args[10])
+			argPayAsYouGoEnabled, err := cast.ToBoolE(args[10])
+			if err != nil {
+				return err
+			}
+			argSubscriptionEnabled, err := cast.ToBoolE(args[11])
 			if err != nil {
 				return err
 			}
@@ -76,7 +80,8 @@ func CmdModProvider() *cobra.Command {
 				argSubscriptionRate,
 				argPayAsYouGoRate,
 				argSettlementDuration,
-				argSupportPayAsYouGo,
+				argPayAsYouGoEnabled,
+				argSubscriptionEnabled,
 			)
 
 			if err := msg.ValidateBasic(); err != nil {

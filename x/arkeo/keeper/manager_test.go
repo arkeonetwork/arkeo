@@ -140,7 +140,8 @@ func TestContractEndBlock(t *testing.T) {
 		Status:              types.ProviderStatus_ONLINE,
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
-		SupportPayAsYouGo:   true,
+		PayAsYouGoEnabled:   true,
+		SubscriptionEnabled: true,
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
@@ -258,7 +259,8 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		PayAsYouGoRate:      15,
 		SubscriptionRate:    15,
 		SettlementDuration:  10,
-		SupportPayAsYouGo:   true,
+		PayAsYouGoEnabled:   true,
+		SubscriptionEnabled: true,
 	}
 
 	err := s.ModProviderHandle(ctx, &modProviderMsg)

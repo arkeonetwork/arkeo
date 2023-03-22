@@ -9,7 +9,6 @@ import (
 )
 
 func NewTendermintClient(baseURL string) (*tmclient.HTTP, error) {
-
 	client, err := tmclient.New(baseURL, "/websocket")
 	if err != nil {
 		return nil, errors.Wrapf(err, "error creating websocket client")

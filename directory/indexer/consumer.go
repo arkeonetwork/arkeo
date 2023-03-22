@@ -218,7 +218,6 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 }
 
 func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64) (result *db.Block, err error) {
-
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
