@@ -67,6 +67,7 @@ message MsgOpenContract {
     (gogoproto.nullable) = false
   ];
   int64 settlement_duration = 11;
+  Restrictions restrictions = 12;
 }
 
 message MsgOpenContractResponse {}

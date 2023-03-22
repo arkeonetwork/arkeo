@@ -47,6 +47,19 @@ message Rate {
   uint64 rate = 3;
 }
 
+message RateLimit {
+  uint64 number_of_calls = 1;
+  uint64 duration = 2;
+}
+
+message Restrictions {
+  RateLimit rate_limit_per_user = 1;
+  RateLimit rate_limit_per_contract = 3;
+  RateLimit rate_limit_per_ip_address = 5;
+  string allowed_origin = 6;
+  string allowed_ip_address = 7;
+}
+
 message Contract {
   string provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -75,6 +88,7 @@ message Contract {
   int64 settlement_height = 13;
   uint64 id = 14;
   int64 settlement_duration = 15;
+  Restrictions restrictions = 16;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
