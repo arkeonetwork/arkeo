@@ -59,3 +59,57 @@ services:
     volumes:
       - ".sentinel:/root/.arkeo:rw"
       - "./scripts:/scripts"
+
+  directory-postgres:
+    image: postgres:15.1-alpine
+    container_name: directory-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: arkeo_directory
+      POSTGRES_USER: arkeo
+      POSTGRES_PASSWORD: arkeo123
+    ports:
+      - 5432:5432
+
+  init-directory-db:
+    build:
+      dockerfile: Dockerfile
+    image: arkeo
+    command:
+      - "tern"
+      - "migrate"
+      - "-c"
+      - "/directory/tern/tern.conf"
+      - "-m"
+      - "/directory/tern"
+    env_file:
+      - docker-directory.env
+    volumes:
+      - ./directory/tern:/directory/tern
+    depends_on:
+      - directory-postgres
+
+  directory-indexer:
+    build:
+      dockerfile: Dockerfile
+    image: arkeo
+    command:
+      - "indexer"
+    env_file:
+      - docker-directory.env
+    depends_on:
+      init-directory-db:
+        condition: service_completed_successfully
+
+  directory-api:
+    build:
+      dockerfile: Dockerfile
+    image: arkeo
+    command:
+      - "api"
+    env_file:
+      - docker-directory.env
+    depends_on:
+      - directory-postgres
+    ports:
+      - 7777:7777
