@@ -114,7 +114,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 
 		res, err := queryClient.ActiveContract(cmd.Context(), params)
 		if err != nil {
-			// not found "rpc error: code = NotFound desc = not found: key not found"
 			return errors.Wrapf(err, "could not find active contract for %s:%s:%s", spenderPubkeyStr, providerPubkey, service)
 		}
 
