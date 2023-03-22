@@ -35,6 +35,6 @@ var (
 	ErrProviderNotFound                       = errors.Register(ModuleName, 26, "provider not found")
 	ErrContractNotFound                       = errors.Register(ModuleName, 27, "contract not found")
 	ErrInvalidModProviderSettlementDuration   = errors.Register(ModuleName, 28, "invalid mod provider settlement duration")
-	ErrProviderNotSupportPayAsYouGo           = errors.Register(ModuleName, 29, "provider doesn't support pay as you go contract")
+	ErrProviderPayAsYouGoDisabled           = errors.Register(ModuleName, 29, "provider has pay as you go contracts disabled")
 	ErrProviderNotSupportSubscription         = errors.Register(ModuleName, 30, "provider doesn't support subscription")
 )
