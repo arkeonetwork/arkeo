@@ -47,7 +47,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             map[common.PubKey]int64{client: 0},
+		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -106,7 +106,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             map[common.PubKey]int64{client: 0},
+		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -145,7 +145,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             map[common.PubKey]int64{client: 0},
+		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}

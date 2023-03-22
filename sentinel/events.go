@@ -1,6 +1,7 @@
 package sentinel
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -93,17 +94,11 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 			if err != nil {
 				return evt, err
 			}
-			//TODO: FIX RATES!
-			// case "subscription_rate":
-			// 	evt.Provider.SubscriptionRate, err = strconv.ParseInt(v, 10, 64)
-			// 	if err != nil {
-			// 		return evt, err
-			// 	}
-			// case "pay-as-you-go_rate":
-			// 	evt.Provider.PayAsYouGoRate, err = strconv.ParseInt(v, 10, 64)
-			// 	if err != nil {
-			// 		return evt, err
-			// 	}
+		case "rates":
+			err = json.Unmarshal([]byte(v), &evt.Provider.Rates)
+			if err != nil {
+				return evt, err
+			}
 		}
 	}
 
@@ -146,8 +141,13 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
-		case "meter-type":
+		case "meter_type":
 			evt.Contract.MeterType = types.MeterType(types.MeterType_value[v])
+			if err != nil {
+				return evt, err
+			}
+		case "user_type":
+			evt.Contract.UserType = types.UserType(types.UserType_value[v])
 			if err != nil {
 				return evt, err
 			}
@@ -237,6 +237,7 @@ type ClaimContractIncome struct {
 func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome, error) {
 	var err error
 	var ok bool
+	nonce := int64(0)
 	evt := ClaimContractIncome{}
 
 	for k, v := range input {
@@ -276,12 +277,11 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		// TODO: fix nonces
-		// case "nonce":
-		// 	evt.Contract.Nonce, err = strconv.ParseInt(v, 10, 64)
-		// 	if err != nil {
-		// 		return evt, err
-		// 	}
+		case "nonce":
+			nonce, err = strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				return evt, err
+			}
 		case "paid":
 			evt.Paid, ok = cosmos.NewIntFromString(v)
 			if !ok {
@@ -294,6 +294,9 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			}
 		}
 	}
+
+	// TODO: support full mapping of all nonces
+	evt.Contract.Nonces = map[common.PubKey]int64{evt.Contract.GetSpender(): nonce}
 
 	return evt, nil
 }

@@ -134,7 +134,7 @@ func TestPaidTier(t *testing.T) {
 	require.Equal(t, code, http.StatusOK)
 	contract, err = proxy.MemStore.Get(contract.Key())
 	require.NoError(t, err)
-	require.Equal(t, contract.Nonces, int64(3))
+	require.Equal(t, contract.Nonces[pk], int64(3))
 	claim, err := proxy.ClaimStore.Get(contract.Key())
 	require.NoError(t, err)
 	require.Equal(t, claim.Nonce, int64(3))
