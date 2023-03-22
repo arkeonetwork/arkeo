@@ -42,7 +42,7 @@ message MsgModProvider {
   ProviderStatus status = 6;
   int64 min_contract_duration = 7;
   int64 max_contract_duration = 8;
-  repeated Rate rates = 9;
+  repeated ContractRate rates = 9;
   int64 settlement_duration = 10;
 }
 
