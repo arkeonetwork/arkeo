@@ -72,10 +72,10 @@ func main() {
 	spender := curl.getSpender(*user)
 	contract := curl.getActiveContract(metadata.Configuration.ProviderPubKey.String(), service, spender)
 	if contract.Height == 0 {
-		println(fmt.Sprintf("no active contract found for spender:%s provider:%s cbhain:%s - will attempt free tier", spender, metadata.Configuration.ProviderPubKey.String(), service))
+		println(fmt.Sprintf("no active contract found for provider:%s cbhain:%s - will attempt free tier", metadata.Configuration.ProviderPubKey.String(), service))
 	} else {
 		claim := curl.getClaim(contract.Id)
-		auth := curl.sign(*user, contract.Id, spender, claim.Nonce+1)
+		auth := curl.sign(*user, contract.Id, claim.Nonce+1)
 		values.Add(sentinel.QueryArkAuth, auth)
 	}
 	u.RawQuery = values.Encode()
@@ -187,7 +187,7 @@ func (c Curl) parseMetadata() sentinel.Metadata {
 	return meta
 }
 
-func (c Curl) sign(user string, contractId uint64, spender string, nonce int64) string {
+func (c Curl) sign(user string, contractId uint64, nonce int64) string {
 	interfaceRegistry := codectypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
 	ModuleBasics.RegisterInterfaces(interfaceRegistry)
@@ -201,7 +201,7 @@ func (c Curl) sign(user string, contractId uint64, spender string, nonce int64) 
 	if err != nil {
 		log.Fatal(err)
 	}
-	msg := sentinel.GenerateMessageToSign(contractId, spender, nonce)
+	msg := sentinel.GenerateMessageToSign(contractId, nonce)
 
 	println("invoking Sign...")
 	signature, pk, err := kb.Sign(user, []byte(msg))
