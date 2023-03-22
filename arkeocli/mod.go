@@ -29,8 +29,8 @@ func newModProviderCmd() *cobra.Command {
 	modProviderCmd.Flags().Uint64("min-duration", 0, "minimum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("max-duration", 0, "maximum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("settlement-duration", 0, "settlement duration (in blocks)")
-	modProviderCmd.Flags().Uint64("subscription-rate", 0, "rate for subscription contracts")
-	modProviderCmd.Flags().Uint64("pay-as-you-go-rate", 0, "rate for pay-as-you-go contracts")
+	modProviderCmd.Flags().Uint64("pay-per-block-rate", 0, "rate for pay per block contracts")
+	modProviderCmd.Flags().Uint64("pay-per-call-rate", 0, "rate for pay per call contracts")
 	return modProviderCmd
 }
 
@@ -133,25 +133,25 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argSubscriptionRate, _ := cmd.Flags().GetUint64("subscription-rate")
-	if argSubscriptionRate == 0 {
-		subscriptiomRate, err := promptForArg(cmd, "Specify rate for subscription contracts: ")
+	argPayPerBlockRate, _ := cmd.Flags().GetUint64("pay-per-block-rate")
+	if argPayPerBlockRate == 0 {
+		subscriptiomRate, err := promptForArg(cmd, "Specify rate for pay per block contracts: ")
 		if err != nil {
 			return err
 		}
-		argSubscriptionRate, err = strconv.ParseUint(subscriptiomRate, 10, 64)
+		argPayPerBlockRate, err = strconv.ParseUint(subscriptiomRate, 10, 64)
 		if err != nil {
 			return err
 		}
 	}
 
-	argPayAsYouGoRate, _ := cmd.Flags().GetUint64("pay-as-you-go-rate")
-	if argPayAsYouGoRate == 0 {
-		payAsYouGoRate, err := promptForArg(cmd, "Specify rate for pay-as-you-go contracts: ")
+	argPayPerCallRate, _ := cmd.Flags().GetUint64("pay-per-call-rate")
+	if argPayPerCallRate == 0 {
+		payAsYouGoRate, err := promptForArg(cmd, "Specify rate for pay per call contracts: ")
 		if err != nil {
 			return err
 		}
-		argPayAsYouGoRate, err = strconv.ParseUint(payAsYouGoRate, 10, 64)
+		argPayPerCallRate, err = strconv.ParseUint(payAsYouGoRate, 10, 64)
 		if err != nil {
 			return err
 		}
@@ -164,6 +164,19 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 
 	status := types.ProviderStatus(types.ProviderStatus_value[strings.ToUpper(argStatus)])
 
+	rates := []*types.ContractRate{
+		{
+			MeterType: types.MeterType_PAY_PER_BLOCK,
+			Rate:      int64(argPayPerBlockRate),
+			UserType:  types.UserType_SINGLE_USER,
+		},
+		{
+			MeterType: types.MeterType_PAY_PER_CALL,
+			Rate:      int64(argPayPerCallRate),
+			UserType:  types.UserType_SINGLE_USER,
+		},
+	}
+
 	msg := types.NewMsgModProvider(
 		clientCtx.GetFromAddress().String(),
 		pubkey,
@@ -173,9 +186,8 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		status,
 		int64(argMinDuration),
 		int64(argMaxDuration),
-		int64(argSubscriptionRate),
-		int64(argPayAsYouGoRate),
 		int64(argSettlementDuration),
+		rates,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

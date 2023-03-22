@@ -15,17 +15,18 @@ import (
 
 func TestHandleActiveContract(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -61,17 +62,19 @@ func TestHandleActiveContract(t *testing.T) {
 
 func TestHandleClaim(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
+
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 151,
 		SettlementDuration: 10,
 	}
@@ -124,17 +127,19 @@ func TestHandleClaim(t *testing.T) {
 
 func TestHandleOpenClaims(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
+
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 151,
 		SettlementDuration: 10,
 	}

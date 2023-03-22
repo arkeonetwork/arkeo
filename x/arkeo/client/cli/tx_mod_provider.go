@@ -13,7 +13,7 @@ import (
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rate] [pay-as-you-go-rate] [settlement-duration]",
+		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [pay-per-block-rate] [pay-per-call-rate] [settlement-duration]",
 		Short: "Broadcast message modProvider",
 		Args:  cobra.ExactArgs(10),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -41,11 +41,11 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argSubscriptionRate, err := cast.ToInt64E(args[7])
+			argPayPerBlockRate, err := cast.ToInt64E(args[7])
 			if err != nil {
 				return err
 			}
-			argPayAsYouGoRate, err := cast.ToInt64E(args[8])
+			argPayPeryCallRate, err := cast.ToInt64E(args[8])
 			if err != nil {
 				return err
 			}
@@ -60,6 +60,19 @@ func CmdModProvider() *cobra.Command {
 				return err
 			}
 
+			rates := []*types.ContractRate{
+				{
+					UserType:  types.UserType_SINGLE_USER,
+					MeterType: types.MeterType_PAY_PER_BLOCK,
+					Rate:      argPayPerBlockRate,
+				},
+				{
+					UserType:  types.UserType_SINGLE_USER,
+					MeterType: types.MeterType_PAY_PER_CALL,
+					Rate:      argPayPeryCallRate,
+				},
+			}
+
 			msg := types.NewMsgModProvider(
 				clientCtx.GetFromAddress().String(),
 				pubkey,
@@ -69,9 +82,8 @@ func CmdModProvider() *cobra.Command {
 				types.ProviderStatus(argStatus),
 				argMinContractDuration,
 				argMaxContractDuration,
-				argSubscriptionRate,
-				argPayAsYouGoRate,
 				argSettlementDuration,
+				rates,
 			)
 
 			if err := msg.ValidateBasic(); err != nil {

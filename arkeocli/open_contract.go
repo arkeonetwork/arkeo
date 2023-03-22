@@ -28,7 +28,7 @@ func newOpenContractCmd() *cobra.Command {
 	openContractCmd.Flags().String("client-pubkey", "", "client pubkey")
 	openContractCmd.Flags().String("delegate-pubkey", "", "delegate pubkey")
 	openContractCmd.Flags().Bool("no-delegate", false, "delegate pubkey")
-	openContractCmd.Flags().String("contract-type", "", "contract type (subscription or pay-as-you-go)")
+	openContractCmd.Flags().String("meter-type", "", "meter type (pay-per-block or pay-per-call)")
 	openContractCmd.Flags().Int64("deposit", 0, "deposit amount")
 	openContractCmd.Flags().Int64("duration", 0, "contract duration")
 	openContractCmd.Flags().Int64("rate", 0, "contract rate")
@@ -91,9 +91,9 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argContractType, _ := cmd.Flags().GetString("contract-type")
-	if argContractType == "" {
-		argContractType, err = promptForArg(cmd, "Specify contract type (subscription or pay-as-you-go): ")
+	argMeterType, _ := cmd.Flags().GetString("meter-type")
+	if argMeterType == "" {
+		argMeterType, err = promptForArg(cmd, "Specify meter type (pay-per-block or pay-per-call): ")
 		if err != nil {
 			return err
 		}
@@ -147,11 +147,11 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argContractType = strings.ToUpper(strings.ReplaceAll(argContractType, "-", "_"))
-	if _, ok := types.ContractType_value[argContractType]; !ok {
-		return fmt.Errorf("invalid contract type: %s", argContractType)
+	argMeterType = strings.ToUpper(strings.ReplaceAll(argMeterType, "-", "_"))
+	if _, ok := types.MeterType_value[argMeterType]; !ok {
+		return fmt.Errorf("invalid contract type: %s", argMeterType)
 	}
-	contractType := types.ContractType(types.ContractType_value[argContractType])
+	meterType := types.MeterType(types.MeterType_value[argMeterType])
 	pubkey, err := common.NewPubKey(argProviderPubkey)
 	if err != nil {
 		return err
@@ -163,7 +163,8 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		argService,
 		common.PubKey(argClientPubkey),
 		common.PubKey(argDelegatePubkey),
-		contractType,
+		meterType,
+		types.UserType_SINGLE_USER, // TODO: fix me
 		argDuration,
 		argSettlementDuration,
 		argRate,

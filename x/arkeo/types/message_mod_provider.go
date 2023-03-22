@@ -15,7 +15,7 @@ var _ sdk.Msg = &MsgModProvider{}
 
 func NewMsgModProvider(creator string, provider common.PubKey, service, metadataUri string,
 	metadataNonce uint64, status ProviderStatus, minContractDuration,
-	maxContractDuration, subscriptionRate, payAsYouGoRate, settlementDuration int64,
+	maxContractDuration, settlementDuration int64, rates []*ContractRate,
 ) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
@@ -26,8 +26,7 @@ func NewMsgModProvider(creator string, provider common.PubKey, service, metadata
 		Status:              status,
 		MinContractDuration: minContractDuration,
 		MaxContractDuration: maxContractDuration,
-		SubscriptionRate:    subscriptionRate,
-		PayAsYouGoRate:      payAsYouGoRate,
+		Rates:               rates,
 		SettlementDuration:  settlementDuration,
 	}
 }
@@ -88,13 +87,6 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	// test metadataURI
-	/*
-		Disabling URI parsing check due to a potential that the underlying golang code may change its behavior between golang versions. We can assume data providers are giving valid URIs, because if they aren't, they won't be able to make income
-		if _, err := url.ParseRequestURI(msg.MetadataURI); err != nil {
-			return errors.Wrapf(ErrInvalidModProviderMetdataURI, "(%s)", err)
-		}
-	*/
 	// Ensure URIs don't get too long and cause chain bloat
 	if len(msg.MetadataUri) > 100 {
 		return errors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataUri))
@@ -111,6 +103,22 @@ func (msg *MsgModProvider) ValidateBasic() error {
 
 	if msg.SettlementDuration < 0 {
 		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
+	}
+
+	// confirm no duplicated rates and valid rate
+	for i, rate := range msg.Rates {
+		if rate.Rate <= 0 {
+			return errors.Wrapf(ErrInvalidModProviderRate, "rate cannot be equal to or less than zero")
+		}
+		for ii, rateMatch := range msg.Rates {
+			if i == ii {
+				continue
+			}
+
+			if rateMatch.MeterType == rate.MeterType && rateMatch.UserType == rate.UserType {
+				return errors.Wrapf(ErrInvalidModProviderDuplicateContractRates, "duplicated rate for meter type %s with user type %s", rate.MeterType, rate.UserType)
+			}
+		}
 	}
 
 	return nil

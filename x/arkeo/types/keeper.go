@@ -57,7 +57,7 @@ func (contract Contract) Expiration() int64 {
 // but a claim can still be posted for previously made calls in order
 // to correctly settle the contract.
 func (contract Contract) SettlementPeriodEnd() int64 {
-	if contract.Type == ContractType_PAY_AS_YOU_GO {
+	if contract.MeterType == MeterType_PAY_PER_CALL {
 		return contract.Expiration() + contract.SettlementDuration
 	}
 	return contract.Expiration()
@@ -114,16 +114,16 @@ func (contract Contract) ClientAddress() cosmos.AccAddress {
 	return addr
 }
 
-func (contractType *ContractType) UnmarshalJSON(b []byte) error {
+func (meterType *MeterType) UnmarshalJSON(b []byte) error {
 	var item interface{}
 	if err := json.Unmarshal(b, &item); err != nil {
 		return err
 	}
 	switch v := item.(type) {
 	case int:
-		*contractType = ContractType(v)
+		*meterType = MeterType(v)
 	case string:
-		*contractType = ContractType(ContractType_value[v])
+		*meterType = MeterType(MeterType_value[v])
 	}
 	return nil
 }

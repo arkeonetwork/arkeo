@@ -63,8 +63,18 @@ func TestModProviderHandle(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		SubscriptionRate:    11,
-		PayAsYouGoRate:      12,
+		Rates: []*types.ContractRate{
+			{
+				MeterType: types.MeterType_PAY_PER_CALL,
+				UserType:  types.UserType_SINGLE_USER,
+				Rate:      11,
+			},
+			{
+				MeterType: types.MeterType_PAY_PER_BLOCK,
+				UserType:  types.UserType_SINGLE_USER,
+				Rate:      12,
+			},
+		},
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
@@ -75,6 +85,5 @@ func TestModProviderHandle(t *testing.T) {
 	require.Equal(t, provider.MinContractDuration, int64(10))
 	require.Equal(t, provider.MaxContractDuration, int64(500))
 	require.Equal(t, provider.Status, types.ProviderStatus_ONLINE)
-	require.Equal(t, provider.SubscriptionRate, int64(11))
-	require.Equal(t, provider.PayAsYouGoRate, int64(12))
+	require.ElementsMatch(t, provider.Rates, msg.Rates)
 }

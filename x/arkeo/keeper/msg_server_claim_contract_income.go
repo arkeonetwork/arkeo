@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -17,7 +18,6 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 	ctx.Logger().Info(
 		"receive MsgClaimContractIncome",
 		"contract_id", msg.ContractId,
-		"nonce", msg.Nonce,
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
@@ -45,8 +45,9 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return err
 	}
 
-	if contract.Nonce >= msg.Nonce {
-		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
+	contractNonce := contract.Nonces[msg.Spender]
+	if contractNonce >= msg.Nonce {
+		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contractNonce, msg.Nonce)
 	}
 
 	if contract.IsSettled(ctx.BlockHeight()) {
@@ -69,7 +70,7 @@ func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgC
 	if err != nil {
 		return err
 	}
-
-	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
+	nonces := map[common.PubKey]int64{msg.Spender: msg.Nonce}
+	_, err = k.mgr.SettleContract(ctx, contract, nonces, false)
 	return err
 }

@@ -145,17 +145,17 @@ func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (p Proxy) isRateLimited(key string, contractType types.ContractType) bool {
+func (p Proxy) isRateLimited(key string, contractType types.MeterType) bool {
 	mu.Lock()
 	defer mu.Unlock()
 
 	var limitTokens int
 	var limitDuration time.Duration
 	switch contractType {
-	case types.ContractType_SUBSCRIPTION:
+	case types.MeterType_PAY_PER_BLOCK:
 		limitTokens = p.Config.SubTierRateLimit
 		limitDuration = p.Config.SubTierRateLimitDuration
-	case types.ContractType_PAY_AS_YOU_GO:
+	case types.MeterType_PAY_PER_CALL:
 		limitTokens = p.Config.AsGoTierRateLimit
 		limitDuration = p.Config.AsGoTierRateLimitDuration
 	default:
@@ -197,14 +197,14 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// check if we've exceed the total number of pay-as-you-go queries
-	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
+	if contract.MeterType == types.MeterType_PAY_PER_CALL {
 		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate)) {
 			return http.StatusPaymentRequired, fmt.Errorf("contract spent")
 		}
 	}
 
-	if ok := p.isRateLimited(key, contract.Type); ok {
-		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
+	if ok := p.isRateLimited(key, contract.MeterType); ok {
+		return http.StatusTooManyRequests, fmt.Errorf("client is rate limited," + http.StatusText(429))
 	}
 
 	claim.Nonce = aa.Nonce
@@ -213,7 +213,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	if err := p.ClaimStore.Set(claim); err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
-	contract.Nonce = aa.Nonce
+	contract.Nonces = map[common.PubKey]int64{aa.Spender: aa.Nonce}
 	p.MemStore.Put(contract)
 	return http.StatusOK, nil
 }

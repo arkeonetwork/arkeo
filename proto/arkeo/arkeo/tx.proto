@@ -83,7 +83,7 @@ message MsgClaimContractIncome {
   string creator = 1;
   uint64 contract_id = 2;
   bytes signature = 4;
-  map<string, int64> nonces = 5 [(gogoproto.castkey) = "github.com/arkeonetwork/arkeo/common.PubKey"];
+  int64 nonce = 5;
 }
 
 message MsgClaimContractIncomeResponse {}

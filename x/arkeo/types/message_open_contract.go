@@ -14,12 +14,13 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration, rate int64, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator string, provider common.PubKey, service string, client, delegate common.PubKey, meterType MeterType, userType UserType, duration, settlementDuration, rate int64, deposit cosmos.Int) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
 		Service:            service,
-		ContractType:       contractType,
+		MeterType:          meterType,
+		UserType:           userType,
 		Duration:           duration,
 		Rate:               rate,
 		Client:             client,

@@ -45,8 +45,9 @@ func TestValidate(t *testing.T) {
 	contract.Duration = 100
 	contract.Rate = 10
 	contract.Height = 10
-	contract.Nonce = 0
-	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.Nonces = map[common.PubKey]int64{client: 0}
+	contract.MeterType = types.MeterType_PAY_PER_CALL
+	contract.UserType = types.UserType_SINGLE_USER
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 1
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -87,7 +88,8 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Rate = 10
-	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.UserType = types.UserType_SINGLE_USER
+	contract.MeterType = types.MeterType_PAY_PER_CALL
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 2
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -95,6 +97,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
+		Spender:    contract.GetSpender(),
 		Creator:    acc.String(),
 		Nonce:      20,
 	}
@@ -152,7 +155,8 @@ func TestHandleSubscription(t *testing.T) {
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Rate = 10
-	contract.Type = types.ContractType_SUBSCRIPTION
+	contract.MeterType = types.MeterType_PAY_PER_BLOCK
+	contract.UserType = types.UserType_SINGLE_USER
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
 	contract.Id = 3
 	require.NoError(t, k.SetContract(ctx, contract))

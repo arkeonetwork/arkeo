@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -24,7 +25,8 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 		sdk.NewAttribute("service", contract.Service.String()),
 		sdk.NewAttribute("client", contract.Client.String()),
 		sdk.NewAttribute("delegate", contract.Delegate.String()),
-		sdk.NewAttribute("type", contract.Type.String()),
+		sdk.NewAttribute("meter_type", contract.MeterType.String()),
+		sdk.NewAttribute("user_type", contract.UserType.String()),
 		sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
 		sdk.NewAttribute("duration", strconv.FormatInt(contract.Duration, 10)),
 		sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
@@ -42,8 +44,9 @@ func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract 
 		sdk.NewAttribute("service", contract.Service.String()),
 		sdk.NewAttribute("client", contract.Client.String()),
 		sdk.NewAttribute("delegate", contract.Delegate.String()),
-		sdk.NewAttribute("type", contract.Type.String()),
-		sdk.NewAttribute("nonce", strconv.FormatInt(contract.Nonce, 10)),
+		sdk.NewAttribute("meter_type", contract.MeterType.String()),
+		sdk.NewAttribute("user_type", contract.UserType.String()),
+		// sdk.NewAttribute("nonce", strconv.FormatInt(contract.Nonce, 10)), // TODO: fix with typed events
 		sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
 		sdk.NewAttribute("paid", debt.String()),
 		sdk.NewAttribute("reserve", valIncome.String()),
@@ -81,10 +84,9 @@ func NewModProviderEvent(provider *Provider) sdk.Event {
 		sdk.NewAttribute("status", provider.Status.String()),
 		sdk.NewAttribute("min_contract_duration", strconv.FormatInt(provider.MinContractDuration, 10)),
 		sdk.NewAttribute("max_contract_duration", strconv.FormatInt(provider.MaxContractDuration, 10)),
-		sdk.NewAttribute("subscription_rate", strconv.FormatInt(provider.SubscriptionRate, 10)),
-		sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
 		sdk.NewAttribute("bond", provider.Bond.String()),
 		sdk.NewAttribute("settlement_duration", strconv.FormatInt(provider.SettlementDuration, 10)),
+		getRatesAttribute(provider.Rates),
 	)
 }
 
@@ -94,4 +96,12 @@ func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) sdk.Event
 		sdk.NewAttribute("validator", acc.String()),
 		sdk.NewAttribute("reward", reward.String()),
 	)
+}
+
+func getRatesAttribute(rates []*ContractRate) sdk.Attribute {
+	rateString, err := json.Marshal(rates)
+	if err != nil {
+		return sdk.NewAttribute("rates", "error")
+	}
+	return sdk.NewAttribute("rates", string(rateString))
 }

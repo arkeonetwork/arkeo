@@ -16,14 +16,14 @@ import (
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [user-type] [meter-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
 		Short: "Broadcast message openContract",
-		Args:  cobra.ExactArgs(8),
+		Args:  cobra.ExactArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			argService := args[1]
 			argClient := args[2]
-			argDeposit := args[4]
+			argDeposit := args[5]
 
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
@@ -35,21 +35,27 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
-			argContractType, err := cast.ToInt32E(args[3])
-			if err != nil {
-				return err
-			}
-			argDuration, err := cast.ToInt64E(args[5])
+			argUserType, err := cast.ToInt32E(args[3])
 			if err != nil {
 				return err
 			}
 
-			argRate, err := cast.ToInt64E(args[6])
+			argMeterType, err := cast.ToInt32E(args[4])
 			if err != nil {
 				return err
 			}
 
-			argSettlementDuration, err := cast.ToInt64E(args[7])
+			argDuration, err := cast.ToInt64E(args[6])
+			if err != nil {
+				return err
+			}
+
+			argRate, err := cast.ToInt64E(args[7])
+			if err != nil {
+				return err
+			}
+
+			argSettlementDuration, err := cast.ToInt64E(args[8])
 			if err != nil {
 				return err
 			}
@@ -61,7 +67,7 @@ func CmdOpenContract() *cobra.Command {
 
 			delegate := common.EmptyPubKey
 			if len(args) > 8 {
-				delegate, err = common.NewPubKey(args[8])
+				delegate, err = common.NewPubKey(args[9])
 				if err != nil {
 					return err
 				}
@@ -78,7 +84,8 @@ func CmdOpenContract() *cobra.Command {
 				argService,
 				cl,
 				delegate,
-				types.ContractType(argContractType),
+				types.MeterType(argMeterType),
+				types.UserType(argUserType),
 				argDuration,
 				argSettlementDuration,
 				argRate,

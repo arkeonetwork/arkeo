@@ -93,17 +93,17 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 			if err != nil {
 				return evt, err
 			}
-
-		case "subscription_rate":
-			evt.Provider.SubscriptionRate, err = strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
-		case "pay-as-you-go_rate":
-			evt.Provider.PayAsYouGoRate, err = strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
+			//TODO: FIX RATES!
+			// case "subscription_rate":
+			// 	evt.Provider.SubscriptionRate, err = strconv.ParseInt(v, 10, 64)
+			// 	if err != nil {
+			// 		return evt, err
+			// 	}
+			// case "pay-as-you-go_rate":
+			// 	evt.Provider.PayAsYouGoRate, err = strconv.ParseInt(v, 10, 64)
+			// 	if err != nil {
+			// 		return evt, err
+			// 	}
 		}
 	}
 
@@ -146,8 +146,8 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 			if err != nil {
 				return evt, err
 			}
-		case "type":
-			evt.Contract.Type = types.ContractType(types.ContractType_value[v])
+		case "meter-type":
+			evt.Contract.MeterType = types.MeterType(types.MeterType_value[v])
 			if err != nil {
 				return evt, err
 			}
@@ -266,8 +266,8 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		case "type":
-			evt.Contract.Type = types.ContractType(types.ContractType_value[v])
+		case "meter-type":
+			evt.Contract.MeterType = types.MeterType(types.MeterType_value[v])
 			if err != nil {
 				return evt, err
 			}
@@ -276,11 +276,12 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		case "nonce":
-			evt.Contract.Nonce, err = strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
+		// TODO: fix nonces
+		// case "nonce":
+		// 	evt.Contract.Nonce, err = strconv.ParseInt(v, 10, 64)
+		// 	if err != nil {
+		// 		return evt, err
+		// 	}
 		case "paid":
 			evt.Paid, ok = cosmos.NewIntFromString(v)
 			if !ok {

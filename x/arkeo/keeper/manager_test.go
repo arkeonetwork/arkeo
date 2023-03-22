@@ -137,8 +137,18 @@ func TestContractEndBlock(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
+		Rates: []*types.ContractRate{
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_BLOCK,
+				Rate:      15,
+			},
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_CALL,
+				Rate:      15,
+			},
+		},
 	}
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
@@ -153,14 +163,15 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
-		Service:      common.BTCService.String(),
-		Creator:      user1Address.String(),
-		Client:       user1PubKey,
-		ContractType: types.ContractType_PAY_AS_YOU_GO,
-		Duration:     100,
-		Rate:         15,
-		Deposit:      cosmos.NewInt(1500),
+		Provider:  providerPubKey,
+		Service:   common.BTCService.String(),
+		Creator:   user1Address.String(),
+		Client:    user1PubKey,
+		MeterType: types.MeterType_PAY_PER_CALL,
+		UserType:  types.UserType_SINGLE_USER,
+		Duration:  100,
+		Rate:      15,
+		Deposit:   cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
@@ -253,9 +264,19 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
-		SettlementDuration:  10,
+		Rates: []*types.ContractRate{
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_BLOCK,
+				Rate:      15,
+			},
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_CALL,
+				Rate:      15,
+			},
+		},
+		SettlementDuration: 10,
 	}
 
 	err := s.ModProviderHandle(ctx, &modProviderMsg)
@@ -275,7 +296,8 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		Service:            common.BTCService.String(),
 		Creator:            user1Address.String(),
 		Client:             user1PubKey,
-		ContractType:       types.ContractType_PAY_AS_YOU_GO,
+		UserType:           types.UserType_SINGLE_USER,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Duration:           100,
 		Rate:               15,
 		Deposit:            cosmos.NewInt(1500),

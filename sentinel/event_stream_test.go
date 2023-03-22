@@ -36,17 +36,18 @@ var testConfig = conf.Configuration{
 
 func TestHandleOpenContractEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -94,17 +95,18 @@ func TestHandleOpenContractEvent(t *testing.T) {
 
 func TestHandleCloseContractEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -132,17 +134,18 @@ func TestHandleCloseContractEvent(t *testing.T) {
 
 func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	proxy := NewProxy(testConfig)
+	client := types.GetRandomPubKey()
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
-		Client:             types.GetRandomPubKey(),
+		Client:             client,
 		Delegate:           common.EmptyPubKey,
-		Type:               types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Height:             100,
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonce:              0,
+		Nonces:             map[common.PubKey]int64{client: 0},
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -173,7 +176,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	require.Equal(t, claim.Nonce, arkAuth.Nonce)
 
 	// confirm is a settlement event is emitted with a lower nonce, we handle it correctly, by not setting our claim to Claimed.
-	inputContract.Nonce = 8
+	inputContract.Nonces = map[common.PubKey]int64{inputContract.Client: 8}
 	proxy.MemStore.SetHeight(150)
 	settlementEvents := sdk.Events{
 		types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract),
@@ -186,8 +189,8 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	require.Equal(t, claim.Nonce, arkAuth.Nonce)
 	require.False(t, claim.Claimed)
 
-	// confirm is a settlement event is emitted with the samce nonce, we handle it correctly, by setting our claim to Claimed.
-	inputContract.Nonce = 10
+	// confirm is a settlement event is emitted with the same nonce, we handle it correctly, by setting our claim to Claimed.
+	inputContract.Nonces[inputContract.Client] = 10
 	proxy.MemStore.SetHeight(160)
 	settlementEvents = sdk.Events{
 		types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract),

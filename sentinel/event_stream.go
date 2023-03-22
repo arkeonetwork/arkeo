@@ -93,7 +93,7 @@ func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 	spender := evt.Contract.GetSpender()
-	newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
+	newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonces[spender], "")
 	currClaim, err := p.ClaimStore.Get(newClaim.Key())
 	if err != nil {
 		p.logger.Error("failed to get claim", "error", err)
@@ -161,7 +161,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 				continue
 			}
 			spender := evt.Contract.GetSpender()
-			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
+			newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonces[spender], "")
 			currClaim, err := p.ClaimStore.Get(newClaim.Key())
 			if err != nil {
 				p.logger.Error("failed to get claim", "error", err)

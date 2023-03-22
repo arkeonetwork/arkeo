@@ -17,11 +17,12 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 
 	ctx.Logger().Info(
 		"receive MsgOpenContract",
-		"provder", msg.Provider,
+		"provider", msg.Provider,
 		"service", msg.Service,
 		"client", msg.Client,
 		"delegate", msg.Delegate,
-		"contract type", msg.ContractType,
+		"user type", msg.UserType,
+		"meter type", msg.MeterType,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
 		"settlement duration", msg.SettlementDuration,
@@ -77,23 +78,31 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrOpenContractDuration, "duration below allowed minimum duration from provider")
 	}
 
-	switch msg.ContractType {
-	case types.ContractType_SUBSCRIPTION:
-		if msg.Rate != provider.SubscriptionRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
+	providerRate := types.FindRate(provider.Rates, msg.UserType, msg.MeterType)
+	if providerRate == nil {
+		return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider does not currently support MeterType:%s for UserType:%s", msg.MeterType, msg.UserType)
+	}
+
+	switch msg.MeterType {
+	case types.MeterType_PAY_PER_BLOCK:
+		if msg.Rate != providerRate.Rate {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", providerRate.Rate, msg.Rate)
 		}
-		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
+		rate := cosmos.NewInt(msg.Rate)
+		duration := cosmos.NewInt(msg.Duration) // we have confirmed that duration is positive in validate basic
+		durationRate := rate.Mul(duration)
+		if !durationRate.Equal(msg.Deposit) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Uint64())
 		}
-	case types.ContractType_PAY_AS_YOU_GO:
-		if msg.Rate != provider.PayAsYouGoRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
+	case types.MeterType_PAY_PER_CALL:
+		if msg.Rate != providerRate.Rate {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rate for MeterType:%s for UserType:%s is %d, client sent %d", msg.MeterType, msg.UserType, providerRate.Rate, msg.Rate)
 		}
 		if msg.SettlementDuration != provider.SettlementDuration {
-			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-as-you-go provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
+			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "Pay-per-call provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
 		}
 	default:
-		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
+		return errors.Wrapf(types.ErrInvalidMeterType, "%s", msg.MeterType.String())
 	}
 
 	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, service)
@@ -117,7 +126,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, getCoins(msg.Deposit.Int64())); err != nil {
-		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Int64())
+		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Uint64())
 	}
 
 	service, err := common.NewService(msg.Service)
@@ -129,7 +138,8 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		Provider:           msg.Provider,
 		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
 		Service:            service,
-		Type:               msg.ContractType,
+		UserType:           msg.UserType,
+		MeterType:          msg.MeterType,
 		Client:             msg.Client,
 		Delegate:           msg.Delegate,
 		Duration:           msg.Duration,

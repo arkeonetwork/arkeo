@@ -65,17 +65,17 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if !signerAccountAddress.Equals(clientAccountAddress) {
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
-	providerUnbonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Service)
+	providerUnBonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Service)
 	if err != nil {
 		return err
 	}
-	if !providerUnbonded && contract.Type == types.ContractType_PAY_AS_YOU_GO {
-		// clients are not allowed to cancel a pay-as-you-go contract as it
+	if !providerUnBonded && contract.MeterType == types.MeterType_PAY_PER_CALL {
+		// clients are not allowed to cancel a pay-per-call contract as it
 		// could be a way to game providers. IE, the client make 1,000 requests
 		// and before the provider can claim the rewards, the client cancels
 		// the contract. We do not want providers to feel "rushed" to claim
 		// their rewards or the income is gone.
-		return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
+		return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-per-call contract")
 	}
 
 	if contract.IsExpired(ctx.BlockHeight()) {
@@ -99,7 +99,7 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	_, err = k.mgr.SettleContract(ctx, contract, 0, true)
+	_, err = k.mgr.SettleContract(ctx, contract, nil, true)
 	if err != nil {
 		return err
 	}

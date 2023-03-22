@@ -17,8 +17,8 @@ enum UserType {
 }
 
 enum MeterType {
-  PAY_PER_BLOCK = 0;
-  PAY_PER_CALL = 1;
+  PAY_PER_BLOCK = 0; // previously called a Subscription
+  PAY_PER_CALL = 1;  // previously called Pay as you go 
 }
 
 message Provider {
@@ -44,7 +44,7 @@ message Provider {
 message ContractRate {
   MeterType meter_type = 1;
   UserType user_type = 2;
-  uint64 rate = 3;
+  int64 rate = 3;
 }
 
 message CallRateLimit {
@@ -54,10 +54,10 @@ message CallRateLimit {
 
 message Restrictions {
   CallRateLimit rate_limit_per_user = 1;
-  CallRateLimit rate_limit_per_contract = 3;
-  CallRateLimit rate_limit_per_ip_address = 5;
-  string allowed_origin = 6;
-  string allowed_ip_address = 7;
+  CallRateLimit rate_limit_per_contract = 2;
+  CallRateLimit rate_limit_per_ip_address = 3;
+  repeated string allowed_origins = 4;
+  repeated string allowed_ip_addresses = 5;
 }
 
 message Contract {

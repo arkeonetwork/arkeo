@@ -60,14 +60,15 @@ func TestCloseContractHandle(t *testing.T) {
 	require.True(t, k.GetBalance(ctx, provider).IsZero())
 
 	openContractMessage := types.MsgOpenContract{
-		Creator:      clientAccount.String(),
-		Client:       clientPubKey,
-		Service:      service.String(),
-		Provider:     providerPubKey,
-		Deposit:      cosmos.NewInt(500),
-		Rate:         5,
-		Duration:     100,
-		ContractType: types.ContractType_SUBSCRIPTION,
+		Creator:   clientAccount.String(),
+		Client:    clientPubKey,
+		Service:   service.String(),
+		Provider:  providerPubKey,
+		Deposit:   cosmos.NewInt(500),
+		Rate:      5,
+		Duration:  100,
+		MeterType: types.MeterType_PAY_PER_BLOCK,
+		UserType:  types.UserType_SINGLE_USER,
 	}
 
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAccount, getCoin(common.Tokens(10))))
@@ -123,8 +124,18 @@ func TestCloseSubscriptionContract(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
+		Rates: []*types.ContractRate{
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_CALL,
+				Rate:      15,
+			},
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_BLOCK,
+				Rate:      15,
+			},
+		},
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -137,14 +148,15 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Provider:     providerPubKey,
-		Service:      service.String(),
-		Creator:      providerAddress.String(),
-		Client:       userPubKey,
-		ContractType: types.ContractType_SUBSCRIPTION,
-		Duration:     100,
-		Rate:         15,
-		Deposit:      cosmos.NewInt(1500),
+		Provider:  providerPubKey,
+		Service:   service.String(),
+		Creator:   providerAddress.String(),
+		Client:    userPubKey,
+		UserType:  types.UserType_SINGLE_USER,
+		MeterType: types.MeterType_PAY_PER_BLOCK,
+		Duration:  100,
+		Rate:      15,
+		Deposit:   cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
@@ -223,8 +235,18 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
+		Rates: []*types.ContractRate{
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_CALL,
+				Rate:      15,
+			},
+			{
+				UserType:  types.UserType_SINGLE_USER,
+				MeterType: types.MeterType_PAY_PER_BLOCK,
+				Rate:      15,
+			},
+		},
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 
@@ -237,14 +259,15 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Provider:     providerPubKey,
-		Service:      service.String(),
-		Creator:      providerAddress.String(),
-		Client:       userPubKey,
-		ContractType: types.ContractType_PAY_AS_YOU_GO,
-		Duration:     100,
-		Rate:         15,
-		Deposit:      cosmos.NewInt(1500),
+		Provider:  providerPubKey,
+		Service:   service.String(),
+		Creator:   providerAddress.String(),
+		Client:    userPubKey,
+		MeterType: types.MeterType_PAY_PER_CALL,
+		UserType:  types.UserType_SINGLE_USER,
+		Duration:  100,
+		Rate:      15,
+		Deposit:   cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
