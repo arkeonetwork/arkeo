@@ -317,7 +317,6 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	claimMsg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
 		Creator:    clientAddress.String(),
-		Spender:    clientPubKey,
 		Nonce:      20,
 	}
 	message := claimMsg.GetBytesToSign()
