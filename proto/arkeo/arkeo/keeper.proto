@@ -11,6 +11,16 @@ enum ProviderStatus {
   ONLINE = 1;
 }
 
+enum UserType {
+  SINGLE_USER = 0;
+  MULTI_USER = 1;
+}
+
+enum MeterType {
+  PAY_PER_BLOCK = 0;
+  PAY_PER_CALL = 1;
+}
+
 message Provider {
   string pub_key = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -21,20 +31,20 @@ message Provider {
   ProviderStatus status = 5;
   int64 min_contract_duration = 6;
   int64 max_contract_duration = 7;
-  int64 subscription_rate = 8;
-  int64 pay_as_you_go_rate = 9;
-  string bond = 10 [
+  repeated Rate rates = 8;
+  string bond = 9 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 last_update = 11;
-  int64 settlement_duration = 12;
+  int64 last_update = 10;
+  int64 settlement_duration = 11;
 }
 
-enum ContractType {
-  SUBSCRIPTION = 0;
-  PAY_AS_YOU_GO = 1;
+message Rate {
+  MeterType meter_type = 1;
+  UserType user_type = 2;
+  uint64 rate = 3;
 }
 
 message Contract {
@@ -46,24 +56,25 @@ message Contract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  ContractType type = 5;
-  int64 height = 6;
-  int64 duration = 7;
-  int64 rate = 8;
-  string deposit = 9 [
+  MeterType meter_type = 5;
+  UserType user_type = 6;
+  int64 height = 7;
+  int64 duration = 8;
+  int64 rate = 9;
+  string deposit = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  string paid = 10 [
+  string paid = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 nonce = 11;
-  int64 settlement_height = 12;
-  uint64 id = 13;
-  int64 settlement_duration = 14;
+  map<string, int64> nonces = 12 [(gogoproto.castkey) = "github.com/arkeonetwork/arkeo/common.PubKey"];
+  int64 settlement_height = 13;
+  uint64 id = 14;
+  int64 settlement_duration = 15;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }

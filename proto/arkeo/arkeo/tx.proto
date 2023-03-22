@@ -42,9 +42,8 @@ message MsgModProvider {
   ProviderStatus status = 6;
   int64 min_contract_duration = 7;
   int64 max_contract_duration = 8;
-  int64 subscription_rate = 9;
-  int64 pay_as_you_go_rate = 10;
-  int64 settlement_duration = 11;
+  repeated Rate rates = 9;
+  int64 settlement_duration = 10;
 }
 
 message MsgModProviderResponse {}
@@ -58,15 +57,16 @@ message MsgOpenContract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  ContractType contract_type = 6;
-  int64 duration = 7;
-  int64 rate = 8;
-  string deposit = 9 [
+  MeterType meter_type = 6;
+  UserType user_type = 7;
+  int64 duration = 8;
+  int64 rate = 9;
+  string deposit = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlement_duration = 10;
+  int64 settlement_duration = 11;
 }
 
 message MsgOpenContractResponse {}
@@ -82,7 +82,7 @@ message MsgClaimContractIncome {
   string creator = 1;
   uint64 contract_id = 2;
   bytes signature = 4;
-  int64 nonce = 5;
+  map<string, int64> nonces = 5 [(gogoproto.castkey) = "github.com/arkeonetwork/arkeo/common.PubKey"];
 }
 
 message MsgClaimContractIncomeResponse {}
