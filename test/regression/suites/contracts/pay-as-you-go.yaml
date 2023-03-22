@@ -52,7 +52,6 @@ endpoint: http://localhost:3636/swapi.dev/api/people/1
 arkauth:
   signer: cat
   id: "0"
-  spender: {{ pubkey_cat }}
   nonce: "1"
 headers:
   Tier: "paid"
@@ -81,7 +80,7 @@ description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/open-claims
 asserts:
   - length == 1
-  - .[0].signature == "44a8ca110a13f596e449a95a41e512850c0eed53f08aeb965d12a53a5966c5f148b0502f2600b1aa8ef04376b0f72ede2e09f4e88ea39b0fa7d33e883d6cb6eb"
+  - .[0].signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
   - .[0].claimed == false
 ---
 ########################################################################################
@@ -91,7 +90,7 @@ type: check
 description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/claim/0
 asserts:
-  - .signature == "44a8ca110a13f596e449a95a41e512850c0eed53f08aeb965d12a53a5966c5f148b0502f2600b1aa8ef04376b0f72ede2e09f4e88ea39b0fa7d33e883d6cb6eb"
+  - .signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
   - .claimed == false
   - .contract_id == 0
 ---
@@ -102,12 +101,10 @@ type: tx-claim-contract
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 contractId: 0
-spender: {{ pubkey_cat }}
 nonce: 1
 arkauth:
   signer: cat
   id: "0"
-  spender: {{ pubkey_cat }}
   nonce: "1"
 ---
 type: create-blocks
@@ -144,12 +141,10 @@ type: tx-claim-contract
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
 contractId: 0
-spender: {{ pubkey_cat }}
 nonce: 1
 arkauth:
   signer: cat
   id: "0"
-  spender: {{ pubkey_cat }}
   nonce: "1"
 ---
 type: create-blocks

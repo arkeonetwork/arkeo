@@ -384,21 +384,48 @@ func run(path string) error {
 			log.Fatal().Err(err).Msg("failed to restart arkeod")
 		}
 
-		// restart sentinel
-		log.Debug().Msg("Restarting sentinel")
-		sentinel = exec.Command("sentinel")
-		sentinel.Stdout = os.Stdout
-		sentinel.Stderr = os.Stderr
-		err = sentinel.Start()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to restart sentinel")
-		}
-
 		// wait for arkeo
 		log.Debug().Msg("Waiting for arkeod")
 		_, err = arkeo.Process.Wait()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to wait for arkeod")
+		}
+
+		// wait for arkeo to listen on block creation port
+		for i := 0; ; i++ {
+			time.Sleep(100 * time.Millisecond)
+			conn, err := net.Dial("tcp", "localhost:8080")
+			if err == nil {
+				conn.Close()
+				break
+			}
+			if i%100 == 0 {
+				log.Debug().Msg("Waiting for arkeo to listen")
+			}
+		}
+
+		// wait for arkeo to listen on block rpc port
+		for i := 0; ; i++ {
+			time.Sleep(100 * time.Millisecond)
+			conn, err := net.Dial("tcp", "localhost:26657")
+			if err == nil {
+				conn.Close()
+				break
+			}
+			if i%100 == 0 {
+				log.Debug().Msg("Waiting for arkeo to listen")
+			}
+		}
+
+		// restart sentinel
+		log.Debug().Msg("Restarting sentinel")
+		restartSentinel := exec.Command("sentinel")
+		restartSentinel.Env = sentinel.Env
+		restartSentinel.Stdout = os.Stdout
+		restartSentinel.Stderr = os.Stderr
+		err = restartSentinel.Start()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to restart sentinel")
 		}
 
 		// wait for sentinel
@@ -407,6 +434,7 @@ func run(path string) error {
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to wait for sentinel")
 		}
+
 	}
 
 	return returnErr
