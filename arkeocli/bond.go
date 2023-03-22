@@ -21,9 +21,9 @@ func newBondProviderCmd() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(bondProviderCmd)
-	bondProviderCmd.Flags().StringP("pubkey", "p", "", "provider pubkey")
-	bondProviderCmd.Flags().StringP("chain", "c", "", "provider chain")
-	bondProviderCmd.Flags().String("bond", "", "provider bond amount")
+	bondProviderCmd.Flags().String("provider-pubkey", "", "provider pubkey")
+	bondProviderCmd.Flags().String("service", "", "provider service name")
+	bondProviderCmd.Flags().String("bond", "", "provider bond amount (negative to unbond)")
 	return bondProviderCmd
 }
 
@@ -33,47 +33,30 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	fromAddr := clientCtx.GetFromAddress().String()
-	if fromAddr == "" {
-		readFrom, err := promptForArg(cmd, "Specify from key or address: ")
-		if err != nil {
-			return err
-		}
-
-		var accAddr cosmos.AccAddress
-		key, err := clientCtx.Keyring.Key(readFrom)
-		if err != nil {
-			accAddr, err = cosmos.AccAddressFromBech32(readFrom)
-			if err != nil {
-				return err
-			}
-			key, err = clientCtx.Keyring.KeyByAddress(accAddr)
-			if err != nil {
-				return err
-			}
-		}
-		accAddr, err = key.GetAddress()
-		if err != nil {
-			return err
-		}
-
-		clientCtx = clientCtx.WithFromName(key.Name).WithFromAddress(accAddr)
-		if err = client.SetCmdClientContext(cmd, clientCtx); err != nil {
-			return err
-		}
+	key, err := ensureKeys(cmd)
+	if err != nil {
+		return err
+	}
+	addr, err := key.GetAddress()
+	if err != nil {
+		return
+	}
+	clientCtx = clientCtx.WithFromName(key.Name).WithFromAddress(addr)
+	if err = client.SetCmdClientContext(cmd, clientCtx); err != nil {
+		return
 	}
 
-	argPubkey, _ := cmd.Flags().GetString("pubkey")
+	argPubkey, _ := cmd.Flags().GetString("provider-pubkey")
 	if argPubkey == "" {
-		argPubkey, err = promptForArg(cmd, "Specify provider pubkey: ")
+		argPubkey, err = toPubkey(cmd, addr)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
-	argChain, _ := cmd.Flags().GetString("chain")
-	if argChain == "" {
-		argChain, err = promptForArg(cmd, "Specify chain (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
+	argService, _ := cmd.Flags().GetString("service")
+	if argService == "" {
+		argService, err = promptForArg(cmd, "Specify service (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
 		if err != nil {
 			return err
 		}
@@ -98,7 +81,7 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 	msg := types.NewMsgBondProvider(
 		clientCtx.GetFromAddress().String(),
 		pubkey,
-		argChain,
+		argService,
 		bond,
 	)
 	if err := msg.ValidateBasic(); err != nil {
