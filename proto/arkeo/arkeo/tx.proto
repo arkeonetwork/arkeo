@@ -81,8 +81,6 @@ message MsgCloseContractResponse {}
 message MsgClaimContractIncome {
   string creator = 1;
   uint64 contract_id = 2;
-  string spender = 3
-      [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes signature = 4;
   int64 nonce = 5;
 }

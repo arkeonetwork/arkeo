@@ -36,39 +36,34 @@ type ArkAuth struct {
 
 // String implement fmt.Stringer
 func (aa ArkAuth) String() string {
-	return GenerateArkAuthString(aa.ContractId, aa.Spender, aa.Nonce, aa.Signature)
+	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature)
 }
 
-func GenerateArkAuthString(contractId uint64, spender common.PubKey, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, spender.String(), nonce), hex.EncodeToString(signature))
+func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte) string {
+	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce), hex.EncodeToString(signature))
 }
 
-func GenerateMessageToSign(contractId uint64, spender string, nonce int64) string {
-	return fmt.Sprintf("%d:%s:%d", contractId, spender, nonce)
+func GenerateMessageToSign(contractId uint64, nonce int64) string {
+	return fmt.Sprintf("%d:%d", contractId, nonce)
 }
 
 func parseArkAuth(raw string) (ArkAuth, error) {
 	var aa ArkAuth
 	var err error
 
-	parts := strings.SplitN(raw, ":", 4)
-	if len(parts) != 4 {
+	parts := strings.SplitN(raw, ":", 3)
+	if len(parts) != 3 {
 		return aa, fmt.Errorf("not properly formatted ark-auth string: %s", raw)
 	}
 	aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
 	if err != nil {
 		return aa, err
 	}
-	aa.Spender, err = common.NewPubKey(parts[1])
+	aa.Nonce, err = strconv.ParseInt(parts[1], 10, 64)
 	if err != nil {
 		return aa, err
 	}
-
-	aa.Nonce, err = strconv.ParseInt(parts[2], 10, 64)
-	if err != nil {
-		return aa, err
-	}
-	aa.Signature, err = hex.DecodeString(parts[3])
+	aa.Signature, err = hex.DecodeString(parts[2])
 	if err != nil {
 		return aa, err
 	}
@@ -80,8 +75,9 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	if err != nil {
 		return fmt.Errorf("internal server error: %w", err)
 	}
-	msg := types.NewMsgClaimContractIncome(creator.String(), aa.ContractId, aa.Spender, aa.Nonce, aa.Signature)
-	return msg.ValidateBasic()
+	msg := types.NewMsgClaimContractIncome(creator.String(), aa.ContractId, aa.Nonce, aa.Signature)
+	err = msg.ValidateBasic()
+	return err
 }
 
 func (p Proxy) auth(next http.Handler) http.Handler {

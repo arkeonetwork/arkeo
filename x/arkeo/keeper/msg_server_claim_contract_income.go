@@ -53,6 +53,14 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "settled on block: %d", contract.SettlementPeriodEnd())
 	}
 
+	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
+	if err != nil {
+		return err
+	}
+	if !pk.VerifySignature(msg.GetBytesToSign(), msg.Signature) {
+		return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "")
+	}
+
 	return nil
 }
 

@@ -15,7 +15,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel"
 	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -192,9 +191,6 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if len(input["id"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: id")
 	}
-	if len(input["spender"]) == 0 {
-		return "", true, fmt.Errorf("missing required field: spender")
-	}
 	if len(input["nonce"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: nonce")
 	}
@@ -202,10 +198,6 @@ func createAuth(input map[string]string) (string, bool, error) {
 	id, err := strconv.ParseUint(input["id"], 10, 64)
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse id: %s", err)
-	}
-	spender, err := common.NewPubKey(input["spender"])
-	if err != nil {
-		return "", true, fmt.Errorf("failed to parse spender pubkey: %s", err)
 	}
 	nonce, err := strconv.ParseInt(input["nonce"], 10, 64)
 	if err != nil {
@@ -236,12 +228,12 @@ func createAuth(input map[string]string) (string, bool, error) {
 	privKey := hd.Secp256k1.Generate()(derivedPriv)
 
 	// sign our msg
-	msg := sentinel.GenerateMessageToSign(id, spender.String(), nonce)
+	msg := sentinel.GenerateMessageToSign(id, nonce)
 	sig, err := privKey.Sign([]byte(msg))
 	if err != nil {
 		return "", true, fmt.Errorf("failed to sign message: %s", err)
 	}
-	arkauth := sentinel.GenerateArkAuthString(id, spender, nonce, sig)
+	arkauth := sentinel.GenerateArkAuthString(id, nonce, sig)
 
 	return arkauth, true, nil
 }

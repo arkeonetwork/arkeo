@@ -32,11 +32,7 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 	kb := cKeys.NewInMemory(cdc)
-	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
-	require.NoError(t, err)
-	pub, err := info.GetPubKey()
-	require.NoError(t, err)
-	spenderPubKey, err := common.NewPubKeyFromCrypto(pub)
+	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	require.NoError(t, err)
 
 	// invalid address
@@ -50,7 +46,6 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 		Creator:    acct.String(),
 		ContractId: 1,
 		Nonce:      24,
-		Spender:    spenderPubKey,
 	}
 
 	message := msg.GetBytesToSign()
@@ -58,11 +53,6 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 	err = msg.ValidateBasic()
 	require.NoError(t, err)
-
-	// check bad client
-	msg.Spender = common.PubKey("bogus")
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidPubKey)
 }
 
 func TestValidateSignature(t *testing.T) {
@@ -80,7 +70,6 @@ func TestValidateSignature(t *testing.T) {
 
 	msg := MsgClaimContractIncome{
 		Creator:    acct.String(),
-		Spender:    pubkey,
 		Nonce:      48,
 		ContractId: 500,
 	}
@@ -93,7 +82,7 @@ func TestValidateSignature(t *testing.T) {
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	require.NoError(t, err)
 
-	message := []byte(fmt.Sprintf("%d:%s:%d", msg.ContractId, msg.Spender, msg.Nonce))
+	message := []byte(fmt.Sprintf("%d:%d", msg.ContractId, msg.Nonce))
 	msg.Signature, pub, err = kb.Sign("whatever", message)
 	require.NoError(t, err)
 

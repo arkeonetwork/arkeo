@@ -7,6 +7,12 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/crypto/hd"
+	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/std"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/stretchr/testify/require"
 )
 
@@ -251,7 +257,19 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 
 	require.NoError(t, err)
 
-	clientPubKey := types.GetRandomPubKey()
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
+	types.RegisterInterfaces(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+
+	kb := cKeys.NewInMemory(cdc)
+	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
+	require.NoError(t, err)
+	pk, err := info.GetPubKey()
+	require.NoError(t, err)
+	clientPubKey, err := common.NewPubKeyFromCrypto(pk)
+	require.NoError(t, err)
 	clientAddress, err := clientPubKey.GetMyAddress()
 	require.NoError(t, err)
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))))
@@ -299,9 +317,11 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	claimMsg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
 		Creator:    clientAddress.String(),
-		Spender:    clientPubKey,
 		Nonce:      20,
 	}
+	message := claimMsg.GetBytesToSign()
+	claimMsg.Signature, _, err = kb.Sign("whatever", message)
+	require.NoError(t, err)
 	_, err = s.ClaimContractIncome(ctx, &claimMsg)
 	require.NoError(t, err)
 
