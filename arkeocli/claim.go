@@ -1,7 +1,6 @@
 package arkeocli
 
 import (
-	"encoding/hex"
 	"fmt"
 	"strconv"
 
@@ -54,91 +53,85 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return
 	}
+	creator := addr.String()
 
 	clientCtx = clientCtx.WithFromName(key.Name).WithFromAddress(addr)
 	if err = client.SetCmdClientContext(cmd, clientCtx); err != nil {
 		return
 	}
 
-	creator := addr.String()
 	spenderPubkeyStr, err := toPubkey(cmd, addr)
 	if err != nil {
 		return
 	}
 
-	spk, err := common.NewPubKey(spenderPubkeyStr)
+	spenderPubkey, err := common.NewPubKey(spenderPubkeyStr)
 	if err != nil {
 		return err
 	}
 
-	argProviderPubkey, _ := cmd.Flags().GetString("provider-pubkey")
-	if argProviderPubkey == "" {
-		argProviderPubkey, err = promptForArg(cmd, "Specify provider pubkey: ")
-		if err != nil {
-			return
-		}
-	}
-
-	providerPubKey, err := common.NewPubKey(argProviderPubkey)
+	queryCtx, err := client.GetClientQueryContext(cmd)
 	if err != nil {
 		return err
 	}
-	_ = providerPubKey
 
+	queryClient := types.NewQueryClient(queryCtx)
+
+	var contract types.Contract
 	contractID, _ := cmd.Flags().GetUint64("contract-id")
-	if contractID == 0 {
-		argService, _ := cmd.Flags().GetString("service")
-		if argService == "" {
-			argService, err = promptForArg(cmd, "Specify service (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
+	if contractID != 0 {
+		params := &types.QueryFetchContractRequest{ContractId: contractID}
+		res, err := queryClient.FetchContract(cmd.Context(), params)
+		if err != nil {
+			return errors.Wrapf(err, "error fetching contract %d", contractID)
+		}
+		if res == nil {
+			return fmt.Errorf("no contract found %d", contractID)
+		}
+		contract = res.GetContract()
+	} else {
+		providerPubkey, _ := cmd.Flags().GetString("provider-pubkey")
+		if providerPubkey == "" {
+			providerPubkey, err = promptForArg(cmd, "Specify provider pubkey: ")
+			if err != nil {
+				return
+			}
+		}
+
+		service, _ := cmd.Flags().GetString("service")
+		if service == "" {
+			service, err = promptForArg(cmd, "Specify service (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
 			if err != nil {
 				return err
 			}
 		}
-		_ = argService
-
-		clientCtx, err := client.GetClientQueryContext(cmd)
-		if err != nil {
-			return err
-		}
-
-		queryClient := types.NewQueryClient(clientCtx)
 
 		params := &types.QueryActiveContractRequest{
 			Spender:  spenderPubkeyStr,
-			Provider: argProviderPubkey,
-			Service:  argService,
+			Provider: providerPubkey,
+			Service:  service,
 		}
 
 		res, err := queryClient.ActiveContract(cmd.Context(), params)
 		if err != nil {
 			// not found "rpc error: code = NotFound desc = not found: key not found"
-			return errors.Wrapf(err, "could not find active contract for %s:%s:%s", spenderPubkeyStr, argProviderPubkey, argService)
+			return errors.Wrapf(err, "could not find active contract for %s:%s:%s", spenderPubkeyStr, providerPubkey, service)
 		}
 
-		contractID = res.GetContract().Id
-		cmd.Println("res")
+		contract = res.GetContract()
 	}
 
-	// "$CONTRACT_ID:$CLIENT_PUBKEY:$NONCE"
-	signStr := fmt.Sprintf("%d:%s:%d", contractID, spenderPubkeyStr, nonce)
+	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkeyStr, nonce)
 	signBytes := []byte(signStr)
-	signature, pubkey, err := clientCtx.Keyring.Sign(key.Name, signBytes)
+	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
 	}
 
-	// verify signature
-	if !pubkey.VerifySignature(signBytes, signature) {
-		return fmt.Errorf("signature verification failed")
-	}
-
-	sigHex := hex.EncodeToString(signature)
-	_ = sigHex
-
 	msg := types.NewMsgClaimContractIncome(
 		creator,
-		contractID,
-		spk,
+		contract.Id,
+		spenderPubkey,
 		nonce,
 		signature,
 	)
