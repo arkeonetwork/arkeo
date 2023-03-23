@@ -14,5 +14,6 @@ func GetArkeoCmd() *cobra.Command {
 	arkeoCmd.AddCommand(newOpenContractCmd())
 	arkeoCmd.AddCommand(newShowPubkeyCmd())
 	arkeoCmd.AddCommand(newClaimCmd())
+	arkeoCmd.AddCommand(newCloseContractCmd())
 	return arkeoCmd
 }

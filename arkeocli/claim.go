@@ -22,8 +22,9 @@ func newClaimCmd() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(claimCmd)
+	claimCmd.Flags().Uint64("contract-id", 0, "id of contract")
 	claimCmd.Flags().String("provider-pubkey", "", "provider pubkey")
-	claimCmd.Flags().String("contract-id", "", "id of contract")
+	claimCmd.Flags().String("client-pubkey", "", "client pubkey")
 	claimCmd.Flags().String("service", "", "service name")
 	claimCmd.Flags().Int64("nonce", 0, "requests claimed (must increment each call)")
 	return claimCmd
@@ -34,6 +35,35 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	key, err := ensureKeys(cmd)
+	if err != nil {
+		return err
+	}
+	spenderAddress, err := key.GetAddress()
+	if err != nil {
+		return
+	}
+
+	clientCtx = clientCtx.WithFromName(key.Name).WithFromAddress(spenderAddress)
+	if err = client.SetCmdClientContext(cmd, clientCtx); err != nil {
+		return
+	}
+
+	spenderPubkeyRaw, err := key.GetPubKey()
+	if err != nil {
+		return err
+	}
+	spenderPubkey, err := common.NewPubKeyFromCrypto(spenderPubkeyRaw)
+	if err != nil {
+		return err
+	}
+
+	contract, err := getContract(cmd)
+	if err != nil {
+		return err
+	}
+
 	nonce, err := cmd.Flags().GetInt64("nonce")
 	if err != nil {
 		return err
@@ -48,98 +78,24 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-	key, err := ensureKeys(cmd)
-	if err != nil {
-		return err
-	}
-	addr, err := key.GetAddress()
-	if err != nil {
-		return
-	}
-	creator := addr.String()
 
-	clientCtx = clientCtx.WithFromName(key.Name).WithFromAddress(addr)
-	if err = client.SetCmdClientContext(cmd, clientCtx); err != nil {
-		return
-	}
-
-	spenderPubkeyStr, err := toPubkey(cmd, addr)
-	if err != nil {
-		return
-	}
-
-	spenderPubkey, err := common.NewPubKey(spenderPubkeyStr)
-	if err != nil {
-		return err
-	}
-
-	queryCtx, err := client.GetClientQueryContext(cmd)
-	if err != nil {
-		return err
-	}
-
-	queryClient := types.NewQueryClient(queryCtx)
-
-	var contract types.Contract
-	contractID, err := cmd.Flags().GetUint64("contract-id")
-	if err != nil {
-		return err
-	}
-	if contractID != 0 {
-		params := &types.QueryFetchContractRequest{ContractId: contractID}
-		res, err := queryClient.FetchContract(cmd.Context(), params)
-		if err != nil {
-			return errors.Wrapf(err, "error fetching contract %d", contractID)
-		}
-		if res == nil {
-			return fmt.Errorf("no contract found %d", contractID)
-		}
-		contract = res.GetContract()
-	} else {
-		var providerPubkey string
-		providerPubkey, err = cmd.Flags().GetString("provider-pubkey")
-		if err != nil {
-			return err
-		}
-		if providerPubkey == "" {
-			providerPubkey, err = promptForArg(cmd, "Specify provider pubkey: ")
-			if err != nil {
-				return
-			}
-		}
-
-		service, err := cmd.Flags().GetString("service")
-		if err != nil {
-			return err
-		}
-		if service == "" {
-			service, err = promptForArg(cmd, "Specify service (e.g. gaia-mainnet-rpc-archive, btc-mainnet-fullnode, etc): ")
-			if err != nil {
-				return err
-			}
-		}
-
-		params := &types.QueryActiveContractRequest{
-			Spender:  spenderPubkeyStr,
-			Provider: providerPubkey,
-			Service:  service,
-		}
-
-		res, err := queryClient.ActiveContract(cmd.Context(), params)
-		if err != nil {
-			return errors.Wrapf(err, "could not find active contract for %s:%s:%s", spenderPubkeyStr, providerPubkey, service)
-		}
-
-		contract = res.GetContract()
-	}
-
-	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkeyStr, nonce)
+	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkey, nonce)
 	signBytes := []byte(signStr)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
 	}
 
+	clientPubkey := contract.GetDelegate()
+	if clientPubkey == "" {
+		clientPubkey = contract.GetClient()
+	}
+
+	creatorAddr, err := clientPubkey.GetMyAddress()
+	if err != nil {
+		return err
+	}
+	creator := creatorAddr.String()
 	msg := types.NewMsgClaimContractIncome(
 		creator,
 		contract.Id,
