@@ -14,8 +14,8 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-user_type: "SINGLE_USER"
-meter_type: "PAY_PER_BLOCK"
+userType: "SINGLE_USER"
+meterType: "PAY_PER_BLOCK"
 duration: 10
 rate: 10
 deposit: "100"
@@ -88,8 +88,8 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-meter_type: "PAY_PER_BLOCK"
-#user_type: "SINGLE_USER"
+meterType: "PAY_PER_BLOCK"
+userType: "SINGLE_USER"
 duration: 10
 rate: 10
 deposit: "100"
