@@ -67,6 +67,7 @@ type Keeper interface {
 	// Keeper Interfaces
 	KeeperProvider
 	KeeperContract
+	KeeperNonce
 }
 
 type KeeperProvider interface {
@@ -97,6 +98,12 @@ type KeeperContract interface {
 	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, service common.Service) (types.Contract, error)
 }
 
+type KeeperNonce interface {
+	SetNonce(ctx cosmos.Context, spenderPubKey common.PubKey, contractId uint64, nonce int64) error
+	GetNonce(ctx cosmos.Context, spenderPubKey common.PubKey, contractId uint64) (int64, error)
+	NonceExists(ctx cosmos.Context, spenderPubKey common.PubKey, contractId uint64) bool
+}
+
 const (
 	prefixVersion               dbPrefix = "ver/"
 	prefixProvider              dbPrefix = "p/"
@@ -104,6 +111,7 @@ const (
 	prefixContractNextId        dbPrefix = "cni/"
 	prefixContractExpirationSet dbPrefix = "ces/"
 	prefixUserContractSet       dbPrefix = "ucs/"
+	prefixNonce                 dbPrefix = "n/"
 )
 
 type KVStore struct {
