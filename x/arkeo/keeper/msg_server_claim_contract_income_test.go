@@ -97,7 +97,6 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Spender:    contract.GetSpender(),
 		Creator:    acc.String(),
 		Nonce:      20,
 	}

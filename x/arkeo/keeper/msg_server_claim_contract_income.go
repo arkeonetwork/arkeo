@@ -45,7 +45,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return err
 	}
 
-	contractNonce := contract.Nonces[msg.Spender]
+	contractNonce := contract.Nonces[contract.GetSpender()]
 	if contractNonce >= msg.Nonce {
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contractNonce, msg.Nonce)
 	}
@@ -70,7 +70,7 @@ func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgC
 	if err != nil {
 		return err
 	}
-	nonces := map[common.PubKey]int64{msg.Spender: msg.Nonce}
+	nonces := map[common.PubKey]int64{contract.GetSpender(): msg.Nonce}
 	_, err = k.mgr.SettleContract(ctx, contract, nonces, false)
 	return err
 }
