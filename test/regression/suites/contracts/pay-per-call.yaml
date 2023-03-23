@@ -1,0 +1,171 @@
+{{ template "default-state.yaml" }}
+---
+{{ template "provider.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# open pay-per-call contract
+########################################################################################
+type: tx-open-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+provider: {{ pubkey_fox }}
+service: "swapi.dev"
+client: {{ pubkey_cat }}
+meter_type: "PAY_PER_CALL"
+user_type: "SINGLE_USER"
+duration: 10
+rate: 3
+deposit: "100"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is created
+endpoint: http://localhost:1317/arkeo/contracts
+asserts:
+  - .contract | length == 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.paid == "0"
+  - .contract.id == "0"
+---
+type: check
+description: cat account balance should decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
+---
+########################################################################################
+# check can make a paid request
+########################################################################################
+type: check
+description: check can make paid request
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "0"
+  nonce: "1"
+headers:
+  Tier: "paid"
+asserts:
+  - .name == "Luke Skywalker"
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# query active contracts on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/active-contract/{{ pubkey_cat }}/{{ pubkey_fox }}/swapi.dev
+asserts:
+  - .provider == "{{ pubkey_fox }}"
+  - .service == 1
+  - .client == "{{ pubkey_cat }}"
+---
+########################################################################################
+# query open claims on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/open-claims
+asserts:
+  - length == 1
+  - .[0].signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
+  - .[0].claimed == false
+---
+########################################################################################
+# query specific claims on sentinel
+########################################################################################
+type: check
+description: ensure contract shows up in active contracts
+endpoint: http://localhost:3636/claim/0
+asserts:
+  - .signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
+  - .claimed == false
+  - .contract_id == 0
+---
+########################################################################################
+# claim pay-per-call rewards
+########################################################################################
+type: tx-claim-contract
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+contractId: 0
+nonce: 1
+arkauth:
+  signer: cat
+  id: "0"
+  nonce: "1"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.paid == "3"
+  - .contract.id == "0"
+---
+type: check
+description: cat account balance should decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---
+########################################################################################
+# query open claims on sentinel, ensure its now "claimed"
+########################################################################################
+type: check
+description: show claims has been removed from active status
+endpoint: http://localhost:3636/open-claims
+asserts:
+  - length == 0
+---
+########################################################################################
+# claim pay-per-call rewards again, but SHOULD NOT double pay provider
+########################################################################################
+type: tx-claim-contract
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+contractId: 0
+nonce: 1
+arkauth:
+  signer: cat
+  id: "0"
+  nonce: "1"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.paid == "3"
+  - .contract.id == "0"
+---
+type: check
+description: cat account balance should NOT decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---

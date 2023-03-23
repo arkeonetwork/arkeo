@@ -1,0 +1,147 @@
+{{ template "default-state.yaml" }}
+---
+{{ template "provider.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# open pay per block contract
+########################################################################################
+type: tx-open-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+provider: {{ pubkey_fox }}
+service: "swapi.dev"
+client: {{ pubkey_cat }}
+user_type: "SINGLE_USER"
+meter_type: "PAY_PER_BLOCK"
+duration: 10
+rate: 10
+deposit: "100"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is created
+endpoint: http://localhost:1317/arkeo/contracts
+asserts:
+  - .contract | length == 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_BLOCK"
+  - .contract.paid == "0"
+---
+type: check
+description: cat account balance should decrease
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
+---
+########################################################################################
+# check can make a paid request
+########################################################################################
+type: check
+description: check can make paid request
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "0"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+headers:
+  Tier: "paid"
+asserts:
+  - .name == "Luke Skywalker"
+---
+########################################################################################
+# check pay per block settles okay
+########################################################################################
+type: create-blocks
+count: 13
+---
+type: check
+description: ensure contract is closed
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.paid == "100"
+---
+type: check
+description: fox account balance should increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000090 # fox gets 90 due to 10% tax to reserve
+---
+########################################################################################
+# open pay-per-block contract (again)
+########################################################################################
+type: tx-open-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+provider: {{ pubkey_fox }}
+service: "swapi.dev"
+client: {{ pubkey_cat }}
+meter_type: "PAY_PER_BLOCK"
+#user_type: "SINGLE_USER"
+duration: 10
+rate: 10
+deposit: "100"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/1
+asserts:
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_BLOCK"
+  - .contract.paid == "0"
+---
+########################################################################################
+# cancel subscription with bad address
+########################################################################################
+type: tx-close-contract
+signer: {{ addr_dog }}
+creator: {{ addr_dog }}
+contract_id: 1
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is closed
+endpoint: http://localhost:1317/arkeo/contract/1
+asserts:
+  - .contract.paid == "0"
+---
+########################################################################################
+# cancel subscription with good address
+########################################################################################
+type: tx-close-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+contract_id: 1
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: fox account balance should increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000108
+---
+type: check
+description: ensure contract is closed
+endpoint: http://localhost:1317/arkeo/contract/1
+asserts:
+  - .contract.paid == "20"
