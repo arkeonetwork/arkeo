@@ -79,13 +79,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkey, nonce)
-	signBytes := []byte(signStr)
-	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
-	if err != nil {
-		return errors.Wrapf(err, "error signing")
-	}
-
 	clientPubkey := contract.GetDelegate()
 	if clientPubkey == "" {
 		clientPubkey = contract.GetClient()
@@ -96,6 +89,14 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 	creator := creatorAddr.String()
+
+	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkey, nonce)
+	signBytes := []byte(signStr)
+	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
+	if err != nil {
+		return errors.Wrapf(err, "error signing")
+	}
+
 	msg := types.NewMsgClaimContractIncome(
 		creator,
 		contract.Id,
