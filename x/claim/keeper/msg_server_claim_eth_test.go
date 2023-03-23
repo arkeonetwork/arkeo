@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-<<<<<<< Updated upstream
 func TestClaimEth(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
@@ -34,24 +33,6 @@ func TestClaimEth(t *testing.T) {
 	}
 	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)
-=======
-func (suite *KeeperTestSuite) TestClaimEth() {
-	suite.SetupTest()
-	msgServer := keeper.NewMsgServerImpl(suite.app.ClaimKeeper)
-	// create valid eth claimrecords
-	addrArkeo := sdk.AccAddress(secp256k1.GenPrivKey().PubKey().Address())
-	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "300")
-	suite.NoError(err)
-
-	claimRecord := types.ClaimRecord{
-		Chain:                  types.ETHEREUM,
-		Address:                addrEth,
-		InitialClaimableAmount: sdk.NewInt64Coin(types.DefaultClaimDenom, 300),
-		ActionCompleted:        []bool{false, false, false},
-	}
-	err = suite.app.ClaimKeeper.SetClaimRecord(suite.ctx, claimRecord)
-	suite.NoError(err)
->>>>>>> Stashed changes
 
 	// mint coins to module account
 	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
@@ -65,7 +46,6 @@ func (suite *KeeperTestSuite) TestClaimEth() {
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
-<<<<<<< Updated upstream
 	_, err = msgServer.ClaimEth(ctx, &claimMessage)
 	require.NoError(t, err)
 
@@ -220,32 +200,6 @@ func TestClaimEthWithNoClaimRecord(t *testing.T) {
 	}
 	_, err = msgServer.ClaimEth(ctx, &claimMessage)
 	require.Error(t, err)
-=======
-
-	// get balance of before claim
-	balanceBefore := suite.app.BankKeeper.GetBalance(suite.ctx, addrArkeo, types.DefaultClaimDenom)
-
-	_, err = msgServer.ClaimEth(suite.ctx, &claimMessage)
-	suite.NoError(err)
-
-	// check if claimrecord is updated
-	claimRecord, err = suite.app.ClaimKeeper.GetClaimRecord(suite.ctx, addrEth, types.ETHEREUM)
-	suite.NoError(err)
-	suite.True(claimRecord.ActionCompleted[types.FOREIGN_CHAIN_ACTION_CLAIM])
-
-	// confirm we have a claimrecord for arkeo
-	claimRecord, err = suite.app.ClaimKeeper.GetClaimRecord(suite.ctx, addrArkeo.String(), types.ARKEO)
-	suite.NoError(err)
-	suite.Equal(claimRecord.Address, addrArkeo)
-	suite.Equal(claimRecord.Chain, types.ARKEO)
-	suite.Equal(claimRecord.InitialClaimableAmount, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
-	suite.False(claimRecord.ActionCompleted[types.ACTION_VOTE])
-	suite.False(claimRecord.ActionCompleted[types.ACTION_DELEGATE_STAKE])
-
-	// check if balance is updated
-	balanceAfter := suite.app.BankKeeper.GetBalance(suite.ctx, addrArkeo, types.DefaultClaimDenom)
-	suite.Equal(balanceBefore.Add(sdk.NewInt64Coin(types.DefaultClaimDenom, 100)), balanceAfter)
->>>>>>> Stashed changes
 }
 
 func TestIsValidClaimSignature(t *testing.T) {
