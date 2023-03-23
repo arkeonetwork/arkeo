@@ -57,7 +57,6 @@ func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract 
 		sdk.NewAttribute("reserve", valIncome.String()),
 		sdk.NewAttribute("nonce", strconv.FormatInt(nonce, 10)),
 	)
-
 }
 
 func NewCloseContractEvent(contract *Contract) sdk.Event {

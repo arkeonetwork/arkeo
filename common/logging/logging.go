@@ -12,11 +12,13 @@ import (
 )
 
 // Fields is an alias to logrus.Fields
-type Fields = logrus.Fields
-type CustomLogFormatter struct {
-	TimestampFormat string
-	LevelDesc       []string
-}
+type (
+	Fields             = logrus.Fields
+	CustomLogFormatter struct {
+		TimestampFormat string
+		LevelDesc       []string
+	}
+)
 
 // Logger wraps a logrus.FieldLogger to provide all standard logging functionality
 type Logger interface {

@@ -106,8 +106,8 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		Service          common.Service   `protobuf:"varint,2,opt,name=service,proto3,casttype=github.com/arkeonetwork/arkeo/common.Service" json:"service,omitempty"`
 		Client           common.PubKey    `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
 		Delegate         common.PubKey    `protobuf:"bytes,4,opt,name=delegate,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"delegate,omitempty"`
-		MeterType        types.MeterType  `protobuf:"varint,5,opt,name=meter_type,proto3,enum=arkeo.arkeo.MeterType" json:"type,omitempty"`
-		UserType         types.UserType   `protobuf:"varint,6,opt,name=user_type,proto3,enum=arkeo.arkeo.UserType" json:"type,omitempty"`
+		MeterType        types.MeterType  `protobuf:"varint,5,opt,name=meter_type,proto3,enum=arkeo.arkeo.MeterType" json:"meter_type,omitempty"`
+		UserType         types.UserType   `protobuf:"varint,6,opt,name=user_type,proto3,enum=arkeo.arkeo.UserType" json:"user_type,omitempty"`
 		Height           string           `protobuf:"varint,7,opt,name=height,proto3" json:"height,omitempty"`
 		Duration         string           `protobuf:"varint,8,opt,name=duration,proto3" json:"duration,omitempty"`
 		Rate             string           `protobuf:"varint,9,opt,name=rate,proto3" json:"rate,omitempty"`
@@ -158,7 +158,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Rate, _ = strconv.ParseInt(data.Contract.Rate, 10, 64)
 	contract.Deposit, _ = cosmos.NewIntFromString(data.Contract.Deposit)
 	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
-	//contract.Nonces = data.Contract.Nonces // TODO: FIX ME
+	// contract.Nonces = data.Contract.Nonces // TODO: FIX ME
 	contract.SettlementHeight, _ = strconv.ParseInt(data.Contract.SettlementHeight, 10, 64)
 
 	return contract, nil

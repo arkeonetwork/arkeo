@@ -79,7 +79,6 @@ import (
 //	500: InternalServerError
 
 func (a *ApiService) searchProviders(response http.ResponseWriter, request *http.Request) {
-
 	sort := request.FormValue("sort")
 	chain := request.FormValue("chain")
 	pubkey := request.FormValue("pubkey")

@@ -5,7 +5,6 @@ import (
 )
 
 func TestInsertIndexerStatus(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -19,7 +18,6 @@ func TestInsertIndexerStatus(t *testing.T) {
 		ID:     0,
 		Height: 55,
 	})
-
 	if err != nil {
 		t.Errorf("error inserting indexer: %+v", err)
 		t.FailNow()
@@ -28,7 +26,6 @@ func TestInsertIndexerStatus(t *testing.T) {
 }
 
 func TestUpdateIndexerStatus(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -42,7 +39,6 @@ func TestUpdateIndexerStatus(t *testing.T) {
 		ID:     0,
 		Height: 65,
 	})
-
 	if err != nil {
 		t.Errorf("error updated indexer: %+v", err)
 		t.FailNow()
@@ -51,7 +47,6 @@ func TestUpdateIndexerStatus(t *testing.T) {
 }
 
 func TestFindIndexerStatus(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}

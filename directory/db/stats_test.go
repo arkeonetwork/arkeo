@@ -5,7 +5,6 @@ import (
 )
 
 func TestGetArkeoNetworkStats(t *testing.T) {
-
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
@@ -16,7 +15,6 @@ func TestGetArkeoNetworkStats(t *testing.T) {
 	}
 
 	stats, err := db.GetArkeoNetworkStats()
-
 	if err != nil {
 		t.Error("error getting stats", err)
 		t.FailNow()
