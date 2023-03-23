@@ -13,9 +13,6 @@ genesis:
           bond: "1000000000000"
           last_update: 1
           rates:
-            - rate: 3
-              user_type: 0
-              meter_type: 0
-            - rate: 10
-              user_type: 0
-              meter_type: 1
+            - { meter_type: "PAY_PER_BLOCK", rate: 10, user_type: 0 }
+            - { meter_type: "PAY_PER_CALL", rate: 3, user_type: 0 }
+

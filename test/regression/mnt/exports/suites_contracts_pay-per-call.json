@@ -20,14 +20,16 @@
           "duration": "10",
           "height": "2",
           "id": "0",
-          "nonce": "1",
+          "nonces": {"tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem": "1"},
           "paid": "3",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
           "rate": "3",
+          "restrictions": null,
           "service": 1,
           "settlement_duration": "0",
           "settlement_height": "0",
-          "type": "PAY_AS_YOU_GO"
+          "user_type": "SINGLE_USER",
+          "meter_type": "PAY_PER_CALL"
         }
       ],
       "next_contract_id": "1",

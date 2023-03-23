@@ -14,8 +14,8 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-meterType: "PAY_PER_CALL"
-userType: "SINGLE_USER"
+meter_type: "PAY_PER_CALL"
+user_type: 0
 duration: 10
 rate: 3
 deposit: "100"
