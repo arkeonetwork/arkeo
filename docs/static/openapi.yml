@@ -26,12 +26,21 @@ paths:
                     type: string
                   delegate:
                     type: string
-                  type:
+                  meter_type:
                     type: string
                     enum:
-                      - SUBSCRIPTION
-                      - PAY_AS_YOU_GO
-                    default: SUBSCRIPTION
+                      - PAY_PER_BLOCK
+                      - PAY_PER_CALL
+                    default: PAY_PER_BLOCK
+                    title: |-
+                      - PAY_PER_BLOCK: previously called a Subscription
+                       - PAY_PER_CALL: previously called Pay as you go
+                  user_type:
+                    type: string
+                    enum:
+                      - SINGLE_USER
+                      - MULTI_USER
+                    default: SINGLE_USER
                   height:
                     type: string
                     format: int64
@@ -45,9 +54,11 @@ paths:
                     type: string
                   paid:
                     type: string
-                  nonce:
-                    type: string
-                    format: int64
+                  nonces:
+                    type: object
+                    additionalProperties:
+                      type: string
+                      format: int64
                   settlement_height:
                     type: string
                     format: int64
@@ -57,6 +68,44 @@ paths:
                   settlement_duration:
                     type: string
                     format: int64
+                  restrictions:
+                    type: object
+                    properties:
+                      rate_limit_per_user:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      rate_limit_per_contract:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      rate_limit_per_ip_address:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      allowed_origins:
+                        type: array
+                        items:
+                          type: string
+                      allowed_ip_addresses:
+                        type: array
+                        items:
+                          type: string
         default:
           description: An unexpected error response.
           schema:
@@ -111,12 +160,21 @@ paths:
                     type: string
                   delegate:
                     type: string
-                  type:
+                  meter_type:
                     type: string
                     enum:
-                      - SUBSCRIPTION
-                      - PAY_AS_YOU_GO
-                    default: SUBSCRIPTION
+                      - PAY_PER_BLOCK
+                      - PAY_PER_CALL
+                    default: PAY_PER_BLOCK
+                    title: |-
+                      - PAY_PER_BLOCK: previously called a Subscription
+                       - PAY_PER_CALL: previously called Pay as you go
+                  user_type:
+                    type: string
+                    enum:
+                      - SINGLE_USER
+                      - MULTI_USER
+                    default: SINGLE_USER
                   height:
                     type: string
                     format: int64
@@ -130,9 +188,11 @@ paths:
                     type: string
                   paid:
                     type: string
-                  nonce:
-                    type: string
-                    format: int64
+                  nonces:
+                    type: object
+                    additionalProperties:
+                      type: string
+                      format: int64
                   settlement_height:
                     type: string
                     format: int64
@@ -142,6 +202,44 @@ paths:
                   settlement_duration:
                     type: string
                     format: int64
+                  restrictions:
+                    type: object
+                    properties:
+                      rate_limit_per_user:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      rate_limit_per_contract:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      rate_limit_per_ip_address:
+                        type: object
+                        properties:
+                          number_of_calls:
+                            type: string
+                            format: uint64
+                          duration:
+                            type: string
+                            format: uint64
+                      allowed_origins:
+                        type: array
+                        items:
+                          type: string
+                      allowed_ip_addresses:
+                        type: array
+                        items:
+                          type: string
         default:
           description: An unexpected error response.
           schema:
@@ -191,12 +289,21 @@ paths:
                       type: string
                     delegate:
                       type: string
-                    type:
+                    meter_type:
                       type: string
                       enum:
-                        - SUBSCRIPTION
-                        - PAY_AS_YOU_GO
-                      default: SUBSCRIPTION
+                        - PAY_PER_BLOCK
+                        - PAY_PER_CALL
+                      default: PAY_PER_BLOCK
+                      title: |-
+                        - PAY_PER_BLOCK: previously called a Subscription
+                         - PAY_PER_CALL: previously called Pay as you go
+                    user_type:
+                      type: string
+                      enum:
+                        - SINGLE_USER
+                        - MULTI_USER
+                      default: SINGLE_USER
                     height:
                       type: string
                       format: int64
@@ -210,9 +317,11 @@ paths:
                       type: string
                     paid:
                       type: string
-                    nonce:
-                      type: string
-                      format: int64
+                    nonces:
+                      type: object
+                      additionalProperties:
+                        type: string
+                        format: int64
                     settlement_height:
                       type: string
                       format: int64
@@ -222,6 +331,44 @@ paths:
                     settlement_duration:
                       type: string
                       format: int64
+                    restrictions:
+                      type: object
+                      properties:
+                        rate_limit_per_user:
+                          type: object
+                          properties:
+                            number_of_calls:
+                              type: string
+                              format: uint64
+                            duration:
+                              type: string
+                              format: uint64
+                        rate_limit_per_contract:
+                          type: object
+                          properties:
+                            number_of_calls:
+                              type: string
+                              format: uint64
+                            duration:
+                              type: string
+                              format: uint64
+                        rate_limit_per_ip_address:
+                          type: object
+                          properties:
+                            number_of_calls:
+                              type: string
+                              format: uint64
+                            duration:
+                              type: string
+                              format: uint64
+                        allowed_origins:
+                          type: array
+                          items:
+                            type: string
+                        allowed_ip_addresses:
+                          type: array
+                          items:
+                            type: string
               pagination:
                 type: object
                 properties:
@@ -397,12 +544,29 @@ paths:
                   max_contract_duration:
                     type: string
                     format: int64
-                  subscription_rate:
-                    type: string
-                    format: int64
-                  pay_as_you_go_rate:
-                    type: string
-                    format: int64
+                  rates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        meter_type:
+                          type: string
+                          enum:
+                            - PAY_PER_BLOCK
+                            - PAY_PER_CALL
+                          default: PAY_PER_BLOCK
+                          title: |-
+                            - PAY_PER_BLOCK: previously called a Subscription
+                             - PAY_PER_CALL: previously called Pay as you go
+                        user_type:
+                          type: string
+                          enum:
+                            - SINGLE_USER
+                            - MULTI_USER
+                          default: SINGLE_USER
+                        rate:
+                          type: string
+                          format: int64
                   bond:
                     type: string
                   last_update:
@@ -476,12 +640,29 @@ paths:
                     max_contract_duration:
                       type: string
                       format: int64
-                    subscription_rate:
-                      type: string
-                      format: int64
-                    pay_as_you_go_rate:
-                      type: string
-                      format: int64
+                    rates:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          meter_type:
+                            type: string
+                            enum:
+                              - PAY_PER_BLOCK
+                              - PAY_PER_CALL
+                            default: PAY_PER_BLOCK
+                            title: |-
+                              - PAY_PER_BLOCK: previously called a Subscription
+                               - PAY_PER_CALL: previously called Pay as you go
+                          user_type:
+                            type: string
+                            enum:
+                              - SINGLE_USER
+                              - MULTI_USER
+                            default: SINGLE_USER
+                          rate:
+                            type: string
+                            format: int64
                     bond:
                       type: string
                     last_update:
@@ -43998,6 +44179,15 @@ paths:
       tags:
         - Query
 definitions:
+  arkeo.arkeo.CallRateLimit:
+    type: object
+    properties:
+      number_of_calls:
+        type: string
+        format: uint64
+      duration:
+        type: string
+        format: uint64
   arkeo.arkeo.Contract:
     type: object
     properties:
@@ -44010,12 +44200,21 @@ definitions:
         type: string
       delegate:
         type: string
-      type:
+      meter_type:
         type: string
         enum:
-          - SUBSCRIPTION
-          - PAY_AS_YOU_GO
-        default: SUBSCRIPTION
+          - PAY_PER_BLOCK
+          - PAY_PER_CALL
+        default: PAY_PER_BLOCK
+        title: |-
+          - PAY_PER_BLOCK: previously called a Subscription
+           - PAY_PER_CALL: previously called Pay as you go
+      user_type:
+        type: string
+        enum:
+          - SINGLE_USER
+          - MULTI_USER
+        default: SINGLE_USER
       height:
         type: string
         format: int64
@@ -44029,9 +44228,11 @@ definitions:
         type: string
       paid:
         type: string
-      nonce:
-        type: string
-        format: int64
+      nonces:
+        type: object
+        additionalProperties:
+          type: string
+          format: int64
       settlement_height:
         type: string
         format: int64
@@ -44041,12 +44242,74 @@ definitions:
       settlement_duration:
         type: string
         format: int64
-  arkeo.arkeo.ContractType:
+      restrictions:
+        type: object
+        properties:
+          rate_limit_per_user:
+            type: object
+            properties:
+              number_of_calls:
+                type: string
+                format: uint64
+              duration:
+                type: string
+                format: uint64
+          rate_limit_per_contract:
+            type: object
+            properties:
+              number_of_calls:
+                type: string
+                format: uint64
+              duration:
+                type: string
+                format: uint64
+          rate_limit_per_ip_address:
+            type: object
+            properties:
+              number_of_calls:
+                type: string
+                format: uint64
+              duration:
+                type: string
+                format: uint64
+          allowed_origins:
+            type: array
+            items:
+              type: string
+          allowed_ip_addresses:
+            type: array
+            items:
+              type: string
+  arkeo.arkeo.ContractRate:
+    type: object
+    properties:
+      meter_type:
+        type: string
+        enum:
+          - PAY_PER_BLOCK
+          - PAY_PER_CALL
+        default: PAY_PER_BLOCK
+        title: |-
+          - PAY_PER_BLOCK: previously called a Subscription
+           - PAY_PER_CALL: previously called Pay as you go
+      user_type:
+        type: string
+        enum:
+          - SINGLE_USER
+          - MULTI_USER
+        default: SINGLE_USER
+      rate:
+        type: string
+        format: int64
+  arkeo.arkeo.MeterType:
     type: string
     enum:
-      - SUBSCRIPTION
-      - PAY_AS_YOU_GO
-    default: SUBSCRIPTION
+      - PAY_PER_BLOCK
+      - PAY_PER_CALL
+    default: PAY_PER_BLOCK
+    title: |-
+      - PAY_PER_BLOCK: previously called a Subscription
+       - PAY_PER_CALL: previously called Pay as you go
   arkeo.arkeo.MsgBondProviderResponse:
     type: object
   arkeo.arkeo.MsgClaimContractIncomeResponse:
@@ -44085,12 +44348,29 @@ definitions:
       max_contract_duration:
         type: string
         format: int64
-      subscription_rate:
-        type: string
-        format: int64
-      pay_as_you_go_rate:
-        type: string
-        format: int64
+      rates:
+        type: array
+        items:
+          type: object
+          properties:
+            meter_type:
+              type: string
+              enum:
+                - PAY_PER_BLOCK
+                - PAY_PER_CALL
+              default: PAY_PER_BLOCK
+              title: |-
+                - PAY_PER_BLOCK: previously called a Subscription
+                 - PAY_PER_CALL: previously called Pay as you go
+            user_type:
+              type: string
+              enum:
+                - SINGLE_USER
+                - MULTI_USER
+              default: SINGLE_USER
+            rate:
+              type: string
+              format: int64
       bond:
         type: string
       last_update:
@@ -44120,12 +44400,21 @@ definitions:
             type: string
           delegate:
             type: string
-          type:
+          meter_type:
             type: string
             enum:
-              - SUBSCRIPTION
-              - PAY_AS_YOU_GO
-            default: SUBSCRIPTION
+              - PAY_PER_BLOCK
+              - PAY_PER_CALL
+            default: PAY_PER_BLOCK
+            title: |-
+              - PAY_PER_BLOCK: previously called a Subscription
+               - PAY_PER_CALL: previously called Pay as you go
+          user_type:
+            type: string
+            enum:
+              - SINGLE_USER
+              - MULTI_USER
+            default: SINGLE_USER
           height:
             type: string
             format: int64
@@ -44139,9 +44428,11 @@ definitions:
             type: string
           paid:
             type: string
-          nonce:
-            type: string
-            format: int64
+          nonces:
+            type: object
+            additionalProperties:
+              type: string
+              format: int64
           settlement_height:
             type: string
             format: int64
@@ -44151,6 +44442,44 @@ definitions:
           settlement_duration:
             type: string
             format: int64
+          restrictions:
+            type: object
+            properties:
+              rate_limit_per_user:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              rate_limit_per_contract:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              rate_limit_per_ip_address:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              allowed_origins:
+                type: array
+                items:
+                  type: string
+              allowed_ip_addresses:
+                type: array
+                items:
+                  type: string
   arkeo.arkeo.QueryAllContractResponse:
     type: object
     properties:
@@ -44168,12 +44497,21 @@ definitions:
               type: string
             delegate:
               type: string
-            type:
+            meter_type:
               type: string
               enum:
-                - SUBSCRIPTION
-                - PAY_AS_YOU_GO
-              default: SUBSCRIPTION
+                - PAY_PER_BLOCK
+                - PAY_PER_CALL
+              default: PAY_PER_BLOCK
+              title: |-
+                - PAY_PER_BLOCK: previously called a Subscription
+                 - PAY_PER_CALL: previously called Pay as you go
+            user_type:
+              type: string
+              enum:
+                - SINGLE_USER
+                - MULTI_USER
+              default: SINGLE_USER
             height:
               type: string
               format: int64
@@ -44187,9 +44525,11 @@ definitions:
               type: string
             paid:
               type: string
-            nonce:
-              type: string
-              format: int64
+            nonces:
+              type: object
+              additionalProperties:
+                type: string
+                format: int64
             settlement_height:
               type: string
               format: int64
@@ -44199,6 +44539,44 @@ definitions:
             settlement_duration:
               type: string
               format: int64
+            restrictions:
+              type: object
+              properties:
+                rate_limit_per_user:
+                  type: object
+                  properties:
+                    number_of_calls:
+                      type: string
+                      format: uint64
+                    duration:
+                      type: string
+                      format: uint64
+                rate_limit_per_contract:
+                  type: object
+                  properties:
+                    number_of_calls:
+                      type: string
+                      format: uint64
+                    duration:
+                      type: string
+                      format: uint64
+                rate_limit_per_ip_address:
+                  type: object
+                  properties:
+                    number_of_calls:
+                      type: string
+                      format: uint64
+                    duration:
+                      type: string
+                      format: uint64
+                allowed_origins:
+                  type: array
+                  items:
+                    type: string
+                allowed_ip_addresses:
+                  type: array
+                  items:
+                    type: string
       pagination:
         type: object
         properties:
@@ -44255,12 +44633,29 @@ definitions:
             max_contract_duration:
               type: string
               format: int64
-            subscription_rate:
-              type: string
-              format: int64
-            pay_as_you_go_rate:
-              type: string
-              format: int64
+            rates:
+              type: array
+              items:
+                type: object
+                properties:
+                  meter_type:
+                    type: string
+                    enum:
+                      - PAY_PER_BLOCK
+                      - PAY_PER_CALL
+                    default: PAY_PER_BLOCK
+                    title: |-
+                      - PAY_PER_BLOCK: previously called a Subscription
+                       - PAY_PER_CALL: previously called Pay as you go
+                  user_type:
+                    type: string
+                    enum:
+                      - SINGLE_USER
+                      - MULTI_USER
+                    default: SINGLE_USER
+                  rate:
+                    type: string
+                    format: int64
             bond:
               type: string
             last_update:
@@ -44310,12 +44705,21 @@ definitions:
             type: string
           delegate:
             type: string
-          type:
+          meter_type:
             type: string
             enum:
-              - SUBSCRIPTION
-              - PAY_AS_YOU_GO
-            default: SUBSCRIPTION
+              - PAY_PER_BLOCK
+              - PAY_PER_CALL
+            default: PAY_PER_BLOCK
+            title: |-
+              - PAY_PER_BLOCK: previously called a Subscription
+               - PAY_PER_CALL: previously called Pay as you go
+          user_type:
+            type: string
+            enum:
+              - SINGLE_USER
+              - MULTI_USER
+            default: SINGLE_USER
           height:
             type: string
             format: int64
@@ -44329,9 +44733,11 @@ definitions:
             type: string
           paid:
             type: string
-          nonce:
-            type: string
-            format: int64
+          nonces:
+            type: object
+            additionalProperties:
+              type: string
+              format: int64
           settlement_height:
             type: string
             format: int64
@@ -44341,6 +44747,44 @@ definitions:
           settlement_duration:
             type: string
             format: int64
+          restrictions:
+            type: object
+            properties:
+              rate_limit_per_user:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              rate_limit_per_contract:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              rate_limit_per_ip_address:
+                type: object
+                properties:
+                  number_of_calls:
+                    type: string
+                    format: uint64
+                  duration:
+                    type: string
+                    format: uint64
+              allowed_origins:
+                type: array
+                items:
+                  type: string
+              allowed_ip_addresses:
+                type: array
+                items:
+                  type: string
   arkeo.arkeo.QueryFetchProviderResponse:
     type: object
     properties:
@@ -44369,12 +44813,29 @@ definitions:
           max_contract_duration:
             type: string
             format: int64
-          subscription_rate:
-            type: string
-            format: int64
-          pay_as_you_go_rate:
-            type: string
-            format: int64
+          rates:
+            type: array
+            items:
+              type: object
+              properties:
+                meter_type:
+                  type: string
+                  enum:
+                    - PAY_PER_BLOCK
+                    - PAY_PER_CALL
+                  default: PAY_PER_BLOCK
+                  title: |-
+                    - PAY_PER_BLOCK: previously called a Subscription
+                     - PAY_PER_CALL: previously called Pay as you go
+                user_type:
+                  type: string
+                  enum:
+                    - SINGLE_USER
+                    - MULTI_USER
+                  default: SINGLE_USER
+                rate:
+                  type: string
+                  format: int64
           bond:
             type: string
           last_update:
@@ -44390,6 +44851,50 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  arkeo.arkeo.Restrictions:
+    type: object
+    properties:
+      rate_limit_per_user:
+        type: object
+        properties:
+          number_of_calls:
+            type: string
+            format: uint64
+          duration:
+            type: string
+            format: uint64
+      rate_limit_per_contract:
+        type: object
+        properties:
+          number_of_calls:
+            type: string
+            format: uint64
+          duration:
+            type: string
+            format: uint64
+      rate_limit_per_ip_address:
+        type: object
+        properties:
+          number_of_calls:
+            type: string
+            format: uint64
+          duration:
+            type: string
+            format: uint64
+      allowed_origins:
+        type: array
+        items:
+          type: string
+      allowed_ip_addresses:
+        type: array
+        items:
+          type: string
+  arkeo.arkeo.UserType:
+    type: string
+    enum:
+      - SINGLE_USER
+      - MULTI_USER
+    default: SINGLE_USER
   cosmos.base.query.v1beta1.PageRequest:
     type: object
     properties:
