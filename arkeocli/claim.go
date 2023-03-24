@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"cosmossdk.io/errors"
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -49,15 +48,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	spenderPubkeyRaw, err := key.GetPubKey()
-	if err != nil {
-		return err
-	}
-	spenderPubkey, err := common.NewPubKeyFromCrypto(spenderPubkeyRaw)
-	if err != nil {
-		return err
-	}
-
 	contract, err := getContract(cmd)
 	if err != nil {
 		return err
@@ -89,7 +79,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 	creator := creatorAddr.String()
 
-	signBytes := types.GetBytesToSign(contract.Id, spenderPubkey, nonce)
+	signBytes := types.GetBytesToSign(contract.Id, nonce)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
@@ -98,7 +88,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	msg := types.NewMsgClaimContractIncome(
 		creator,
 		contract.Id,
-		spenderPubkey,
 		nonce,
 		signature,
 	)
