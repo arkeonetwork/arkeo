@@ -2,17 +2,23 @@ package keeper
 
 import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/events"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			types.NewBondProviderEvent(bond, msg),
+func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
+	if err := ctx.EventManager().EmitTypedEvent(
+		&events.EventBondProvider{
+			Provider: msg.Provider,
+			Creator:  msg.Creator,
+			Service:  msg.Service,
+			Bond:     msg.Bond,
 		},
-	)
+	); err != nil {
+		panic(err)
+	}
 }
 
 func (k msgServer) CloseContractEvent(ctx cosmos.Context, contract *types.Contract) {
