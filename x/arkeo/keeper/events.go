@@ -39,10 +39,10 @@ func (k msgServer) OpenContractEvent(ctx cosmos.Context, openCost int64, contrac
 	)
 }
 
-func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt, valIncome cosmos.Int, contract *types.Contract) {
+func (mgr Manager) ContractSettlementEvent(ctx cosmos.Context, debt, valIncome cosmos.Int, contract *types.Contract, nonce int64) {
 	ctx.EventManager().EmitEvents(
 		sdk.Events{
-			types.NewContractSettlementEvent(debt, valIncome, contract),
+			types.NewContractSettlementEvent(debt, valIncome, contract, nonce),
 		},
 	)
 }

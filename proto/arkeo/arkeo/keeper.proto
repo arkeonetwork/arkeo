@@ -84,7 +84,6 @@ message Contract {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  map<string, int64> nonces = 12 [(gogoproto.castkey) = "github.com/arkeonetwork/arkeo/common.PubKey"];
   int64 settlement_height = 13;
   uint64 id = 14;
   int64 settlement_duration = 15;

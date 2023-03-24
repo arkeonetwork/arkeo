@@ -36,13 +36,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 	)
 }
 
-func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract *Contract) sdk.Event {
-	nonce := int64(0)
-	if contract.Nonces != nil {
-		// for now we only support one nonce, but we can extend once we handle
-		// downstream dependencies
-		nonce = contract.Nonces[contract.GetSpender()]
-	}
+func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract *Contract, nonce int64) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeContractSettlement,
 		sdk.NewAttribute("provider", contract.Provider.String()),

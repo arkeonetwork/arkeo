@@ -45,7 +45,6 @@ func TestValidate(t *testing.T) {
 	contract.Duration = 100
 	contract.Rate = 10
 	contract.Height = 10
-	contract.Nonces = map[common.PubKey]int64{client: 0}
 	contract.MeterType = types.MeterType_PAY_PER_CALL
 	contract.UserType = types.UserType_SINGLE_USER
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)

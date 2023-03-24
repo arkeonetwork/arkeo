@@ -52,7 +52,7 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			continue
 		}
 
-		_, err = mgr.SettleContract(ctx, contract, nil, true)
+		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
 			ctx.Logger().Error("unable to settle contract", "id", contractId, "error", err)
 			continue
@@ -162,8 +162,8 @@ func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 }
 
 // any owed debt is paid to data provider
-func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonces map[common.PubKey]int64, isFinal bool) (types.Contract, error) {
-	totalDebt, err := mgr.contractDebt(ctx, &contract, nonces) // this will update the contract nonces as well.
+func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonce int64, isFinal bool) (types.Contract, error) {
+	totalDebt, err := mgr.contractDebt(ctx, &contract, nonce) // this will update the contract nonces as well.
 	valIncome := common.GetSafeShare(cosmos.NewInt(mgr.FetchConfig(ctx, configs.ReserveTax)), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
 	debt := totalDebt.Sub(valIncome)
 	if err != nil {
@@ -207,18 +207,30 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 
-	mgr.ContractSettlementEvent(ctx, debt, valIncome, &contract)
+	mgr.ContractSettlementEvent(ctx, debt, valIncome, &contract, nonce)
 	return contract, nil
 }
 
-func (mgr Manager) contractDebt(ctx cosmos.Context, contract *types.Contract, nonces map[common.PubKey]int64) (cosmos.Int, error) {
+// TODO: rename me with more descriptive name
+func (mgr Manager) contractDebt(ctx cosmos.Context, contract *types.Contract, nonce int64) (cosmos.Int, error) {
 	var debt cosmos.Int
 	switch contract.MeterType {
 	case types.MeterType_PAY_PER_BLOCK:
 		debt = cosmos.NewInt(contract.Rate * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
 	case types.MeterType_PAY_PER_CALL:
-		newCalls := updateAndAggregateNonces(contract, nonces)
+		currentNonce, err := mgr.keeper.GetNonce(ctx, contract.GetSpender(), contract.Id)
+		if err != nil {
+			return cosmos.ZeroInt(), errors.Wrapf(err, "failed to get nonce for contractId=%d and spender=%s", contract.Id, contract.GetSpender())
+		}
+		if nonce <= currentNonce {
+			return cosmos.ZeroInt(), nil
+		}
+		newCalls := nonce - currentNonce
 		debt = cosmos.NewInt(contract.Rate * newCalls)
+		err = mgr.keeper.SetNonce(ctx, contract.GetSpender(), contract.Id, nonce)
+		if err != nil {
+			return cosmos.ZeroInt(), errors.Wrapf(err, "failed to set nonce for contractId=%d and spender=%s", contract.Id, contract.GetSpender())
+		}
 	default:
 		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidMeterType, "%s", contract.MeterType.String())
 	}
@@ -233,22 +245,4 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract *types.Contract, no
 	}
 
 	return debt, nil
-}
-
-// updateAndAggregateNonces updates the nonces for the given contract and returns the total number of new calls
-func updateAndAggregateNonces(contract *types.Contract, nonces map[common.PubKey]int64) int64 {
-	var totalNewCalls int64
-	for spenderPubKey, nonce := range nonces {
-		if contract.Nonces == nil {
-			contract.Nonces = map[common.PubKey]int64{spenderPubKey: 0}
-		}
-
-		existingNonce := contract.Nonces[spenderPubKey]
-		if existingNonce >= nonce {
-			continue
-		}
-		totalNewCalls += (nonce - existingNonce)
-		contract.Nonces[spenderPubKey] = nonce
-	}
-	return totalNewCalls
 }

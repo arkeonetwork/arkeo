@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -45,7 +44,11 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return err
 	}
 
-	contractNonce := contract.Nonces[contract.GetSpender()]
+	contractNonce, err := k.GetNonce(ctx, contract.GetSpender(), contract.Id)
+	if err != nil {
+		return err
+	}
+
 	if contractNonce >= msg.Nonce {
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contractNonce, msg.Nonce)
 	}
@@ -70,7 +73,6 @@ func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgC
 	if err != nil {
 		return err
 	}
-	nonces := map[common.PubKey]int64{contract.GetSpender(): msg.Nonce}
-	_, err = k.mgr.SettleContract(ctx, contract, nonces, false)
+	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
 	return err
 }

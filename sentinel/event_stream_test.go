@@ -47,7 +47,6 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -106,7 +105,6 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -145,7 +143,6 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Duration:           100,
 		Rate:               1,
 		Deposit:            sdk.NewInt(100),
-		Nonces:             nil,
 		Id:                 1,
 		SettlementDuration: 10,
 	}
@@ -176,10 +173,9 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	require.Equal(t, claim.Nonce, arkAuth.Nonce)
 
 	// confirm is a settlement event is emitted with a lower nonce, we handle it correctly, by not setting our claim to Claimed.
-	inputContract.Nonces = map[common.PubKey]int64{inputContract.Client: 8}
 	proxy.MemStore.SetHeight(150)
 	settlementEvents := sdk.Events{
-		types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract),
+		types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract, 8),
 	}
 	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
 
@@ -190,10 +186,9 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	require.False(t, claim.Claimed)
 
 	// confirm is a settlement event is emitted with the same nonce, we handle it correctly, by setting our claim to Claimed.
-	inputContract.Nonces[inputContract.Client] = 10
 	proxy.MemStore.SetHeight(160)
 	settlementEvents = sdk.Events{
-		types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract),
+		types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract, 10),
 	}
 	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
 	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())

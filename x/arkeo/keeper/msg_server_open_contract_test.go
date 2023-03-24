@@ -133,9 +133,11 @@ func TestOpenContractHandle(t *testing.T) {
 	require.Equal(t, contract.Height, ctx.BlockHeight())
 	require.Equal(t, contract.Duration, int64(100))
 	require.Equal(t, contract.Rate, int64(15))
-	require.Equal(t, contract.Nonces[contract.GetSpender()], int64(0))
 	require.Equal(t, contract.Deposit.Int64(), int64(1000))
 	require.Equal(t, contract.Paid.Int64(), int64(0))
+	nonce, err := k.GetNonce(ctx, contract.GetSpender(), contract.Id)
+	require.NoError(t, err)
+	require.Equal(t, nonce, int64(0))
 
 	bal := k.GetBalance(ctx, acc) // check balance
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(899999000))

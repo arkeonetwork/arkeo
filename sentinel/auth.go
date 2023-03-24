@@ -174,7 +174,8 @@ func (p Proxy) isRateLimited(key string, contractType types.MeterType) bool {
 
 func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	key := strconv.FormatUint(aa.ContractId, 10)
-	contract, err := p.MemStore.Get(key)
+	sentinelContract, err := p.MemStore.Get(key)
+	contract := sentinelContract.ArkeoContract
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
@@ -213,7 +214,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	if err := p.ClaimStore.Set(claim); err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
-	contract.Nonces = map[common.PubKey]int64{aa.Spender: aa.Nonce}
-	p.MemStore.Put(contract)
+	sentinelContract.Nonces = map[common.PubKey]int64{aa.Spender: aa.Nonce}
+	p.MemStore.Put(sentinelContract)
 	return http.StatusOK, nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
+	sentinelTypes "github.com/arkeonetwork/arkeo/sentinel/types"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 
@@ -119,8 +120,11 @@ func TestPaidTier(t *testing.T) {
 	contract.Height = 5
 	contract.Duration = 100
 	contract.Id = 545
+	sentinelContract := sentinelTypes.SentinelContract{
+		ArkeoContract: contract,
+	}
 	proxy.MemStore.SetHeight(10)
-	proxy.MemStore.Put(contract)
+	proxy.MemStore.Put(sentinelContract)
 
 	// happy path
 	aa := ArkAuth{
@@ -132,9 +136,11 @@ func TestPaidTier(t *testing.T) {
 	code, err := proxy.paidTier(aa, "127.0.0.1:8080")
 	require.NoError(t, err)
 	require.Equal(t, code, http.StatusOK)
-	contract, err = proxy.MemStore.Get(contract.Key())
+
+	sentinelContract, err = proxy.MemStore.Get(contract.Key())
 	require.NoError(t, err)
-	require.Equal(t, contract.Nonces[pk], int64(3))
+	require.Equal(t, sentinelContract.Nonces[pk], int64(3))
+
 	claim, err := proxy.ClaimStore.Get(contract.Key())
 	require.NoError(t, err)
 	require.Equal(t, claim.Nonce, int64(3))
@@ -194,7 +200,10 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 	contract.Id = 55556
 	// set contract to expired
 	proxy.MemStore.SetHeight(120)
-	proxy.MemStore.Put(contract)
+	sentinelContract := sentinelTypes.SentinelContract{
+		ArkeoContract: contract,
+	}
+	proxy.MemStore.Put(sentinelContract)
 
 	nextHandler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 	})
