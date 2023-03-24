@@ -97,7 +97,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 
 	err = k.SetProvider(ctx, provider)
 	if err == nil {
-		k.EmitBondProviderEvent(ctx, provider.Bond, msg)
+		return k.EmitBondProviderEvent(ctx, provider.Bond, msg)
 	}
 	return err
 }

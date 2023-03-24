@@ -8,17 +8,15 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
-	if err := ctx.EventManager().EmitTypedEvent(
+func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) error {
+	return ctx.EventManager().EmitTypedEvent(
 		&events.EventBondProvider{
 			Provider: msg.Provider,
 			Creator:  msg.Creator,
 			Service:  msg.Service,
 			Bond:     msg.Bond,
 		},
-	); err != nil {
-		panic(err)
-	}
+	)
 }
 
 func (k msgServer) CloseContractEvent(ctx cosmos.Context, contract *types.Contract) {
