@@ -89,8 +89,7 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	provider.Bond = provider.Bond.Add(msg.Bond)
 	if provider.Bond.IsZero() {
 		k.RemoveProvider(ctx, provider.PubKey, provider.Service)
-		k.EmitBondProviderEvent(ctx, provider.Bond, msg)
-		return nil
+		return k.EmitBondProviderEvent(ctx, provider.Bond, msg)
 	}
 
 	provider.LastUpdate = ctx.BlockHeight()

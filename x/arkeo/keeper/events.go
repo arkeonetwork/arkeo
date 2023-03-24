@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/events"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,7 +9,7 @@ import (
 
 func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) error {
 	return ctx.EventManager().EmitTypedEvent(
-		&events.EventBondProvider{
+		&types.EventBondProvider{
 			Provider: msg.Provider,
 			Creator:  msg.Creator,
 			Service:  msg.Service,
