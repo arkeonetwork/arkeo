@@ -1,8 +1,6 @@
 package arkeocli
 
 import (
-	"fmt"
-
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -48,10 +46,6 @@ func runCloseContractCmd(cmd *cobra.Command, args []string) (err error) {
 	contract, err := getContract(cmd)
 	if err != nil {
 		return err
-	}
-
-	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
-		return fmt.Errorf("cannot close PAY_AS_YOU_GO contract")
 	}
 
 	msg := types.NewMsgCloseContract(

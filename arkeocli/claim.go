@@ -1,7 +1,6 @@
 package arkeocli
 
 import (
-	"fmt"
 	"strconv"
 
 	"cosmossdk.io/errors"
@@ -90,8 +89,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 	creator := creatorAddr.String()
 
-	signStr := fmt.Sprintf("%d:%s:%d", contract.Id, spenderPubkey, nonce)
-	signBytes := []byte(signStr)
+	signBytes := types.GetBytesToSign(contract.Id, spenderPubkey, nonce)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
