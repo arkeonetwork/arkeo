@@ -14,7 +14,7 @@ export const protobufPackage = "arkeo.arkeo";
 
 export interface MsgBondProvider {
   creator: string;
-  pubKey: string;
+  provider: string;
   service: string;
   bond: string;
 }
@@ -24,7 +24,7 @@ export interface MsgBondProviderResponse {
 
 export interface MsgModProvider {
   creator: string;
-  pubKey: string;
+  provider: string;
   service: string;
   metadataUri: string;
   metadataNonce: number;
@@ -33,6 +33,7 @@ export interface MsgModProvider {
   maxContractDuration: number;
   subscriptionRate: number;
   payAsYouGoRate: number;
+  settlementDuration: number;
 }
 
 export interface MsgModProviderResponse {
@@ -40,7 +41,7 @@ export interface MsgModProviderResponse {
 
 export interface MsgOpenContract {
   creator: string;
-  pubKey: string;
+  provider: string;
   service: string;
   client: string;
   delegate: string;
@@ -48,6 +49,7 @@ export interface MsgOpenContract {
   duration: number;
   rate: number;
   deposit: string;
+  settlementDuration: number;
 }
 
 export interface MsgOpenContractResponse {
@@ -67,14 +69,13 @@ export interface MsgClaimContractIncome {
   spender: string;
   signature: Uint8Array;
   nonce: number;
-  height: number;
 }
 
 export interface MsgClaimContractIncomeResponse {
 }
 
 function createBaseMsgBondProvider(): MsgBondProvider {
-  return { creator: "", pubKey: "", service: "", bond: "" };
+  return { creator: "", provider: "", service: "", bond: "" };
 }
 
 export const MsgBondProvider = {
@@ -82,8 +83,8 @@ export const MsgBondProvider = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubKey !== "") {
-      writer.uint32(18).string(message.pubKey);
+    if (message.provider !== "") {
+      writer.uint32(18).string(message.provider);
     }
     if (message.service !== "") {
       writer.uint32(26).string(message.service);
@@ -105,7 +106,7 @@ export const MsgBondProvider = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubKey = reader.string();
+          message.provider = reader.string();
           break;
         case 3:
           message.service = reader.string();
@@ -124,7 +125,7 @@ export const MsgBondProvider = {
   fromJSON(object: any): MsgBondProvider {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
+      provider: isSet(object.provider) ? String(object.provider) : "",
       service: isSet(object.service) ? String(object.service) : "",
       bond: isSet(object.bond) ? String(object.bond) : "",
     };
@@ -133,7 +134,7 @@ export const MsgBondProvider = {
   toJSON(message: MsgBondProvider): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.provider !== undefined && (obj.provider = message.provider);
     message.service !== undefined && (obj.service = message.service);
     message.bond !== undefined && (obj.bond = message.bond);
     return obj;
@@ -142,7 +143,7 @@ export const MsgBondProvider = {
   fromPartial<I extends Exact<DeepPartial<MsgBondProvider>, I>>(object: I): MsgBondProvider {
     const message = createBaseMsgBondProvider();
     message.creator = object.creator ?? "";
-    message.pubKey = object.pubKey ?? "";
+    message.provider = object.provider ?? "";
     message.service = object.service ?? "";
     message.bond = object.bond ?? "";
     return message;
@@ -191,7 +192,7 @@ export const MsgBondProviderResponse = {
 function createBaseMsgModProvider(): MsgModProvider {
   return {
     creator: "",
-    pubKey: "",
+    provider: "",
     service: "",
     metadataUri: "",
     metadataNonce: 0,
@@ -200,6 +201,7 @@ function createBaseMsgModProvider(): MsgModProvider {
     maxContractDuration: 0,
     subscriptionRate: 0,
     payAsYouGoRate: 0,
+    settlementDuration: 0,
   };
 }
 
@@ -208,8 +210,8 @@ export const MsgModProvider = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubKey !== "") {
-      writer.uint32(18).string(message.pubKey);
+    if (message.provider !== "") {
+      writer.uint32(18).string(message.provider);
     }
     if (message.service !== "") {
       writer.uint32(26).string(message.service);
@@ -235,6 +237,9 @@ export const MsgModProvider = {
     if (message.payAsYouGoRate !== 0) {
       writer.uint32(80).int64(message.payAsYouGoRate);
     }
+    if (message.settlementDuration !== 0) {
+      writer.uint32(88).int64(message.settlementDuration);
+    }
     return writer;
   },
 
@@ -249,7 +254,7 @@ export const MsgModProvider = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubKey = reader.string();
+          message.provider = reader.string();
           break;
         case 3:
           message.service = reader.string();
@@ -275,6 +280,9 @@ export const MsgModProvider = {
         case 10:
           message.payAsYouGoRate = longToNumber(reader.int64() as Long);
           break;
+        case 11:
+          message.settlementDuration = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -286,7 +294,7 @@ export const MsgModProvider = {
   fromJSON(object: any): MsgModProvider {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
+      provider: isSet(object.provider) ? String(object.provider) : "",
       service: isSet(object.service) ? String(object.service) : "",
       metadataUri: isSet(object.metadataUri) ? String(object.metadataUri) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
@@ -295,13 +303,14 @@ export const MsgModProvider = {
       maxContractDuration: isSet(object.maxContractDuration) ? Number(object.maxContractDuration) : 0,
       subscriptionRate: isSet(object.subscriptionRate) ? Number(object.subscriptionRate) : 0,
       payAsYouGoRate: isSet(object.payAsYouGoRate) ? Number(object.payAsYouGoRate) : 0,
+      settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
     };
   },
 
   toJSON(message: MsgModProvider): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.provider !== undefined && (obj.provider = message.provider);
     message.service !== undefined && (obj.service = message.service);
     message.metadataUri !== undefined && (obj.metadataUri = message.metadataUri);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
@@ -310,13 +319,14 @@ export const MsgModProvider = {
     message.maxContractDuration !== undefined && (obj.maxContractDuration = Math.round(message.maxContractDuration));
     message.subscriptionRate !== undefined && (obj.subscriptionRate = Math.round(message.subscriptionRate));
     message.payAsYouGoRate !== undefined && (obj.payAsYouGoRate = Math.round(message.payAsYouGoRate));
+    message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgModProvider>, I>>(object: I): MsgModProvider {
     const message = createBaseMsgModProvider();
     message.creator = object.creator ?? "";
-    message.pubKey = object.pubKey ?? "";
+    message.provider = object.provider ?? "";
     message.service = object.service ?? "";
     message.metadataUri = object.metadataUri ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
@@ -325,6 +335,7 @@ export const MsgModProvider = {
     message.maxContractDuration = object.maxContractDuration ?? 0;
     message.subscriptionRate = object.subscriptionRate ?? 0;
     message.payAsYouGoRate = object.payAsYouGoRate ?? 0;
+    message.settlementDuration = object.settlementDuration ?? 0;
     return message;
   },
 };
@@ -371,7 +382,7 @@ export const MsgModProviderResponse = {
 function createBaseMsgOpenContract(): MsgOpenContract {
   return {
     creator: "",
-    pubKey: "",
+    provider: "",
     service: "",
     client: "",
     delegate: "",
@@ -379,6 +390,7 @@ function createBaseMsgOpenContract(): MsgOpenContract {
     duration: 0,
     rate: 0,
     deposit: "",
+    settlementDuration: 0,
   };
 }
 
@@ -387,8 +399,8 @@ export const MsgOpenContract = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.pubKey !== "") {
-      writer.uint32(18).string(message.pubKey);
+    if (message.provider !== "") {
+      writer.uint32(18).string(message.provider);
     }
     if (message.service !== "") {
       writer.uint32(26).string(message.service);
@@ -411,6 +423,9 @@ export const MsgOpenContract = {
     if (message.deposit !== "") {
       writer.uint32(74).string(message.deposit);
     }
+    if (message.settlementDuration !== 0) {
+      writer.uint32(80).int64(message.settlementDuration);
+    }
     return writer;
   },
 
@@ -425,7 +440,7 @@ export const MsgOpenContract = {
           message.creator = reader.string();
           break;
         case 2:
-          message.pubKey = reader.string();
+          message.provider = reader.string();
           break;
         case 3:
           message.service = reader.string();
@@ -448,6 +463,9 @@ export const MsgOpenContract = {
         case 9:
           message.deposit = reader.string();
           break;
+        case 10:
+          message.settlementDuration = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -459,7 +477,7 @@ export const MsgOpenContract = {
   fromJSON(object: any): MsgOpenContract {
     return {
       creator: isSet(object.creator) ? String(object.creator) : "",
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
+      provider: isSet(object.provider) ? String(object.provider) : "",
       service: isSet(object.service) ? String(object.service) : "",
       client: isSet(object.client) ? String(object.client) : "",
       delegate: isSet(object.delegate) ? String(object.delegate) : "",
@@ -467,13 +485,14 @@ export const MsgOpenContract = {
       duration: isSet(object.duration) ? Number(object.duration) : 0,
       rate: isSet(object.rate) ? Number(object.rate) : 0,
       deposit: isSet(object.deposit) ? String(object.deposit) : "",
+      settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
     };
   },
 
   toJSON(message: MsgOpenContract): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.provider !== undefined && (obj.provider = message.provider);
     message.service !== undefined && (obj.service = message.service);
     message.client !== undefined && (obj.client = message.client);
     message.delegate !== undefined && (obj.delegate = message.delegate);
@@ -481,13 +500,14 @@ export const MsgOpenContract = {
     message.duration !== undefined && (obj.duration = Math.round(message.duration));
     message.rate !== undefined && (obj.rate = Math.round(message.rate));
     message.deposit !== undefined && (obj.deposit = message.deposit);
+    message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgOpenContract>, I>>(object: I): MsgOpenContract {
     const message = createBaseMsgOpenContract();
     message.creator = object.creator ?? "";
-    message.pubKey = object.pubKey ?? "";
+    message.provider = object.provider ?? "";
     message.service = object.service ?? "";
     message.client = object.client ?? "";
     message.delegate = object.delegate ?? "";
@@ -495,6 +515,7 @@ export const MsgOpenContract = {
     message.duration = object.duration ?? 0;
     message.rate = object.rate ?? 0;
     message.deposit = object.deposit ?? "";
+    message.settlementDuration = object.settlementDuration ?? 0;
     return message;
   },
 };
@@ -636,7 +657,7 @@ export const MsgCloseContractResponse = {
 };
 
 function createBaseMsgClaimContractIncome(): MsgClaimContractIncome {
-  return { creator: "", contractId: 0, spender: "", signature: new Uint8Array(), nonce: 0, height: 0 };
+  return { creator: "", contractId: 0, spender: "", signature: new Uint8Array(), nonce: 0 };
 }
 
 export const MsgClaimContractIncome = {
@@ -655,9 +676,6 @@ export const MsgClaimContractIncome = {
     }
     if (message.nonce !== 0) {
       writer.uint32(40).int64(message.nonce);
-    }
-    if (message.height !== 0) {
-      writer.uint32(48).int64(message.height);
     }
     return writer;
   },
@@ -684,9 +702,6 @@ export const MsgClaimContractIncome = {
         case 5:
           message.nonce = longToNumber(reader.int64() as Long);
           break;
-        case 6:
-          message.height = longToNumber(reader.int64() as Long);
-          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -702,7 +717,6 @@ export const MsgClaimContractIncome = {
       spender: isSet(object.spender) ? String(object.spender) : "",
       signature: isSet(object.signature) ? bytesFromBase64(object.signature) : new Uint8Array(),
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
-      height: isSet(object.height) ? Number(object.height) : 0,
     };
   },
 
@@ -714,7 +728,6 @@ export const MsgClaimContractIncome = {
     message.signature !== undefined
       && (obj.signature = base64FromBytes(message.signature !== undefined ? message.signature : new Uint8Array()));
     message.nonce !== undefined && (obj.nonce = Math.round(message.nonce));
-    message.height !== undefined && (obj.height = Math.round(message.height));
     return obj;
   },
 
@@ -725,7 +738,6 @@ export const MsgClaimContractIncome = {
     message.spender = object.spender ?? "";
     message.signature = object.signature ?? new Uint8Array();
     message.nonce = object.nonce ?? 0;
-    message.height = object.height ?? 0;
     return message;
   },
 };

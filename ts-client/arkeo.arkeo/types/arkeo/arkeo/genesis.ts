@@ -1,6 +1,7 @@
 /* eslint-disable */
+import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { Contract, Provider } from "./keeper";
+import { Contract, ContractExpirationSet, Provider, UserContractSet } from "./keeper";
 import { Params } from "./params";
 
 export const protobufPackage = "arkeo.arkeo";
@@ -9,12 +10,22 @@ export const protobufPackage = "arkeo.arkeo";
 export interface GenesisState {
   params: Params | undefined;
   providers: Provider[];
-  /** this line is used by starport scaffolding # genesis/proto/state */
   contracts: Contract[];
+  nextContractId: number;
+  contractExpirationSets: ContractExpirationSet[];
+  /** this line is used by starport scaffolding # genesis/proto/state */
+  userContractSets: UserContractSet[];
 }
 
 function createBaseGenesisState(): GenesisState {
-  return { params: undefined, providers: [], contracts: [] };
+  return {
+    params: undefined,
+    providers: [],
+    contracts: [],
+    nextContractId: 0,
+    contractExpirationSets: [],
+    userContractSets: [],
+  };
 }
 
 export const GenesisState = {
@@ -27,6 +38,15 @@ export const GenesisState = {
     }
     for (const v of message.contracts) {
       Contract.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.nextContractId !== 0) {
+      writer.uint32(32).uint64(message.nextContractId);
+    }
+    for (const v of message.contractExpirationSets) {
+      ContractExpirationSet.encode(v!, writer.uint32(42).fork()).ldelim();
+    }
+    for (const v of message.userContractSets) {
+      UserContractSet.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -47,6 +67,15 @@ export const GenesisState = {
         case 3:
           message.contracts.push(Contract.decode(reader, reader.uint32()));
           break;
+        case 4:
+          message.nextContractId = longToNumber(reader.uint64() as Long);
+          break;
+        case 5:
+          message.contractExpirationSets.push(ContractExpirationSet.decode(reader, reader.uint32()));
+          break;
+        case 6:
+          message.userContractSets.push(UserContractSet.decode(reader, reader.uint32()));
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -60,6 +89,13 @@ export const GenesisState = {
       params: isSet(object.params) ? Params.fromJSON(object.params) : undefined,
       providers: Array.isArray(object?.providers) ? object.providers.map((e: any) => Provider.fromJSON(e)) : [],
       contracts: Array.isArray(object?.contracts) ? object.contracts.map((e: any) => Contract.fromJSON(e)) : [],
+      nextContractId: isSet(object.nextContractId) ? Number(object.nextContractId) : 0,
+      contractExpirationSets: Array.isArray(object?.contractExpirationSets)
+        ? object.contractExpirationSets.map((e: any) => ContractExpirationSet.fromJSON(e))
+        : [],
+      userContractSets: Array.isArray(object?.userContractSets)
+        ? object.userContractSets.map((e: any) => UserContractSet.fromJSON(e))
+        : [],
     };
   },
 
@@ -76,6 +112,19 @@ export const GenesisState = {
     } else {
       obj.contracts = [];
     }
+    message.nextContractId !== undefined && (obj.nextContractId = Math.round(message.nextContractId));
+    if (message.contractExpirationSets) {
+      obj.contractExpirationSets = message.contractExpirationSets.map((e) =>
+        e ? ContractExpirationSet.toJSON(e) : undefined
+      );
+    } else {
+      obj.contractExpirationSets = [];
+    }
+    if (message.userContractSets) {
+      obj.userContractSets = message.userContractSets.map((e) => e ? UserContractSet.toJSON(e) : undefined);
+    } else {
+      obj.userContractSets = [];
+    }
     return obj;
   },
 
@@ -86,9 +135,32 @@ export const GenesisState = {
       : undefined;
     message.providers = object.providers?.map((e) => Provider.fromPartial(e)) || [];
     message.contracts = object.contracts?.map((e) => Contract.fromPartial(e)) || [];
+    message.nextContractId = object.nextContractId ?? 0;
+    message.contractExpirationSets = object.contractExpirationSets?.map((e) => ContractExpirationSet.fromPartial(e))
+      || [];
+    message.userContractSets = object.userContractSets?.map((e) => UserContractSet.fromPartial(e)) || [];
     return message;
   },
 };
+
+declare var self: any | undefined;
+declare var window: any | undefined;
+declare var global: any | undefined;
+var globalThis: any = (() => {
+  if (typeof globalThis !== "undefined") {
+    return globalThis;
+  }
+  if (typeof self !== "undefined") {
+    return self;
+  }
+  if (typeof window !== "undefined") {
+    return window;
+  }
+  if (typeof global !== "undefined") {
+    return global;
+  }
+  throw "Unable to locate global object";
+})();
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
@@ -100,6 +172,18 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
+
+if (_m0.util.Long !== Long) {
+  _m0.util.Long = Long as any;
+  _m0.configure();
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;

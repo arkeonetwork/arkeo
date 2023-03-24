@@ -4,7 +4,7 @@ import { Coin } from "../../cosmos/base/v1beta1/coin";
 import { Duration } from "../../google/protobuf/duration";
 import { Timestamp } from "../../google/protobuf/timestamp";
 
-export const protobufPackage = "arkeonetwork.arkeo.claim";
+export const protobufPackage = "arkeo.claim";
 
 /** Params defines the parameters for the module. */
 export interface Params {

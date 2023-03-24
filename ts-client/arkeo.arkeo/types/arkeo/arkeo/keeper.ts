@@ -82,10 +82,11 @@ export interface Provider {
   payAsYouGoRate: number;
   bond: string;
   lastUpdate: number;
+  settlementDuration: number;
 }
 
 export interface Contract {
-  providerPubKey: string;
+  provider: string;
   service: number;
   client: string;
   delegate: string;
@@ -96,8 +97,9 @@ export interface Contract {
   deposit: string;
   paid: string;
   nonce: number;
-  SettlementHeight: number;
+  settlementHeight: number;
   id: number;
+  settlementDuration: number;
 }
 
 export interface ContractSet {
@@ -127,6 +129,7 @@ function createBaseProvider(): Provider {
     payAsYouGoRate: 0,
     bond: "",
     lastUpdate: 0,
+    settlementDuration: 0,
   };
 }
 
@@ -164,6 +167,9 @@ export const Provider = {
     }
     if (message.lastUpdate !== 0) {
       writer.uint32(88).int64(message.lastUpdate);
+    }
+    if (message.settlementDuration !== 0) {
+      writer.uint32(96).int64(message.settlementDuration);
     }
     return writer;
   },
@@ -208,6 +214,9 @@ export const Provider = {
         case 11:
           message.lastUpdate = longToNumber(reader.int64() as Long);
           break;
+        case 12:
+          message.settlementDuration = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -229,6 +238,7 @@ export const Provider = {
       payAsYouGoRate: isSet(object.payAsYouGoRate) ? Number(object.payAsYouGoRate) : 0,
       bond: isSet(object.bond) ? String(object.bond) : "",
       lastUpdate: isSet(object.lastUpdate) ? Number(object.lastUpdate) : 0,
+      settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
     };
   },
 
@@ -245,6 +255,7 @@ export const Provider = {
     message.payAsYouGoRate !== undefined && (obj.payAsYouGoRate = Math.round(message.payAsYouGoRate));
     message.bond !== undefined && (obj.bond = message.bond);
     message.lastUpdate !== undefined && (obj.lastUpdate = Math.round(message.lastUpdate));
+    message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
     return obj;
   },
 
@@ -261,13 +272,14 @@ export const Provider = {
     message.payAsYouGoRate = object.payAsYouGoRate ?? 0;
     message.bond = object.bond ?? "";
     message.lastUpdate = object.lastUpdate ?? 0;
+    message.settlementDuration = object.settlementDuration ?? 0;
     return message;
   },
 };
 
 function createBaseContract(): Contract {
   return {
-    providerPubKey: "",
+    provider: "",
     service: 0,
     client: "",
     delegate: "",
@@ -278,15 +290,16 @@ function createBaseContract(): Contract {
     deposit: "",
     paid: "",
     nonce: 0,
-    SettlementHeight: 0,
+    settlementHeight: 0,
     id: 0,
+    settlementDuration: 0,
   };
 }
 
 export const Contract = {
   encode(message: Contract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.providerPubKey !== "") {
-      writer.uint32(10).string(message.providerPubKey);
+    if (message.provider !== "") {
+      writer.uint32(10).string(message.provider);
     }
     if (message.service !== 0) {
       writer.uint32(16).int32(message.service);
@@ -318,11 +331,14 @@ export const Contract = {
     if (message.nonce !== 0) {
       writer.uint32(88).int64(message.nonce);
     }
-    if (message.SettlementHeight !== 0) {
-      writer.uint32(96).int64(message.SettlementHeight);
+    if (message.settlementHeight !== 0) {
+      writer.uint32(96).int64(message.settlementHeight);
     }
     if (message.id !== 0) {
       writer.uint32(104).uint64(message.id);
+    }
+    if (message.settlementDuration !== 0) {
+      writer.uint32(112).int64(message.settlementDuration);
     }
     return writer;
   },
@@ -335,7 +351,7 @@ export const Contract = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.providerPubKey = reader.string();
+          message.provider = reader.string();
           break;
         case 2:
           message.service = reader.int32();
@@ -368,10 +384,13 @@ export const Contract = {
           message.nonce = longToNumber(reader.int64() as Long);
           break;
         case 12:
-          message.SettlementHeight = longToNumber(reader.int64() as Long);
+          message.settlementHeight = longToNumber(reader.int64() as Long);
           break;
         case 13:
           message.id = longToNumber(reader.uint64() as Long);
+          break;
+        case 14:
+          message.settlementDuration = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -383,7 +402,7 @@ export const Contract = {
 
   fromJSON(object: any): Contract {
     return {
-      providerPubKey: isSet(object.providerPubKey) ? String(object.providerPubKey) : "",
+      provider: isSet(object.provider) ? String(object.provider) : "",
       service: isSet(object.service) ? Number(object.service) : 0,
       client: isSet(object.client) ? String(object.client) : "",
       delegate: isSet(object.delegate) ? String(object.delegate) : "",
@@ -394,14 +413,15 @@ export const Contract = {
       deposit: isSet(object.deposit) ? String(object.deposit) : "",
       paid: isSet(object.paid) ? String(object.paid) : "",
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
-      SettlementHeight: isSet(object.SettlementHeight) ? Number(object.SettlementHeight) : 0,
+      settlementHeight: isSet(object.settlementHeight) ? Number(object.settlementHeight) : 0,
       id: isSet(object.id) ? Number(object.id) : 0,
+      settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
     };
   },
 
   toJSON(message: Contract): unknown {
     const obj: any = {};
-    message.providerPubKey !== undefined && (obj.providerPubKey = message.providerPubKey);
+    message.provider !== undefined && (obj.provider = message.provider);
     message.service !== undefined && (obj.service = Math.round(message.service));
     message.client !== undefined && (obj.client = message.client);
     message.delegate !== undefined && (obj.delegate = message.delegate);
@@ -412,14 +432,15 @@ export const Contract = {
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
     message.nonce !== undefined && (obj.nonce = Math.round(message.nonce));
-    message.SettlementHeight !== undefined && (obj.SettlementHeight = Math.round(message.SettlementHeight));
+    message.settlementHeight !== undefined && (obj.settlementHeight = Math.round(message.settlementHeight));
     message.id !== undefined && (obj.id = Math.round(message.id));
+    message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<Contract>, I>>(object: I): Contract {
     const message = createBaseContract();
-    message.providerPubKey = object.providerPubKey ?? "";
+    message.provider = object.provider ?? "";
     message.service = object.service ?? 0;
     message.client = object.client ?? "";
     message.delegate = object.delegate ?? "";
@@ -430,8 +451,9 @@ export const Contract = {
     message.deposit = object.deposit ?? "";
     message.paid = object.paid ?? "";
     message.nonce = object.nonce ?? 0;
-    message.SettlementHeight = object.SettlementHeight ?? 0;
+    message.settlementHeight = object.settlementHeight ?? 0;
     message.id = object.id ?? 0;
+    message.settlementDuration = object.settlementDuration ?? 0;
     return message;
   },
 };
@@ -442,7 +464,7 @@ function createBaseContractSet(): ContractSet {
 
 export const ContractSet = {
   encode(message: ContractSet, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    writer.uint32(18).fork();
+    writer.uint32(10).fork();
     for (const v of message.contractIds) {
       writer.uint64(v);
     }
@@ -457,7 +479,7 @@ export const ContractSet = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 2:
+        case 1:
           if ((tag & 7) === 2) {
             const end2 = reader.uint32() + reader.pos;
             while (reader.pos < end2) {

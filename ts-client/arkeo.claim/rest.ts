@@ -243,11 +243,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryClaimRecord
    * @summary Queries a list of ClaimRecord items.
-   * @request GET:/arkeonetwork/arkeo/claim/claimrecord/{address}
+   * @request GET:/arkeo/claim/claimrecord/{address}
    */
   queryClaimRecord = (address: string, query?: { chain?: "ARKEO" | "ETHEREUM" }, params: RequestParams = {}) =>
     this.request<ClaimQueryClaimRecordResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/claim/claimrecord/${address}`,
+      path: `/arkeo/claim/claimrecord/${address}`,
       method: "GET",
       query: query,
       format: "json",
@@ -260,11 +260,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryParams
    * @summary Parameters queries the parameters of the module.
-   * @request GET:/arkeonetwork/arkeo/claim/params
+   * @request GET:/arkeo/claim/params
    */
   queryParams = (params: RequestParams = {}) =>
     this.request<ClaimQueryParamsResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/claim/params`,
+      path: `/arkeo/claim/params`,
       method: "GET",
       format: "json",
       ...params,

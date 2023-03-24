@@ -3,7 +3,7 @@ import Long from "long";
 import _m0 from "protobufjs/minimal";
 import { Chain, chainFromJSON, chainToJSON } from "./claim_record";
 
-export const protobufPackage = "arkeonetwork.arkeo.claim";
+export const protobufPackage = "arkeo.claim";
 
 export interface MsgClaimEth {
   creator: string;
@@ -465,25 +465,25 @@ export class MsgClientImpl implements Msg {
   }
   ClaimEth(request: MsgClaimEth): Promise<MsgClaimEthResponse> {
     const data = MsgClaimEth.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "ClaimEth", data);
+    const promise = this.rpc.request("arkeo.claim.Msg", "ClaimEth", data);
     return promise.then((data) => MsgClaimEthResponse.decode(new _m0.Reader(data)));
   }
 
   ClaimArkeo(request: MsgClaimArkeo): Promise<MsgClaimArkeoResponse> {
     const data = MsgClaimArkeo.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "ClaimArkeo", data);
+    const promise = this.rpc.request("arkeo.claim.Msg", "ClaimArkeo", data);
     return promise.then((data) => MsgClaimArkeoResponse.decode(new _m0.Reader(data)));
   }
 
   TransferClaim(request: MsgTransferClaim): Promise<MsgTransferClaimResponse> {
     const data = MsgTransferClaim.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "TransferClaim", data);
+    const promise = this.rpc.request("arkeo.claim.Msg", "TransferClaim", data);
     return promise.then((data) => MsgTransferClaimResponse.decode(new _m0.Reader(data)));
   }
 
   AddClaim(request: MsgAddClaim): Promise<MsgAddClaimResponse> {
     const data = MsgAddClaim.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Msg", "AddClaim", data);
+    const promise = this.rpc.request("arkeo.claim.Msg", "AddClaim", data);
     return promise.then((data) => MsgAddClaimResponse.decode(new _m0.Reader(data)));
   }
 }

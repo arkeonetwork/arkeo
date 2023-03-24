@@ -10,7 +10,7 @@
  */
 
 export interface ArkeoContract {
-  provider_pub_key?: string;
+  provider?: string;
 
   /** @format int32 */
   service?: number;
@@ -37,6 +37,9 @@ export interface ArkeoContract {
 
   /** @format uint64 */
   id?: string;
+
+  /** @format int64 */
+  settlement_duration?: string;
 }
 
 export enum ArkeoContractType {
@@ -85,6 +88,9 @@ export interface ArkeoProvider {
 
   /** @format int64 */
   last_update?: string;
+
+  /** @format int64 */
+  settlement_duration?: string;
 }
 
 export enum ArkeoProviderStatus {
@@ -92,7 +98,9 @@ export enum ArkeoProviderStatus {
   ONLINE = "ONLINE",
 }
 
-export type ArkeoQueryActiveContractResponse = object;
+export interface ArkeoQueryActiveContractResponse {
+  contract?: ArkeoContract;
+}
 
 export interface ArkeoQueryAllContractResponse {
   contract?: ArkeoContract[];
@@ -352,6 +360,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
+   * @name QueryActiveContract
+   * @summary Queries an active contract by spender, provider and service.
+   * @request GET:/arkeo/active-contract/{spender}/{provider}/{service}
+   */
+  queryActiveContract = (spender: string, provider: string, service: string, params: RequestParams = {}) =>
+    this.request<ArkeoQueryActiveContractResponse, RpcStatus>({
+      path: `/arkeo/active-contract/${spender}/${provider}/${service}`,
+      method: "GET",
+      format: "json",
+      ...params,
+    });
+
+  /**
+   * No description
+   *
+   * @tags Query
    * @name QueryFetchContract
    * @request GET:/arkeo/contract/{contract_id}
    */
@@ -440,22 +464,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       path: `/arkeo/providers`,
       method: "GET",
       query: query,
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryActiveContract
-   * @summary Queries a list of ActiveContract items.
-   * @request GET:/arkeonetwork/arkeo/arkeo/active-contract/{spender}/{provider}/{service}
-   */
-  queryActiveContract = (spender: string, provider: string, service: string, params: RequestParams = {}) =>
-    this.request<ArkeoQueryActiveContractResponse, RpcStatus>({
-      path: `/arkeonetwork/arkeo/arkeo/active-contract/${spender}/${provider}/${service}`,
-      method: "GET",
       format: "json",
       ...params,
     });

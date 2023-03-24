@@ -3,7 +3,7 @@ import _m0 from "protobufjs/minimal";
 import { Chain, chainFromJSON, chainToJSON, ClaimRecord } from "./claim_record";
 import { Params } from "./params";
 
-export const protobufPackage = "arkeonetwork.arkeo.claim";
+export const protobufPackage = "arkeo.claim";
 
 /** QueryParamsRequest is request type for the Query/Params RPC method. */
 export interface QueryParamsRequest {
@@ -237,13 +237,13 @@ export class QueryClientImpl implements Query {
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Query", "Params", data);
+    const promise = this.rpc.request("arkeo.claim.Query", "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
   }
 
   ClaimRecord(request: QueryClaimRecordRequest): Promise<QueryClaimRecordResponse> {
     const data = QueryClaimRecordRequest.encode(request).finish();
-    const promise = this.rpc.request("arkeonetwork.arkeo.claim.Query", "ClaimRecord", data);
+    const promise = this.rpc.request("arkeo.claim.Query", "ClaimRecord", data);
     return promise.then((data) => QueryClaimRecordResponse.decode(new _m0.Reader(data)));
   }
 }
