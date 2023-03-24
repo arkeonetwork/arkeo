@@ -11,7 +11,7 @@ message EventBondProvider {
   string creator = 1;
   string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
-  int64 bond = 4 [
+  string bond = 4 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
