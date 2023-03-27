@@ -26,10 +26,21 @@ func (k msgServer) CloseContractEvent(ctx cosmos.Context, contract *types.Contra
 	)
 }
 
-func (k msgServer) ModProviderEvent(ctx cosmos.Context, provider *types.Provider) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			types.NewModProviderEvent(provider),
+func (k msgServer) EmitModProviderEvent(ctx cosmos.Context, msg *types.MsgModProvider, provider *types.Provider) error {
+	return ctx.EventManager().EmitTypedEvent(
+		&types.EventModProvider{
+			Creator:             msg.Creator,
+			Provider:            provider.PubKey,
+			Service:             provider.Service.String(),
+			MetadataURI:         provider.MetadataUri,
+			MetadataNonce:       provider.MetadataNonce,
+			Status:              types.ProviderStatus(provider.Status),
+			MinContractDuration: provider.MinContractDuration,
+			MaxContractDuration: provider.MaxContractDuration,
+			SubscriptionRate:    provider.SubscriptionRate,
+			PayAsYouGoRate:      provider.PayAsYouGoRate,
+			Bond:                provider.Bond,
+			SettlementDuration:  provider.SettlementDuration,
 		},
 	)
 }
