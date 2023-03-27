@@ -4,7 +4,7 @@ package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
-
+import "arkeo/arkeo/keeper.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 message EventBondProvider {
@@ -16,4 +16,23 @@ message EventBondProvider {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
+}
+
+message EventModProvider {
+  string creator = 1;
+  string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string service = 3;
+  string metadataURI = 4;
+  uint64 metadataNonce = 5;
+  ProviderStatus status = 6;
+  int64 minContractDuration = 7;
+  int64 maxContractDuration = 8;
+  int64 subscriptionRate = 9;
+  int64 payAsYouGoRate = 10;
+  string bond = 11 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  int64 settlementDuration = 12;
 }

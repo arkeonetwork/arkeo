@@ -111,6 +111,5 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	if err := k.SetProvider(ctx, provider); err != nil {
 		return err
 	}
-	k.ModProviderEvent(ctx, &provider)
-	return nil
+	return k.EmitModProviderEvent(ctx, msg, &provider)
 }
