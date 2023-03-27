@@ -36,3 +36,60 @@ message EventModProvider {
   ];
   int64 settlementDuration = 12;
 }
+
+message EventOpenContract {
+  string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  uint64 contractId = 2;
+  string service = 3;
+  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  ContractType type = 6;
+  int64 height = 7;
+  int64 duration = 8;
+  int64 rate = 9;
+  int64 openCost = 10;
+  string deposit = 11 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  int64 settlementDuration = 12;
+}
+
+message EventSettleContract {
+  string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  uint64 contractId = 2;
+  string service = 3;
+  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  ContractType type = 6;
+  int64 nonce = 7;
+  int64 height = 8;
+  string paid = 9 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+  string reserve = 10 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message EventCloseContract {
+  uint64 contractId = 1;
+  string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string service = 3;
+  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+}
+
+message ValidatorPayoutEvent {
+  string validator = 1;
+  string reward = 2 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}

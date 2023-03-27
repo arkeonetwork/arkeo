@@ -179,6 +179,5 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	k.OpenContractEvent(ctx, openCost, &contract)
-	return nil
+	return k.EmitOpenContractEvent(ctx, openCost, &contract)
 }
