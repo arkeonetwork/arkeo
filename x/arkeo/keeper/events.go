@@ -7,10 +7,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k msgServer) BondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) {
-	ctx.EventManager().EmitEvents(
-		sdk.Events{
-			types.NewBondProviderEvent(bond, msg),
+func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) error {
+	return ctx.EventManager().EmitTypedEvent(
+		&types.EventBondProvider{
+			Provider: msg.Provider,
+			Creator:  msg.Creator,
+			Service:  msg.Service,
+			Bond:     msg.Bond,
 		},
 	)
 }
