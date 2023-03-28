@@ -177,10 +177,10 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err != nil {
 			return contract, err
 		}
-		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, debt))); err != nil {
+		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, debt))); err != nil {
 			return contract, err
 		}
-		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, valIncome))); err != nil {
+		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome))); err != nil {
 			return contract, err
 		}
 	}
@@ -218,9 +218,9 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	var debt cosmos.Int
 	switch contract.Type {
 	case types.ContractType_SUBSCRIPTION:
-		debt = cosmos.NewInt(contract.Rate * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
+		debt = cosmos.NewInt(contract.Rate.Amount.Int64() * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
 	case types.ContractType_PAY_AS_YOU_GO:
-		debt = cosmos.NewInt(contract.Rate * contract.Nonce).Sub(contract.Paid)
+		debt = cosmos.NewInt(contract.Rate.Amount.Int64() * contract.Nonce).Sub(contract.Paid)
 	default:
 		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
 	}

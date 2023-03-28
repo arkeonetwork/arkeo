@@ -44,7 +44,7 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
-			argRate, err := cast.ToInt64E(args[6])
+			argRate, err := cosmos.ParseCoin(args[6])
 			if err != nil {
 				return err
 			}

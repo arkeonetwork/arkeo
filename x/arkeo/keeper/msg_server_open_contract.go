@@ -79,15 +79,21 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 
 	switch msg.ContractType {
 	case types.ContractType_SUBSCRIPTION:
-		if msg.Rate != provider.SubscriptionRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", provider.SubscriptionRate, msg.Rate)
+		if cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).IsZero() {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is 0, client sent %d", msg.Rate.Amount.Int64())
 		}
-		if !cosmos.NewInt(msg.Rate * msg.Duration).Equal(msg.Deposit) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate, msg.Duration, msg.Deposit.Int64())
+		if !msg.Rate.Amount.Equal(cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom)) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).Int64(), msg.Rate.Amount.Int64())
+		}
+		if !cosmos.NewInt(msg.Rate.Amount.Int64() * msg.Duration).Equal(msg.Deposit) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.Deposit.Int64())
 		}
 	case types.ContractType_PAY_AS_YOU_GO:
-		if msg.Rate != provider.PayAsYouGoRate {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", provider.PayAsYouGoRate, msg.Rate)
+		if cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom).IsZero() {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is 0, client sent %d", msg.Rate.Amount.Int64())
+		}
+		if !msg.Rate.Amount.Equal(cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom)) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom), msg.Rate.Amount.Int64())
 		}
 		if msg.SettlementDuration != provider.SettlementDuration {
 			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-as-you-go provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
@@ -116,7 +122,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		}
 	}
 
-	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, getCoins(msg.Deposit.Int64())); err != nil {
+	if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ContractName, cosmos.NewCoins(cosmos.NewCoin(msg.Rate.Denom, msg.Deposit))); err != nil {
 		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Int64())
 	}
 
