@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -133,28 +134,28 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argSubscriptionRate, _ := cmd.Flags().GetUint64("subscription-rate")
-	if argSubscriptionRate == 0 {
-		subscriptiomRate, err := promptForArg(cmd, "Specify rate for subscription contracts: ")
-		if err != nil {
-			return err
-		}
-		argSubscriptionRate, err = strconv.ParseUint(subscriptiomRate, 10, 64)
+	argSubscriptionRate, _ := cmd.Flags().GetString("subscription-rate")
+	if len(argSubscriptionRate) == 0 {
+		argSubscriptionRate, err = promptForArg(cmd, "Specify rate for subscription contracts: ")
 		if err != nil {
 			return err
 		}
 	}
+	srate, err := cosmos.ParseCoins(argSubscriptionRate)
+	if err != nil {
+		return err
+	}
 
-	argPayAsYouGoRate, _ := cmd.Flags().GetUint64("pay-as-you-go-rate")
-	if argPayAsYouGoRate == 0 {
-		payAsYouGoRate, err := promptForArg(cmd, "Specify rate for pay-as-you-go contracts: ")
+	argPayAsYouGoRate, _ := cmd.Flags().GetString("pay-as-you-go-rate")
+	if len(argPayAsYouGoRate) == 0 {
+		argPayAsYouGoRate, err = promptForArg(cmd, "Specify rate for pay-as-you-go contracts: ")
 		if err != nil {
 			return err
 		}
-		argPayAsYouGoRate, err = strconv.ParseUint(payAsYouGoRate, 10, 64)
-		if err != nil {
-			return err
-		}
+	}
+	prate, err := cosmos.ParseCoins(argPayAsYouGoRate)
+	if err != nil {
+		return err
 	}
 
 	pubkey, err := common.NewPubKey(argPubkey)
@@ -173,8 +174,8 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		status,
 		int64(argMinDuration),
 		int64(argMaxDuration),
-		int64(argSubscriptionRate),
-		int64(argPayAsYouGoRate),
+		srate,
+		prate,
 		int64(argSettlementDuration),
 	)
 	if err := msg.ValidateBasic(); err != nil {

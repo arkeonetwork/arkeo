@@ -7,13 +7,16 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func NewProvider(pubkey common.PubKey, service common.Service) Provider {
 	return Provider{
-		PubKey:  pubkey,
-		Service: service,
-		Bond:    cosmos.ZeroInt(),
+		PubKey:           pubkey,
+		Service:          service,
+		Bond:             cosmos.ZeroInt(),
+		SubscriptionRate: make([]sdk.Coin, 0),
+		PayAsYouGoRate:   make([]sdk.Coin, 0),
 	}
 }
 

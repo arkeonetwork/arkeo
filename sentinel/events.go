@@ -95,12 +95,12 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 			}
 
 		case "subscription_rate":
-			evt.Provider.SubscriptionRate, err = strconv.ParseInt(v, 10, 64)
+			evt.Provider.SubscriptionRate, err = cosmos.ParseCoins(v)
 			if err != nil {
 				return evt, err
 			}
 		case "pay-as-you-go_rate":
-			evt.Provider.PayAsYouGoRate, err = strconv.ParseInt(v, 10, 64)
+			evt.Provider.PayAsYouGoRate, err = cosmos.ParseCoins(v)
 			if err != nil {
 				return evt, err
 			}
@@ -167,7 +167,7 @@ func parseOpenContract(input map[string]string) (OpenContract, error) {
 				return evt, err
 			}
 		case "rate":
-			evt.Contract.Rate, err = strconv.ParseInt(v, 10, 64)
+			evt.Contract.Rate, err = cosmos.ParseCoin(v)
 			if err != nil {
 				return evt, err
 			}

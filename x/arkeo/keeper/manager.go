@@ -193,7 +193,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			if err != nil {
 				return contract, err
 			}
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, remainder))); err != nil {
+			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, remainder))); err != nil {
 				return contract, err
 			}
 		}

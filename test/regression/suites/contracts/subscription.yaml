@@ -16,7 +16,9 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 duration: 10
-rate: 10
+rate:
+  denom: "uarkeo"
+  amount: "10"
 deposit: "100"
 ---
 type: create-blocks
@@ -88,7 +90,9 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 duration: 10
-rate: 10
+rate:
+  denom: "uarkeo"
+  amount: "10"
 deposit: "100"
 ---
 type: create-blocks

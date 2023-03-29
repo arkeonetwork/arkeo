@@ -16,7 +16,9 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "PAY_AS_YOU_GO"
 duration: 10
-rate: 3
+rate:
+  denom: "uarkeo"
+  amount: "3"
 deposit: "100"
 ---
 type: create-blocks
