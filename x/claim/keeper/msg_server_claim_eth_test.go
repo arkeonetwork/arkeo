@@ -227,7 +227,7 @@ func TestIsValidClaimSignature(t *testing.T) {
 	require.Error(t, err)
 }
 
-func generateSignedEthClaim(addrArkeo string, amount string) (string, string, error) {
+func generateSignedEthClaim(addrArkeo, amount string) (string, string, error) {
 	// generate a random eth address
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {

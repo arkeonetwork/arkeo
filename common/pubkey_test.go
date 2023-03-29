@@ -56,5 +56,5 @@ func TestEquals(t *testing.T) {
 	require.False(t, PubKeys{pk1, pk2}.Equals(nil))
 	require.False(t, PubKeys{pk1, pk2, pk3}.Equals(PubKeys{pk1, pk2}))
 	require.True(t, PubKeys{pk1, pk2, pk3, pk4}.Equals(PubKeys{pk4, pk3, pk2, pk1}))
-	require.True(t, PubKeys{pk1, pk2, pk3, pk4}.Equals(PubKeys{pk1, pk2, pk3, pk4})) //nolint
+	require.True(t, PubKeys{pk1, pk2, pk3, pk4}.Equals(PubKeys{pk1, pk2, pk3, pk4})) // nolint
 }

@@ -34,7 +34,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 	)
 }
 
-func NewContractSettlementEvent(debt cosmos.Int, valIncome cosmos.Int, contract *Contract) sdk.Event {
+func NewContractSettlementEvent(debt, valIncome cosmos.Int, contract *Contract) sdk.Event {
 	return sdk.NewEvent(
 		EventTypeContractSettlement,
 		sdk.NewAttribute("provider", contract.Provider.String()),

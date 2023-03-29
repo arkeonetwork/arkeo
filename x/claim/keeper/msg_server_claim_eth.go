@@ -90,7 +90,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	return &types.MsgClaimEthResponse{}, nil
 }
 
-func GenerateClaimTypedDataBytes(ethAddress string, arkeoAddress string, amount string) ([]byte, error) {
+func GenerateClaimTypedDataBytes(ethAddress, arkeoAddress, amount string) ([]byte, error) {
 	claimEthAddress := common.HexToAddress(ethAddress)
 	signerTypedData := apitypes.TypedData{
 		Types:       types.EIP712Types,
@@ -114,7 +114,7 @@ func GenerateClaimTypedDataBytes(ethAddress string, arkeoAddress string, amount 
 	return []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash))), nil
 }
 
-func IsValidClaimSignature(ethAddress string, arkeoAdddress string, amount string, signature string) (bool, error) {
+func IsValidClaimSignature(ethAddress, arkeoAdddress, amount, signature string) (bool, error) {
 	rawData, err := GenerateClaimTypedDataBytes(ethAddress, arkeoAdddress, amount)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to generate claim typed data bytes")
@@ -172,7 +172,7 @@ func has0xPrefix(str string) bool {
 	return strings.HasPrefix(str, "0x") || strings.HasPrefix(str, "0X")
 }
 
-func mergeClaimRecords(claimA types.ClaimRecord, claimB types.ClaimRecord) (types.ClaimRecord, error) {
+func mergeClaimRecords(claimA, claimB types.ClaimRecord) (types.ClaimRecord, error) {
 	if claimA.IsEmpty() {
 		return claimB, nil
 	}

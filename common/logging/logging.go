@@ -13,6 +13,7 @@ import (
 
 // Fields is an alias to logrus.Fields
 type Fields = logrus.Fields
+
 type CustomLogFormatter struct {
 	TimestampFormat string
 	LevelDesc       []string

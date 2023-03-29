@@ -35,7 +35,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 }
 
 // NewParams creates a new Params instance
-func NewParams(claimDenom string, airdropStartTime time.Time, durationUntilDecay time.Duration, durationOfDecay time.Duration) Params {
+func NewParams(claimDenom string, airdropStartTime time.Time, durationUntilDecay, durationOfDecay time.Duration) Params {
 	return Params{
 		ClaimDenom:         claimDenom,
 		AirdropStartTime:   airdropStartTime,

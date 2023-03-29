@@ -94,7 +94,7 @@ type KeeperContract interface {
 	GetAndIncrementNextContractId(ctx cosmos.Context) uint64
 	SetUserContractSet(ctx cosmos.Context, contractSet types.UserContractSet) error
 	GetUserContractSet(ctx cosmos.Context, pubkey common.PubKey) (types.UserContractSet, error)
-	GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, service common.Service) (types.Contract, error)
+	GetActiveContractForUser(ctx cosmos.Context, user, provider common.PubKey, service common.Service) (types.Contract, error)
 }
 
 const (

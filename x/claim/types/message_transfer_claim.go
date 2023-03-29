@@ -10,7 +10,7 @@ const TypeMsgTransferClaim = "transfer_claim"
 
 var _ sdk.Msg = &MsgTransferClaim{}
 
-func NewMsgTransferClaim(creator string, toAddress string) *MsgTransferClaim {
+func NewMsgTransferClaim(creator, toAddress string) *MsgTransferClaim {
 	return &MsgTransferClaim{
 		Creator:   creator,
 		ToAddress: toAddress,
