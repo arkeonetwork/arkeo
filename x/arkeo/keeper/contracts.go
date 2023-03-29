@@ -194,7 +194,7 @@ func (k KVStore) getUserContractSet(ctx cosmos.Context, key string, contractSet 
 	return true, nil
 }
 
-func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user common.PubKey, provider common.PubKey, service common.Service) (types.Contract, error) {
+func (k KVStore) GetActiveContractForUser(ctx cosmos.Context, user, provider common.PubKey, service common.Service) (types.Contract, error) {
 	contractSet, err := k.GetUserContractSet(ctx, user)
 	if err != nil {
 		return types.Contract{}, err

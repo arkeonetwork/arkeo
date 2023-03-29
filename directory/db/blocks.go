@@ -54,6 +54,7 @@ type BlockGap struct {
 func (g BlockGap) String() string {
 	return fmt.Sprintf("%d-%d", g.Start, g.End)
 }
+
 func (d *DirectoryDB) FindBlockGaps() ([]*BlockGap, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()

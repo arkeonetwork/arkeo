@@ -66,7 +66,7 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 	)
 }
 
-func (d *DirectoryDB) FindProvider(pubkey string, chain string) (*ArkeoProvider, error) {
+func (d *DirectoryDB) FindProvider(pubkey, chain string) (*ArkeoProvider, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {

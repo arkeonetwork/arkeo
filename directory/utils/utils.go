@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -12,9 +14,6 @@ import (
 	"github.com/arkeonetwork/arkeo/directory/sentinel"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/pkg/errors"
-
-	"net/http"
-	"net/url"
 
 	resty "github.com/go-resty/resty/v2"
 )
@@ -49,7 +48,7 @@ func ParseContractType(contractTypeStr string) (types.ContractType, error) {
 	return contractType, nil
 }
 
-func IsNearEqual(a float64, b float64, epsilon float64) bool {
+func IsNearEqual(a, b, epsilon float64) bool {
 	return math.Abs(a-b) <= epsilon
 }
 
@@ -61,7 +60,7 @@ func ValidateChain(chain string) (ok bool) {
 	return
 }
 
-func readFromNetwork(u *url.URL, retries int, maxBytes int) ([]byte, error) {
+func readFromNetwork(u *url.URL, retries, maxBytes int) ([]byte, error) {
 	client := resty.New()
 
 	client.SetRetryCount(retries)
@@ -91,8 +90,7 @@ func readFromFilesystem(u *url.URL) (raw []byte, err error) {
 	return raw, nil
 }
 
-func DownloadProviderMetadata(metadataUrl string, retries int, maxBytes int) (*sentinel.Metadata, error) {
-
+func DownloadProviderMetadata(metadataUrl string, retries, maxBytes int) (*sentinel.Metadata, error) {
 	u, err := url.Parse(metadataUrl)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error parsing url %s", metadataUrl)

@@ -40,7 +40,7 @@ func (d *DirectoryDB) FindContract(providerID int64, delegatePubkey string, heig
 	return &contract, nil
 }
 
-func (d *DirectoryDB) FindContractsByPubKeys(chain string, providerPubkey string, delegatePubkey string) ([]*ArkeoContract, error) {
+func (d *DirectoryDB) FindContractsByPubKeys(chain, providerPubkey, delegatePubkey string) ([]*ArkeoContract, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
@@ -54,7 +54,7 @@ func (d *DirectoryDB) FindContractsByPubKeys(chain string, providerPubkey string
 	return results, nil
 }
 
-func (d *DirectoryDB) FindContractByPubKeys(chain string, providerPubkey string, delegatePubkey string, height int64) (*ArkeoContract, error) {
+func (d *DirectoryDB) FindContractByPubKeys(chain, providerPubkey, delegatePubkey string, height int64) (*ArkeoContract, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
@@ -84,7 +84,7 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt types.OpenContractEve
 		evt.Duration, evt.Rate, evt.OpenCost, evt.Height)
 }
 
-func (d *DirectoryDB) CloseContract(contractID int64, height int64) (*Entity, error) {
+func (d *DirectoryDB) CloseContract(contractID, height int64) (*Entity, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
