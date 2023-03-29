@@ -141,7 +141,7 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-	srate, err := cosmos.ParseCoins(argSubscriptionRate)
+	sRate, err := cosmos.ParseCoins(argSubscriptionRate)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
-	prate, err := cosmos.ParseCoins(argPayAsYouGoRate)
+	pRate, err := cosmos.ParseCoins(argPayAsYouGoRate)
 	if err != nil {
 		return err
 	}
@@ -174,8 +174,8 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		status,
 		int64(argMinDuration),
 		int64(argMaxDuration),
-		srate,
-		prate,
+		sRate,
+		pRate,
 		int64(argSettlementDuration),
 	)
 	if err := msg.ValidateBasic(); err != nil {

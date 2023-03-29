@@ -53,9 +53,9 @@ func TestModProviderHandle(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
-	srates, err := cosmos.ParseCoins("11uarkeo")
+	sRates, err := cosmos.ParseCoins("11uarkeo")
 	require.NoError(t, err)
-	prates, err := cosmos.ParseCoins("12uarkeo")
+	pRates, err := cosmos.ParseCoins("12uarkeo")
 	require.NoError(t, err)
 
 	// happy path
@@ -68,8 +68,8 @@ func TestModProviderHandle(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		SubscriptionRate:    srates,
-		PayAsYouGoRate:      prates,
+		SubscriptionRate:    sRates,
+		PayAsYouGoRate:      pRates,
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 

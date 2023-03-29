@@ -30,9 +30,9 @@ func TestOpenContractValidate(t *testing.T) {
 
 	service := common.BTCService
 
-	srates, err := cosmos.ParseCoins("15uarkeo")
+	sRates, err := cosmos.ParseCoins("15uarkeo,20uatom")
 	require.NoError(t, err)
-	prates, err := cosmos.ParseCoins("2uarkeo")
+	pRates, err := cosmos.ParseCoins("2uarkeo")
 	require.NoError(t, err)
 
 	provider := types.NewProvider(providerPubkey, service)
@@ -40,8 +40,8 @@ func TestOpenContractValidate(t *testing.T) {
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.MaxContractDuration = 1000
 	provider.MinContractDuration = 10
-	provider.SubscriptionRate = srates
-	provider.PayAsYouGoRate = prates
+	provider.SubscriptionRate = sRates
+	provider.PayAsYouGoRate = pRates
 	provider.LastUpdate = 1
 	require.NoError(t, k.SetProvider(ctx, provider))
 
@@ -53,7 +53,7 @@ func TestOpenContractValidate(t *testing.T) {
 		Creator:      acc.String(),
 		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
-		Rate:         srates[0],
+		Rate:         sRates[0],
 		Deposit:      cosmos.NewInt(100 * 15),
 	}
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(100*25))))
@@ -69,7 +69,13 @@ func TestOpenContractValidate(t *testing.T) {
 	msg.Duration = 100
 
 	// check rates
+	msg.Rate = cosmos.NewInt64Coin("bogus", 10)
+	err = s.OpenContractValidate(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrOpenContractMismatchRate)
 	msg.Rate = cosmos.NewInt64Coin("uarkeo", 10)
+	err = s.OpenContractValidate(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrOpenContractMismatchRate)
+	msg.Rate = cosmos.NewInt64Coin("uatom", 10)
 	err = s.OpenContractValidate(ctx, &msg)
 	require.ErrorIs(t, err, types.ErrOpenContractMismatchRate)
 	msg.ContractType = types.ContractType_PAY_AS_YOU_GO
@@ -90,7 +96,7 @@ func TestOpenContractValidate(t *testing.T) {
 	contract.Type = types.ContractType_SUBSCRIPTION
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
-	contract.Rate = prates[0]
+	contract.Rate = pRates[0]
 
 	require.NoError(t, s.OpenContractHandle(ctx, &msg))
 	err = s.OpenContractValidate(ctx, &msg)
