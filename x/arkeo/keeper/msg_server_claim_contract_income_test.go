@@ -40,14 +40,16 @@ func TestValidate(t *testing.T) {
 	require.NoError(t, err)
 	client, err := common.NewPubKeyFromCrypto(pk)
 	require.NoError(t, err)
+	rate, err := cosmos.ParseCoin("10uarkeo")
+	require.NoError(t, err)
 
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
-	contract.Rate = 10
+	contract.Rate = rate
 	contract.Height = 10
 	contract.Nonce = 0
 	contract.Type = types.ContractType_PAY_AS_YOU_GO
-	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
+	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 1
 	require.NoError(t, k.SetContract(ctx, contract))
 
@@ -83,12 +85,14 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	client := types.GetRandomPubKey()
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
 	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	rate, err := cosmos.ParseCoin("10uarkeo")
+	require.NoError(t, err)
 
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
-	contract.Rate = 10
+	contract.Rate = rate
 	contract.Type = types.ContractType_PAY_AS_YOU_GO
-	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
+	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 2
 	require.NoError(t, k.SetContract(ctx, contract))
 
@@ -119,10 +123,10 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, cname, int64(750))
 	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
 	require.Equal(t, rname, int64(25))
-	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
+	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
-	msg.Nonce = contract.Deposit.Int64() / contract.Rate * 1000000000000
+	msg.Nonce = contract.Deposit.Int64() / contract.Rate.Amount.Int64() * 1000000000000
 	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
 	acct = k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64()
 	require.Equal(t, acct, int64(900))
@@ -130,7 +134,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, cname, int64(0))
 	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
 	require.Equal(t, rname, int64(100))
-	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
+	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
 }
 
 func TestHandleSubscription(t *testing.T) {
@@ -147,13 +151,15 @@ func TestHandleSubscription(t *testing.T) {
 	client := types.GetRandomPubKey()
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
 	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	rate, err := cosmos.ParseCoin("10uarkeo")
+	require.NoError(t, err)
 
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Height = 10
-	contract.Rate = 10
+	contract.Rate = rate
 	contract.Type = types.ContractType_SUBSCRIPTION
-	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate)
+	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 3
 	require.NoError(t, k.SetContract(ctx, contract))
 
@@ -184,7 +190,7 @@ func TestHandleSubscription(t *testing.T) {
 	require.Equal(t, cname, int64(800))
 	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
 	require.Equal(t, rname, int64(20))
-	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
+	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
 	ctx = ctx.WithBlockHeight(30000000)
@@ -195,5 +201,5 @@ func TestHandleSubscription(t *testing.T) {
 	require.Equal(t, cname, int64(0))
 	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
 	require.Equal(t, rname, int64(100))
-	require.Equal(t, rname+cname+acct, contract.Rate*contract.Duration)
+	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
 }

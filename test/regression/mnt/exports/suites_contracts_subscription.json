@@ -31,7 +31,10 @@
           "nonce": "0",
           "paid": "100",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "rate": "10",
+          "rate": {
+            "amount": "10",
+            "denom": "uarkeo"
+          },
           "service": 1,
           "settlement_duration": "0",
           "settlement_height": "12",
@@ -47,7 +50,10 @@
           "nonce": "0",
           "paid": "20",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "rate": "10",
+          "rate": {
+            "amount": "10",
+            "denom": "uarkeo"
+          },
           "service": 1,
           "settlement_duration": "0",
           "settlement_height": "18",
@@ -64,12 +70,22 @@
           "metadata_nonce": "0",
           "metadata_uri": "localhost:3636",
           "min_contract_duration": "3",
-          "pay_as_you_go_rate": "3",
+          "pay_as_you_go_rate": [
+            {
+              "amount": "3",
+              "denom": "uarkeo"
+            }
+          ],
           "pub_key": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
           "service": 1,
           "settlement_duration": "0",
           "status": "ONLINE",
-          "subscription_rate": "10"
+          "subscription_rate": [
+            {
+              "amount": "10",
+              "denom": "uarkeo"
+            }
+          ]
         }
       ],
       "user_contract_sets": []

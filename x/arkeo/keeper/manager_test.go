@@ -131,16 +131,19 @@ func TestContractEndBlock(t *testing.T) {
 	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
+	rates, err := cosmos.ParseCoins("15uarkeo")
+	require.NoError(t, err)
+
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
+		PayAsYouGoRate:      rates,
+		SubscriptionRate:    rates,
 	}
-	err := s.ModProviderHandle(ctx, &modProviderMsg)
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
 	modProviderMsg.Service = common.ETHService.String()
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
@@ -159,7 +162,7 @@ func TestContractEndBlock(t *testing.T) {
 		Client:       user1PubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
-		Rate:         15,
+		Rate:         rates[0],
 		Deposit:      cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &msg)
@@ -247,18 +250,21 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
+	rates, err := cosmos.ParseCoins("15uarkeo")
+	require.NoError(t, err)
+
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      15,
-		SubscriptionRate:    15,
+		PayAsYouGoRate:      rates,
+		SubscriptionRate:    rates,
 		SettlementDuration:  10,
 	}
 
-	err := s.ModProviderHandle(ctx, &modProviderMsg)
+	err = s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
 	modProviderMsg.Service = common.ETHService.String()
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
@@ -277,7 +283,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		Client:             user1PubKey,
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
 		Duration:           100,
-		Rate:               15,
+		Rate:               rates[0],
 		Deposit:            cosmos.NewInt(1500),
 		SettlementDuration: 10,
 	}

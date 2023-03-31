@@ -4,8 +4,10 @@ import (
 	"cosmossdk.io/errors"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
@@ -15,7 +17,7 @@ var _ sdk.Msg = &MsgModProvider{}
 
 func NewMsgModProvider(creator string, provider common.PubKey, service, metadataUri string,
 	metadataNonce uint64, status ProviderStatus, minContractDuration,
-	maxContractDuration, subscriptionRate, payAsYouGoRate, settlementDuration int64,
+	maxContractDuration int64, subscriptionRate, payAsYouGoRate types.Coins, settlementDuration int64,
 ) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
@@ -111,6 +113,24 @@ func (msg *MsgModProvider) ValidateBasic() error {
 
 	if msg.SettlementDuration < 0 {
 		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
+	}
+
+	subRate := cosmos.NewCoins(msg.SubscriptionRate...)
+	if err := subRate.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid subscription rate")
+	}
+
+	if !subRate.IsAllPositive() {
+		return errors.Wrapf(ErrInvalidModProviderRate, "all subscription rates must be positive")
+	}
+
+	payRate := cosmos.NewCoins(msg.PayAsYouGoRate...)
+	if err := payRate.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid subscription rate")
+	}
+
+	if !payRate.IsAllPositive() {
+		return errors.Wrapf(ErrInvalidModProviderRate, "all pay-as-you-go rates must be positive")
 	}
 
 	return nil

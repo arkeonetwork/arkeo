@@ -53,6 +53,11 @@ func TestModProviderHandle(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
+	sRates, err := cosmos.ParseCoins("11uarkeo")
+	require.NoError(t, err)
+	pRates, err := cosmos.ParseCoins("12uarkeo")
+	require.NoError(t, err)
+
 	// happy path
 	msg := types.MsgModProvider{
 		Creator:             acct.String(),
@@ -63,8 +68,8 @@ func TestModProviderHandle(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		SubscriptionRate:    11,
-		PayAsYouGoRate:      12,
+		SubscriptionRate:    sRates,
+		PayAsYouGoRate:      pRates,
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
@@ -75,6 +80,6 @@ func TestModProviderHandle(t *testing.T) {
 	require.Equal(t, provider.MinContractDuration, int64(10))
 	require.Equal(t, provider.MaxContractDuration, int64(500))
 	require.Equal(t, provider.Status, types.ProviderStatus_ONLINE)
-	require.Equal(t, provider.SubscriptionRate, int64(11))
-	require.Equal(t, provider.PayAsYouGoRate, int64(12))
+	require.Equal(t, provider.SubscriptionRate[0].Amount.Int64(), int64(11))
+	require.Equal(t, provider.PayAsYouGoRate[0].Amount.Int64(), int64(12))
 }

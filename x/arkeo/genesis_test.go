@@ -43,8 +43,12 @@ func TestGenesisWithContracts(t *testing.T) {
 	provider := types.NewProvider(providerPubkey, common.BTCService)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.LastUpdate = 100
+	provider.SubscriptionRate, _ = cosmos.ParseCoins("100uarkeo")
+	provider.PayAsYouGoRate, _ = cosmos.ParseCoins("100uarkeo")
 	err := k.SetProvider(ctx, provider)
 	require.NoError(t, err)
+
+	rate, _ := cosmos.ParseCoin("100uarkeo")
 
 	// create contracts
 	contracts := []types.Contract{
@@ -53,7 +57,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Service:  common.BTCService,
 			Client:   user1PubKey,
 			Duration: 100,
-			Rate:     100,
+			Rate:     rate,
 			Id:       0,
 			Deposit:  cosmos.NewInt(500),
 			Paid:     cosmos.ZeroInt(),
@@ -64,7 +68,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Service:  common.ETHService,
 			Client:   user1PubKey,
 			Duration: 100,
-			Rate:     100,
+			Rate:     rate,
 			Id:       1,
 			Deposit:  cosmos.NewInt(500),
 			Paid:     cosmos.ZeroInt(),
@@ -75,7 +79,7 @@ func TestGenesisWithContracts(t *testing.T) {
 			Service:  common.BTCService,
 			Client:   user2PubKey,
 			Duration: 150,
-			Rate:     100,
+			Rate:     rate,
 			Id:       2,
 			Deposit:  cosmos.NewInt(200),
 			Paid:     cosmos.ZeroInt(),

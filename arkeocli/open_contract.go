@@ -111,16 +111,16 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argRate, _ := cmd.Flags().GetInt64("rate")
-	if argRate == 0 {
-		rate, err := promptForArg(cmd, "Specify rate (must match provider): ")
+	argRate, _ := cmd.Flags().GetString("rate")
+	if len(argRate) == 0 {
+		argRate, err = promptForArg(cmd, "Specify rate (must match provider): ")
 		if err != nil {
 			return err
 		}
-		argRate, err = strconv.ParseInt(rate, 10, 64)
-		if err != nil {
-			return err
-		}
+	}
+	rate, err := cosmos.ParseCoin(argRate)
+	if err != nil {
+		return err
 	}
 
 	argDeposit, _ := cmd.Flags().GetInt64("deposit")
@@ -166,7 +166,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		contractType,
 		argDuration,
 		argSettlementDuration,
-		argRate,
+		rate,
 		deposit,
 	)
 	if err := msg.ValidateBasic(); err != nil {

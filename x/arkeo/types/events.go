@@ -5,6 +5,7 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (
@@ -27,7 +28,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 		sdk.NewAttribute("type", contract.Type.String()),
 		sdk.NewAttribute("height", strconv.FormatInt(contract.Height, 10)),
 		sdk.NewAttribute("duration", strconv.FormatInt(contract.Duration, 10)),
-		sdk.NewAttribute("rate", strconv.FormatInt(contract.Rate, 10)),
+		sdk.NewAttribute("rate", contract.Rate.String()),
 		sdk.NewAttribute("open_cost", strconv.FormatInt(openCost, 10)),
 		sdk.NewAttribute("deposit", contract.Deposit.String()),
 		sdk.NewAttribute("settlement_duration", strconv.FormatInt(contract.SettlementDuration, 10)),
@@ -81,8 +82,8 @@ func NewModProviderEvent(provider *Provider) sdk.Event {
 		sdk.NewAttribute("status", provider.Status.String()),
 		sdk.NewAttribute("min_contract_duration", strconv.FormatInt(provider.MinContractDuration, 10)),
 		sdk.NewAttribute("max_contract_duration", strconv.FormatInt(provider.MaxContractDuration, 10)),
-		sdk.NewAttribute("subscription_rate", strconv.FormatInt(provider.SubscriptionRate, 10)),
-		sdk.NewAttribute("pay-as-you-go_rate", strconv.FormatInt(provider.PayAsYouGoRate, 10)),
+		sdk.NewAttribute("subscription_rate", types.NewCoins(provider.SubscriptionRate...).String()),
+		sdk.NewAttribute("pay-as-you-go_rate", types.NewCoins(provider.PayAsYouGoRate...).String()),
 		sdk.NewAttribute("bond", provider.Bond.String()),
 		sdk.NewAttribute("settlement_duration", strconv.FormatInt(provider.SettlementDuration, 10)),
 	)

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/stretchr/testify/require"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -22,6 +23,9 @@ func TestModProviderValidateBasic(t *testing.T) {
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
 
+	rates, err := cosmos.ParseCoins("15uarkeo")
+	require.NoError(t, err)
+
 	// happy path
 	msg = MsgModProvider{
 		Creator:             acct.String(),
@@ -30,6 +34,8 @@ func TestModProviderValidateBasic(t *testing.T) {
 		MinContractDuration: 12,
 		MaxContractDuration: 30,
 		MetadataUri:         "http://mad.hatter.net/test?foo=baz",
+		SubscriptionRate:    rates,
+		PayAsYouGoRate:      rates,
 	}
 	err = msg.ValidateBasic()
 	require.NoError(t, err)

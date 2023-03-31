@@ -7,6 +7,7 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
@@ -14,7 +15,7 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration, rate int64, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator string, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
@@ -102,7 +103,11 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return errors.Wrapf(ErrOpenContractDuration, "contract duration cannot be zero")
 	}
 
-	if msg.Rate <= 0 {
+	if err := msg.Rate.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid rate")
+	}
+
+	if !msg.Rate.Amount.IsPositive() {
 		return errors.Wrapf(ErrOpenContractRate, "contract rate cannot be zero")
 	}
 

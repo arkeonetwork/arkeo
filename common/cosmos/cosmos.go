@@ -31,8 +31,10 @@ var (
 	ZeroUint                     = sdkmath.ZeroUint
 	ZeroDec                      = sdk.ZeroDec
 	OneUint                      = sdkmath.OneUint
+	NewInt64Coin                 = sdk.NewInt64Coin
 	NewCoin                      = sdk.NewCoin
 	NewCoins                     = sdk.NewCoins
+	ParseCoin                    = sdk.ParseCoinNormalized
 	ParseCoins                   = sdk.ParseCoinsNormalized
 	NewDecWithPrec               = sdk.NewDecWithPrec
 	NewDecFromBigInt             = sdk.NewDecFromBigInt

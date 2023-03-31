@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -44,7 +45,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Type:               types.ContractType_PAY_AS_YOU_GO,
 		Height:             100,
 		Duration:           100,
-		Rate:               1,
+		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
 		Deposit:            sdk.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
@@ -102,7 +103,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Type:               types.ContractType_PAY_AS_YOU_GO,
 		Height:             100,
 		Duration:           100,
-		Rate:               1,
+		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
 		Deposit:            sdk.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
@@ -140,7 +141,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Type:               types.ContractType_PAY_AS_YOU_GO,
 		Height:             100,
 		Duration:           100,
-		Rate:               1,
+		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
 		Deposit:            sdk.NewInt(100),
 		Nonce:              0,
 		Id:                 1,

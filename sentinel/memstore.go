@@ -153,7 +153,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Type = data.Contract.Type
 	contract.Height, _ = strconv.ParseInt(data.Contract.Height, 10, 64)
 	contract.Duration, _ = strconv.ParseInt(data.Contract.Duration, 10, 64)
-	contract.Rate, _ = strconv.ParseInt(data.Contract.Rate, 10, 64)
+	contract.Rate, _ = cosmos.ParseCoin(data.Contract.Rate)
 	contract.Deposit, _ = cosmos.NewIntFromString(data.Contract.Deposit)
 	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
