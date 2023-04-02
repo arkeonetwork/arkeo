@@ -65,6 +65,7 @@ message Contract {
   int64 settlement_height = 12;
   uint64 id = 13;
   int64 settlement_duration = 14;
+  bytes affiliate = 15  [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }

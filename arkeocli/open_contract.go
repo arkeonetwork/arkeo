@@ -91,6 +91,23 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
+	var argAffiliate string
+	var affiliate cosmos.AccAddress
+	argNoAffiliate, _ := cmd.Flags().GetBool("no-affiliate")
+	if !argNoAffiliate {
+		argAffiliate, _ = cmd.Flags().GetString("affiliate-address")
+		if argAffiliate == "" {
+			argAffiliate, err = promptForArg(cmd, "Specify affiliate address (leave blank to use no affiliate): ")
+			if err != nil {
+				return err
+			}
+			affiliate, err = cosmos.AccAddressFromBech32(argAffiliate)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	argContractType, _ := cmd.Flags().GetString("contract-type")
 	if argContractType == "" {
 		argContractType, err = promptForArg(cmd, "Specify contract type (subscription or pay-as-you-go): ")
@@ -168,6 +185,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		argSettlementDuration,
 		rate,
 		deposit,
+		affiliate,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

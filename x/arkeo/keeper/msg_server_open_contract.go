@@ -144,6 +144,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		Paid:               cosmos.ZeroInt(),
 		Height:             ctx.BlockHeight(),
 		SettlementDuration: msg.SettlementDuration,
+		Affiliate:          msg.Affiliate,
 	}
 
 	// create expiration set

@@ -16,7 +16,7 @@ import (
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [delegation-optional] [affiliate-optional]",
 		Short: "Broadcast message openContract",
 		Args:  cobra.ExactArgs(8),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -67,6 +67,14 @@ func CmdOpenContract() *cobra.Command {
 				}
 			}
 
+			affiliate := cosmos.AccAddress{}
+			if len(args) > 9 {
+				affiliate, err = cosmos.AccAddressFromBech32(args[9])
+				if err != nil {
+					return err
+				}
+			}
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
@@ -83,6 +91,7 @@ func CmdOpenContract() *cobra.Command {
 				argSettlementDuration,
 				argRate,
 				deposit,
+				affiliate,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

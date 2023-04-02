@@ -14,6 +14,7 @@
       ],
       "contracts": [
         {
+          "affiliate": "",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "100",

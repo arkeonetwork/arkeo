@@ -9,6 +9,8 @@ message ProtoInt64 { int64 value = 1; }
 
 message ProtoUint64 { uint64 value = 1; }
 
+message ProtoAccAddress { bytes value = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ]; }
+
 message ProtoAccAddresses {
   repeated bytes value = 1
       [ (gogoproto.casttype) =

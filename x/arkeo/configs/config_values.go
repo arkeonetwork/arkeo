@@ -19,6 +19,7 @@ const (
 	OpenContractCost
 	MinProviderBond
 	ReserveTax
+	AffilateFee
 	BlocksPerYear
 	EmissionCurve
 	ValidatorPayoutCycle
@@ -34,6 +35,7 @@ var nameToString = map[ConfigName]string{
 	OpenContractCost:           "OpenContractCost",
 	MinProviderBond:            "MinProviderBond",
 	ReserveTax:                 "ReserveTax",
+	AffilateFee:                "AffilateFee",
 	BlocksPerYear:              "BlocksPerYear",
 	EmissionCurve:              "EmissionCurve",
 	ValidatorPayoutCycle:       "ValidatorPayoutCycle",

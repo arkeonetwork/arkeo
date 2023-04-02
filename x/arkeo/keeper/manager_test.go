@@ -242,6 +242,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 
 	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
+	providerAddress, _ := providerPubKey.GetMyAddress()
 	provider := types.NewProvider(providerPubKey, common.BTCService)
 	provider.Bond = cosmos.NewInt(20000000000)
 	provider.LastUpdate = ctx.BlockHeight()
@@ -276,16 +277,22 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
+	// create affiliate
+	affPubKey := types.GetRandomPubKey()
+	affAddress, err := affPubKey.GetMyAddress()
+	require.NoError(t, err)
+
 	msg := types.MsgOpenContract{
 		Provider:           providerPubKey,
 		Service:            common.BTCService.String(),
 		Creator:            user1Address.String(),
 		Client:             user1PubKey,
-		ContractType:       types.ContractType_PAY_AS_YOU_GO,
+		ContractType:       types.ContractType_SUBSCRIPTION,
 		Duration:           100,
 		Rate:               rates[0],
 		Deposit:            cosmos.NewInt(1500),
 		SettlementDuration: 10,
+		Affiliate:          affAddress,
 	}
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
@@ -317,4 +324,8 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	activeContract, err = k.GetContract(ctx, activeContract.Id)
 	require.NoError(t, err)
 	require.Equal(t, activeContract.SettlementHeight, activeContract.SettlementPeriodEnd())
+
+	require.Equal(t, k.GetBalance(ctx, affAddress).AmountOf(configs.Denom).Int64(), int64(75))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(100000075))
+	require.Equal(t, k.GetBalance(ctx, providerAddress).AmountOf(configs.Denom).Int64(), int64(1350))
 }

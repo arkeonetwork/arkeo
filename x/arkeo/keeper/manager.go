@@ -167,8 +167,15 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		contract.Nonce = nonce
 	}
 	totalDebt, err := mgr.contractDebt(ctx, contract)
-	valIncome := common.GetSafeShare(cosmos.NewInt(mgr.FetchConfig(ctx, configs.ReserveTax)), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
-	debt := totalDebt.Sub(valIncome)
+	reserveTax := mgr.FetchConfig(ctx, configs.ReserveTax)
+	affilateFee := int64(0)
+	if !contract.Affiliate.Empty() {
+		affilateFee = mgr.FetchConfig(ctx, configs.AffilateFee)
+	}
+	valIncome := common.GetSafeShare(cosmos.NewInt(reserveTax), cosmos.NewInt(configs.MaxBasisPoints), totalDebt)
+	affIncome := common.GetSafeShare(cosmos.NewInt(affilateFee), cosmos.NewInt(configs.MaxBasisPoints), valIncome)
+	valIncome = valIncome.Sub(affIncome)
+	debt := totalDebt.Sub(valIncome).Sub(affIncome)
 	if err != nil {
 		return contract, err
 	}
@@ -180,7 +187,14 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, debt))); err != nil {
 			return contract, err
 		}
+	}
+	if !valIncome.IsZero() {
 		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome))); err != nil {
+			return contract, err
+		}
+	}
+	if !affIncome.IsZero() {
+		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, contract.Affiliate, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, affIncome))); err != nil {
 			return contract, err
 		}
 	}
