@@ -32,6 +32,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) sdk.Event {
 		sdk.NewAttribute("open_cost", strconv.FormatInt(openCost, 10)),
 		sdk.NewAttribute("deposit", contract.Deposit.String()),
 		sdk.NewAttribute("settlement_duration", strconv.FormatInt(contract.SettlementDuration, 10)),
+		sdk.NewAttribute("affiliate", contract.Affiliate.String()),
 	)
 }
 
