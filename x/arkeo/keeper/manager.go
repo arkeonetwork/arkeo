@@ -218,9 +218,9 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	var debt cosmos.Int
 	switch contract.Type {
 	case types.ContractType_SUBSCRIPTION:
-		debt = cosmos.NewInt(contract.Rate.Amount.Int64() * (ctx.BlockHeight() - contract.Height)).Sub(contract.Paid)
+		debt = contract.Rate.Amount.MulRaw(ctx.BlockHeight() - contract.Height).Sub(contract.Paid)
 	case types.ContractType_PAY_AS_YOU_GO:
-		debt = cosmos.NewInt(contract.Rate.Amount.Int64() * contract.Nonce).Sub(contract.Paid)
+		debt = contract.Rate.Amount.MulRaw(contract.Nonce).Sub(contract.Paid)
 	default:
 		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
 	}
