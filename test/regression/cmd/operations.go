@@ -187,10 +187,17 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if len(input) == 0 {
 		return "", false, nil
 	}
+
 	// validate inputs
 	if len(input["id"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: id")
 	}
+
+	if _, ok := input["nosig"]; ok {
+		// no signature requested
+		return input["id"], true, nil
+	}
+
 	if len(input["nonce"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: nonce")
 	}

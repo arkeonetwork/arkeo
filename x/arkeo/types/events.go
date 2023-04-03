@@ -27,6 +27,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract 
 		OpenCost:           openCost,
 		Deposit:            contract.Deposit,
 		SettlementDuration: contract.SettlementDuration,
+		Authorization:      contract.Authorization,
 	}
 }
 

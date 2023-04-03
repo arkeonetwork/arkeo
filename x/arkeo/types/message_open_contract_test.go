@@ -34,4 +34,9 @@ func TestBondProviderValidateBasic(t *testing.T) {
 	msg.Rate, _ = cosmos.ParseCoin("100uarkeo")
 	err = msg.ValidateBasic()
 	require.NoError(t, err)
+
+	msg.Authorization = ContractAuthorization_OPEN
+	msg.ContractType = ContractType_PAY_AS_YOU_GO
+	err = msg.ValidateBasic()
+	require.ErrorIs(t, err, ErrInvalidAuthorization)
 }

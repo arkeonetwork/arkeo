@@ -52,20 +52,26 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 	var err error
 
 	parts := strings.SplitN(raw, ":", 3)
-	if len(parts) != 3 {
-		return aa, fmt.Errorf("not properly formatted ark-auth string: %s", raw)
+
+	if len(parts) > 0 {
+		aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
+		if err != nil {
+			return aa, err
+		}
 	}
-	aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
-	if err != nil {
-		return aa, err
+
+	if len(parts) > 1 {
+		aa.Nonce, err = strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return aa, err
+		}
 	}
-	aa.Nonce, err = strconv.ParseInt(parts[1], 10, 64)
-	if err != nil {
-		return aa, err
-	}
-	aa.Signature, err = hex.DecodeString(parts[2])
-	if err != nil {
-		return aa, err
+
+	if len(parts) > 2 {
+		aa.Signature, err = hex.DecodeString(parts[2])
+		if err != nil {
+			return aa, err
+		}
 	}
 	return aa, nil
 }
@@ -90,7 +96,8 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			aa, err = parseArkAuth(raw[0])
 		}
 		remoteAddr := p.getRemoteAddr(r)
-		if err == nil && aa.Validate(p.Config.ProviderPubKey) == nil {
+		contract, _ := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
+		if err == nil && (contract.Authorization == types.ContractAuthorization_OPEN || aa.Validate(p.Config.ProviderPubKey) == nil) {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
 			w.Header().Set("tier", "paid")
 			httpCode, err := p.paidTier(aa, remoteAddr)

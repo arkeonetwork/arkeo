@@ -60,6 +60,7 @@ message EventOpenContract {
     (gogoproto.nullable) = false
   ];
   int64 settlement_duration = 12;
+  ContractAuthorization authorization = 13;
 }
 
 message EventSettleContract {

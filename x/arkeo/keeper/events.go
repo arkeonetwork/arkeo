@@ -62,6 +62,7 @@ func (k msgServer) EmitOpenContractEvent(ctx cosmos.Context, openCost int64, con
 			OpenCost:           openCost,
 			Deposit:            contract.Deposit,
 			SettlementDuration: contract.SettlementDuration,
+			Authorization:      contract.Authorization,
 		},
 	)
 }

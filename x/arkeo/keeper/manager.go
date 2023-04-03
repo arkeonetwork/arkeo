@@ -72,7 +72,6 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 
 // test that the contract module has enough bond in it
 func (mgr Manager) invariantContractModule(ctx cosmos.Context) error {
-
 	sums := cosmos.NewCoins()
 	iter := mgr.keeper.GetContractIterator(ctx)
 	defer iter.Close()

@@ -25,6 +25,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"duration", msg.Duration,
 		"rate", msg.Rate,
 		"settlement duration", msg.SettlementDuration,
+		"authorization", msg.Authorization,
 	)
 
 	// CacheContext implies NewEventManager
@@ -145,6 +146,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		Paid:               cosmos.ZeroInt(),
 		Height:             ctx.BlockHeight(),
 		SettlementDuration: msg.SettlementDuration,
+		Authorization:      msg.Authorization,
 	}
 
 	// create expiration set

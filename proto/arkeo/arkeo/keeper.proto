@@ -38,6 +38,11 @@ enum ContractType {
   PAY_AS_YOU_GO = 1;
 }
 
+enum ContractAuthorization {
+  STRICT = 0;
+  OPEN = 1;
+}
+
 message Contract {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -65,6 +70,7 @@ message Contract {
   int64 settlement_height = 12;
   uint64 id = 13;
   int64 settlement_duration = 14;
+  ContractAuthorization authorization = 15;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
