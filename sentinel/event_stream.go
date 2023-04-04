@@ -5,33 +5,19 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/gogo/protobuf/proto"
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	arkeoTypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
-
-// TODO: if there are multiple of the same type of event, this may be
-// problematic, multiple events may get purged into one (not sure)
-func convertEvent(etype string, raw map[string][]string) map[string]string {
-	newEvt := make(map[string]string, 0)
-
-	for k, v := range raw {
-		if strings.HasPrefix(k, etype+".") {
-			parts := strings.SplitN(k, ".", 2)
-			newEvt[parts[1]] = v[0]
-		}
-	}
-
-	return newEvt
-}
 
 func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tmCoreTypes.ResultEvent {
 	out, err := client.Subscribe(context.Background(), "", query)
@@ -84,16 +70,33 @@ func (p Proxy) EventListener(host string) {
 
 // handleContractSettlementEvent
 func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
-	evt, err := parseContractSettlementEvent(convertEvent(arkeoTypes.EventTypeContractSettlement, result.Events))
+	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventSettleContract")
 	if err != nil {
-		p.logger.Error("failed to get contract settlement event", "error", err)
+		p.logger.Error("failed to parse typed event", "error", err)
 		return
 	}
-	if !p.isMyPubKey(evt.Contract.Provider) {
+
+	evt, ok := typedEvent.(*types.EventSettleContract)
+	if !ok {
+		p.logger.Error(fmt.Sprintf("failed to cast %T to EventSettleContract", typedEvent))
 		return
 	}
-	spender := evt.Contract.GetSpender()
-	newClaim := NewClaim(evt.Contract.Id, spender, evt.Contract.Nonce, "")
+
+	if !p.isMyPubKey(evt.Provider) {
+		return
+	}
+
+	service := common.Service(common.ServiceLookup[evt.Service])
+	contract := types.Contract{
+		Provider: evt.Provider,
+		Service:  service,
+		Client:   evt.Client,
+		Delegate: evt.Delegate,
+		Id:       evt.ContractId,
+	}
+
+	spender := contract.GetSpender()
+	newClaim := NewClaim(contract.Id, spender, evt.Nonce, "")
 	currClaim, err := p.ClaimStore.Get(newClaim.Key())
 	if err != nil {
 		p.logger.Error("failed to get claim", "error", err)
@@ -109,31 +112,68 @@ func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
 
 // handleCloseContractEvent
 func (p Proxy) handleCloseContractEvent(result tmCoreTypes.ResultEvent) {
-	evt, err := parseCloseContract(convertEvent(arkeoTypes.EventTypeCloseContract, result.Events))
+	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventCloseContract")
 	if err != nil {
-		p.logger.Error("failed to get close contract event", "error", err)
+		p.logger.Error("failed to parse typed event", "error", err)
 		return
 	}
-	if !p.isMyPubKey(evt.Contract.Provider) {
+
+	evt, ok := typedEvent.(*types.EventCloseContract)
+	if !ok {
+		p.logger.Error(fmt.Sprintf("failed to cast %T to EventCloseContract", typedEvent))
 		return
 	}
-	p.MemStore.Put(evt.Contract)
+
+	service := common.Service(common.ServiceLookup[evt.Service])
+	contract := types.Contract{
+		Provider: evt.Provider,
+		Service:  service,
+		Client:   evt.Client,
+		Delegate: evt.Delegate,
+		Id:       evt.ContractId,
+	}
+	if !p.isMyPubKey(contract.Provider) {
+		return
+	}
+	p.MemStore.Put(contract)
 }
 
 func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
-	evt, err := parseOpenContract(convertEvent(arkeoTypes.EventTypeOpenContract, result.Events))
+	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventOpenContract")
 	if err != nil {
-		p.logger.Error("failed to get open contract event", "error", err)
+		p.logger.Error("failed to parse typed event", "error", err)
 		return
 	}
-	if !p.isMyPubKey(evt.Contract.Provider) {
+
+	evt, ok := typedEvent.(*types.EventOpenContract)
+	if !ok {
+		p.logger.Error(fmt.Sprintf("failed to cast %T to EventOpenContract", typedEvent))
 		return
 	}
-	if evt.Contract.Deposit.IsZero() {
+
+	service := common.Service(common.ServiceLookup[evt.Service])
+	contract := types.Contract{
+		Provider:           evt.Provider,
+		Service:            service,
+		Client:             evt.Client,
+		Delegate:           evt.Delegate,
+		Type:               evt.Type,
+		Height:             evt.Height,
+		Duration:           evt.Duration,
+		Rate:               evt.Rate,
+		Deposit:            evt.Deposit,
+		Id:                 evt.ContractId,
+		SettlementDuration: evt.SettlementDuration,
+	}
+
+	if !p.isMyPubKey(evt.Provider) {
+		return
+	}
+	if evt.Deposit.IsZero() {
 		p.logger.Error("contract's deposit is zero")
 		return
 	}
-	p.MemStore.Put(evt.Contract)
+	p.MemStore.Put(contract)
 }
 
 func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
@@ -147,7 +187,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 	p.MemStore.SetHeight(height)
 
 	for _, evt := range data.ResultEndBlock.Events {
-		if evt.Type == arkeoTypes.EventTypeContractSettlement {
+		if evt.Type == types.EventTypeContractSettlement {
 			input := make(map[string]string)
 			for _, attr := range evt.Attributes {
 				input[string(attr.Key)] = string(attr.Value)
@@ -179,4 +219,23 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 
 func (p Proxy) isMyPubKey(pk common.PubKey) bool {
 	return pk.Equals(p.Config.ProviderPubKey)
+}
+
+func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (proto.Message, error) {
+	var (
+		msg         proto.Message
+		eventDataTx tmtypes.EventDataTx
+		ok          bool
+	)
+	if eventDataTx, ok = result.Data.(tmtypes.EventDataTx); !ok {
+		return msg, fmt.Errorf("failed cast %T to EventDataTx", result.Data)
+	}
+
+	for _, evt := range eventDataTx.TxResult.Result.Events {
+		if evt.Type == eventType {
+			return sdk.ParseTypedEvent(evt)
+		}
+	}
+
+	return msg, fmt.Errorf("event %s not found", eventType)
 }

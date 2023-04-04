@@ -137,7 +137,9 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
 		}
 
-		mgr.ValidatorPayoutEvent(ctx, acc, validatorReward)
+		if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {
+			ctx.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
+		}
 	}
 
 	return nil
@@ -210,7 +212,10 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 
-	mgr.ContractSettlementEvent(ctx, debt, valIncome, &contract)
+	if err = mgr.EmitContractSettlementEvent(ctx, debt, valIncome, &contract); err != nil {
+		return contract, err
+	}
+
 	return contract, nil
 }
 

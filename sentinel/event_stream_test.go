@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
@@ -13,29 +14,35 @@ import (
 	"github.com/stretchr/testify/require"
 	abciTypes "github.com/tendermint/tendermint/abci/types"
 	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-var testConfig = conf.Configuration{
-	Moniker:                   "Testy McTestface",
-	Website:                   "testing.com",
-	Description:               "the best testnet ever",
-	Location:                  "100,100",
-	Port:                      "3636",
-	ProxyHost:                 "localhost:3637",
-	SourceChain:               "localhost", // this should point to arkeo rpc endpoints, but we can ignore for testing
-	EventStreamHost:           "localhost",
-	ProviderPubKey:            types.GetRandomPubKey(),
-	FreeTierRateLimit:         10,
-	FreeTierRateLimitDuration: time.Second,
-	SubTierRateLimit:          10,
-	SubTierRateLimitDuration:  time.Second,
-	AsGoTierRateLimit:         10,
-	AsGoTierRateLimitDuration: time.Second,
-	ClaimStoreLocation:        "",
-	GaiaRpcArchiveHost:        "gaia-host",
+func newTestConfig() conf.Configuration {
+	c := cosmos.GetConfig()
+	c.SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
+	return conf.Configuration{
+		Moniker:                   "Testy McTestface",
+		Website:                   "testing.com",
+		Description:               "the best testnet ever",
+		Location:                  "100,100",
+		Port:                      "3636",
+		ProxyHost:                 "localhost:3637",
+		SourceChain:               "http://localhost:1317", // this should point to arkeo rpc endpoints, but we can ignore for testing
+		EventStreamHost:           "localhost",
+		ProviderPubKey:            types.GetRandomPubKey(),
+		FreeTierRateLimit:         10,
+		FreeTierRateLimitDuration: time.Second,
+		SubTierRateLimit:          10,
+		SubTierRateLimitDuration:  time.Second,
+		AsGoTierRateLimit:         10,
+		AsGoTierRateLimitDuration: time.Second,
+		ClaimStoreLocation:        "",
+		GaiaRpcArchiveHost:        "gaia-host",
+	}
 }
 
 func TestHandleOpenContractEvent(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -52,10 +59,13 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore has the contract and its active
 	outputContract, err := proxy.MemStore.Get(inputContract.Key())
@@ -67,10 +77,14 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	// confirm that a contract for a different provider doesn't get stored.
 	inputContract.Provider = types.GetRandomPubKey()
 	inputContract.Id = 2
-	events = sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent.Provider = inputContract.Provider
+	openEvent.ContractId = inputContract.Id
+
+	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 	_, err = proxy.MemStore.Get(inputContract.Key())
 	require.Error(t, err)
 
@@ -83,10 +97,15 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	inputContract.Provider = testConfig.ProviderPubKey
 	inputContract.Id = 3
 	inputContract.Height = 200
-	events = sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent.Provider = inputContract.Provider
+	openEvent.ContractId = inputContract.Id
+	openEvent.Height = inputContract.Height
+
+	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	outputContract, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
 	require.NoError(t, err)
@@ -94,6 +113,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 }
 
 func TestHandleCloseContractEvent(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -110,10 +130,12 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore
 	outputContract, err := proxy.MemStore.Get(inputContract.Key())
@@ -123,15 +145,25 @@ func TestHandleCloseContractEvent(t *testing.T) {
 	// confirm that we can close the contract
 	proxy.MemStore.SetHeight(200)
 	inputContract.SettlementHeight = 200
-	closeEvents := sdk.Events{
-		types.NewCloseContractEvent(&inputContract),
+	closeEvent := types.EventCloseContract{
+		ContractId: inputContract.Id,
+		Provider:   inputContract.Provider,
+		Service:    inputContract.Service.String(),
+		Client:     inputContract.Client,
+		Delegate:   inputContract.Delegate,
 	}
-	proxy.handleCloseContractEvent(convertEventsToResultEvent(closeEvents))
+
+	sdkEvt, err = sdk.TypedEventToEvent(&closeEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, inputContract.SettlementHeight)
+	proxy.handleCloseContractEvent(resultEvent)
 	_, err = proxy.MemStore.Get(inputContract.Key()) // contract should be deleted from store since its closed
 	require.Error(t, err)
 }
 
 func TestHandleHandleContractSettlementEvent(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -148,10 +180,11 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore has the contract.
 	outputContract, err := proxy.MemStore.Get(inputContract.Key())
@@ -176,10 +209,12 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	// confirm is a settlement event is emitted with a lower nonce, we handle it correctly, by not setting our claim to Claimed.
 	inputContract.Nonce = 8
 	proxy.MemStore.SetHeight(150)
-	settlementEvents := sdk.Events{
-		types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract),
-	}
-	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
+	settlementEvent := types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract)
+	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, 151)
+	proxy.handleContractSettlementEvent(resultEvent)
 
 	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
 	require.NoError(t, err)
@@ -190,10 +225,12 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	// confirm is a settlement event is emitted with the samce nonce, we handle it correctly, by setting our claim to Claimed.
 	inputContract.Nonce = 10
 	proxy.MemStore.SetHeight(160)
-	settlementEvents = sdk.Events{
-		types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract),
-	}
-	proxy.handleContractSettlementEvent(convertEventsToResultEvent(settlementEvents))
+	settlementEvent = types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract)
+	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, 161)
+	proxy.handleContractSettlementEvent(resultEvent)
 	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
 	require.NoError(t, err)
 	require.Equal(t, claim.ContractId, inputContract.Id)
@@ -205,26 +242,30 @@ func TestHandleNewBlockHeaderEvent(t *testing.T) {
 	// TODO: add tests
 }
 
-func convertEventsToResultEvent(events sdk.Events) tmCoreTypes.ResultEvent {
-	return tmCoreTypes.ResultEvent{
-		Events: stringifyEvents(events.ToABCIEvents()),
+func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
+	evts := make(map[string][]string, len(sdkEvent.Attributes))
+	for _, attr := range sdkEvent.Attributes {
+		evts[string(attr.Key)] = []string{string(attr.Value)}
 	}
-}
 
-// stringifyEvents - adapated from the tendermint codebase
-func stringifyEvents(events []abciTypes.Event) map[string][]string {
-	result := make(map[string][]string)
-	for _, event := range events {
-		if len(event.Type) == 0 {
-			continue
-		}
-		for _, attr := range event.Attributes {
-			if len(attr.Key) == 0 {
-				continue
-			}
-			compositeTag := fmt.Sprintf("%s.%s", event.Type, string(attr.Key))
-			result[compositeTag] = append(result[compositeTag], string(attr.Value))
-		}
+	abciEvents := []abciTypes.Event{{
+		Type:       sdkEvent.Type,
+		Attributes: sdkEvent.Attributes,
+	}}
+
+	query := fmt.Sprintf("tm.event = 'Tx' AND message.action='/%s'", sdkEvent.Type)
+	return tmCoreTypes.ResultEvent{
+		Query:  query,
+		Events: evts,
+		Data: tmtypes.EventDataTx{
+			TxResult: abciTypes.TxResult{
+				Height: height,
+				Index:  0,
+				Tx:     []byte{},
+				Result: abciTypes.ResponseDeliverTx{
+					Events: abciEvents,
+				},
+			},
+		},
 	}
-	return result
 }

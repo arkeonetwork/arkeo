@@ -104,6 +104,5 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	k.CloseContractEvent(ctx, &contract)
-	return nil
+	return k.EmitCloseContractEvent(ctx, &contract)
 }
