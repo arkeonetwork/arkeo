@@ -40,12 +40,12 @@ message EventModProvider {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlementDuration = 12;
+  int64 settlement_duration = 12;
 }
 
 message EventOpenContract {
   string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  uint64 contractId = 2;
+  uint64 contract_id = 2;
   string service = 3;
   string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -53,18 +53,18 @@ message EventOpenContract {
   int64 height = 7;
   int64 duration = 8;
   cosmos.base.v1beta1.Coin rate = 9[ (gogoproto.nullable) = false ];
-  int64 openCost = 10;
+  int64 open_cost = 10;
   string deposit = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlementDuration = 12;
+  int64 settlement_duration = 12;
 }
 
 message EventSettleContract {
   string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  uint64 contractId = 2;
+  uint64 contract_id = 2;
   string service = 3;
   string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -84,7 +84,7 @@ message EventSettleContract {
 }
 
 message EventCloseContract {
-  uint64 contractId = 1;
+  uint64 contract_id = 1;
   string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
   string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
