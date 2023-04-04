@@ -221,11 +221,14 @@ func (p Proxy) isMyPubKey(pk common.PubKey) bool {
 	return pk.Equals(p.Config.ProviderPubKey)
 }
 
-func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (typedEvent proto.Message, err error) {
-	eventDataTx, ok := result.Data.(tmtypes.EventDataTx)
-	if !ok {
-		err = fmt.Errorf("failed cast %T to EventDataTx", result.Data)
-		return
+func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (proto.Message, error) {
+	var (
+		msg         proto.Message
+		eventDataTx tmtypes.EventDataTx
+		ok          bool
+	)
+	if eventDataTx, ok = result.Data.(tmtypes.EventDataTx); !ok {
+		return msg, fmt.Errorf("failed cast %T to EventDataTx", result.Data)
 	}
 
 	for _, evt := range eventDataTx.TxResult.Result.Events {
@@ -234,5 +237,5 @@ func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (typedEve
 		}
 	}
 
-	return
+	return msg, fmt.Errorf("event %s not found", eventType)
 }
