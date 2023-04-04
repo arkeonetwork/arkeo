@@ -27,6 +27,7 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 		"settlement duration", msg.SettlementDuration,
 	)
 
+	// CacheContext implies NewEventManager
 	cacheCtx, commit := ctx.CacheContext()
 	if err := k.OpenContractValidate(cacheCtx, msg); err != nil {
 		ctx.Logger().Error("failed open contract validation", "err", err)
@@ -185,6 +186,5 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
-	k.OpenContractEvent(ctx, openCost, &contract)
-	return nil
+	return k.EmitOpenContractEvent(ctx, openCost, &contract)
 }

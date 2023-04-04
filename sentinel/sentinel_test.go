@@ -15,6 +15,7 @@ import (
 )
 
 func TestHandleActiveContract(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -31,10 +32,12 @@ func TestHandleActiveContract(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	url := fmt.Sprintf("%s%s/%s/%s", RoutesActiveContract, inputContract.GetSpender(), testConfig.ProviderPubKey, inputContract.Service)
 
@@ -61,6 +64,7 @@ func TestHandleActiveContract(t *testing.T) {
 }
 
 func TestHandleClaim(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -77,10 +81,12 @@ func TestHandleClaim(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	// simulate 10 calls being made to sentinel on the contract.
 	arkAuth := ArkAuth{
@@ -88,7 +94,7 @@ func TestHandleClaim(t *testing.T) {
 		Spender:    inputContract.Client,
 		Nonce:      10,
 	}
-	_, err := proxy.paidTier(arkAuth, "")
+	_, err = proxy.paidTier(arkAuth, "")
 	require.NoError(t, err)
 
 	// get the expected claim
@@ -124,6 +130,7 @@ func TestHandleClaim(t *testing.T) {
 }
 
 func TestHandleOpenClaims(t *testing.T) {
+	testConfig := newTestConfig()
 	proxy := NewProxy(testConfig)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
@@ -140,10 +147,12 @@ func TestHandleOpenClaims(t *testing.T) {
 		SettlementDuration: 10,
 	}
 	openCost := int64(100)
-	events := sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 
 	// simulate 10 calls being made to sentinel on the contract.
 	arkAuth := ArkAuth{
@@ -151,16 +160,18 @@ func TestHandleOpenClaims(t *testing.T) {
 		Spender:    inputContract.Client,
 		Nonce:      10,
 	}
-	_, err := proxy.paidTier(arkAuth, "")
+	_, err = proxy.paidTier(arkAuth, "")
 	require.NoError(t, err)
 
 	// repeat for a second contract rom a different client
 	inputContract.Client = types.GetRandomPubKey()
 	inputContract.Id = 420
-	events = sdk.Events{
-		types.NewOpenContractEvent(openCost, &inputContract),
-	}
-	proxy.handleOpenContractEvent(convertEventsToResultEvent(events))
+	openEvent = types.NewOpenContractEvent(openCost, &inputContract)
+	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
+	require.NoError(t, err)
+
+	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	proxy.handleOpenContractEvent(resultEvent)
 	arkAuth = ArkAuth{
 		ContractId: inputContract.Id,
 		Spender:    inputContract.Client,
