@@ -149,12 +149,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-bondProviderEvents:
 			log.Debugf("received bond provider event")
-			bondProviderEvent := types.BondProviderEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &bondProviderEvent); err != nil {
-				log.Errorf("error converting bond_provider event: %+v", err)
-				break
-			}
-			if err := a.handleBondProviderEvent(bondProviderEvent); err != nil {
+			if err := a.handleBondProviderEvent(evt); err != nil {
 				log.Errorf("error handling bond_provider event: %+v", err)
 			}
 		case evt := <-modProviderEvents:
@@ -291,9 +286,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleBondProviderEvent(bondProviderEvent); err != nil {
-			log.Errorf("error handling %s event: %+v", event.Type, err)
-		}
+		// TODO
+		// if err = a.handleBondProviderEvent(event); err != nil {
+		// 	log.Errorf("error handling %s event: %+v", event.Type, err)
+		// }
 	case "provider_mod":
 		modProviderEvent := types.ModProviderEvent{}
 		if err = convertEvent(tmAttributeSource(transaction, event, height), &modProviderEvent); err != nil {

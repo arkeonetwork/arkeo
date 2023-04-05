@@ -5,10 +5,13 @@ import (
 	"net/url"
 	"strconv"
 
+	arkeoUtils "github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
+	arkeoTypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/pkg/errors"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
@@ -66,43 +69,58 @@ func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
 	return nil
 }
 
-func (a *IndexerApp) handleBondProviderEvent(evt types.BondProviderEvent) error {
-	provider, err := a.db.FindProvider(evt.Pubkey, evt.Chain)
+func (a *IndexerApp) handleBondProviderEvent(evt ctypes.ResultEvent) error {
+	typedEvent, err := arkeoUtils.ParseTypedEvent(evt, "arkeo.arkeo.EventBondProvider")
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for chain %s", evt.Pubkey, evt.Chain)
+		log.Errorf("failed to parse typed event", "error", err)
+	}
+
+	bondProviderEvent, ok := typedEvent.(*arkeoTypes.EventBondProvider)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventBondProvider", typedEvent)
+	}
+
+	provider, err := a.db.FindProvider(bondProviderEvent.Provider.String(), bondProviderEvent.Service)
+	if err != nil {
+		return errors.Wrapf(err, "error finding provider %s for chain %s", bondProviderEvent.Provider, bondProviderEvent.Service)
 	}
 	if provider == nil {
 		// new provider for chain, insert
-		if provider, err = a.createProvider(evt); err != nil {
-			return errors.Wrapf(err, "error creating provider %s chain %s", evt.Pubkey, evt.Chain)
+		if provider, err = a.createProvider(bondProviderEvent); err != nil {
+			return errors.Wrapf(err, "error creating provider %s chain %s", bondProviderEvent.Provider, bondProviderEvent.Service)
 		}
 	} else {
-		if evt.BondAbsolute != "" {
-			provider.Bond = evt.BondAbsolute
-		}
+		provider.Bond = bondProviderEvent.BondAbs.String()
 		if _, err = a.db.UpdateProvider(provider); err != nil {
-			return errors.Wrapf(err, "error updating provider for bond event %s chain %s", evt.Pubkey, evt.Chain)
+			return errors.Wrapf(err, "error updating provider for bond event %s chain %s", bondProviderEvent.Provider, bondProviderEvent.Service)
 		}
 	}
 
-	log.Debugf("handled bond provider event for %s chain %s", evt.Pubkey, evt.Chain)
-	if _, err = a.db.InsertBondProviderEvent(provider.ID, evt); err != nil {
-		return errors.Wrapf(err, "error inserting BondProviderEvent for %s chain %s", evt.Pubkey, evt.Chain)
+	log.Debugf("handled bond provider event for %s chain %s", bondProviderEvent.Provider.String(), bondProviderEvent.Service)
+	bpe := types.BondProviderEvent{
+		Pubkey: bondProviderEvent.Provider.String(),
+		Chain:  bondProviderEvent.Service,
+		Height: -1,
+		TxID:   "abc",
+	}
+
+	if _, err = a.db.InsertBondProviderEvent(provider.ID, bpe); err != nil {
+		return errors.Wrapf(err, "error inserting BondProviderEvent for %s chain %s", bondProviderEvent.Provider.String(), bondProviderEvent.Service)
 	}
 	return nil
 }
 
-func (a *IndexerApp) createProvider(evt types.BondProviderEvent) (*db.ArkeoProvider, error) {
+func (a *IndexerApp) createProvider(evt *arkeoTypes.EventBondProvider) (*db.ArkeoProvider, error) {
 	// new provider for chain, insert
-	provider := &db.ArkeoProvider{Pubkey: evt.Pubkey, Chain: evt.Chain, Bond: evt.BondAbsolute}
+	provider := &db.ArkeoProvider{Pubkey: evt.Provider.String(), Chain: evt.Service, Bond: evt.BondAbs.String()}
 	entity, err := a.db.InsertProvider(provider)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error inserting provider %s %s", evt.Pubkey, evt.Chain)
+		return nil, errors.Wrapf(err, "error inserting provider %s %s", evt.Provider.String(), evt.Service)
 	}
 	if entity == nil {
 		return nil, fmt.Errorf("nil entity after inserting provider")
 	}
-	log.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Chain)
+	log.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Provider.String(), evt.Service)
 	provider.Entity = *entity
 	return provider, nil
 }

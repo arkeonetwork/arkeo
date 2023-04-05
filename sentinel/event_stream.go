@@ -8,12 +8,11 @@ import (
 	"syscall"
 
 	"github.com/arkeonetwork/arkeo/common"
-	"github.com/gogo/protobuf/proto"
+	"github.com/arkeonetwork/arkeo/common/utils"
 
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -70,7 +69,7 @@ func (p Proxy) EventListener(host string) {
 
 // handleContractSettlementEvent
 func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
-	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventSettleContract")
+	typedEvent, err := utils.ParseTypedEvent(result, "arkeo.arkeo.EventSettleContract")
 	if err != nil {
 		p.logger.Error("failed to parse typed event", "error", err)
 		return
@@ -112,7 +111,7 @@ func (p Proxy) handleContractSettlementEvent(result tmCoreTypes.ResultEvent) {
 
 // handleCloseContractEvent
 func (p Proxy) handleCloseContractEvent(result tmCoreTypes.ResultEvent) {
-	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventCloseContract")
+	typedEvent, err := utils.ParseTypedEvent(result, "arkeo.arkeo.EventCloseContract")
 	if err != nil {
 		p.logger.Error("failed to parse typed event", "error", err)
 		return
@@ -139,7 +138,7 @@ func (p Proxy) handleCloseContractEvent(result tmCoreTypes.ResultEvent) {
 }
 
 func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
-	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventOpenContract")
+	typedEvent, err := utils.ParseTypedEvent(result, "arkeo.arkeo.EventOpenContract")
 	if err != nil {
 		p.logger.Error("failed to parse typed event", "error", err)
 		return
@@ -219,23 +218,4 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 
 func (p Proxy) isMyPubKey(pk common.PubKey) bool {
 	return pk.Equals(p.Config.ProviderPubKey)
-}
-
-func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (proto.Message, error) {
-	var (
-		msg         proto.Message
-		eventDataTx tmtypes.EventDataTx
-		ok          bool
-	)
-	if eventDataTx, ok = result.Data.(tmtypes.EventDataTx); !ok {
-		return msg, fmt.Errorf("failed cast %T to EventDataTx", result.Data)
-	}
-
-	for _, evt := range eventDataTx.TxResult.Result.Events {
-		if evt.Type == eventType {
-			return sdk.ParseTypedEvent(evt)
-		}
-	}
-
-	return msg, fmt.Errorf("event %s not found", eventType)
 }
