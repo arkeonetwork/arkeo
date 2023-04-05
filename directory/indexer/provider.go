@@ -1,9 +1,11 @@
 package indexer
 
 import (
+	"encoding/hex"
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
 	arkeoUtils "github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -12,6 +14,7 @@ import (
 	arkeoTypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/pkg/errors"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
@@ -73,7 +76,16 @@ func (a *IndexerApp) handleBondProviderEvent(evt ctypes.ResultEvent) error {
 	typedEvent, err := arkeoUtils.ParseTypedEvent(evt, "arkeo.arkeo.EventBondProvider")
 	if err != nil {
 		log.Errorf("failed to parse typed event", "error", err)
+		return errors.Wrapf(err, "failed to parse typed event")
 	}
+
+	txData, ok := evt.Data.(tmtypes.EventDataTx)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventDataTx", evt.Data)
+	}
+
+	height := txData.Height
+	txid := strings.ToUpper(hex.EncodeToString(tmtypes.Tx(txData.Tx).Hash()))
 
 	bondProviderEvent, ok := typedEvent.(*arkeoTypes.EventBondProvider)
 	if !ok {
@@ -98,10 +110,12 @@ func (a *IndexerApp) handleBondProviderEvent(evt ctypes.ResultEvent) error {
 
 	log.Debugf("handled bond provider event for %s chain %s", bondProviderEvent.Provider.String(), bondProviderEvent.Service)
 	bpe := types.BondProviderEvent{
-		Pubkey: bondProviderEvent.Provider.String(),
-		Chain:  bondProviderEvent.Service,
-		Height: -1,
-		TxID:   "abc",
+		Pubkey:       bondProviderEvent.Provider.String(),
+		Chain:        bondProviderEvent.Service,
+		Height:       height,
+		TxID:         txid,
+		BondRelative: bondProviderEvent.BondRel.String(),
+		BondAbsolute: bondProviderEvent.BondAbs.String(),
 	}
 
 	if _, err = a.db.InsertBondProviderEvent(provider.ID, bpe); err != nil {

@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math/rand"
-	"time"
 
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -50,11 +50,10 @@ var (
 	}
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func main() {
+	cosmosConfig := cosmos.GetConfig()
+	cosmosConfig.SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
+
 	log.Info("starting indexer")
 	flag.Parse()
 	c := &Config{}

@@ -22,6 +22,6 @@ select (select count(1) from contracts)                                 as total
        (SELECT percentile_cont(0.5) within group (order by rate)
         from contracts c
         where c.closed_height = 0)                                      as median_open_contract_rate,
-       (select count(1) from providers where status = 'Online')         as total_online_providers,
+       (select count(1) from providers where status = 'ONLINE')         as total_online_providers,
        (select coalesce(sum(nonce), 0) from contract_settlement_events) as total_queries, -- nonce here is serviced request count
        (select coalesce(sum(paid), 0) from contract_settlement_events)  as total_paid );

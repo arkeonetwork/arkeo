@@ -67,8 +67,8 @@ type ValidatorPayoutEvent struct {
 type ProviderStatus string
 
 var (
-	ProviderStatusOnline  ProviderStatus = "Online"
-	ProviderStatusOffline ProviderStatus = "Offline"
+	ProviderStatusOnline  ProviderStatus = "ONLINE"
+	ProviderStatusOffline ProviderStatus = "OFFLINE"
 )
 
 type ModProviderEvent struct {

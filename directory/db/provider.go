@@ -88,7 +88,7 @@ const provSearchCols = `
 	p.created,
 	p.pubkey,
 	p.chain, 
-	coalesce(p.status,'Offline') as status,
+	coalesce(p.status,'OFFLINE') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
 	coalesce(p.subscription_rate,0) as subscription_rate,

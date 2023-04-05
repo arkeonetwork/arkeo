@@ -29,7 +29,7 @@ var (
 			coalesce(bond,0) as bond,
 			coalesce(metadata_uri,'') as metadata_uri,
 			coalesce(metadata_nonce,0) as metadata_nonce,
-			coalesce(status,'Offline') as status,
+			coalesce(status,'OFFLINE') as status,
 			coalesce(min_contract_duration,-1) as min_contract_duration,
 			coalesce(max_contract_duration,-1) as max_contract_duration,
 			coalesce(subscription_rate,-1) as subscription_rate,
