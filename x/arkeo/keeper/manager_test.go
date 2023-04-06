@@ -75,8 +75,13 @@ func TestValidatorPayout(t *testing.T) {
 	sk.SetDelegation(ctx, del2)
 	sk.SetDelegation(ctx, del3)
 
+	// mint token1
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(50000))))
 	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ReserveName, getCoins(common.Tokens(50000))))
+	// mint token2
+	coins := cosmos.NewCoins(cosmos.NewInt64Coin("tokkie", 50000*1e8))
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, coins[0]))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ReserveName, coins))
 
 	mgr := NewManager(k, sk)
 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
@@ -90,27 +95,33 @@ func TestValidatorPayout(t *testing.T) {
 	bal := k.GetBalance(ctx, acc1)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(27984))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(27984))
 
 	bal = k.GetBalance(ctx, acc2)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(55962))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(55962))
 
 	bal = k.GetBalance(ctx, acc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(139878))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(139878))
 
 	// check delegate balances
 	bal = k.GetBalance(ctx, delAcc1)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(2795))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(2795))
 
 	bal = k.GetBalance(ctx, delAcc2)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(5589))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(5589))
 
 	bal = k.GetBalance(ctx, delAcc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(5584))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(5584))
 
 	// ensure block reward is equal to total rewarded to validators and delegates
 	require.Equal(t, blockReward, totalBal.Int64())
