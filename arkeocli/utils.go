@@ -27,7 +27,7 @@ func promptForArg(cmd *cobra.Command, prompt string) (string, error) {
 	return read, nil
 }
 
-func toPubkey(cmd *cobra.Command, addr cosmos.AccAddress) (pubkey string, err error) {
+func toPubKey(cmd *cobra.Command, addr cosmos.AccAddress) (pubkey string, err error) {
 	clientCtx, err := client.GetClientTxContext(cmd)
 	if err != nil {
 		return

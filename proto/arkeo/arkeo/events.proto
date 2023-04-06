@@ -33,20 +33,20 @@ message EventModProvider {
   ProviderStatus status = 6;
   int64 minContractDuration = 7;
   int64 maxContractDuration = 8;
-  repeated cosmos.base.v1beta1.Coin subscriptionRate = 9 [ (gogoproto.nullable) = false ];
-  repeated cosmos.base.v1beta1.Coin payAsYouGoRate = 10 [ (gogoproto.nullable) = false ];
-  string bond = 11 [
+  repeated ContractRate rates = 9;
+  string bond = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlement_duration = 12;
+  int64 settlement_duration = 11;
 }
 
 message EventOpenContract {
   bytes provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   uint64 contract_id = 2;
   string service = 3;
+<<<<<<< HEAD
   bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType type = 6;
@@ -55,28 +55,50 @@ message EventOpenContract {
   cosmos.base.v1beta1.Coin rate = 9[ (gogoproto.nullable) = false ];
   int64 open_cost = 10;
   string deposit = 11 [
+=======
+  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  UserType user_type = 6;
+  MeterType meter_type = 7;
+  int64 height = 8;
+  int64 duration = 9;
+  cosmos.base.v1beta1.Coin rate = 10 [ (gogoproto.nullable) = false ];
+  int64 open_cost = 11;
+  string deposit = 12 [
+>>>>>>> 3cb15d0 (adds missing proto fields to events)
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlement_duration = 12;
+  int64 settlement_duration = 13;
+  Restrictions restrictions = 14;
 }
 
 message EventSettleContract {
   bytes provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   uint64 contract_id = 2;
   string service = 3;
+<<<<<<< HEAD
   bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType type = 6;
   int64 nonce = 7;
   int64 height = 8;
   string paid = 9 [
+=======
+  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  UserType user_type = 6;
+  MeterType meter_type = 7;
+  int64 nonce = 8;
+  int64 height = 9;
+  string paid = 10 [
+>>>>>>> 3cb15d0 (adds missing proto fields to events)
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  string reserve = 10 [
+  string reserve = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false

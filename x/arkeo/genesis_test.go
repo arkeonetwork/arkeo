@@ -43,8 +43,19 @@ func TestGenesisWithContracts(t *testing.T) {
 	provider := types.NewProvider(providerPubkey, common.BTCService)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.LastUpdate = 100
-	provider.SubscriptionRate, _ = cosmos.ParseCoins("100uarkeo")
-	provider.PayAsYouGoRate, _ = cosmos.ParseCoins("100uarkeo")
+	coinRates, _ := cosmos.ParseCoins("100uarkeo")
+	provider.Rates = []*types.ContractRate{
+		{
+			MeterType: types.MeterType_PAY_PER_BLOCK,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+		{
+			MeterType: types.MeterType_PAY_PER_CALL,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+	}
 	err := k.SetProvider(ctx, provider)
 	require.NoError(t, err)
 

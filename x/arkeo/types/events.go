@@ -20,13 +20,15 @@ func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract 
 		Service:            contract.Service.String(),
 		Client:             contract.Client,
 		Delegate:           contract.Delegate,
-		Type:               contract.Type,
+		UserType:           contract.UserType,
+		MeterType:          contract.MeterType,
 		Height:             contract.Height,
 		Duration:           contract.Duration,
 		Rate:               contract.Rate,
 		OpenCost:           openCost,
 		Deposit:            contract.Deposit,
 		SettlementDuration: contract.SettlementDuration,
+		Restrictions:       contract.Restrictions,
 	}
 }
 
@@ -37,7 +39,8 @@ func NewContractSettlementEvent(debt, valIncome cosmos.Int, contract *Contract) 
 		Service:    contract.Service.String(),
 		Client:     contract.Client,
 		Delegate:   contract.Delegate,
-		Type:       contract.Type,
+		UserType:   contract.UserType,
+		MeterType:  contract.MeterType,
 		Nonce:      contract.Nonce,
 		Height:     contract.Height,
 		Paid:       debt,

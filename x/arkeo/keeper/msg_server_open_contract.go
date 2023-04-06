@@ -17,11 +17,13 @@ func (k msgServer) OpenContract(goCtx context.Context, msg *types.MsgOpenContrac
 
 	ctx.Logger().Info(
 		"receive MsgOpenContract",
-		"provder", msg.Provider,
+		"provider", msg.Provider,
 		"service", msg.Service,
 		"client", msg.Client,
 		"delegate", msg.Delegate,
-		"contract type", msg.ContractType,
+		"meter type", msg.MeterType,
+		"user type", msg.UserType,
+		"restrictions", msg.Restrictions,
 		"duration", msg.Duration,
 		"rate", msg.Rate,
 		"settlement duration", msg.SettlementDuration,
@@ -78,29 +80,34 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrOpenContractDuration, "duration below allowed minimum duration from provider")
 	}
 
-	switch msg.ContractType {
-	case types.ContractType_SUBSCRIPTION:
-		if cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).IsZero() {
+	providerRate := types.FindRate(provider.Rates, msg.UserType, msg.MeterType)
+	if providerRate == nil {
+		return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider does not currently support MeterType:%s for UserType:%s", msg.MeterType, msg.UserType)
+	}
+	providerRateCoins := cosmos.NewCoins(providerRate.Rates...)
+	switch msg.MeterType {
+	case types.MeterType_PAY_PER_BLOCK:
+		if providerRateCoins.AmountOf(msg.Rate.Denom).IsZero() {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is 0, client sent %d", msg.Rate.Amount.Int64())
 		}
-		if !msg.Rate.Amount.Equal(cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom)) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).Int64(), msg.Rate.Amount.Int64())
+		if !msg.Rate.Amount.Equal(providerRateCoins.AmountOf(msg.Rate.Denom)) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", providerRateCoins.AmountOf(msg.Rate.Denom).Int64(), msg.Rate.Amount.Int64())
 		}
-		if !cosmos.NewInt(msg.Rate.Amount.Int64() * msg.Duration).Equal(msg.Deposit) {
+		if !msg.Rate.Amount.MulRaw(msg.Duration).Equal(msg.Deposit) {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.Deposit.Int64())
 		}
-	case types.ContractType_PAY_AS_YOU_GO:
-		if cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom).IsZero() {
+	case types.MeterType_PAY_PER_CALL:
+		if providerRateCoins.AmountOf(msg.Rate.Denom).IsZero() {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is 0, client sent %d", msg.Rate.Amount.Int64())
 		}
-		if !msg.Rate.Amount.Equal(cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom)) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-as-you-go provider rate is %d, client sent %d", cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom), msg.Rate.Amount.Int64())
+		if !msg.Rate.Amount.Equal(providerRateCoins.AmountOf(msg.Rate.Denom)) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "pay-per-call provider rate is %d, client sent %d", providerRateCoins.AmountOf(msg.Rate.Denom), msg.Rate.Amount.Int64())
 		}
 		if msg.SettlementDuration != provider.SettlementDuration {
-			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-as-you-go provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
+			return errors.Wrapf(types.ErrOpenContractMismatchSettlementDuration, "pay-per-call provider settlement duration is %d, client sent %d", provider.SettlementDuration, msg.SettlementDuration)
 		}
 	default:
-		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
+		return errors.Wrapf(types.ErrInvalidMeterType, "%s", msg.MeterType.String())
 	}
 
 	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, service)
@@ -136,8 +143,10 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		Provider:           msg.Provider,
 		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
 		Service:            service,
-		Type:               msg.ContractType,
+		UserType:           msg.UserType,
+		MeterType:          msg.MeterType,
 		Client:             msg.Client,
+		Restrictions:       msg.Restrictions,
 		Delegate:           msg.Delegate,
 		Duration:           msg.Duration,
 		Rate:               msg.Rate,
@@ -149,7 +158,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 
 	// create expiration set
 	// these are used by the end blocker to settle contracts. We need to
-	// use the additional settlement period for pay as you go contracts.
+	// use the additional settlement period for pay per call contracts.
 	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
 	if err != nil {
 		return err

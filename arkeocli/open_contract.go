@@ -28,7 +28,8 @@ func newOpenContractCmd() *cobra.Command {
 	openContractCmd.Flags().String("client-pubkey", "", "client pubkey")
 	openContractCmd.Flags().String("delegate-pubkey", "", "delegate pubkey")
 	openContractCmd.Flags().Bool("no-delegate", false, "delegate pubkey")
-	openContractCmd.Flags().String("contract-type", "", "contract type (subscription or pay-as-you-go)")
+	openContractCmd.Flags().String("meter-type", "", "meter type (pay-per-call or pay-per-block)")
+	openContractCmd.Flags().String("user-type", "", "user type (single-user or multi-user)")
 	openContractCmd.Flags().Int64("deposit", 0, "deposit amount")
 	openContractCmd.Flags().Int64("duration", 0, "contract duration")
 	openContractCmd.Flags().Int64("rate", 0, "contract rate")
@@ -73,7 +74,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 
 	argClientPubkey, _ := cmd.Flags().GetString("client-pubkey")
 	if argClientPubkey == "" {
-		argClientPubkey, err = toPubkey(cmd, addr)
+		argClientPubkey, err = toPubKey(cmd, addr)
 		if err != nil {
 			return err
 		}
@@ -91,9 +92,17 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argContractType, _ := cmd.Flags().GetString("contract-type")
-	if argContractType == "" {
-		argContractType, err = promptForArg(cmd, "Specify contract type (subscription or pay-as-you-go): ")
+	argMeterType, _ := cmd.Flags().GetString("meter-type")
+	if argMeterType == "" {
+		argMeterType, err = promptForArg(cmd, "Specify meter type (pay-per-block or pay-per-call): ")
+		if err != nil {
+			return err
+		}
+	}
+
+	argUserType, _ := cmd.Flags().GetString("user-type")
+	if argUserType == "" {
+		argUserType, err = promptForArg(cmd, "Specify user type (single-user or multi-user): ")
 		if err != nil {
 			return err
 		}
@@ -147,15 +156,22 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argContractType = strings.ToUpper(strings.ReplaceAll(argContractType, "-", "_"))
-	if _, ok := types.ContractType_value[argContractType]; !ok {
-		return fmt.Errorf("invalid contract type: %s", argContractType)
+	argMeterType = strings.ToUpper(strings.ReplaceAll(argMeterType, "-", "_"))
+	if _, ok := types.MeterType_value[argMeterType]; !ok {
+		return fmt.Errorf("invalid meter type: %s", argMeterType)
 	}
-	contractType := types.ContractType(types.ContractType_value[argContractType])
+	meterType := types.MeterType(types.MeterType_value[argMeterType])
 	pubkey, err := common.NewPubKey(argProviderPubkey)
 	if err != nil {
 		return err
 	}
+
+	argUserType = strings.ToUpper(strings.ReplaceAll(argUserType, "-", "_"))
+	if _, ok := types.UserType_value[argUserType]; !ok {
+		return fmt.Errorf("invalid user type: %s", argUserType)
+	}
+	userType := types.UserType(types.UserType_value[argUserType])
+
 	deposit := cosmos.NewInt(argDeposit)
 	msg := types.NewMsgOpenContract(
 		clientCtx.GetFromAddress(),
@@ -163,12 +179,15 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		argService,
 		common.PubKey(argClientPubkey),
 		common.PubKey(argDelegatePubkey),
-		contractType,
+		userType,
+		meterType,
 		argDuration,
 		argSettlementDuration,
 		rate,
 		deposit,
+		types.Restrictions{}, // TODO: implement restrictions for CLI
 	)
+
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}

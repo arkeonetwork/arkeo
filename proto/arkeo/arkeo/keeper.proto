@@ -22,20 +22,43 @@ message Provider {
   ProviderStatus status = 5;
   int64 min_contract_duration = 6;
   int64 max_contract_duration = 7;
-  repeated cosmos.base.v1beta1.Coin subscription_rate = 8 [ (gogoproto.nullable) = false ];
-  repeated cosmos.base.v1beta1.Coin pay_as_you_go_rate = 9 [ (gogoproto.nullable) = false ];
-  string bond = 10 [
+  repeated ContractRate rates = 8;
+  string bond = 9 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 last_update = 11;
-  int64 settlement_duration = 12;
+  int64 last_update = 10;
+  int64 settlement_duration = 11;
 }
 
-enum ContractType {
-  SUBSCRIPTION = 0;
-  PAY_AS_YOU_GO = 1;
+enum UserType {
+  SINGLE_USER = 0;
+  MULTI_USER = 1;
+}
+
+enum MeterType {
+  PAY_PER_BLOCK = 0; // previously called a Subscription
+  PAY_PER_CALL = 1;  // previously called Pay as you go 
+}
+
+message ContractRate {
+  MeterType meter_type = 1;
+  UserType user_type = 2;
+  repeated cosmos.base.v1beta1.Coin rates = 3 [ (gogoproto.nullable) = false ];
+}
+
+message CallRateLimit {
+  uint64 number_of_calls = 1;
+  uint64 duration = 2;
+}
+
+message Restrictions {
+  CallRateLimit rate_limit_per_user = 1;
+  CallRateLimit rate_limit_per_contract = 2;
+  CallRateLimit rate_limit_per_ip_address = 3;
+  repeated string allowed_origins = 4;
+  repeated string allowed_ip_addresses = 5;
 }
 
 message Contract {
@@ -47,24 +70,26 @@ message Contract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  ContractType type = 5;
-  int64 height = 6;
-  int64 duration = 7;
-  cosmos.base.v1beta1.Coin rate = 8 [ (gogoproto.nullable) = false ];
-  string deposit = 9 [
+  UserType user_type = 5;
+  MeterType meter_type = 6;
+  int64 height = 7;
+  int64 duration = 8;
+  cosmos.base.v1beta1.Coin rate = 9 [ (gogoproto.nullable) = false ];
+  string deposit = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  string paid = 10 [
+  string paid = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 nonce = 11;
-  int64 settlement_height = 12;
-  uint64 id = 13;
-  int64 settlement_duration = 14;
+  int64 nonce = 12;
+  int64 settlement_height = 13;
+  uint64 id = 14;
+  int64 settlement_duration = 15;
+  Restrictions restrictions = 16;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }

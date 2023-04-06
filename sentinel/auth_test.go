@@ -105,13 +105,13 @@ func TestPaidTier(t *testing.T) {
 	require.NoError(t, err)
 
 	config := conf.Configuration{
-		ProviderPubKey:            pubkey,
-		AsGoTierRateLimitDuration: time.Minute,
-		AsGoTierRateLimit:         1,
-		SubTierRateLimitDuration:  time.Minute,
-		SubTierRateLimit:          1,
-		FreeTierRateLimitDuration: time.Minute,
-		FreeTierRateLimit:         1,
+		ProviderPubKey:                   pubkey,
+		PayPerCallRateLimitDuration:      time.Minute,
+		PayPerCallTierRateLimit:          1,
+		PayPerBlockTierRateLimitDuration: time.Minute,
+		PayPerBlockTierRateLimit:         1,
+		FreeTierRateLimitDuration:        time.Minute,
+		FreeTierRateLimit:                1,
 	}
 	proxy := NewProxy(config)
 
@@ -178,13 +178,13 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 	require.NoError(t, err)
 
 	config := conf.Configuration{
-		ProviderPubKey:            pubkey,
-		AsGoTierRateLimitDuration: time.Minute,
-		AsGoTierRateLimit:         1,
-		SubTierRateLimitDuration:  time.Minute,
-		SubTierRateLimit:          1,
-		FreeTierRateLimitDuration: time.Minute,
-		FreeTierRateLimit:         1,
+		ProviderPubKey:                   pubkey,
+		PayPerCallRateLimitDuration:      time.Minute,
+		PayPerCallTierRateLimit:          1,
+		PayPerBlockTierRateLimitDuration: time.Minute,
+		PayPerBlockTierRateLimit:         1,
+		FreeTierRateLimitDuration:        time.Minute,
+		FreeTierRateLimit:                1,
 	}
 	proxy := NewProxy(config)
 

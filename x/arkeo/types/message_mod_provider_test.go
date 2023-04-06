@@ -14,8 +14,31 @@ func TestModProviderValidateBasic(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
+<<<<<<< HEAD
 	rates, err := cosmos.ParseCoins("15uarkeo")
+=======
+	// invalid address
+	msg := MsgModProvider{
+		Creator: "invalid address",
+	}
+	err = msg.ValidateBasic()
+	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
+
+	coinRates, err := cosmos.ParseCoins("15uarkeo")
+>>>>>>> 3951377 (WIP with refactor)
 	require.NoError(t, err)
+	rates := []*ContractRate{
+		{
+			MeterType: MeterType_PAY_PER_BLOCK,
+			UserType:  UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+		{
+			MeterType: MeterType_PAY_PER_CALL,
+			UserType:  UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+	}
 
 	// happy path
 	msg := MsgModProvider{
@@ -25,8 +48,7 @@ func TestModProviderValidateBasic(t *testing.T) {
 		MinContractDuration: 12,
 		MaxContractDuration: 30,
 		MetadataUri:         "http://mad.hatter.net/test?foo=baz",
-		SubscriptionRate:    rates,
-		PayAsYouGoRate:      rates,
+		Rates:               rates,
 	}
 	err = msg.ValidateBasic()
 	require.NoError(t, err)

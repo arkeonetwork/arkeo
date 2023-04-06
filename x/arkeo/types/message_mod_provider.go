@@ -7,7 +7,6 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	types "github.com/cosmos/cosmos-sdk/types"
 )
 
 const TypeMsgModProvider = "mod_provider"
@@ -16,7 +15,7 @@ var _ sdk.Msg = &MsgModProvider{}
 
 func NewMsgModProvider(creator cosmos.AccAddress, provider common.PubKey, service, metadataUri string,
 	metadataNonce uint64, status ProviderStatus, minContractDuration,
-	maxContractDuration int64, subscriptionRate, payAsYouGoRate types.Coins, settlementDuration int64,
+	maxContractDuration int64, rates []*ContractRate, settlementDuration int64,
 ) *MsgModProvider {
 	return &MsgModProvider{
 		Creator:             creator,
@@ -27,8 +26,7 @@ func NewMsgModProvider(creator cosmos.AccAddress, provider common.PubKey, servic
 		Status:              status,
 		MinContractDuration: minContractDuration,
 		MaxContractDuration: maxContractDuration,
-		SubscriptionRate:    subscriptionRate,
-		PayAsYouGoRate:      payAsYouGoRate,
+		Rates:               rates,
 		SettlementDuration:  settlementDuration,
 	}
 }
@@ -76,13 +74,6 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	// test metadataURI
-	/*
-		Disabling URI parsing check due to a potential that the underlying golang code may change its behavior between golang versions. We can assume data providers are giving valid URIs, because if they aren't, they won't be able to make income
-		if _, err := url.ParseRequestURI(msg.MetadataURI); err != nil {
-			return errors.Wrapf(ErrInvalidModProviderMetdataURI, "(%s)", err)
-		}
-	*/
 	// Ensure URIs don't get too long and cause chain bloat
 	if len(msg.MetadataUri) > 100 {
 		return errors.Wrapf(ErrInvalidModProviderMetdataURI, "length is too long (%d/100)", len(msg.MetadataUri))
@@ -101,22 +92,26 @@ func (msg *MsgModProvider) ValidateBasic() error {
 		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
 	}
 
-	subRate := cosmos.NewCoins(msg.SubscriptionRate...)
-	if err := subRate.Validate(); err != nil {
-		return errors.Wrapf(err, "invalid subscription rate")
-	}
+	// confirm no duplicated rates and valid rate
+	for i, rate := range msg.Rates {
+		rateCoins := cosmos.NewCoins(rate.Rates...)
+		if err := rateCoins.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid rate")
+		}
 
-	if !subRate.IsAllPositive() {
-		return errors.Wrapf(ErrInvalidModProviderRate, "all subscription rates must be positive")
-	}
+		if !rateCoins.IsAllPositive() {
+			return errors.Wrapf(ErrInvalidModProviderRate, "rate cannot be equal to or less than zero")
+		}
 
-	payRate := cosmos.NewCoins(msg.PayAsYouGoRate...)
-	if err := payRate.Validate(); err != nil {
-		return errors.Wrapf(err, "invalid subscription rate")
-	}
+		for ii, rateMatch := range msg.Rates {
+			if i == ii {
+				continue
+			}
 
-	if !payRate.IsAllPositive() {
-		return errors.Wrapf(ErrInvalidModProviderRate, "all pay-as-you-go rates must be positive")
+			if rateMatch.MeterType == rate.MeterType && rateMatch.UserType == rate.UserType {
+				return errors.Wrapf(ErrInvalidModProviderDuplicateContractRates, "duplicated rate for meter type %s with user type %s", rate.MeterType, rate.UserType)
+			}
+		}
 	}
 
 	return nil

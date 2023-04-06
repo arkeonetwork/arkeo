@@ -10,11 +10,16 @@ genesis:
           status: 1
           min_contract_duration: 3
           max_contract_duration: 10
-          subscription_rate:
-            - denom: "uarkeo"
-              amount: "10"
-          pay_as_you_go_rate:
-            - denom: "uarkeo"
-              amount: "3"
           bond: "1000000000000"
           last_update: 1
+          rates:
+            - meter_type: "PAY_PER_BLOCK"
+              user_type: 0
+              rates: 
+               - denom: "uarkeo"
+                 amount: "10"
+            -  meter_type: "PAY_PER_CALL"
+               user_type: 0
+               rates: 
+               - denom: "uarkeo"
+                 amount: "3"

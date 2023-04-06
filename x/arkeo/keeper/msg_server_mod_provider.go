@@ -17,15 +17,14 @@ func (k msgServer) ModProvider(goCtx context.Context, msg *types.MsgModProvider)
 
 	ctx.Logger().Info(
 		"receive MsgModProvider",
-		"proivder", msg.Provider,
+		"provider", msg.Provider,
 		"service", msg.Service,
-		"metatadata uri", msg.MetadataUri,
+		"metadata uri", msg.MetadataUri,
 		"metadata nonce", msg.MetadataNonce,
 		"status", msg.Status,
 		"min contract duration", msg.MinContractDuration,
 		"max contract duration", msg.MaxContractDuration,
-		"subscription rate", msg.SubscriptionRate,
-		"pay-as-you-go rate", msg.PayAsYouGoRate,
+		"rates", msg.Rates,
 		"settlement duration", msg.SettlementDuration,
 	)
 
@@ -102,8 +101,7 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	provider.MaxContractDuration = msg.MaxContractDuration
 
 	// update contract rates
-	provider.SubscriptionRate = msg.SubscriptionRate
-	provider.PayAsYouGoRate = msg.PayAsYouGoRate
+	provider.Rates = msg.Rates
 	provider.SettlementDuration = msg.SettlementDuration
 
 	provider.LastUpdate = ctx.BlockHeight()

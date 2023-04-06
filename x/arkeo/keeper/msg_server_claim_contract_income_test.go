@@ -48,7 +48,7 @@ func TestValidate(t *testing.T) {
 	contract.Rate = rate
 	contract.Height = 10
 	contract.Nonce = 0
-	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.MeterType = types.MeterType_PAY_PER_CALL
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 1
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -72,7 +72,7 @@ func TestValidate(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrClaimContractIncomeClosed)
 }
 
-func TestHandlePayAsYouGo(t *testing.T) {
+func TestHandlePayPerCall(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 
 	s := newMsgServer(k, sk)
@@ -91,7 +91,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Rate = rate
-	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.MeterType = types.MeterType_PAY_PER_CALL
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 2
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -137,7 +137,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
 }
 
-func TestHandleSubscription(t *testing.T) {
+func TestHandlePayPerBlock(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	ctx = ctx.WithBlockHeight(20)
 
@@ -158,7 +158,7 @@ func TestHandleSubscription(t *testing.T) {
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Rate = rate
-	contract.Type = types.ContractType_SUBSCRIPTION
+	contract.MeterType = types.MeterType_PAY_PER_BLOCK
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 3
 	require.NoError(t, k.SetContract(ctx, contract))

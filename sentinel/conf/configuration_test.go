@@ -39,9 +39,9 @@ func TestConfiguration(t *testing.T) {
 	require.Equal(t, config.ProviderPubKey.String(), "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	require.Equal(t, config.FreeTierRateLimit, 99)
 	require.Equal(t, config.FreeTierRateLimitDuration, time.Hour)
-	require.Equal(t, config.SubTierRateLimit, 98)
-	require.Equal(t, config.SubTierRateLimitDuration, 2*time.Minute)
-	require.Equal(t, config.AsGoTierRateLimit, 97)
-	require.Equal(t, config.AsGoTierRateLimitDuration, 3*time.Hour)
+	require.Equal(t, config.PayPerBlockTierRateLimit, 98)
+	require.Equal(t, config.PayPerBlockTierRateLimitDuration, 2*time.Minute)
+	require.Equal(t, config.PayPerCallTierRateLimit, 97)
+	require.Equal(t, config.PayPerCallRateLimitDuration, 3*time.Hour)
 	require.Equal(t, config.ClaimStoreLocation, "clammy")
 }

@@ -14,7 +14,8 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-contract_type: "SUBSCRIPTION"
+userType: "SINGLE_USER"
+meterType: "PAY_PER_BLOCK"
 duration: 10
 rate:
   denom: "uarkeo"
@@ -34,7 +35,8 @@ type: check
 description: ensure contract is available at specific endpoint
 endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
-  - .contract.type == "SUBSCRIPTION"
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_BLOCK"
   - .contract.paid == "0"
 ---
 type: check
@@ -61,7 +63,7 @@ asserts:
   - .name == "Luke Skywalker"
 ---
 ########################################################################################
-# check subscription settles okay
+# check pay-per-block settles okay
 ########################################################################################
 type: create-blocks
 count: 13
@@ -80,7 +82,7 @@ asserts:
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000090 # fox gets 90 due to 10% tax to reserve
 ---
 ########################################################################################
-# open subscription contract (again)
+# open pay-per-block contract (again)
 ########################################################################################
 type: tx-open-contract
 signer: {{ addr_cat }}
@@ -88,7 +90,8 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-contract_type: "SUBSCRIPTION"
+meter_type: "PAY_PER_BLOCK"
+user_type: 0
 duration: 10
 rate:
   denom: "uarkeo"
@@ -102,7 +105,8 @@ type: check
 description: ensure contract is available at specific endpoint
 endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
-  - .contract.type == "SUBSCRIPTION"
+  - .contract.user_type == "SINGLE_USER"
+  - .contract.meter_type == "PAY_PER_BLOCK"
   - .contract.paid == "0"
 ---
 ########################################################################################

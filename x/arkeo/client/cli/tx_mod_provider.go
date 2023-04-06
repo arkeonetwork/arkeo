@@ -14,7 +14,7 @@ import (
 
 func CmdModProvider() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [subscription-rates] [pay-as-you-go-rates] [settlement-duration]",
+		Use:   "mod-provider [pubkey] [service] [metatadata-uri] [metadata-nonce] [status] [min-contract-duration] [max-contract-duration] [pay-per-block-rates] [pay-per-call-rates] [settlement-duration]",
 		Short: "Broadcast message modProvider",
 		Args:  cobra.ExactArgs(10),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -42,13 +42,26 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argSubscriptionRate, err := cosmos.ParseCoins(args[7])
+			argPayPerBlockRate, err := cosmos.ParseCoins(args[7])
 			if err != nil {
 				return err
 			}
-			argPayAsYouGoRate, err := cosmos.ParseCoins(args[8])
+			argPayPerCallRate, err := cosmos.ParseCoins(args[8])
 			if err != nil {
 				return err
+			}
+
+			rates := []*types.ContractRate{
+				{
+					UserType:  types.UserType_SINGLE_USER,
+					MeterType: types.MeterType_PAY_PER_BLOCK,
+					Rates:     argPayPerBlockRate,
+				},
+				{
+					UserType:  types.UserType_SINGLE_USER,
+					MeterType: types.MeterType_PAY_PER_CALL,
+					Rates:     argPayPerCallRate,
+				},
 			}
 
 			argSettlementDuration, err := cast.ToInt64E(args[9])
@@ -70,8 +83,7 @@ func CmdModProvider() *cobra.Command {
 				types.ProviderStatus(argStatus),
 				argMinContractDuration,
 				argMaxContractDuration,
-				argSubscriptionRate,
-				argPayAsYouGoRate,
+				rates,
 				argSettlementDuration,
 			)
 

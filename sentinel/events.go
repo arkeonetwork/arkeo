@@ -54,62 +54,6 @@ type ProviderModEvent struct {
 	Provider types.Provider
 }
 
-// nolint
-func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
-	var err error
-	evt := ProviderModEvent{}
-
-	for k, v := range input {
-		switch k {
-		case "pubkey":
-			evt.Provider.PubKey, err = common.NewPubKey(v)
-			if err != nil {
-				return evt, err
-			}
-		case "service":
-			evt.Provider.Service, err = common.NewService(v)
-			if err != nil {
-				return evt, err
-			}
-		case "metadata_uri":
-			evt.Provider.MetadataUri = v
-		case "metadata_nonce":
-			evt.Provider.MetadataNonce, err = strconv.ParseUint(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
-		case "status":
-			evt.Provider.Status = types.ProviderStatus(types.ProviderStatus_value[v])
-			if err != nil {
-				return evt, err
-			}
-		case "min_contract_duration":
-			evt.Provider.MinContractDuration, err = strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
-		case "max_contract_duration":
-			evt.Provider.MaxContractDuration, err = strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return evt, err
-			}
-
-		case "subscription_rate":
-			evt.Provider.SubscriptionRate, err = cosmos.ParseCoins(v)
-			if err != nil {
-				return evt, err
-			}
-		case "pay-as-you-go_rate":
-			evt.Provider.PayAsYouGoRate, err = cosmos.ParseCoins(v)
-			if err != nil {
-				return evt, err
-			}
-		}
-	}
-
-	return evt, nil
-}
-
 type OpenContract struct {
 	Contract types.Contract
 	OpenCost int64
@@ -157,8 +101,13 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		case "type":
-			evt.Contract.Type = types.ContractType(types.ContractType_value[v])
+		case "meter_type":
+			evt.Contract.MeterType = types.MeterType(types.MeterType_value[v])
+			if err != nil {
+				return evt, err
+			}
+		case "user_type":
+			evt.Contract.UserType = types.UserType(types.UserType_value[v])
 			if err != nil {
 				return evt, err
 			}

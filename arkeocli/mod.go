@@ -30,8 +30,8 @@ func newModProviderCmd() *cobra.Command {
 	modProviderCmd.Flags().Uint64("min-duration", 0, "minimum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("max-duration", 0, "maximum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("settlement-duration", 0, "settlement duration (in blocks)")
-	modProviderCmd.Flags().Uint64("subscription-rate", 0, "rate for subscription contracts")
-	modProviderCmd.Flags().Uint64("pay-as-you-go-rate", 0, "rate for pay-as-you-go contracts")
+	modProviderCmd.Flags().Uint64("pay-per-block-rate", 0, "rate for pay-per-block contracts")
+	modProviderCmd.Flags().Uint64("pay-per-call-rate", 0, "rate for pay-per-call contracts")
 	return modProviderCmd
 }
 
@@ -54,9 +54,9 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	argPubkey, _ := cmd.Flags().GetString("provider-pubkey")
-	if argPubkey == "" {
-		argPubkey, err = toPubkey(cmd, addr)
+	argPubKey, _ := cmd.Flags().GetString("provider-pubkey")
+	if argPubKey == "" {
+		argPubKey, err = toPubKey(cmd, addr)
 		if err != nil {
 			return
 		}
@@ -134,52 +134,66 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argSubscriptionRate, _ := cmd.Flags().GetString("subscription-rate")
-	if len(argSubscriptionRate) == 0 {
-		argSubscriptionRate, err = promptForArg(cmd, "Specify rate for subscription contracts: ")
+	argPayPerBlockRate, _ := cmd.Flags().GetString("pay-per-block-rate")
+	if len(argPayPerBlockRate) == 0 {
+		argPayPerBlockRate, err = promptForArg(cmd, "Specify rate for pay-per-block contracts: ")
 		if err != nil {
 			return err
 		}
 	}
-	sRate, err := cosmos.ParseCoins(argSubscriptionRate)
+	sRate, err := cosmos.ParseCoins(argPayPerBlockRate)
 	if err != nil {
 		return err
 	}
 
-	argPayAsYouGoRate, _ := cmd.Flags().GetString("pay-as-you-go-rate")
-	if len(argPayAsYouGoRate) == 0 {
-		argPayAsYouGoRate, err = promptForArg(cmd, "Specify rate for pay-as-you-go contracts: ")
+	argPayPerCallRate, _ := cmd.Flags().GetString("pay-per-call-rate")
+	if len(argPayPerCallRate) == 0 {
+		argPayPerCallRate, err = promptForArg(cmd, "Specify rate for pay-per-call contracts: ")
 		if err != nil {
 			return err
 		}
 	}
-	pRate, err := cosmos.ParseCoins(argPayAsYouGoRate)
+	pRate, err := cosmos.ParseCoins(argPayPerCallRate)
 	if err != nil {
 		return err
 	}
 
-	pubkey, err := common.NewPubKey(argPubkey)
+	pubKey, err := common.NewPubKey(argPubKey)
 	if err != nil {
 		return err
 	}
 
 	status := types.ProviderStatus(types.ProviderStatus_value[strings.ToUpper(argStatus)])
 
+	rates := []*types.ContractRate{
+		{
+			UserType:  types.UserType_SINGLE_USER,
+			MeterType: types.MeterType_PAY_PER_BLOCK,
+			Rates:     sRate,
+		},
+		{
+			UserType:  types.UserType_SINGLE_USER,
+			MeterType: types.MeterType_PAY_PER_CALL,
+			Rates:     pRate,
+		},
+	}
+
 	msg := types.NewMsgModProvider(
 		clientCtx.GetFromAddress(),
-		pubkey,
+		pubKey,
 		argService,
 		argMetaURI,
 		argMetaNonce,
 		status,
 		int64(argMinDuration),
 		int64(argMaxDuration),
-		sRate,
-		pRate,
+		rates,
 		int64(argSettlementDuration),
 	)
+
 	if err := msg.ValidateBasic(); err != nil {
 		return err
 	}
+
 	return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 }

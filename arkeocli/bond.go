@@ -48,7 +48,7 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 
 	argPubkey, _ := cmd.Flags().GetString("provider-pubkey")
 	if argPubkey == "" {
-		argPubkey, err = toPubkey(cmd, addr)
+		argPubkey, err = toPubKey(cmd, addr)
 		if err != nil {
 			return
 		}

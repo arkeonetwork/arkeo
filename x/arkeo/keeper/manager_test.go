@@ -142,8 +142,20 @@ func TestContractEndBlock(t *testing.T) {
 	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
-	rates, err := cosmos.ParseCoins("15uarkeo")
+	coinRates, err := cosmos.ParseCoins("15uarkeo")
 	require.NoError(t, err)
+	rates := []*types.ContractRate{
+		{
+			MeterType: types.MeterType_PAY_PER_BLOCK,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+		{
+			MeterType: types.MeterType_PAY_PER_CALL,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+	}
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
@@ -151,8 +163,7 @@ func TestContractEndBlock(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      rates,
-		SubscriptionRate:    rates,
+		Rates:               rates,
 	}
 	err = s.ModProviderHandle(ctx, &modProviderMsg)
 	require.NoError(t, err)
@@ -167,14 +178,14 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
-		Service:      common.BTCService.String(),
-		Creator:      user1Address,
-		Client:       user1PubKey,
-		ContractType: types.ContractType_PAY_AS_YOU_GO,
-		Duration:     100,
-		Rate:         rates[0],
-		Deposit:      cosmos.NewInt(1500),
+		Provider:  providerPubKey,
+		Service:   common.BTCService.String(),
+		Creator:   user1Address.String(),
+		Client:    user1PubKey,
+		MeterType: types.MeterType_PAY_PER_CALL,
+		Duration:  100,
+		Rate:      coinRates[0],
+		Deposit:   cosmos.NewInt(1500),
 	}
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
@@ -261,8 +272,20 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	provider.Service = common.ETHService
 	require.NoError(t, k.SetProvider(ctx, provider))
 
-	rates, err := cosmos.ParseCoins("15uarkeo")
+	coinRates, err := cosmos.ParseCoins("15uarkeo")
 	require.NoError(t, err)
+	rates := []*types.ContractRate{
+		{
+			MeterType: types.MeterType_PAY_PER_BLOCK,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+		{
+			MeterType: types.MeterType_PAY_PER_CALL,
+			UserType:  types.UserType_SINGLE_USER,
+			Rates:     coinRates,
+		},
+	}
 
 	modProviderMsg := types.MsgModProvider{
 		Provider:            provider.PubKey,
@@ -270,8 +293,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
 		Status:              types.ProviderStatus_ONLINE,
-		PayAsYouGoRate:      rates,
-		SubscriptionRate:    rates,
+		Rates:               rates,
 		SettlementDuration:  10,
 	}
 
@@ -292,9 +314,9 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 		Service:            common.BTCService.String(),
 		Creator:            user1Address,
 		Client:             user1PubKey,
-		ContractType:       types.ContractType_PAY_AS_YOU_GO,
+		MeterType:          types.MeterType_PAY_PER_CALL,
 		Duration:           100,
-		Rate:               rates[0],
+		Rate:               coinRates[0],
 		Deposit:            cosmos.NewInt(1500),
 		SettlementDuration: 10,
 	}

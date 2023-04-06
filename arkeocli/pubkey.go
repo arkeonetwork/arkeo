@@ -34,7 +34,7 @@ func runShowPubkeyCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	pubkey, err := toPubkey(cmd, addr)
+	pubkey, err := toPubKey(cmd, addr)
 	if err != nil {
 		return
 	}

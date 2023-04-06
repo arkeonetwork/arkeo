@@ -7,16 +7,13 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func NewProvider(pubkey common.PubKey, service common.Service) Provider {
+func NewProvider(pubKey common.PubKey, service common.Service) Provider {
 	return Provider{
-		PubKey:           pubkey,
-		Service:          service,
-		Bond:             cosmos.ZeroInt(),
-		SubscriptionRate: make([]sdk.Coin, 0),
-		PayAsYouGoRate:   make([]sdk.Coin, 0),
+		PubKey:  pubKey,
+		Service: service,
+		Bond:    cosmos.ZeroInt(),
 	}
 }
 
@@ -48,19 +45,19 @@ func (contract Contract) GetSpender() common.PubKey {
 
 // Expiration Contracts progress through the following states
 // Open -> Expired -> Settled
-// for Subscription contracts, they expire and settle on the same block
-// for PayAsYouGo contracts, they can expire and settle on different blocks, based on the settlement duration
+// for PayPerBlock contracts, they expire and settle on the same block
+// for PayPerCall contracts, they can expire and settle on different blocks, based on the settlement duration
 func (contract Contract) Expiration() int64 {
 	return contract.Height + contract.Duration
 }
 
 // SettlementPeriodEnd returns the end of the settlement period
-// for a contract. For PAY_AS_YOU_GO contracts, the settlement period is
+// for a contract. For PAY_PER_CALL contracts, the settlement period is
 // a period of time in which no additional API calls should be allowed
 // but a claim can still be posted for previously made calls in order
 // to correctly settle the contract.
 func (contract Contract) SettlementPeriodEnd() int64 {
-	if contract.Type == ContractType_PAY_AS_YOU_GO {
+	if contract.MeterType == MeterType_PAY_PER_CALL {
 		return contract.Expiration() + contract.SettlementDuration
 	}
 	return contract.Expiration()
@@ -117,16 +114,16 @@ func (contract Contract) ClientAddress() cosmos.AccAddress {
 	return addr
 }
 
-func (contractType *ContractType) UnmarshalJSON(b []byte) error {
+func (meterType *MeterType) UnmarshalJSON(b []byte) error {
 	var item interface{}
 	if err := json.Unmarshal(b, &item); err != nil {
 		return err
 	}
 	switch v := item.(type) {
 	case int:
-		*contractType = ContractType(v)
+		*meterType = MeterType(v)
 	case string:
-		*contractType = ContractType(ContractType_value[v])
+		*meterType = MeterType(MeterType_value[v])
 	}
 	return nil
 }

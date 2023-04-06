@@ -6,7 +6,7 @@ type: create-blocks
 count: 1
 ---
 ########################################################################################
-# open pay-as-you-go contract
+# open pay-per-call contract
 ########################################################################################
 type: tx-open-contract
 signer: {{ addr_cat }}
@@ -14,7 +14,7 @@ creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
-contract_type: "PAY_AS_YOU_GO"
+meter_type: "PAY_PER_CALL"
 duration: 10
 rate:
   denom: "uarkeo"
@@ -34,7 +34,8 @@ type: check
 description: ensure contract is available at specific endpoint
 endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
-  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.user_type == "SINGLE_USER"
   - .contract.paid == "0"
   - .contract.id == "0"
 ---
@@ -97,7 +98,7 @@ asserts:
   - .contract_id == 0
 ---
 ########################################################################################
-# claim pay-as-you-go rewards
+# claim pay-per-call rewards
 ########################################################################################
 type: tx-claim-contract
 signer: {{ addr_fox }}
@@ -116,7 +117,8 @@ type: check
 description: ensure contract is available at specific endpoint
 endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
-  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.user_type == "SINGLE_USER"
   - .contract.paid == "3"
   - .contract.id == "0"
 ---
@@ -137,7 +139,7 @@ asserts:
   - length == 0
 ---
 ########################################################################################
-# claim pay-as-you-go rewards again, but SHOULD NOT double pay provider
+# claim pay-per-call rewards again, but SHOULD NOT double pay provider
 ########################################################################################
 type: tx-claim-contract
 signer: {{ addr_fox }}
@@ -156,7 +158,8 @@ type: check
 description: ensure contract is available at specific endpoint
 endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
-  - .contract.type == "PAY_AS_YOU_GO"
+  - .contract.meter_type == "PAY_PER_CALL"
+  - .contract.user_type == "SINGLE_USER"
   - .contract.paid == "3"
   - .contract.id == "0"
 ---

@@ -223,13 +223,13 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 
 func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (cosmos.Int, error) {
 	var debt cosmos.Int
-	switch contract.Type {
-	case types.ContractType_SUBSCRIPTION:
+	switch contract.MeterType {
+	case types.MeterType_PAY_PER_BLOCK:
 		debt = contract.Rate.Amount.MulRaw(ctx.BlockHeight() - contract.Height).Sub(contract.Paid)
-	case types.ContractType_PAY_AS_YOU_GO:
+	case types.MeterType_PAY_PER_CALL:
 		debt = contract.Rate.Amount.MulRaw(contract.Nonce).Sub(contract.Paid)
 	default:
-		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidContractType, "%s", contract.Type.String())
+		return cosmos.ZeroInt(), errors.Wrapf(types.ErrInvalidMeterType, "%s", contract.MeterType.String())
 	}
 
 	if debt.IsNegative() {
