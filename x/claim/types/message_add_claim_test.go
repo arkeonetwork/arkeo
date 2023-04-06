@@ -16,26 +16,6 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid creator address",
-			msg: MsgAddClaim{
-				Creator: "invalid_address",
-				Address: sample.AccAddress(),
-				Chain:   ARKEO,
-				Amount:  100,
-			},
-			err: sdkerrors.ErrInvalidAddress,
-		},
-		{
-			name: "invalid address",
-			msg: MsgAddClaim{
-				Creator: sample.AccAddress(),
-				Address: "invalid address",
-				Chain:   ARKEO,
-				Amount:  100,
-			},
-			err: sdkerrors.ErrInvalidAddress,
-		},
-		{
 			name: "invalid chain",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),

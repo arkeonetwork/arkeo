@@ -32,7 +32,7 @@ func TestCloseContractValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    clientAcct.String(),
+		Creator:    clientAcct,
 		ContractId: contract.Id,
 	}
 	require.NoError(t, s.CloseContractValidate(ctx, &msg))
@@ -62,7 +62,7 @@ func TestCloseContractHandle(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Creator:      clientAccount.String(),
+		Creator:      clientAccount,
 		Client:       clientPubKey,
 		Service:      service.String(),
 		Provider:     providerPubKey,
@@ -87,7 +87,7 @@ func TestCloseContractHandle(t *testing.T) {
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    clientAccount.String(),
+		Creator:    clientAccount,
 		ContractId: contract.Id,
 	}
 	require.NoError(t, s.CloseContractHandle(ctx, &msg))
@@ -144,7 +144,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      providerAddress.String(),
+		Creator:      providerAddress,
 		Client:       userPubKey,
 		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
@@ -166,14 +166,14 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	closeContractMsg := types.MsgCloseContract{
-		Creator:    user2Address.String(),
+		Creator:    user2Address,
 		ContractId: contract.Id,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// confirm that the contract can be closed by the client
-	closeContractMsg.Creator = userAddress.String()
+	closeContractMsg.Creator = userAddress
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
 	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
@@ -197,12 +197,12 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.Len(t, user2ContractSet.ContractSet.ContractIds, 1)
 
 	// confirm that the contract cannot be closed by the delegate
-	closeContractMsg.Creator = user2Address.String()
+	closeContractMsg.Creator = user2Address
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// but can be closed by the client
-	closeContractMsg.Creator = userAddress.String()
+	closeContractMsg.Creator = userAddress
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
 }
@@ -247,7 +247,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      providerAddress.String(),
+		Creator:      providerAddress,
 		Client:       userPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -266,14 +266,14 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.NoError(t, err)
 
 	closeContractMsg := types.MsgCloseContract{
-		Creator:    user2Address.String(),
+		Creator:    user2Address,
 		ContractId: contract.Id,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// confirm that the contract can not be closed by the client
-	closeContractMsg.Creator = userAddress.String()
+	closeContractMsg.Creator = userAddress
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
@@ -288,12 +288,12 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	closeContractMsg.ContractId = contract.Id
 
 	// confirm that the contract cannot be closed by the delegate
-	closeContractMsg.Creator = user2Address.String()
+	closeContractMsg.Creator = user2Address
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// nor the client
-	closeContractMsg.Creator = userAddress.String()
+	closeContractMsg.Creator = userAddress
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 

@@ -98,7 +98,7 @@ func TestHandleClaim(t *testing.T) {
 	require.NoError(t, err)
 
 	// get the expected claim
-	claim := NewClaim(inputContract.Id, "", 0, "")
+	claim := NewClaim(inputContract.Id, nil, 0, "")
 	claim, err = proxy.ClaimStore.Get(claim.Key())
 	require.NoError(t, err)
 	require.False(t, claim.Claimed)

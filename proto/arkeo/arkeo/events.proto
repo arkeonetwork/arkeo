@@ -10,7 +10,7 @@ import "arkeo/arkeo/keeper.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 message EventBondProvider {
-  string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 2;
   string bond_rel = 3 [
     (cosmos_proto.scalar) = "cosmos.Int",
@@ -25,8 +25,8 @@ message EventBondProvider {
 }
 
 message EventModProvider {
-  string creator = 1;
-  string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
   string metadataURI = 4;
   uint64 metadataNonce = 5;
@@ -44,11 +44,11 @@ message EventModProvider {
 }
 
 message EventOpenContract {
-  string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   uint64 contract_id = 2;
   string service = 3;
-  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType type = 6;
   int64 height = 7;
   int64 duration = 8;
@@ -63,11 +63,11 @@ message EventOpenContract {
 }
 
 message EventSettleContract {
-  string provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes provider = 1 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   uint64 contract_id = 2;
   string service = 3;
-  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType type = 6;
   int64 nonce = 7;
   int64 height = 8;
@@ -85,14 +85,14 @@ message EventSettleContract {
 
 message EventCloseContract {
   uint64 contract_id = 1;
-  string provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes provider = 2 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
-  string client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
+  bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
 }
 
 message ValidatorPayoutEvent {
-  string validator = 1;
+  bytes validator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   string reward = 2 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",

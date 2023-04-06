@@ -13,7 +13,7 @@ enum ProviderStatus {
 }
 
 message Provider {
-  string pub_key = 1
+  bytes pub_key = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   int32 service = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Service" ];
@@ -39,13 +39,13 @@ enum ContractType {
 }
 
 message Contract {
-  string provider = 1
+  bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   int32 service = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.Service" ];
-  string client = 3
+  bytes client = 3
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 4
+  bytes delegate = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType type = 5;
   int64 height = 6;
@@ -75,7 +75,7 @@ message ContractExpirationSet {
 }
 
 message UserContractSet {
-  string user = 1
+  bytes user = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractSet contract_set = 2;
 }

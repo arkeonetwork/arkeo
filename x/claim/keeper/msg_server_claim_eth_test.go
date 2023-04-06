@@ -42,7 +42,7 @@ func TestClaimEth(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo.String(),
+		Creator:    addrArkeo,
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -72,7 +72,7 @@ func TestClaimEth(t *testing.T) {
 	require.Error(t, err)
 
 	// attempt to claim from arkeo should also fail!
-	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
 	require.Error(t, err)
 }
 
@@ -100,7 +100,7 @@ func TestClaimEthWithInvalidSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo.String(),
+		Creator:    addrArkeo,
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -146,7 +146,7 @@ func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo.String(),
+		Creator:    addrArkeo,
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -176,7 +176,7 @@ func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
 	require.Error(t, err)
 
 	// attempt to claim from arkeo should also fail!
-	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
 	require.Error(t, err)
 }
 
@@ -194,7 +194,7 @@ func TestClaimEthWithNoClaimRecord(t *testing.T) {
 	require.NoError(t, err)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo.String(),
+		Creator:    addrArkeo,
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}

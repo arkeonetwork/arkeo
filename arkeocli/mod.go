@@ -166,7 +166,7 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 	status := types.ProviderStatus(types.ProviderStatus_value[strings.ToUpper(argStatus)])
 
 	msg := types.NewMsgModProvider(
-		clientCtx.GetFromAddress().String(),
+		clientCtx.GetFromAddress(),
 		pubkey,
 		argService,
 		argMetaURI,

@@ -2,6 +2,7 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -10,7 +11,7 @@ const TypeMsgAddClaim = "add_claim"
 
 var _ sdk.Msg = &MsgAddClaim{}
 
-func NewMsgAddClaim(creator string, chain Chain, address string, amount int64) *MsgAddClaim {
+func NewMsgAddClaim(creator cosmos.AccAddress, chain Chain, address cosmos.AccAddress, amount int64) *MsgAddClaim {
 	return &MsgAddClaim{
 		Creator: creator,
 		Chain:   chain,
@@ -28,11 +29,7 @@ func (msg *MsgAddClaim) Type() string {
 }
 
 func (msg *MsgAddClaim) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{creator}
+	return []sdk.AccAddress{msg.Creator}
 }
 
 func (msg *MsgAddClaim) GetSignBytes() []byte {
@@ -41,16 +38,12 @@ func (msg *MsgAddClaim) GetSignBytes() []byte {
 }
 
 func (msg *MsgAddClaim) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
-	}
 	_, ok := Chain_value[msg.Chain.String()]
 	if !ok {
-		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid chain(%s),err: %s", msg.Chain, err)
+		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid chain(%s)", msg.Chain)
 	}
-	if !IsValidAddress(msg.Address, msg.Chain) {
-		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid  address")
+	if !IsValidAddress(msg.Address.String(), msg.Chain) {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid address")
 	}
 	if msg.Amount <= 0 {
 		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "amount should larger than 0")

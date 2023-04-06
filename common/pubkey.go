@@ -14,7 +14,7 @@ import (
 )
 
 type (
-	PubKey  string
+	PubKey  []byte
 	PubKeys []PubKey
 )
 
@@ -49,7 +49,17 @@ func NewPubKeyFromCrypto(pk cryptotypes.PubKey) (PubKey, error) {
 
 // Equals check whether two are the same
 func (pubKey PubKey) Equals(pubKey1 PubKey) bool {
-	return pubKey == pubKey1
+	if len(pubKey) != len(pubKey1) {
+		return false
+	}
+
+	for i := range pubKey {
+		if pubKey[i] != pubKey1[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 // IsEmpty to check whether it is empty

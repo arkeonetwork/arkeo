@@ -13,7 +13,7 @@ import (
 func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferClaim) (*types.MsgTransferClaimResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	// get original claim record
-	originalClaim, err := k.GetClaimRecord(ctx, msg.Creator, types.ARKEO)
+	originalClaim, err := k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
@@ -28,7 +28,7 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 
 	// create new arkeo claim
 	arkeoClaim := types.ClaimRecord{
-		Address:        msg.ToAddress,
+		Address:        msg.ToAddress.String(),
 		Chain:          types.ARKEO,
 		AmountClaim:    originalClaim.AmountClaim,
 		AmountVote:     originalClaim.AmountVote,
@@ -45,13 +45,13 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeClaim,
-			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.Creator)),
+			sdk.NewAttribute(sdk.AttributeKeySender, strings.ToLower(msg.Creator.String())),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, arkeoClaim.AmountClaim.String()),
 		),
 	})
 
 	// see if there is an existing arkeo claim, so we can merge it
-	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.ToAddress, types.ARKEO)
+	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.ToAddress.String(), types.ARKEO)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.ToAddress)
 	}
@@ -66,7 +66,7 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.ToAddress)
 	}
 
-	_, err = k.ClaimCoinsForAction(ctx, msg.ToAddress, types.ACTION_CLAIM)
+	_, err = k.ClaimCoinsForAction(ctx, msg.ToAddress.String(), types.ACTION_CLAIM)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.ToAddress)
 	}

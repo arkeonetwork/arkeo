@@ -21,7 +21,7 @@ func (k msgServer) AddClaim(goCtx context.Context, msg *types.MsgAddClaim) (*typ
 	coin := sdk.NewCoin(types.DefaultClaimDenom, sdk.NewInt(msg.Amount))
 	claim := types.ClaimRecord{
 		Chain:          msg.Chain,
-		Address:        msg.Address,
+		Address:        msg.Address.String(),
 		AmountClaim:    coin,
 		AmountVote:     coin,
 		AmountDelegate: coin,

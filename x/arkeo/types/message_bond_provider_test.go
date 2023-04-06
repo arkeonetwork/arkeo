@@ -5,7 +5,6 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,15 +14,8 @@ func TestValidateBasic(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
-	// invalid address
 	msg := MsgBondProvider{
-		Creator: "invalid address",
-	}
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
-
-	msg = MsgBondProvider{
-		Creator:  acct.String(),
+		Creator:  acct,
 		Provider: pubkey,
 	}
 	err = msg.ValidateBasic()

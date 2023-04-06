@@ -8,14 +8,13 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator string, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
@@ -39,19 +38,11 @@ func (msg *MsgOpenContract) Type() string {
 }
 
 func (msg *MsgOpenContract) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{creator}
+	return []sdk.AccAddress{msg.Creator}
 }
 
 func (msg *MsgOpenContract) MustGetSigner() sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		panic(err)
-	}
-	return addr
+	return msg.Creator
 }
 
 func (msg *MsgOpenContract) GetSignBytes() []byte {
@@ -67,13 +58,8 @@ func (msg *MsgOpenContract) GetSpender() common.PubKey {
 }
 
 func (msg *MsgOpenContract) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
-	if err != nil {
-		return errors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
-	}
-
 	// verify pubkey
-	_, err = common.NewPubKey(msg.Provider.String())
+	_, err := common.NewPubKey(msg.Provider.String())
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}

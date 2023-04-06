@@ -57,7 +57,7 @@ func TestValidate(t *testing.T) {
 
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc.String(),
+		Creator:    acc,
 		Nonce:      20,
 	}
 
@@ -99,7 +99,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc.String(),
+		Creator:    acc,
 		Nonce:      20,
 	}
 	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))
@@ -166,7 +166,7 @@ func TestHandleSubscription(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc.String(),
+		Creator:    acc,
 		Nonce:      20,
 	}
 	require.NoError(t, s.ClaimContractIncomeHandle(ctx, &msg))

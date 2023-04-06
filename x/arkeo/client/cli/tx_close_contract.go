@@ -27,7 +27,7 @@ func CmdCloseContract() *cobra.Command {
 			}
 
 			msg := types.NewMsgCloseContract(
-				clientCtx.GetFromAddress().String(),
+				clientCtx.GetFromAddress(),
 				argContractId,
 			)
 			if err := msg.ValidateBasic(); err != nil {

@@ -20,7 +20,7 @@ func SimulateMsgClaimContractIncome(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgClaimContractIncome{
-			Creator: simAccount.Address.String(),
+			Creator: simAccount.Address,
 		}
 
 		// TODO: Handling the ClaimContractIncome simulation

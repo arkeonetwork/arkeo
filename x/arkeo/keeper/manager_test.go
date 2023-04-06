@@ -158,7 +158,7 @@ func TestContractEndBlock(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      common.BTCService.String(),
-		Creator:      user1Address.String(),
+		Creator:      user1Address,
 		Client:       user1PubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -182,7 +182,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user2Address, getCoin(common.Tokens(20))))
 	msg.Delegate = common.EmptyPubKey
 	msg.Client = user2PubKey
-	msg.Creator = user2Address.String()
+	msg.Creator = user2Address
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -279,7 +279,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:           providerPubKey,
 		Service:            common.BTCService.String(),
-		Creator:            user1Address.String(),
+		Creator:            user1Address,
 		Client:             user1PubKey,
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
 		Duration:           100,

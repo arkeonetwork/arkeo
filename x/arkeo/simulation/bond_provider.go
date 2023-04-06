@@ -20,7 +20,7 @@ func SimulateMsgBondProvider(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgBondProvider{
-			Creator: simAccount.Address.String(),
+			Creator: simAccount.Address,
 		}
 
 		// TODO: Handling the BondProvider simulation

@@ -158,7 +158,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 	deposit := cosmos.NewInt(argDeposit)
 	msg := types.NewMsgOpenContract(
-		clientCtx.GetFromAddress().String(),
+		clientCtx.GetFromAddress(),
 		pubkey,
 		argService,
 		common.PubKey(argClientPubkey),
