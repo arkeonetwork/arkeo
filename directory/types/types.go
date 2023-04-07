@@ -71,6 +71,7 @@ var (
 	ProviderStatusOffline ProviderStatus = "OFFLINE"
 )
 
+// TODO - support multiple rates/currencies for each of subscription/pay-as-you-go
 type ModProviderEvent struct {
 	Pubkey              string         `mapstructure:"pubkey"` // TODO provider
 	Chain               string         `mapstructure:"chain"`

@@ -154,12 +154,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-modProviderEvents:
 			log.Debugf("received mod provider event")
-			modProviderEvent := types.ModProviderEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &modProviderEvent); err != nil {
-				log.Errorf("error converting mod_provider event: %+v", err)
-				break
-			}
-			if err := a.handleModProviderEvent(modProviderEvent); err != nil {
+			if err := a.handleModProviderEvent(evt); err != nil {
 				log.Errorf("error handling mod_provider event: %+v", err)
 			}
 		case evt := <-claimContractIncomeEvents:
@@ -296,9 +291,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleModProviderEvent(modProviderEvent); err != nil {
-			log.Errorf("error handling %s event: %+v", event.Type, err)
-		}
+		// TODO
+		// if err = a.handleModProviderEvent(modProviderEvent); err != nil {
+		// 	log.Errorf("error handling %s event: %+v", event.Type, err)
+		// }
 	case "open_contract":
 		openContractEvent := types.OpenContractEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &openContractEvent); err != nil {
