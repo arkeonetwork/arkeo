@@ -1,6 +1,7 @@
 package arkeocli
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
+)
+
+var (
+	payments  *[]string
+	rates     *[]string
+	meters    *[]string
+	userTypes *[]string
 )
 
 func newModProviderCmd() *cobra.Command {
@@ -30,12 +38,20 @@ func newModProviderCmd() *cobra.Command {
 	modProviderCmd.Flags().Uint64("min-duration", 0, "minimum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("max-duration", 0, "maximum contract duration (in blocks)")
 	modProviderCmd.Flags().Uint64("settlement-duration", 0, "settlement duration (in blocks)")
-	modProviderCmd.Flags().Uint64("subscription-rate", 0, "rate for subscription contracts")
-	modProviderCmd.Flags().Uint64("pay-as-you-go-rate", 0, "rate for pay-as-you-go contracts")
+
+	payments = modProviderCmd.Flags().StringArray("payment", []string{}, "adds an accepted payment currency. rate, meter, user-type must be specified after each occurence of this flag")
+	rates = modProviderCmd.Flags().StringArray("rate", []string{}, "adds a rate with the given currency")
+	meters = modProviderCmd.Flags().StringArray("meter", []string{}, "adds a meter with the given type to the preceeding rate")
+	userTypes = modProviderCmd.Flags().StringArray("user-type", []string{}, "adds a user type to the preceeding rate")
 	return modProviderCmd
 }
 
 func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
+	if len(*rates) != len(*payments) || len(*meters) != len(*payments) || len(*userTypes) != len(*payments) {
+		err = fmt.Errorf("must have equal number of payment, rate, meter, and user-types")
+		return
+	}
+
 	clientCtx, err := client.GetClientTxContext(cmd)
 	if err != nil {
 		return err
@@ -134,28 +150,22 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argSubscriptionRate, _ := cmd.Flags().GetString("subscription-rate")
-	if len(argSubscriptionRate) == 0 {
-		argSubscriptionRate, err = promptForArg(cmd, "Specify rate for subscription contracts: ")
+	subscriptionRates, payAsYouGoRates := cosmos.Coins{}, cosmos.Coins{}
+	for i, payment := range *payments {
+		rate, err := cosmos.ParseCoins(fmt.Sprintf("%su%s", (*rates)[i], payment))
 		if err != nil {
 			return err
 		}
-	}
-	sRate, err := cosmos.ParseCoins(argSubscriptionRate)
-	if err != nil {
-		return err
-	}
+		meter := (*meters)[i]
+		userType := (*userTypes)[i]
+		_ = userType
 
-	argPayAsYouGoRate, _ := cmd.Flags().GetString("pay-as-you-go-rate")
-	if len(argPayAsYouGoRate) == 0 {
-		argPayAsYouGoRate, err = promptForArg(cmd, "Specify rate for pay-as-you-go contracts: ")
-		if err != nil {
-			return err
+		switch meter {
+		case "block":
+			subscriptionRates = subscriptionRates.Add(rate...)
+		case "request":
+			payAsYouGoRates = payAsYouGoRates.Add(rate...)
 		}
-	}
-	pRate, err := cosmos.ParseCoins(argPayAsYouGoRate)
-	if err != nil {
-		return err
 	}
 
 	pubkey, err := common.NewPubKey(argPubkey)
@@ -174,8 +184,8 @@ func runModProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		status,
 		int64(argMinDuration),
 		int64(argMaxDuration),
-		sRate,
-		pRate,
+		subscriptionRates,
+		payAsYouGoRates,
 		int64(argSettlementDuration),
 	)
 	if err := msg.ValidateBasic(); err != nil {
