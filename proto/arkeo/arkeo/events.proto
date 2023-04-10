@@ -48,19 +48,17 @@ message EventOpenContract {
   string service = 3;
   bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  UserType user_type = 6;
-  MeterType meter_type = 7;
-  int64 height = 8;
-  int64 duration = 9;
-  cosmos.base.v1beta1.Coin rate = 10 [ (gogoproto.nullable) = false ];
-  int64 open_cost = 11;
-  string deposit = 12 [
+  ContractOptions options = 6;
+  int64 height = 7;
+  int64 duration = 8;
+  cosmos.base.v1beta1.Coin rate = 9 [ (gogoproto.nullable) = false ];
+  int64 open_cost = 10;
+  string deposit = 11 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 settlement_duration = 13;
-  Restrictions restrictions = 14;
+  int64 settlement_duration = 12;
 }
 
 message EventSettleContract {
@@ -69,8 +67,6 @@ message EventSettleContract {
   string service = 3;
   bytes client = 4 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 5 [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  UserType user_type = 6;
-  MeterType meter_type = 7;
   int64 nonce = 8;
   int64 height = 9;
   string paid = 10 [

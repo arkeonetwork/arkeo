@@ -61,6 +61,12 @@ message Restrictions {
   repeated string allowed_ip_addresses = 5;
 }
 
+message ContractOptions {
+  UserType user_type = 1;
+  MeterType meter_type = 2;
+  Restrictions restrictions = 3;
+}
+
 message Contract {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -70,26 +76,24 @@ message Contract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  UserType user_type = 5;
-  MeterType meter_type = 6;
-  int64 height = 7;
-  int64 duration = 8;
-  cosmos.base.v1beta1.Coin rate = 9 [ (gogoproto.nullable) = false ];
-  string deposit = 10 [
+  ContractOptions options = 5;
+  int64 height = 6;
+  int64 duration = 7;
+  cosmos.base.v1beta1.Coin rate = 8 [ (gogoproto.nullable) = false ];
+  string deposit = 9 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  string paid = 11 [
+  string paid = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-  int64 nonce = 12;
-  int64 settlement_height = 13;
-  uint64 id = 14;
-  int64 settlement_duration = 15;
-  Restrictions restrictions = 16;
+  int64 nonce = 11;
+  int64 settlement_height = 12;
+  uint64 id = 13;
+  int64 settlement_duration = 14;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
