@@ -1,25 +1,67 @@
 package indexer
 
 import (
+	"encoding/hex"
 	"fmt"
+	"strings"
 
+	arkeoUtils "github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/types"
+	arkeoTypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/pkg/errors"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-func (a *IndexerApp) handleOpenContractEvent(evt types.OpenContractEvent) error {
-	provider, err := a.db.FindProvider(evt.ProviderPubkey, evt.Chain)
+func (a *IndexerApp) handleOpenContractEvent(evt ctypes.ResultEvent) error {
+	typedEvent, err := arkeoUtils.ParseTypedEvent(evt, "arkeo.arkeo.EventOpenContract")
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for chain %s", evt.ProviderPubkey, evt.Chain)
+		log.Errorf("failed to parse typed event", "error", err)
+		return errors.Wrapf(err, "failed to parse typed event")
+	}
+
+	txData, ok := evt.Data.(tmtypes.EventDataTx)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventDataTx", evt.Data)
+	}
+
+	txid := strings.ToUpper(hex.EncodeToString(tmtypes.Tx(txData.Tx).Hash()))
+
+	openContractEvent, ok := typedEvent.(*arkeoTypes.EventOpenContract)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventOpenContract", typedEvent)
+	}
+
+	provider, err := a.db.FindProvider(openContractEvent.Provider.String(), openContractEvent.Service)
+	if err != nil {
+		return errors.Wrapf(err, "error finding provider %s for chain %s", openContractEvent.Provider.String(), openContractEvent.Service)
 	}
 	if provider == nil {
-		return fmt.Errorf("no provider found: DNE %s %s", evt.ProviderPubkey, evt.Chain)
+		return fmt.Errorf("no provider found: DNE %s %s", openContractEvent.Provider.String(), openContractEvent.Service)
 	}
-	ent, err := a.db.UpsertContract(provider.ID, evt)
+
+	height := openContractEvent.Height
+
+	oce := types.OpenContractEvent{
+		BaseContractEvent: types.BaseContractEvent{
+			ProviderPubkey: openContractEvent.Provider.String(),
+			Chain:          openContractEvent.Service,
+			ClientPubkey:   openContractEvent.Client.String(),
+			DelegatePubkey: openContractEvent.Delegate.String(),
+			TxID:           txid,
+			Height:         height,
+			EventHeight:    height,
+		},
+		ContractType: types.ContractType(openContractEvent.Type.String()),
+		Duration:     openContractEvent.Duration,
+		Rate:         openContractEvent.Rate.Amount.Int64(),
+		OpenCost:     openContractEvent.OpenCost,
+	}
+	ent, err := a.db.UpsertContract(provider.ID, oce)
 	if err != nil {
 		return errors.Wrapf(err, "error upserting contract")
 	}
-	if _, err = a.db.UpsertOpenContractEvent(ent.ID, evt); err != nil {
+	if _, err = a.db.UpsertOpenContractEvent(ent.ID, oce); err != nil {
 		return errors.Wrapf(err, "error upserting open contract event")
 	}
 

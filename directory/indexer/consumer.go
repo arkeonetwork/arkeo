@@ -139,12 +139,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-openContractEvents:
 			log.Debugf("received open contract event")
-			openContractEvent := types.OpenContractEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &openContractEvent); err != nil {
-				log.Errorf("error converting open_contract event: %+v", err)
-				break
-			}
-			if err := a.handleOpenContractEvent(openContractEvent); err != nil {
+			if err := a.handleOpenContractEvent(evt); err != nil {
 				log.Errorf("error handling open_contract event: %+v", err)
 			}
 		case evt := <-bondProviderEvents:
@@ -301,9 +296,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleOpenContractEvent(openContractEvent); err != nil {
-			log.Errorf("error handling %s event: %+v", event.Type, err)
-		}
+		// TODO
+		// if err = a.handleOpenContractEvent(openContractEvent); err != nil {
+		// 	log.Errorf("error handling %s event: %+v", event.Type, err)
+		// }
 	case "claim_contract_income":
 		contractSettlementEvent := types.ContractSettlementEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &contractSettlementEvent); err != nil {
