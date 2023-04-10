@@ -78,67 +78,69 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 		return nil
 	}
 	validators := mgr.sk.GetBondedValidatorsByPower(ctx)
-
-	reserve := mgr.keeper.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	emissionCurve := mgr.FetchConfig(ctx, configs.EmissionCurve)
 	blocksPerYear := mgr.FetchConfig(ctx, configs.BlocksPerYear)
-	blockReward := mgr.calcBlockReward(reserve.Int64(), emissionCurve, (blocksPerYear / valCycle))
 
-	if blockReward.IsZero() {
-		ctx.Logger().Info("no validator rewards this block")
-		return nil
-	}
+	reserveBal := mgr.keeper.GetBalance(ctx, mgr.keeper.GetModuleAccAddress(types.ReserveName))
+	for _, bal := range reserveBal {
+		reserve := bal.Amount
+		blockReward := mgr.calcBlockReward(reserve.Int64(), emissionCurve, (blocksPerYear / valCycle))
 
-	// sum tokens
-	total := cosmos.ZeroInt()
-	for _, val := range validators {
-		if !val.IsBonded() || val.IsJailed() {
-			continue
-		}
-		total = total.Add(val.DelegatorShares.RoundInt())
-	}
-
-	for _, val := range validators {
-		if !val.IsBonded() || val.IsJailed() {
-			ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.String())
+		if blockReward.IsZero() {
 			continue
 		}
 
-		acc := cosmos.AccAddress(val.GetOperator())
-
-		totalReward := common.GetSafeShare(val.DelegatorShares.RoundInt(), total, blockReward)
-		validatorReward := cosmos.ZeroInt()
-		rateBasisPts := val.Commission.CommissionRates.Rate.MulInt64(100).RoundInt()
-
-		delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
-		for _, delegate := range delegates {
-			delegateAcc, err := cosmos.AccAddressFromBech32(delegate.DelegatorAddress)
-			if err != nil {
-				ctx.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
+		// sum tokens
+		total := cosmos.ZeroInt()
+		for _, val := range validators {
+			if !val.IsBonded() || val.IsJailed() {
 				continue
 			}
-			delegateReward := common.GetSafeShare(delegate.Shares.RoundInt(), val.DelegatorShares.RoundInt(), totalReward)
-			if acc.String() != delegate.DelegatorAddress {
-				valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
-				delegateReward = delegateReward.Sub(valFee)
-				validatorReward = validatorReward.Add(valFee)
-			}
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, delegateAcc, getCoins(delegateReward.Int64())); err != nil {
-				ctx.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
-			}
-			ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
+			total = total.Add(val.DelegatorShares.RoundInt())
 		}
 
-		if !validatorReward.IsZero() {
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, getCoins(validatorReward.Int64())); err != nil {
-				ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
+		for _, val := range validators {
+			if !val.IsBonded() || val.IsJailed() {
+				ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.String())
 				continue
 			}
-			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
-		}
 
-		if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {
-			ctx.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
+			acc := cosmos.AccAddress(val.GetOperator())
+
+			totalReward := common.GetSafeShare(val.DelegatorShares.RoundInt(), total, blockReward)
+			validatorReward := cosmos.ZeroInt()
+			rateBasisPts := val.Commission.CommissionRates.Rate.MulInt64(100).RoundInt()
+
+			delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
+			for _, delegate := range delegates {
+				delegateAcc, err := cosmos.AccAddressFromBech32(delegate.DelegatorAddress)
+				if err != nil {
+					ctx.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
+					continue
+				}
+				delegateReward := common.GetSafeShare(delegate.Shares.RoundInt(), val.DelegatorShares.RoundInt(), totalReward)
+				if acc.String() != delegate.DelegatorAddress {
+					valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
+					delegateReward = delegateReward.Sub(valFee)
+					validatorReward = validatorReward.Add(valFee)
+				}
+				if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, delegateAcc, cosmos.NewCoins(cosmos.NewCoin(bal.Denom, delegateReward))); err != nil {
+					ctx.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
+				}
+				ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
+			}
+
+			if !validatorReward.IsZero() {
+				if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, cosmos.NewCoins(cosmos.NewCoin(bal.Denom, validatorReward))); err != nil {
+					ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
+					continue
+				}
+				ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
+			}
+
+			if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {
+				ctx.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
+			}
 		}
 	}
 
