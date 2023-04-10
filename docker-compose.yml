@@ -2,8 +2,11 @@ version: "3.6"
 services:
   arkeod:
     hostname: arkeod
+    image: arkeo
     build:
       dockerfile: ./Dockerfile
+      args:
+        - TAG=mocknet
     ports:
       - "1317:1317"
       - "26656:26656"
@@ -32,6 +35,8 @@ services:
     image: arkeo
     build:
       dockerfile: ./Dockerfile
+      args:
+        - TAG=mocknet
     depends_on:
       - "arkeod"
     ports:
