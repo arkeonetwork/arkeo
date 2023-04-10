@@ -62,7 +62,7 @@ func TestCloseContractHandle(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Creator:   clientAccount.String(),
+		Creator:   clientAccount,
 		Client:    clientPubKey,
 		Service:   service.String(),
 		Provider:  providerPubKey,
@@ -155,7 +155,7 @@ func TestClosePayPerBlockContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   service.String(),
-		Creator:   providerAddress.String(),
+		Creator:   providerAddress,
 		Client:    userPubKey,
 		MeterType: types.MeterType_PAY_PER_BLOCK,
 		Duration:  100,
@@ -269,7 +269,7 @@ func TestClosePayPerCallContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   service.String(),
-		Creator:   providerAddress.String(),
+		Creator:   providerAddress,
 		Client:    userPubKey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,

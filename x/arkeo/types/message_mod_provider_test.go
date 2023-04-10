@@ -14,18 +14,7 @@ func TestModProviderValidateBasic(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
-<<<<<<< HEAD
-	rates, err := cosmos.ParseCoins("15uarkeo")
-=======
-	// invalid address
-	msg := MsgModProvider{
-		Creator: "invalid address",
-	}
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
-
 	coinRates, err := cosmos.ParseCoins("15uarkeo")
->>>>>>> 3951377 (WIP with refactor)
 	require.NoError(t, err)
 	rates := []*ContractRate{
 		{

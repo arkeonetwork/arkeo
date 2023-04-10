@@ -61,7 +61,7 @@ func TestOpenContractValidate(t *testing.T) {
 		Provider:  providerPubkey,
 		Service:   service.String(),
 		Client:    clientPubKey,
-		Creator:   acc.String(),
+		Creator:   acc,
 		MeterType: types.MeterType_PAY_PER_BLOCK,
 		Duration:  100,
 		Rate:      sRates[0],
@@ -129,7 +129,7 @@ func TestOpenContractHandle(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:  pubkey,
 		Service:   service.String(),
-		Creator:   acc.String(),
+		Creator:   acc,
 		Client:    pubkey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,
@@ -212,7 +212,7 @@ func TestOpenContract(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   service.String(),
-		Creator:   providerAddress.String(),
+		Creator:   providerAddress,
 		Client:    providerPubKey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,
@@ -235,7 +235,7 @@ func TestOpenContract(t *testing.T) {
 	msg = types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   service.String(),
-		Creator:   clientAddress.String(),
+		Creator:   clientAddress,
 		Client:    clientPubKey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,
@@ -327,7 +327,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   service.String(),
-		Creator:   clientAddress.String(),
+		Creator:   clientAddress,
 		Client:    clientPubKey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,

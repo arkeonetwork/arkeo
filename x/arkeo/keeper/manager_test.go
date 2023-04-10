@@ -180,7 +180,7 @@ func TestContractEndBlock(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:  providerPubKey,
 		Service:   common.BTCService.String(),
-		Creator:   user1Address.String(),
+		Creator:   user1Address,
 		Client:    user1PubKey,
 		MeterType: types.MeterType_PAY_PER_CALL,
 		Duration:  100,
