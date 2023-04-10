@@ -2,6 +2,9 @@ package db
 
 import (
 	"testing"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFindContract(t *testing.T) {
@@ -31,4 +34,22 @@ func TestFindContract(t *testing.T) {
 	if contract != nil {
 		t.Errorf("expected nil but got %v", contract)
 	}
+}
+
+func TestFindContractsByPubKeys(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	db, err := New(config)
+	if err != nil {
+		t.Errorf("error getting db: %+v", err)
+	}
+
+	provider := "arkeopub1addwnpepqfqqxap0fdehn3jc2vzf2q8hpge2lp65r9gettxev28rqn24mjxtqe9fln3"
+	client := "arkeopub1addwnpepq0s3lv5ne868p7jrtcua7awzz9eu76dlddrrpstadrcmtnmyvfk7qsmxt0g"
+	// delegate := ""
+	contracts, err := db.FindContractsByPubKeys(common.GAIAChainRPCArchiveService.String(), provider, client)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, contracts)
 }

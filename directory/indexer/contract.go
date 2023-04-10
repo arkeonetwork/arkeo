@@ -68,37 +68,113 @@ func (a *IndexerApp) handleOpenContractEvent(evt ctypes.ResultEvent) error {
 	return nil
 }
 
-func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) error {
-	contracts, err := a.db.FindContractsByPubKeys(evt.Chain, evt.ProviderPubkey, evt.GetDelegatePubkey())
+func (a *IndexerApp) handleCloseContractEvent(evt ctypes.ResultEvent) error {
+
+	typedEvent, err := arkeoUtils.ParseTypedEvent(evt, "arkeo.arkeo.EventCloseContract")
 	if err != nil {
-		return errors.Wrapf(err, "error finding contract for %s:%s %s", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey())
+		log.Errorf("failed to parse typed event", "error", err)
+		return errors.Wrapf(err, "failed to parse typed event")
 	}
-	if len(contracts) < 1 {
-		return fmt.Errorf("no contracts found: %s:%s %s", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey())
+
+	txData, ok := evt.Data.(tmtypes.EventDataTx)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventDataTx", evt.Data)
+	}
+
+	txid := strings.ToUpper(hex.EncodeToString(tmtypes.Tx(txData.Tx).Hash()))
+
+	closeContractEvent, ok := typedEvent.(*arkeoTypes.EventCloseContract)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventCloseContract", typedEvent)
+	}
+
+	clientPubkey := closeContractEvent.Client.String()
+	if closeContractEvent.Delegate != "" {
+		clientPubkey = closeContractEvent.Delegate.String()
 	}
 
 	// FindContractsByPubKeys returns by id descending (newest)
+	contracts, err := a.db.FindContractsByPubKeys(closeContractEvent.Service, closeContractEvent.Provider.String(), clientPubkey)
+	if err != nil {
+		return errors.Wrapf(err, "error finding contract for %s:%s %s", closeContractEvent.Provider, closeContractEvent.Service, clientPubkey)
+	}
+	if len(contracts) < 1 {
+		return fmt.Errorf("no contracts found: %s:%s %s", closeContractEvent.Provider, closeContractEvent.Service, clientPubkey)
+	}
+
 	contract := contracts[0]
-	if _, err = a.db.UpsertCloseContractEvent(contract.ID, evt); err != nil {
+	event := types.CloseContractEvent{
+		ContractSettlementEvent: types.ContractSettlementEvent{
+			BaseContractEvent: types.BaseContractEvent{
+				ProviderPubkey: closeContractEvent.Provider.String(),
+				Chain:          closeContractEvent.Service,
+				ClientPubkey:   closeContractEvent.Client.String(),
+				DelegatePubkey: closeContractEvent.Delegate.String(),
+				TxID:           txid,
+				Height:         contract.Height,
+				EventHeight:    a.Height,
+			},
+		},
+	}
+	if _, err = a.db.UpsertCloseContractEvent(contract.ID, event); err != nil {
 		return errors.Wrapf(err, "error upserting open contract event")
 	}
 
-	if _, err = a.db.CloseContract(contract.ID, evt.EventHeight); err != nil {
+	if _, err = a.db.CloseContract(contract.ID, event.EventHeight); err != nil {
 		return errors.Wrapf(err, "error closing contract %d", contract.ID)
 	}
 	return nil
 }
 
-func (a *IndexerApp) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
+func (a *IndexerApp) handleContractSettlementEvent(evt ctypes.ResultEvent) error {
 	log.Infof("receieved contractSettlementEvent %#v", evt)
-	contract, err := a.db.FindContractByPubKeys(evt.Chain, evt.ProviderPubkey, evt.GetDelegatePubkey(), evt.Height)
+
+	typedEvent, err := arkeoUtils.ParseTypedEvent(evt, "arkeo.arkeo.EventSettleContract")
 	if err != nil {
-		return errors.Wrapf(err, "error finding contract provider %s chain %s", evt.ProviderPubkey, evt.Chain)
+		log.Errorf("failed to parse typed event: %+v", err)
+		return errors.Wrapf(err, "failed to parse typed event")
+	}
+
+	txData, ok := evt.Data.(tmtypes.EventDataTx)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventDataTx", evt.Data)
+	}
+
+	txid := strings.ToUpper(hex.EncodeToString(tmtypes.Tx(txData.Tx).Hash()))
+
+	settleContractEvent, ok := typedEvent.(*arkeoTypes.EventSettleContract)
+	if !ok {
+		return fmt.Errorf("failed to cast %T to EventSettleContract", typedEvent)
+	}
+	clientPubkey := settleContractEvent.Client.String()
+	if settleContractEvent.Delegate != "" {
+		clientPubkey = settleContractEvent.Delegate.String()
+	}
+
+	contract, err := a.db.FindContractByPubKeys(settleContractEvent.Service, settleContractEvent.Provider.String(), clientPubkey, settleContractEvent.Height)
+	if err != nil {
+		return errors.Wrapf(err, "error finding contract provider %s chain %s", settleContractEvent.Provider, settleContractEvent.Service)
 	}
 	if contract == nil {
-		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey(), evt.Height)
+		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", settleContractEvent.Provider, settleContractEvent.Service, clientPubkey, settleContractEvent.Height)
 	}
-	if _, err = a.db.UpsertContractSettlementEvent(contract.ID, evt); err != nil {
+
+	event := types.ContractSettlementEvent{
+		BaseContractEvent: types.BaseContractEvent{
+			ProviderPubkey: settleContractEvent.Provider.String(),
+			Chain:          settleContractEvent.Service,
+			ClientPubkey:   settleContractEvent.Client.String(),
+			DelegatePubkey: settleContractEvent.Delegate.String(),
+			TxID:           txid,
+			Height:         contract.Height,
+			EventHeight:    settleContractEvent.Height,
+		},
+		Nonce:   fmt.Sprintf("%d", settleContractEvent.Nonce),
+		Paid:    settleContractEvent.Paid.String(),
+		Reserve: settleContractEvent.Reserve.String(),
+	}
+
+	if _, err = a.db.UpsertContractSettlementEvent(contract.ID, event); err != nil {
 		return errors.Wrapf(err, "error upserting contract settlement event")
 	}
 	return nil

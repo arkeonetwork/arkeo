@@ -130,11 +130,12 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 					contractSettlementEvent := types.ContractSettlementEvent{}
 					if err := convertEvent(tmAttributeSource(nil, evt, data.Block.Height), &contractSettlementEvent); err != nil {
 						log.Errorf("error converting contract_settlement event: %+v", err)
-						break
+						continue
 					}
-					if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
-						log.Errorf("error handling close_contract contract_settlement event: %+v", err)
-					}
+					// TODO
+					// if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
+					// 	log.Errorf("error handling close_contract contract_settlement event: %+v", err)
+					// }
 				}
 			}
 		case evt := <-openContractEvents:
@@ -154,47 +155,19 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-claimContractIncomeEvents:
 			log.Debugf("received claim contract income event")
-			claimContractIncomeEvent := types.ClaimContractIncomeEvent{}
-			attribs := wsAttributeSource(evt)
-			// hack contract_settlement height
-			wrapped := func() map[string]string {
-				tmp := attribs()
-				if ev, ok := evt.Events["contract_settlement.height"]; ok && len(ev) > 0 {
-					tmp["height"] = evt.Events["contract_settlement.height"][0]
-				}
-				return tmp
-			}
-			if err := convertEvent(wrapped, &claimContractIncomeEvent); err != nil {
-				log.Errorf("error converting open_contract event: %+v", err)
-				break
-			}
-			if err := a.handleContractSettlementEvent(claimContractIncomeEvent.ContractSettlementEvent); err != nil {
-				log.Errorf("error handling claim contract income event: %+v", err)
+			if err := a.handleContractSettlementEvent(evt); err != nil {
+				log.Errorf("error handling claim_contract_income event: %+v", err)
 			}
 		case evt := <-closeContractEvents:
 			log.Debugf("received close_contract event")
-			closeContractEvent := types.CloseContractEvent{}
-			attribs := wsAttributeSource(evt)
-			wrapped := func() map[string]string {
-				tmp := attribs()
-				if ev, ok := evt.Events["contract_settlement.height"]; ok && len(ev) > 0 {
-					tmp["height"] = evt.Events["contract_settlement.height"][0]
-				}
-				return tmp
-			}
-
-			if err := convertEvent(wrapped, &closeContractEvent); err != nil {
-				log.Errorf("error converting close_contract event: %+v", err)
-				break
-			}
-
-			if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
+			if err := a.handleCloseContractEvent(evt); err != nil {
 				log.Errorf("error handling close_contract event: %+v", err)
 			}
 
-			if err := a.handleContractSettlementEvent(closeContractEvent.ContractSettlementEvent); err != nil {
-				log.Errorf("error handling close_contract contract_settlement event: %+v", err)
-			}
+			// TODO needed?
+			// if err := a.handleContractSettlementEvent(closeContractEvent.ContractSettlementEvent); err != nil {
+			// 	log.Errorf("error handling close_contract contract_settlement event: %+v", err)
+			// }
 		case <-quit:
 			log.Infof("received os quit signal")
 			return nil
@@ -306,9 +279,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting claim_contract_income event: %+v", err)
 			break
 		}
-		if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
-			log.Errorf("error handling claim contract income event: %+v", err)
-		}
+		// TODO
+		// if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
+		// 	log.Errorf("error handling claim contract income event: %+v", err)
+		// }
 	case "validator_payout":
 		validatorPayoutEvent := types.ValidatorPayoutEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &validatorPayoutEvent); err != nil {
@@ -324,9 +298,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting contractSettlementEvent: %+v", err)
 			break
 		}
-		if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
-			log.Errorf("error handling contractSettlementEvent: %+v", err)
-		}
+		// TODO
+		// if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
+		// 	log.Errorf("error handling contractSettlementEvent: %+v", err)
+		// }
 	case "close_contract":
 		log.Debugf("received close_contract event")
 		closeContractEvent := types.CloseContractEvent{}
@@ -334,9 +309,10 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting close_contract event: %+v", err)
 			break
 		}
-		if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
-			log.Errorf("error handling close contract event: %+v", err)
-		}
+		// TODO
+		// if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
+		// 	log.Errorf("error handling close contract event: %+v", err)
+		// }
 	default:
 		log.Debugf("ignored event %s", event.Type)
 	}
