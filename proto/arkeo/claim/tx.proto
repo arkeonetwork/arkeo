@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package arkeo.claim;
 import "arkeo/claim/claim_record.proto";
+import "gogoproto/gogo.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
@@ -13,26 +14,26 @@ service Msg {
   // this line is used by starport scaffolding # proto/tx/rpc
 }
 message MsgClaimEth {
-  string creator = 1;
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   string eth_address = 2; // the adress the claim is for
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
 message MsgClaimEthResponse {}
 
-message MsgClaimArkeo { string creator = 1; }
+message MsgClaimArkeo { bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ]; }
 
 message MsgClaimArkeoResponse {}
 
 message MsgTransferClaim {
-  string creator = 1;
-  string toAddress = 2;
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes toAddress = 2 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
 }
 
 message MsgTransferClaimResponse {}
 
 message MsgAddClaim {
-  string creator = 1;
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   Chain chain = 2;
   string address = 3;
   int64 amount = 4;

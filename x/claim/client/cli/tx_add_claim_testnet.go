@@ -26,6 +26,7 @@ func CmdAddClaim() *cobra.Command {
 				return fmt.Errorf("invalid chain(%s),err: %w", argChain, err)
 			}
 			argAddress := args[1]
+
 			argAmount, err := cast.ToInt64E(args[2])
 			if err != nil {
 				return err
@@ -37,7 +38,7 @@ func CmdAddClaim() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddClaim(
-				clientCtx.GetFromAddress().String(),
+				clientCtx.GetFromAddress(),
 				chain,
 				argAddress,
 				argAmount,

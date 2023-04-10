@@ -16,30 +16,10 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid creator address",
-			msg: MsgAddClaim{
-				Creator: "invalid_address",
-				Address: sample.AccAddress(),
-				Chain:   ARKEO,
-				Amount:  100,
-			},
-			err: sdkerrors.ErrInvalidAddress,
-		},
-		{
-			name: "invalid address",
-			msg: MsgAddClaim{
-				Creator: sample.AccAddress(),
-				Address: "invalid address",
-				Chain:   ARKEO,
-				Amount:  100,
-			},
-			err: sdkerrors.ErrInvalidAddress,
-		},
-		{
 			name: "invalid chain",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   Chain(100),
 				Amount:  100,
 			},
@@ -49,7 +29,7 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 			name: "invalid amount",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   ARKEO,
 				Amount:  -100,
 			},
@@ -59,7 +39,7 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 			name: "valid address",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   ARKEO,
 				Amount:  100,
 			},

@@ -50,7 +50,7 @@ func TestOpenContractValidate(t *testing.T) {
 		Provider:     providerPubkey,
 		Service:      service.String(),
 		Client:       clientPubKey,
-		Creator:      acc.String(),
+		Creator:      acc,
 		ContractType: types.ContractType_SUBSCRIPTION,
 		Duration:     100,
 		Rate:         sRates[0],
@@ -118,7 +118,7 @@ func TestOpenContractHandle(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     pubkey,
 		Service:      service.String(),
-		Creator:      acc.String(),
+		Creator:      acc,
 		Client:       pubkey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -190,7 +190,7 @@ func TestOpenContract(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      providerAddress.String(),
+		Creator:      providerAddress,
 		Client:       providerPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -213,7 +213,7 @@ func TestOpenContract(t *testing.T) {
 	msg = types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      clientAddress.String(),
+		Creator:      clientAddress,
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -294,7 +294,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      clientAddress.String(),
+		Creator:      clientAddress,
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -333,7 +333,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	// settlement period.
 	claimMsg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    clientAddress.String(),
+		Creator:    clientAddress,
 		Nonce:      20,
 	}
 	message := claimMsg.GetBytesToSign()

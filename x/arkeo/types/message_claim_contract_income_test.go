@@ -15,7 +15,6 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
@@ -35,15 +34,8 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	_, _, err = kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
 	require.NoError(t, err)
 
-	// invalid address
 	msg := MsgClaimContractIncome{
-		Creator: "invalid address",
-	}
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
-
-	msg = MsgClaimContractIncome{
-		Creator:    acct.String(),
+		Creator:    acct,
 		ContractId: 1,
 		Nonce:      24,
 	}
@@ -69,7 +61,7 @@ func TestValidateSignature(t *testing.T) {
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	msg := MsgClaimContractIncome{
-		Creator:    acct.String(),
+		Creator:    acct,
 		Nonce:      48,
 		ContractId: 500,
 	}

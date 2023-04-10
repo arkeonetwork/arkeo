@@ -69,7 +69,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	clientPubkey := contract.GetDelegate()
-	if clientPubkey == "" {
+	if clientPubkey.IsEmpty() {
 		clientPubkey = contract.GetClient()
 	}
 
@@ -77,7 +77,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	creator := creatorAddr.String()
 
 	signBytes := types.GetBytesToSign(contract.Id, nonce)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
@@ -86,7 +85,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	msg := types.NewMsgClaimContractIncome(
-		creator,
+		creatorAddr,
 		contract.Id,
 		nonce,
 		signature,

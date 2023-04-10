@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
@@ -21,9 +22,14 @@ func CmdTransferClaim() *cobra.Command {
 				return err
 			}
 
+			toAddress, err := cosmos.AccAddressFromBech32(argToAddress)
+			if err != nil {
+				return err
+			}
+
 			msg := types.NewMsgTransferClaim(
-				clientCtx.GetFromAddress().String(),
-				argToAddress,
+				clientCtx.GetFromAddress(),
+				toAddress,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

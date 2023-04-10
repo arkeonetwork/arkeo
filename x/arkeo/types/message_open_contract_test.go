@@ -6,8 +6,6 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/stretchr/testify/require"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 func TestBondProviderValidateBasic(t *testing.T) {
@@ -16,18 +14,11 @@ func TestBondProviderValidateBasic(t *testing.T) {
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
 
-	// invalid address
-	msg := MsgOpenContract{
-		Creator: "invalid address",
-	}
-	err = msg.ValidateBasic()
-	require.ErrorIs(t, err, sdkerrors.ErrInvalidAddress)
-
 	rate, err := cosmos.ParseCoin("0uarkeo")
 	require.NoError(t, err)
 
-	msg = MsgOpenContract{
-		Creator:  acct.String(),
+	msg := MsgOpenContract{
+		Creator:  acct,
 		Provider: pubkey,
 		Client:   pubkey,
 		Service:  common.BTCService.String(),

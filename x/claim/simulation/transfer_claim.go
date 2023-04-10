@@ -19,7 +19,7 @@ func SimulateMsgTransferClaim(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgTransferClaim{
-			Creator: simAccount.Address.String(),
+			Creator: simAccount.Address,
 		}
 
 		// TODO: Handling the TransferClaim simulation

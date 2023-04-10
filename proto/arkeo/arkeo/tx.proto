@@ -20,8 +20,8 @@ service Msg {
 }
 
 message MsgBondProvider {
-  string creator = 1;
-  string provider = 2
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
   string bond = 4 [
@@ -34,8 +34,8 @@ message MsgBondProvider {
 message MsgBondProviderResponse {}
 
 message MsgModProvider {
-  string creator = 1;
-  string provider = 2
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
   string metadata_uri = 4;
@@ -51,13 +51,13 @@ message MsgModProvider {
 message MsgModProviderResponse {}
 
 message MsgOpenContract {
-  string creator = 1;
-  string provider = 2
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
-  string client = 4
+  bytes client = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  string delegate = 5
+  bytes delegate = 5
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractType contract_type = 6;
   int64 duration = 7;
@@ -73,14 +73,14 @@ message MsgOpenContract {
 message MsgOpenContractResponse {}
 
 message MsgCloseContract {
-  string creator = 1;
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   uint64 contract_id = 2;
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
-  string creator = 1;
+  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   uint64 contract_id = 2;
   bytes signature = 4;
   int64 nonce = 5;
