@@ -197,13 +197,13 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// check if we've exceed the total number of pay-as-you-go queries
-	if contract.MeterType == types.MeterType_PAY_PER_CALL {
+	if contract.Options.MeterType == types.MeterType_PAY_PER_CALL {
 		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate.Amount.Int64())) {
 			return http.StatusPaymentRequired, fmt.Errorf("contract spent")
 		}
 	}
 
-	if ok := p.isRateLimited(key, contract.MeterType); ok {
+	if ok := p.isRateLimited(key, contract.Options.MeterType); ok {
 		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
 	}
 

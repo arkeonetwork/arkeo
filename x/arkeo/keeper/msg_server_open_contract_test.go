@@ -104,7 +104,7 @@ func TestOpenContractValidate(t *testing.T) {
 
 	ctx = ctx.WithBlockHeight(15)
 	contract := types.NewContract(providerPubkey, service, clientPubKey)
-	contract.MeterType = types.MeterType_PAY_PER_BLOCK
+	contract.Options.MeterType = types.MeterType_PAY_PER_BLOCK
 	contract.Height = ctx.BlockHeight()
 	contract.Duration = 100
 	contract.Rate = pRates[0]
@@ -141,7 +141,7 @@ func TestOpenContractHandle(t *testing.T) {
 	contract, err := k.GetActiveContractForUser(ctx, pubkey, pubkey, service)
 	require.NoError(t, err)
 
-	require.Equal(t, contract.MeterType, types.MeterType_PAY_PER_CALL)
+	require.Equal(t, contract.Options.MeterType, types.MeterType_PAY_PER_CALL)
 	require.False(t, contract.IsEmpty())
 
 	require.Equal(t, contract.Height, ctx.BlockHeight())

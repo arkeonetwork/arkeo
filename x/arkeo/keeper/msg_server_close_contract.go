@@ -69,7 +69,7 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if err != nil {
 		return err
 	}
-	if !providerUnBonded && contract.MeterType == types.MeterType_PAY_PER_CALL {
+	if !providerUnBonded && contract.Options.MeterType == types.MeterType_PAY_PER_CALL {
 		// clients are not allowed to cancel a pay-per-call contract as it
 		// could be a way to game providers. IE, the client make 1,000 requests
 		// and before the provider can claim the rewards, the client cancels

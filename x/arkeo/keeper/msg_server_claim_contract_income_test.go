@@ -48,7 +48,7 @@ func TestValidate(t *testing.T) {
 	contract.Rate = rate
 	contract.Height = 10
 	contract.Nonce = 0
-	contract.MeterType = types.MeterType_PAY_PER_CALL
+	contract.Options.MeterType = types.MeterType_PAY_PER_CALL
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 1
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -91,7 +91,7 @@ func TestHandlePayPerCall(t *testing.T) {
 	contract := types.NewContract(pubkey, service, client)
 	contract.Duration = 100
 	contract.Rate = rate
-	contract.MeterType = types.MeterType_PAY_PER_CALL
+	contract.Options.MeterType = types.MeterType_PAY_PER_CALL
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 2
 	require.NoError(t, k.SetContract(ctx, contract))
@@ -158,7 +158,7 @@ func TestHandlePayPerBlock(t *testing.T) {
 	contract.Duration = 100
 	contract.Height = 10
 	contract.Rate = rate
-	contract.MeterType = types.MeterType_PAY_PER_BLOCK
+	contract.Options.MeterType = types.MeterType_PAY_PER_BLOCK
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 3
 	require.NoError(t, k.SetContract(ctx, contract))

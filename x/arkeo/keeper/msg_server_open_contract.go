@@ -140,13 +140,15 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	}
 
 	contract := types.Contract{
-		Provider:           msg.Provider,
-		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
-		Service:            service,
-		UserType:           msg.UserType,
-		MeterType:          msg.MeterType,
+		Provider: msg.Provider,
+		Id:       k.Keeper.GetAndIncrementNextContractId(ctx),
+		Service:  service,
+		Options: types.ContractOptions{
+			UserType:     msg.UserType,
+			MeterType:    msg.MeterType,
+			Restrictions: msg.Restrictions,
+		},
 		Client:             msg.Client,
-		Restrictions:       msg.Restrictions,
 		Delegate:           msg.Delegate,
 		Duration:           msg.Duration,
 		Rate:               msg.Rate,

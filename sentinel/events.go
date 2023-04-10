@@ -101,16 +101,6 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 			if err != nil {
 				return evt, err
 			}
-		case "meter_type":
-			evt.Contract.MeterType = types.MeterType(types.MeterType_value[v])
-			if err != nil {
-				return evt, err
-			}
-		case "user_type":
-			evt.Contract.UserType = types.UserType(types.UserType_value[v])
-			if err != nil {
-				return evt, err
-			}
 		case "height":
 			evt.Contract.Height, err = strconv.ParseInt(v, 10, 64)
 			if err != nil {

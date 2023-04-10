@@ -76,7 +76,7 @@ message Contract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   bytes delegate = 4
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
-  ContractOptions options = 5;
+  ContractOptions options = 5 [(gogoproto.nullable) = false ];
   int64 height = 6;
   int64 duration = 7;
   cosmos.base.v1beta1.Coin rate = 8 [ (gogoproto.nullable) = false ];

@@ -57,7 +57,7 @@ func (contract Contract) Expiration() int64 {
 // but a claim can still be posted for previously made calls in order
 // to correctly settle the contract.
 func (contract Contract) SettlementPeriodEnd() int64 {
-	if contract.MeterType == MeterType_PAY_PER_CALL {
+	if contract.Options.MeterType == MeterType_PAY_PER_CALL {
 		return contract.Expiration() + contract.SettlementDuration
 	}
 	return contract.Expiration()

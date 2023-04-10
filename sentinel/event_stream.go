@@ -157,15 +157,13 @@ func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
 		Service:            service,
 		Client:             evt.Client,
 		Delegate:           evt.Delegate,
-		MeterType:          evt.MeterType,
-		UserType:           evt.UserType,
+		Options:            evt.Options,
 		Height:             evt.Height,
 		Duration:           evt.Duration,
 		Rate:               evt.Rate,
 		Deposit:            evt.Deposit,
 		Id:                 evt.ContractId,
 		SettlementDuration: evt.SettlementDuration,
-		Restrictions:       evt.Restrictions,
 	}
 
 	if !p.isMyPubKey(evt.Provider) {
