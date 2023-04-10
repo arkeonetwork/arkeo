@@ -11,7 +11,7 @@ const TypeMsgAddClaim = "add_claim"
 
 var _ sdk.Msg = &MsgAddClaim{}
 
-func NewMsgAddClaim(creator cosmos.AccAddress, chain Chain, address cosmos.AccAddress, amount int64) *MsgAddClaim {
+func NewMsgAddClaim(creator cosmos.AccAddress, chain Chain, address string, amount int64) *MsgAddClaim {
 	return &MsgAddClaim{
 		Creator: creator,
 		Chain:   chain,
@@ -42,7 +42,7 @@ func (msg *MsgAddClaim) ValidateBasic() error {
 	if !ok {
 		return errors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid chain(%s)", msg.Chain)
 	}
-	if !IsValidAddress(msg.Address.String(), msg.Chain) {
+	if !IsValidAddress(msg.Address, msg.Chain) {
 		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid address")
 	}
 	if msg.Amount <= 0 {

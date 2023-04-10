@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
@@ -27,10 +26,6 @@ func CmdAddClaim() *cobra.Command {
 				return fmt.Errorf("invalid chain(%s),err: %w", argChain, err)
 			}
 			argAddress := args[1]
-			addr, err := cosmos.AccAddressFromBech32(argAddress)
-			if err != nil {
-				return err
-			}
 
 			argAmount, err := cast.ToInt64E(args[2])
 			if err != nil {
@@ -45,7 +40,7 @@ func CmdAddClaim() *cobra.Command {
 			msg := types.NewMsgAddClaim(
 				clientCtx.GetFromAddress(),
 				chain,
-				addr,
+				argAddress,
 				argAmount,
 			)
 			if err := msg.ValidateBasic(); err != nil {

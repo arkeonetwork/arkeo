@@ -19,7 +19,7 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 			name: "invalid chain",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   Chain(100),
 				Amount:  100,
 			},
@@ -29,7 +29,7 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 			name: "invalid amount",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   ARKEO,
 				Amount:  -100,
 			},
@@ -39,7 +39,7 @@ func TestMsgAddClaim_ValidateBasic(t *testing.T) {
 			name: "valid address",
 			msg: MsgAddClaim{
 				Creator: sample.AccAddress(),
-				Address: sample.AccAddress(),
+				Address: sample.AccAddress().String(),
 				Chain:   ARKEO,
 				Amount:  100,
 			},
