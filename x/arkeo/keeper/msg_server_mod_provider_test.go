@@ -52,6 +52,9 @@ func TestModProviderHandle(t *testing.T) {
 	pubkey := types.GetRandomPubKey()
 	acct, err := pubkey.GetMyAddress()
 	require.NoError(t, err)
+	provider := types.NewProvider(pubkey, common.BTCService)
+	provider.Bond = cosmos.NewInt(500)
+	require.NoError(t, k.SetProvider(ctx, provider))
 
 	sRates, err := cosmos.ParseCoins("11uarkeo")
 	require.NoError(t, err)
@@ -73,7 +76,7 @@ func TestModProviderHandle(t *testing.T) {
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
-	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCService)
+	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.MetadataUri, "foobar")
 	require.Equal(t, provider.MetadataNonce, uint64(3))

@@ -29,6 +29,14 @@ import (
 // Cosmos
 ////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: determine how to return these programmatically without keeper
+const (
+	ModuleAddr         = "tarkeo1k8925g52vwe5jgfp4nqr7ljuhs7nzu2f8g0za5"
+	ModuleAddrContract = "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h"
+	ModuleAddrProvider = "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k"
+	ModuleAddrReserve  = "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t"
+)
+
 var (
 	encodingConfig cosmoscmd.EncodingConfig
 	clientCtx      client.Context

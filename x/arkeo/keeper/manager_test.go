@@ -329,3 +329,59 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, activeContract.SettlementHeight, activeContract.SettlementPeriodEnd())
 }
+
+func TestInvariantBondModule(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	mgr := NewManager(k, sk)
+
+	require.NoError(t, mgr.invariantBondModule(ctx))
+
+	// setup provider
+	pubkey := types.GetRandomPubKey()
+	provider := types.NewProvider(pubkey, common.BTCService)
+	provider.Bond = cosmos.NewInt(500)
+	require.NoError(t, k.SetProvider(ctx, provider))
+
+	// invariant should not fire
+	require.ErrorIs(t, mgr.invariantBondModule(ctx), types.ErrInvariantBondModule)
+
+	// mint tokens into the provider module, and check that the invariant no longer fires
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(1000)))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ProviderName, getCoins(1000)))
+	require.NoError(t, mgr.invariantBondModule(ctx))
+}
+
+func TestInvariantContractModule(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	mgr := NewManager(k, sk)
+
+	require.NoError(t, mgr.invariantContractModule(ctx))
+
+	// setup provider
+	pubkey := types.GetRandomPubKey()
+	contract := types.NewContract(pubkey, common.BTCService, pubkey)
+	contract.Rate = cosmos.NewInt64Coin(configs.Denom, 10)
+	contract.Deposit = cosmos.NewInt(500)
+	contract.Paid = cosmos.NewInt(200)
+	contract.Duration = 10
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	// invariant should not fire
+	require.ErrorIs(t, mgr.invariantContractModule(ctx), types.ErrInvariantContractModule)
+
+	// mint tokens into the provider module, and check that the invariant no longer fires
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(1000)))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
+	require.NoError(t, mgr.invariantContractModule(ctx))
+}
+
+func TestInvariantMaxSupply(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	mgr := NewManager(k, sk)
+
+	require.NoError(t, mgr.invariantMaxSupply(ctx))
+
+	// mint many coins and trigger the invariant
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(200_000_000*1e8)))
+	require.ErrorIs(t, mgr.invariantMaxSupply(ctx), types.ErrInvariantMaxSupply)
+}

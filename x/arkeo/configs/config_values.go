@@ -15,6 +15,7 @@ const (
 	HandlerOpenContract
 	HandlerCloseContract
 	HandlerClaimContractIncome
+	MaxSupply
 	MaxContractLength
 	OpenContractCost
 	MinProviderBond
@@ -30,6 +31,7 @@ var nameToString = map[ConfigName]string{
 	HandlerOpenContract:        "HandlerOpenContract",
 	HandlerCloseContract:       "HandlerCloseContract",
 	HandlerClaimContractIncome: "HandlerClaimContractIncome",
+	MaxSupply:                  "MaxSupply",
 	MaxContractLength:          "MaxContractLength",
 	OpenContractCost:           "OpenContractCost",
 	MinProviderBond:            "MinProviderBond",

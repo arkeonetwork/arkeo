@@ -43,6 +43,7 @@ func TestGenesisWithContracts(t *testing.T) {
 	provider := types.NewProvider(providerPubkey, common.BTCService)
 	provider.Status = types.ProviderStatus_ONLINE
 	provider.LastUpdate = 100
+	provider.Bond = cosmos.NewInt(100)
 	provider.SubscriptionRate, _ = cosmos.ParseCoins("100uarkeo")
 	provider.PayAsYouGoRate, _ = cosmos.ParseCoins("100uarkeo")
 	err := k.SetProvider(ctx, provider)

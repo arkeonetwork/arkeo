@@ -38,6 +38,7 @@ type Keeper interface {
 	GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string
 	GetStoreVersion(ctx cosmos.Context) int64
 	SetStoreVersion(ctx cosmos.Context, ver int64)
+	GetSupply(ctx cosmos.Context, denom string) cosmos.Coin
 	GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string) cosmos.Int
 	SendFromModuleToModule(ctx cosmos.Context, from, to string, coin cosmos.Coins) error
 	SendFromAccountToModule(ctx cosmos.Context, from cosmos.AccAddress, to string, _ cosmos.Coins) error
@@ -221,6 +222,10 @@ func (k KVStore) GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string
 	addr := k.accountKeeper.GetModuleAddress(moduleName)
 	coin := k.coinKeeper.GetBalance(ctx, addr, denom)
 	return cosmos.NewIntFromBigInt(coin.Amount.BigInt())
+}
+
+func (k KVStore) GetSupply(ctx cosmos.Context, denom string) cosmos.Coin {
+	return k.coinKeeper.GetSupply(ctx, denom)
 }
 
 // SendFromModuleToModule transfer asset from one module to another
