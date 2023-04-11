@@ -9,9 +9,13 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	abciTypes "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/bytes"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 func TestHandleActiveContract(t *testing.T) {
@@ -31,12 +35,18 @@ func TestHandleActiveContract(t *testing.T) {
 		Id:                 1,
 		SettlementDuration: 10,
 	}
+
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
-
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   openEvent.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	url := fmt.Sprintf("%s%s/%s/%s", RoutesActiveContract, inputContract.GetSpender(), testConfig.ProviderPubKey, inputContract.Service)
@@ -84,8 +94,13 @@ func TestHandleClaim(t *testing.T) {
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
-
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   openEvent.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	// simulate 10 calls being made to sentinel on the contract.
@@ -150,8 +165,13 @@ func TestHandleOpenClaims(t *testing.T) {
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
-
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   openEvent.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	// simulate 10 calls being made to sentinel on the contract.
@@ -163,14 +183,19 @@ func TestHandleOpenClaims(t *testing.T) {
 	_, err = proxy.paidTier(arkAuth, "")
 	require.NoError(t, err)
 
-	// repeat for a second contract rom a different client
+	// repeat for a second contract from a different client
 	inputContract.Client = types.GetRandomPubKey()
 	inputContract.Id = 420
 	openEvent = types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
-
-	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	// resultTx = &coretypes.ResultTx{
+	// 	Hash:     bytes.HexBytes("0x1234"),
+	// 	Height:   openEvent.Height,
+	// 	Index:    0,
+	// 	TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	// }
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 	arkAuth = ArkAuth{
 		ContractId: inputContract.Id,

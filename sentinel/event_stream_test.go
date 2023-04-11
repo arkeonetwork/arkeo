@@ -1,20 +1,20 @@
 package sentinel
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	abciTypes "github.com/tendermint/tendermint/abci/types"
-	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
+	"github.com/tendermint/tendermint/libs/bytes"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 func newTestConfig() conf.Configuration {
@@ -64,7 +64,14 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
 
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   inputContract.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore has the contract and its active
@@ -83,7 +90,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
 
-	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 	_, err = proxy.MemStore.Get(inputContract.Key())
 	require.Error(t, err)
@@ -100,11 +107,12 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	openEvent.Provider = inputContract.Provider
 	openEvent.ContractId = inputContract.Id
 	openEvent.Height = inputContract.Height
+	resultTx.Height = inputContract.Height
 
 	sdkEvt, err = sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
 
-	resultEvent = makeResultEvent(sdkEvt, openEvent.Height)
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	outputContract, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
@@ -129,12 +137,19 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Id:                 1,
 		SettlementDuration: 10,
 	}
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   inputContract.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
 
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore
@@ -145,6 +160,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 	// confirm that we can close the contract
 	proxy.MemStore.SetHeight(200)
 	inputContract.SettlementHeight = 200
+	resultTx.Height = inputContract.Height
 	closeEvent := types.EventCloseContract{
 		ContractId: inputContract.Id,
 		Provider:   inputContract.Provider,
@@ -156,7 +172,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 	sdkEvt, err = sdk.TypedEventToEvent(&closeEvent)
 	require.NoError(t, err)
 
-	resultEvent = makeResultEvent(sdkEvt, inputContract.SettlementHeight)
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleCloseContractEvent(resultEvent)
 	_, err = proxy.MemStore.Get(inputContract.Key()) // contract should be deleted from store since its closed
 	require.Error(t, err)
@@ -179,11 +195,18 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Id:                 1,
 		SettlementDuration: 10,
 	}
+	resultTx := &coretypes.ResultTx{
+		Hash:     bytes.HexBytes("0x1234"),
+		Height:   inputContract.Height,
+		Index:    0,
+		TxResult: abciTypes.ResponseDeliverTx{Code: 0, Data: []byte("0x4321")},
+	}
+
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
-	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
+	resultEvent := utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleOpenContractEvent(resultEvent)
 
 	// confirm that our memstore has the contract.
@@ -212,8 +235,8 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	settlementEvent := types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract)
 	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
 	require.NoError(t, err)
-
-	resultEvent = makeResultEvent(sdkEvt, 151)
+	resultTx.Height = proxy.MemStore.GetHeight() + 1
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleContractSettlementEvent(resultEvent)
 
 	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
@@ -228,8 +251,8 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	settlementEvent = types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract)
 	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
 	require.NoError(t, err)
-
-	resultEvent = makeResultEvent(sdkEvt, 161)
+	resultTx.Height = proxy.MemStore.GetHeight() + 1
+	resultEvent = utils.MakeResultEvent(sdkEvt, resultTx)
 	proxy.handleContractSettlementEvent(resultEvent)
 	claim, err = proxy.ClaimStore.Get(Claim{ContractId: inputContract.Id}.Key())
 	require.NoError(t, err)
@@ -242,30 +265,30 @@ func TestHandleNewBlockHeaderEvent(t *testing.T) {
 	// TODO: add tests
 }
 
-func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
-	evts := make(map[string][]string, len(sdkEvent.Attributes))
-	for _, attr := range sdkEvent.Attributes {
-		evts[string(attr.Key)] = []string{string(attr.Value)}
-	}
+// func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
+// 	evts := make(map[string][]string, len(sdkEvent.Attributes))
+// 	for _, attr := range sdkEvent.Attributes {
+// 		evts[string(attr.Key)] = []string{string(attr.Value)}
+// 	}
 
-	abciEvents := []abciTypes.Event{{
-		Type:       sdkEvent.Type,
-		Attributes: sdkEvent.Attributes,
-	}}
+// 	abciEvents := []abciTypes.Event{{
+// 		Type:       sdkEvent.Type,
+// 		Attributes: sdkEvent.Attributes,
+// 	}}
 
-	query := fmt.Sprintf("tm.event = 'Tx' AND message.action='/%s'", sdkEvent.Type)
-	return tmCoreTypes.ResultEvent{
-		Query:  query,
-		Events: evts,
-		Data: tmtypes.EventDataTx{
-			TxResult: abciTypes.TxResult{
-				Height: height,
-				Index:  0,
-				Tx:     []byte{},
-				Result: abciTypes.ResponseDeliverTx{
-					Events: abciEvents,
-				},
-			},
-		},
-	}
-}
+// 	query := fmt.Sprintf("tm.event = 'Tx' AND message.action='/%s'", sdkEvent.Type)
+// 	return tmCoreTypes.ResultEvent{
+// 		Query:  query,
+// 		Events: evts,
+// 		Data: tmtypes.EventDataTx{
+// 			TxResult: abciTypes.TxResult{
+// 				Height: height,
+// 				Index:  0,
+// 				Tx:     []byte{},
+// 				Result: abciTypes.ResponseDeliverTx{
+// 					Events: abciEvents,
+// 				},
+// 			},
+// 		},
+// 	}
+// }
