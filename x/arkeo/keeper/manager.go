@@ -64,7 +64,7 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 
 	if sum.GT(balance) {
 		// TODO: instead of returning an error and causing a panic, pause the bond provider handler and allow the chain to continue to function
-		return errors.Wrapf(types.ErrInvariantBondModule, "bond module does not have enough token in it to back the bond records (%d/%d)", sum.Int64(), balance.Int64())
+		return errors.Wrapf(types.ErrInvariantBondModule, "bond module does not have enough token in it to back the bond records (%s/%s)", sum.String(), balance.String())
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func (mgr Manager) invariantContractModule(ctx cosmos.Context) error {
 		}
 		balance := mgr.keeper.GetBalanceOfModule(ctx, types.ContractName, sum.Denom)
 		if sum.Amount.GT(balance) {
-			return errors.Wrapf(types.ErrInvariantContractModule, "contract module does not have enough token (%s) in it to back the bond records (%d/%d)", sum.Denom, sum.Amount.Int64(), balance.Int64())
+			return errors.Wrapf(types.ErrInvariantContractModule, "contract module does not have enough token (%s) in it to back the bond records (%s/%s)", sum.Denom, sum.Amount.String(), balance.String())
 		}
 	}
 
@@ -107,7 +107,7 @@ func (mgr Manager) invariantMaxSupply(ctx cosmos.Context) error {
 
 	max := cosmos.NewInt(mgr.FetchConfig(ctx, configs.MaxSupply))
 	if supply.Amount.GT(max) {
-		return errors.Wrapf(types.ErrInvariantMaxSupply, "supply has surpass the max set (%d/%d)", supply.Amount.Int64(), max.Int64())
+		return errors.Wrapf(types.ErrInvariantMaxSupply, "supply has surpass the max set (%s/%s)", supply.Amount.String(), max.String())
 	}
 
 	return nil
@@ -278,6 +278,10 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, remainder))); err != nil {
 				return contract, err
 			}
+			// now that the user has some of their funds refunded, the deposit
+			// amount should be updated (to reflect that). This also sets Paid
+			// == Deposit, which causes the record to be deleted, conserving
+			// space
 			contract.Deposit = contract.Paid
 		}
 		contract.SettlementHeight = ctx.BlockHeight()

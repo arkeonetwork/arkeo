@@ -366,7 +366,7 @@ func TestInvariantContractModule(t *testing.T) {
 	contract.Duration = 10
 	require.NoError(t, k.SetContract(ctx, contract))
 
-	// invariant should not fire
+	// invariant should fire
 	require.ErrorIs(t, mgr.invariantContractModule(ctx), types.ErrInvariantContractModule)
 
 	// mint tokens into the provider module, and check that the invariant no longer fires
