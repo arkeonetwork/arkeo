@@ -11,7 +11,7 @@ import (
 func (k KVStore) setProvider(ctx cosmos.Context, key string, record types.Provider) {
 	store := ctx.KVStore(k.storeKey)
 	buf := k.cdc.MustMarshal(&record)
-	if buf == nil {
+	if buf == nil || record.Bond.IsZero() {
 		store.Delete([]byte(key))
 	} else {
 		store.Set([]byte(key), buf)

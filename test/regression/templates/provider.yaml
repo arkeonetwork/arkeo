@@ -1,6 +1,12 @@
 type: state
 genesis:
   app_state:
+    bank:
+      balances:
+        - address: {{ addr_module_provider }}
+          coins:
+            - amount: "1000000000000"
+              denom: uarkeo
     arkeo:
       providers:
         - pub_key: {{ pubkey_fox }}

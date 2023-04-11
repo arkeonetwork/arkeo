@@ -217,6 +217,15 @@
     "bank": {
       "balances": [
         {
+          "address": "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k",
+          "coins": [
+            {
+              "amount": "1000000000000",
+              "denom": "uarkeo"
+            }
+          ]
+        },
+        {
           "address": "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43",
           "coins": [
             {
@@ -247,7 +256,7 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "5355285730",
+              "amount": "5355388717",
               "denom": "stake"
             }
           ]
@@ -287,11 +296,11 @@
       },
       "supply": [
         {
-          "amount": "5355285730",
+          "amount": "5355388717",
           "denom": "stake"
         },
         {
-          "amount": "52000000000000000",
+          "amount": "52001000000000000",
           "denom": "uarkeo"
         }
       ]
@@ -366,7 +375,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "107105714.600000000000000000",
+            "amount": "107107774.340000000000000000",
             "denom": "stake"
           }
         ]
@@ -375,7 +384,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "5248180015.400000000000000000",
+              "amount": "5248280942.660000000000000000",
               "denom": "stake"
             }
           ],
@@ -394,7 +403,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "524818001.540000000000000000",
+                "amount": "524828094.266000000000000000",
                 "denom": "stake"
               }
             ]
@@ -408,7 +417,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "4723362013.860000000000000000",
+                "amount": "4723452848.394000000000000000",
                 "denom": "stake"
               }
             ]
@@ -524,8 +533,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6759997669743154.460000000000000000",
-        "inflation": "0.129999955187368355"
+        "annual_provisions": "6760127669846140.630585000000000000",
+        "inflation": "0.129999955190210585"
       },
       "params": {
         "blocks_per_year": "6311520",

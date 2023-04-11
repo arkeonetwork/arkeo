@@ -32,6 +32,84 @@ func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.ValidatorEndBlock(ctx); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
 	}
+
+	// invariant checks
+	if err := mgr.invariantBondModule(ctx); err != nil {
+		panic(err)
+	}
+	if err := mgr.invariantContractModule(ctx); err != nil {
+		panic(err)
+	}
+	if err := mgr.invariantMaxSupply(ctx); err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+// test that the bond module has enough bond in it
+func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
+	balance := mgr.keeper.GetBalanceOfModule(ctx, types.ProviderName, configs.Denom)
+
+	sum := cosmos.ZeroInt()
+	iter := mgr.keeper.GetProviderIterator(ctx)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var provider types.Provider
+		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &provider); err != nil {
+			ctx.Logger().Error("fail to unmarshal provider", "error", err)
+			continue
+		}
+		sum = sum.Add(provider.Bond)
+	}
+
+	if sum.GT(balance) {
+		// TODO: instead of returning an error and causing a panic, pause the bond provider handler and allow the chain to continue to function
+		return errors.Wrapf(types.ErrInvariantBondModule, "bond module does not have enough token in it to back the bond records (%s/%s)", sum.String(), balance.String())
+	}
+
+	return nil
+}
+
+// test that the contract module has enough bond in it
+func (mgr Manager) invariantContractModule(ctx cosmos.Context) error {
+
+	sums := cosmos.NewCoins()
+	iter := mgr.keeper.GetContractIterator(ctx)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var contract types.Contract
+		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &contract); err != nil {
+			ctx.Logger().Error("fail to unmarshal contract", "error", err)
+			continue
+		}
+		if contract.IsSettled(ctx.BlockHeight()) {
+			continue
+		}
+		sums = sums.Add(cosmos.NewCoin(contract.Rate.Denom, contract.Deposit.Sub(contract.Paid)))
+	}
+
+	for _, sum := range sums {
+		if sum.Amount.IsZero() {
+			continue
+		}
+		balance := mgr.keeper.GetBalanceOfModule(ctx, types.ContractName, sum.Denom)
+		if sum.Amount.GT(balance) {
+			return errors.Wrapf(types.ErrInvariantContractModule, "contract module does not have enough token (%s) in it to back the bond records (%s/%s)", sum.Denom, sum.Amount.String(), balance.String())
+		}
+	}
+
+	return nil
+}
+
+// test that the total supply does not surpass max supply
+func (mgr Manager) invariantMaxSupply(ctx cosmos.Context) error {
+	supply := mgr.keeper.GetSupply(ctx, configs.Denom)
+
+	max := cosmos.NewInt(mgr.FetchConfig(ctx, configs.MaxSupply))
+	if supply.Amount.GT(max) {
+		return errors.Wrapf(types.ErrInvariantMaxSupply, "supply has surpass the max set (%s/%s)", supply.Amount.String(), max.String())
+	}
+
 	return nil
 }
 
@@ -200,6 +278,11 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, client, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, remainder))); err != nil {
 				return contract, err
 			}
+			// now that the user has some of their funds refunded, the deposit
+			// amount should be updated (to reflect that). This also sets Paid
+			// == Deposit, which causes the record to be deleted, conserving
+			// space
+			contract.Deposit = contract.Paid
 		}
 		contract.SettlementHeight = ctx.BlockHeight()
 		// this contract can now be removed from the users list of contracts

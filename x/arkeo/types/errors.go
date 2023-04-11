@@ -36,4 +36,7 @@ var (
 	ErrContractNotFound                       = errors.Register(ModuleName, 27, "contract not found")
 	ErrInvalidModProviderSettlementDuration   = errors.Register(ModuleName, 28, "invalid mod provider settlement duration")
 	ErrInvalidModProviderRate                 = errors.Register(ModuleName, 29, "bad provider rate")
+	ErrInvariantBondModule                    = errors.Register(ModuleName, 30, "bond module invariant")
+	ErrInvariantContractModule                = errors.Register(ModuleName, 31, "contract module invariant")
+	ErrInvariantMaxSupply                     = errors.Register(ModuleName, 32, "max supply invariant")
 )
