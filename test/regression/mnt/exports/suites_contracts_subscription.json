@@ -22,6 +22,7 @@
       ],
       "contracts": [
         {
+          "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "100",
@@ -31,6 +32,7 @@
           "nonce": "0",
           "paid": "100",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
+          "queries_per_minute": "0",
           "rate": {
             "amount": "10",
             "denom": "uarkeo"
@@ -41,6 +43,7 @@
           "type": "SUBSCRIPTION"
         },
         {
+          "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "20",
@@ -50,6 +53,7 @@
           "nonce": "0",
           "paid": "20",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
+          "queries_per_minute": "0",
           "rate": {
             "amount": "10",
             "denom": "uarkeo"
@@ -262,7 +266,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "199999912",
+              "amount": "199999952",
               "denom": "uarkeo"
             }
           ]
@@ -280,7 +284,7 @@
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
           "coins": [
             {
-              "amount": "100",
+              "amount": "60",
               "denom": "uarkeo"
             }
           ]
