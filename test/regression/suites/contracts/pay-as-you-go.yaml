@@ -15,6 +15,7 @@ provider: {{ pubkey_fox }}
 service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "PAY_AS_YOU_GO"
+queries_per_minute: 1
 duration: 10
 rate:
   denom: "uarkeo"

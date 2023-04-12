@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/arkeonetwork/arkeo/common"
 )
@@ -64,18 +63,6 @@ func loadVarInt(key string) int {
 		panic(fmt.Errorf("env var %s is not an integer: %s", key, err))
 	}
 	return i
-}
-
-func loadVarDuration(key string) time.Duration {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		panic(fmt.Sprintf("%s env var is not set", key))
-	}
-	dur, err := time.ParseDuration(val)
-	if err != nil {
-		panic(fmt.Errorf("env var %s is not a duration: %s", key, err))
-	}
-	return dur
 }
 
 func NewConfiguration() Configuration {

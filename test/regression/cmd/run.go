@@ -268,11 +268,6 @@ func run(path string) error {
 		"SOURCE_CHAIN=localhost:1317",
 		"EVENT_STREAM_HOST=localhost:26657",
 		"FREE_RATE_LIMIT=10",
-		"FREE_RATE_LIMIT_DURATION=1m",
-		"SUB_RATE_LIMIT=10",
-		"SUB_RATE_LIMIT_DURATION=1m",
-		"AS_GO_RATE_LIMIT=10",
-		"AS_GO_RATE_LIMIT_DURATION=1m",
 		"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
 		"GAIA_RPC_ARCHIVE_HOST=http://176.34.207.130:26657",
 	)
