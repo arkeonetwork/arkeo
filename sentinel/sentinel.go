@@ -130,7 +130,7 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	providerPk := p.Config.ProviderPubKey
+	providerPK := p.Config.ProviderPubKey
 
 	service, err := common.NewService(parts[2])
 	if err != nil {

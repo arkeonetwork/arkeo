@@ -85,16 +85,13 @@ func (k *MemStore) Put(contract types.Contract) {
 }
 
 func (k *MemStore) GetActiveContract(provider common.PubKey, service common.Service, spender common.PubKey) (types.Contract, error) {
-	k.storeLock.Lock()
-	defer k.storeLock.Unlock()
-
 	key := k.Key(provider.String(), service.String(), spender.String())
 	contract, err := k.Get(key)
 	if err != nil {
 		return types.Contract{}, err
 	}
 
-	if contract.IsOpen() {
+	if contract.IsOpen(k.blockHeight) {
 		return contract, nil
 	}
 
@@ -125,7 +122,8 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	}
 
 	var data fetch
-	requestURL := fmt.Sprintf("%s/arkeo/contract/%s", k.baseURL, key)
+	requestURL := fmt.Sprintf("%s/arkeo/active-contract/%s", k.baseURL, key)
+	fmt.Println("Request URL:", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		k.logger.Error("fail to create http request", "error", err)

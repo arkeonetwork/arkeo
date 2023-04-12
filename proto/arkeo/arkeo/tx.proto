@@ -20,7 +20,8 @@ service Msg {
 }
 
 message MsgBondProvider {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
@@ -34,7 +35,8 @@ message MsgBondProvider {
 message MsgBondProviderResponse {}
 
 message MsgModProvider {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
@@ -43,15 +45,18 @@ message MsgModProvider {
   ProviderStatus status = 6;
   int64 min_contract_duration = 7;
   int64 max_contract_duration = 8;
-  repeated cosmos.base.v1beta1.Coin subscription_rate = 9 [ (gogoproto.nullable) = false ];
-  repeated cosmos.base.v1beta1.Coin pay_as_you_go_rate = 10 [ (gogoproto.nullable) = false ];
+  repeated cosmos.base.v1beta1.Coin subscription_rate = 9
+      [ (gogoproto.nullable) = false ];
+  repeated cosmos.base.v1beta1.Coin pay_as_you_go_rate = 10
+      [ (gogoproto.nullable) = false ];
   int64 settlement_duration = 11;
 }
 
 message MsgModProviderResponse {}
 
 message MsgOpenContract {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   bytes provider = 2
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   string service = 3;
@@ -73,14 +78,16 @@ message MsgOpenContract {
 message MsgOpenContractResponse {}
 
 message MsgCloseContract {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   uint64 contract_id = 2;
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   uint64 contract_id = 2;
   bytes signature = 4;
   int64 nonce = 5;

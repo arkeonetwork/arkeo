@@ -22,8 +22,10 @@ message Provider {
   ProviderStatus status = 5;
   int64 min_contract_duration = 6;
   int64 max_contract_duration = 7;
-  repeated cosmos.base.v1beta1.Coin subscription_rate = 8 [ (gogoproto.nullable) = false ];
-  repeated cosmos.base.v1beta1.Coin pay_as_you_go_rate = 9 [ (gogoproto.nullable) = false ];
+  repeated cosmos.base.v1beta1.Coin subscription_rate = 8
+      [ (gogoproto.nullable) = false ];
+  repeated cosmos.base.v1beta1.Coin pay_as_you_go_rate = 9
+      [ (gogoproto.nullable) = false ];
   string bond = 10 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",

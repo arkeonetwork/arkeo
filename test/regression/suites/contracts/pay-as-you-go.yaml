@@ -68,7 +68,7 @@ count: 1
 ########################################################################################
 type: check
 description: ensure contract shows up in active contracts
-endpoint: http://localhost:3636/active-contract/{{ pubkey_cat }}/{{ pubkey_fox }}/swapi.dev
+endpoint: http://localhost:3636/active-contract/swapi.dev/{{ pubkey_cat }}
 asserts:
   - .provider == "{{ pubkey_fox }}"
   - .service == 1
