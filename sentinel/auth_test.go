@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
@@ -62,8 +61,7 @@ func TestArkAuth(t *testing.T) {
 
 func TestFreeTier(t *testing.T) {
 	config := conf.Configuration{
-		FreeTierRateLimitDuration: time.Minute,
-		FreeTierRateLimit:         1,
+		FreeTierRateLimit: 1,
 	}
 	proxy := NewProxy(config)
 
@@ -105,13 +103,8 @@ func TestPaidTier(t *testing.T) {
 	require.NoError(t, err)
 
 	config := conf.Configuration{
-		ProviderPubKey:            pubkey,
-		AsGoTierRateLimitDuration: time.Minute,
-		AsGoTierRateLimit:         1,
-		SubTierRateLimitDuration:  time.Minute,
-		SubTierRateLimit:          1,
-		FreeTierRateLimitDuration: time.Minute,
-		FreeTierRateLimit:         1,
+		ProviderPubKey:    pubkey,
+		FreeTierRateLimit: 1,
 	}
 	proxy := NewProxy(config)
 
@@ -119,6 +112,7 @@ func TestPaidTier(t *testing.T) {
 	contract.Height = 5
 	contract.Duration = 100
 	contract.Id = 545
+	contract.QueriesPerMinute = 1
 	proxy.MemStore.SetHeight(10)
 	proxy.MemStore.Put(contract)
 
@@ -178,13 +172,8 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 	require.NoError(t, err)
 
 	config := conf.Configuration{
-		ProviderPubKey:            pubkey,
-		AsGoTierRateLimitDuration: time.Minute,
-		AsGoTierRateLimit:         1,
-		SubTierRateLimitDuration:  time.Minute,
-		SubTierRateLimit:          1,
-		FreeTierRateLimitDuration: time.Minute,
-		FreeTierRateLimit:         1,
+		ProviderPubKey:    pubkey,
+		FreeTierRateLimit: 1,
 	}
 	proxy := NewProxy(config)
 

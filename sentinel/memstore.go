@@ -115,6 +115,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		Nonce            string                      `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
 		SettlementHeight string                      `protobuf:"varint,12,opt,name=settlement_height,json=settlementHeight,proto3" json:"settlement_height,omitempty"`
 		Authorization    types.ContractAuthorization `protobuf:"varint,15,opt,name=authorization,proto3,enum=arkeo.arkeo.ContractAuthorization" json:"authorization,omitempty"`
+		QueriesPerMinute int64                       `protobuf:"varint,16,opt,name=queries_per_minute,json=queriesPerMinute,proto3" json:"queries_per_minute,omitempty"`
 	}
 
 	type fetch struct {
@@ -160,6 +161,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
 	contract.SettlementHeight, _ = strconv.ParseInt(data.Contract.SettlementHeight, 10, 64)
 	contract.Authorization = data.Contract.Authorization
+	contract.QueriesPerMinute = data.Contract.QueriesPerMinute
 
 	return contract, nil
 }

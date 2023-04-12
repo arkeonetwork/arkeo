@@ -12,23 +12,18 @@ import (
 )
 
 type Configuration struct {
-	Moniker                   string        `json:"moniker"`
-	Website                   string        `json:"website"`
-	Description               string        `json:"description"`
-	Location                  string        `json:"location"`
-	Port                      string        `json:"port"`
-	ProxyHost                 string        `json:"proxy_host"`
-	SourceChain               string        `json:"source_chain"` // base url for arceo block chain
-	EventStreamHost           string        `json:"event_stream_host"`
-	ClaimStoreLocation        string        `json:"claim_store_location"` // file location where claims are stored
-	ProviderPubKey            common.PubKey `json:"provider_pubkey"`
-	FreeTierRateLimit         int           `json:"free_tier_rate_limit"`
-	FreeTierRateLimitDuration time.Duration `json:"free_tier_rate_limit_duration"`
-	SubTierRateLimit          int           `json:"subscription_tier_rate_limit"`
-	SubTierRateLimitDuration  time.Duration `json:"subscription_tier_rate_limit_duration"`
-	AsGoTierRateLimit         int           `json:"pay_as_you_go_tier_rate_limit"`
-	AsGoTierRateLimitDuration time.Duration `json:"pay_as_you_go_tier_rate_limit_duration"`
-	GaiaRpcArchiveHost        string        `json:"gaia_rpc_archive_host"`
+	Moniker            string        `json:"moniker"`
+	Website            string        `json:"website"`
+	Description        string        `json:"description"`
+	Location           string        `json:"location"`
+	Port               string        `json:"port"`
+	ProxyHost          string        `json:"proxy_host"`
+	SourceChain        string        `json:"source_chain"` // base url for arceo block chain
+	EventStreamHost    string        `json:"event_stream_host"`
+	ClaimStoreLocation string        `json:"claim_store_location"` // file location where claims are stored
+	ProviderPubKey     common.PubKey `json:"provider_pubkey"`
+	FreeTierRateLimit  int           `json:"free_tier_rate_limit"`
+	GaiaRpcArchiveHost string        `json:"gaia_rpc_archive_host"`
 }
 
 // Simple helper function to read an environment or return a default value
@@ -85,23 +80,18 @@ func loadVarDuration(key string) time.Duration {
 
 func NewConfiguration() Configuration {
 	return Configuration{
-		Moniker:                   loadVarString("MONIKER"),
-		Website:                   loadVarString("WEBSITE"),
-		Description:               loadVarString("DESCRIPTION"),
-		Location:                  loadVarString("LOCATION"),
-		Port:                      getEnv("PORT", "3636"),
-		ProxyHost:                 loadVarString("PROXY_HOST"),
-		SourceChain:               loadVarString("SOURCE_CHAIN"),
-		EventStreamHost:           loadVarString("EVENT_STREAM_HOST"),
-		ProviderPubKey:            loadVarPubKey("PROVIDER_PUBKEY"),
-		FreeTierRateLimit:         loadVarInt("FREE_RATE_LIMIT"),
-		FreeTierRateLimitDuration: loadVarDuration("FREE_RATE_LIMIT_DURATION"),
-		SubTierRateLimit:          loadVarInt("SUB_RATE_LIMIT"),
-		SubTierRateLimitDuration:  loadVarDuration("SUB_RATE_LIMIT_DURATION"),
-		AsGoTierRateLimit:         loadVarInt("AS_GO_RATE_LIMIT"),
-		AsGoTierRateLimitDuration: loadVarDuration("AS_GO_RATE_LIMIT_DURATION"),
-		ClaimStoreLocation:        loadVarString("CLAIM_STORE_LOCATION"),
-		GaiaRpcArchiveHost:        loadVarString("GAIA_RPC_ARCHIVE_HOST"),
+		Moniker:            loadVarString("MONIKER"),
+		Website:            loadVarString("WEBSITE"),
+		Description:        loadVarString("DESCRIPTION"),
+		Location:           loadVarString("LOCATION"),
+		Port:               getEnv("PORT", "3636"),
+		ProxyHost:          loadVarString("PROXY_HOST"),
+		SourceChain:        loadVarString("SOURCE_CHAIN"),
+		EventStreamHost:    loadVarString("EVENT_STREAM_HOST"),
+		ProviderPubKey:     loadVarPubKey("PROVIDER_PUBKEY"),
+		FreeTierRateLimit:  loadVarInt("FREE_RATE_LIMIT"),
+		ClaimStoreLocation: loadVarString("CLAIM_STORE_LOCATION"),
+		GaiaRpcArchiveHost: loadVarString("GAIA_RPC_ARCHIVE_HOST"),
 	}
 }
 
@@ -117,8 +107,6 @@ func (c Configuration) Print() {
 	fmt.Fprintln(writer, "Event Stream Host\t", c.EventStreamHost)
 	fmt.Fprintln(writer, "Provider PubKey\t", c.ProviderPubKey)
 	fmt.Fprintln(writer, "Claim Store Location\t", c.ClaimStoreLocation)
-	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.FreeTierRateLimit, c.FreeTierRateLimitDuration))
-	fmt.Fprintln(writer, "Subscription Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.SubTierRateLimit, c.SubTierRateLimitDuration))
-	fmt.Fprintln(writer, "Pay-As-You-Go Rate Limit\t", fmt.Sprintf("%d requests per %+v", c.AsGoTierRateLimit, c.AsGoTierRateLimitDuration))
+	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per 1m", c.FreeTierRateLimit))
 	writer.Flush()
 }

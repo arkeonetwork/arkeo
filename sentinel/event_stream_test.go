@@ -3,7 +3,6 @@ package sentinel
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
@@ -21,23 +20,18 @@ func newTestConfig() conf.Configuration {
 	c := cosmos.GetConfig()
 	c.SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
 	return conf.Configuration{
-		Moniker:                   "Testy McTestface",
-		Website:                   "testing.com",
-		Description:               "the best testnet ever",
-		Location:                  "100,100",
-		Port:                      "3636",
-		ProxyHost:                 "localhost:3637",
-		SourceChain:               "http://localhost:1317", // this should point to arkeo rpc endpoints, but we can ignore for testing
-		EventStreamHost:           "localhost",
-		ProviderPubKey:            types.GetRandomPubKey(),
-		FreeTierRateLimit:         10,
-		FreeTierRateLimitDuration: time.Second,
-		SubTierRateLimit:          10,
-		SubTierRateLimitDuration:  time.Second,
-		AsGoTierRateLimit:         10,
-		AsGoTierRateLimitDuration: time.Second,
-		ClaimStoreLocation:        "",
-		GaiaRpcArchiveHost:        "gaia-host",
+		Moniker:            "Testy McTestface",
+		Website:            "testing.com",
+		Description:        "the best testnet ever",
+		Location:           "100,100",
+		Port:               "3636",
+		ProxyHost:          "localhost:3637",
+		SourceChain:        "http://localhost:1317", // this should point to arkeo rpc endpoints, but we can ignore for testing
+		EventStreamHost:    "localhost",
+		ProviderPubKey:     types.GetRandomPubKey(),
+		FreeTierRateLimit:  100,
+		ClaimStoreLocation: "",
+		GaiaRpcArchiveHost: "gaia-host",
 	}
 }
 
@@ -57,6 +51,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
+		QueriesPerMinute:   1,
 	}
 	openCost := int64(100)
 
@@ -178,6 +173,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
+		QueriesPerMinute:   1,
 	}
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)

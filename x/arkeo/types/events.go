@@ -28,6 +28,7 @@ func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract 
 		Deposit:            contract.Deposit,
 		SettlementDuration: contract.SettlementDuration,
 		Authorization:      contract.Authorization,
+		QueriesPerMinute:   contract.QueriesPerMinute,
 	}
 }
 

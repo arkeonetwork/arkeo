@@ -165,6 +165,7 @@ func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
 		Id:                 evt.ContractId,
 		SettlementDuration: evt.SettlementDuration,
 		Authorization:      evt.Authorization,
+		QueriesPerMinute:   evt.QueriesPerMinute,
 	}
 
 	if !p.isMyPubKey(evt.Provider) {

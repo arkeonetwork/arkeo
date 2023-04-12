@@ -16,7 +16,7 @@ import (
 
 func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [settlement-duration] [authorization-optional] [delegation-optional]",
+		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [queries-per-minute] [settlement-duration] [authorization-optional] [delegation-optional]",
 		Short: "Broadcast message openContract",
 		Args:  cobra.ExactArgs(8),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -50,12 +50,17 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
-			argSettlementDuration, err := cast.ToInt64E(args[7])
+			argQPM, err := cast.ToInt64E(args[7])
 			if err != nil {
 				return err
 			}
 
-			argContractAuth, err := cast.ToInt32E(args[8])
+			argSettlementDuration, err := cast.ToInt64E(args[8])
+			if err != nil {
+				return err
+			}
+
+			argContractAuth, err := cast.ToInt32E(args[9])
 			if err != nil {
 				return err
 			}
@@ -66,8 +71,8 @@ func CmdOpenContract() *cobra.Command {
 			}
 
 			delegate := common.EmptyPubKey
-			if len(args) > 8 {
-				delegate, err = common.NewPubKey(args[9])
+			if len(args) > 9 {
+				delegate, err = common.NewPubKey(args[10])
 				if err != nil {
 					return err
 				}
@@ -90,6 +95,7 @@ func CmdOpenContract() *cobra.Command {
 				argRate,
 				deposit,
 				types.ContractAuthorization(argContractAuth),
+				argQPM,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

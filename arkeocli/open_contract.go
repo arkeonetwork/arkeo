@@ -32,6 +32,7 @@ func newOpenContractCmd() *cobra.Command {
 	openContractCmd.Flags().Int64("deposit", 0, "deposit amount")
 	openContractCmd.Flags().Int64("duration", 0, "contract duration")
 	openContractCmd.Flags().Int64("rate", 0, "contract rate")
+	openContractCmd.Flags().Int64("qpm", 0, "queries per minute")
 	openContractCmd.Flags().Int64("settlement-duration", 0, "contract settlement duration")
 	openContractCmd.Flags().String("contract-authorization", "strict", "contract authorization (strict or open)")
 	return openContractCmd
@@ -153,6 +154,18 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
+	argQPM, _ := cmd.Flags().GetInt64("qpm")
+	if argQPM == 0 {
+		qpm, err := promptForArg(cmd, "Specify queries per minute: ")
+		if err != nil {
+			return err
+		}
+		argSettlementDuration, err = strconv.ParseInt(qpm, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+
 	argContractAuth, _ := cmd.Flags().GetString("contract-authorization")
 	if argContractAuth == "" {
 		argContractAuth, err = promptForArg(cmd, "Specify contract authorization (strict or open): ")
@@ -183,6 +196,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		rate,
 		deposit,
 		contractAuth,
+		argQPM,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

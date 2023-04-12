@@ -1,6 +1,8 @@
 package types
 
 import (
+	fmt "fmt"
+
 	"cosmossdk.io/errors"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -14,7 +16,7 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization) *MsgOpenContract {
+func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization, qpm int64) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
@@ -27,6 +29,7 @@ func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, servi
 		Delegate:           delegate,
 		SettlementDuration: settlementDuration,
 		Authorization:      authorization,
+		QueriesPerMinute:   qpm,
 	}
 }
 
@@ -92,6 +95,10 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 
 	if err := msg.Rate.Validate(); err != nil {
 		return errors.Wrapf(err, "invalid rate")
+	}
+
+	if msg.QueriesPerMinute <= 0 {
+		return fmt.Errorf("queries per minute must be greater than zero")
 	}
 
 	if !msg.Rate.Amount.IsPositive() {

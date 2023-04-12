@@ -18,11 +18,12 @@ func TestBondProviderValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgOpenContract{
-		Creator:  acct,
-		Provider: pubkey,
-		Client:   pubkey,
-		Service:  common.BTCService.String(),
-		Rate:     rate,
+		Creator:          acct,
+		Provider:         pubkey,
+		Client:           pubkey,
+		Service:          common.BTCService.String(),
+		Rate:             rate,
+		QueriesPerMinute: 10,
 	}
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrOpenContractDuration)
