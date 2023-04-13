@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -65,7 +64,6 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	fmt.Printf(">>>>>>>>>> REQ: %+v\n", req)
 	providerPubKey, err := common.NewPubKey(req.Provider)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
