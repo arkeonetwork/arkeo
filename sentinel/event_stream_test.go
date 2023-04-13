@@ -71,6 +71,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 	outputContract, err := proxy.MemStore.Get(inputContract.Key())
 	require.NoError(t, err)
 	require.Equal(t, inputContract, outputContract)
+	fmt.Println("B  Key:", inputContract.Key())
 	_, err = proxy.MemStore.GetActiveContract(inputContract.Provider, inputContract.Service, inputContract.Client)
 	require.NoError(t, err)
 
