@@ -94,6 +94,7 @@ func (k *MemStore) GetActiveContract(provider common.PubKey, service common.Serv
 		}
 	}
 	// we should also probably call arkeo if we don't find the contract as we do below.
+
 	return types.Contract{}, fmt.Errorf("contract not found")
 }
 

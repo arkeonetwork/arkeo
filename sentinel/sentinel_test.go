@@ -39,7 +39,7 @@ func TestHandleActiveContract(t *testing.T) {
 	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
 	proxy.handleOpenContractEvent(resultEvent)
 
-	url := fmt.Sprintf("%s%s/%s/%s", RoutesActiveContract, inputContract.GetSpender(), testConfig.ProviderPubKey, inputContract.Service)
+	url := fmt.Sprintf("%s%s/%s", RoutesActiveContract, inputContract.Service, inputContract.GetSpender())
 
 	req, err := http.NewRequest("GET", url, nil)
 	require.NoError(t, err)

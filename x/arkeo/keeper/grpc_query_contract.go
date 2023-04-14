@@ -64,10 +64,6 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	spenderPubKey, err := common.NewPubKey(req.Spender)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid spender pubkey")
-	}
 	providerPubKey, err := common.NewPubKey(req.Provider)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
@@ -75,6 +71,10 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 	service, err := common.NewService(req.Service)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid service")
+	}
+	spenderPubKey, err := common.NewPubKey(req.Spender)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid spender pubkey")
 	}
 
 	activeContract, err := k.GetActiveContractForUser(ctx, spenderPubKey, providerPubKey, service)

@@ -14,26 +14,33 @@ service Msg {
   // this line is used by starport scaffolding # proto/tx/rpc
 }
 message MsgClaimEth {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   string eth_address = 2; // the adress the claim is for
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
 message MsgClaimEthResponse {}
 
-message MsgClaimArkeo { bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ]; }
+message MsgClaimArkeo {
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+}
 
 message MsgClaimArkeoResponse {}
 
 message MsgTransferClaim {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
-  bytes toAddress = 2 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes toAddress = 2 [ (gogoproto.casttype) =
+                            "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
 }
 
 message MsgTransferClaimResponse {}
 
 message MsgAddClaim {
-  bytes creator = 1 [ (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   Chain chain = 2;
   string address = 3;
   int64 amount = 4;

@@ -38,7 +38,7 @@ service Query {
   rpc ActiveContract(QueryActiveContractRequest)
       returns (QueryActiveContractResponse) {
     option (google.api.http).get =
-        "/arkeo/active-contract/{spender}/{provider}/{service}";
+        "/arkeo/active-contract/{provider}/{service}/{spender}";
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -86,9 +86,9 @@ message QueryAllContractResponse {
 
 // this line is used by starport scaffolding # 3
 message QueryActiveContractRequest {
-  string spender = 1;
-  string provider = 2;
-  string service = 3;
+  string provider = 1;
+  string service = 2;
+  string spender = 3;
 }
 
 message QueryActiveContractResponse {
