@@ -110,11 +110,6 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 	return evt, nil
 }
 
-type OpenContract struct {
-	Contract types.Contract
-	OpenCost int64
-}
-
 type CloseContract struct {
 	Contract types.Contract
 }

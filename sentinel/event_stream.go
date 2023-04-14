@@ -164,6 +164,7 @@ func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
 		Deposit:            evt.Deposit,
 		Id:                 evt.ContractId,
 		SettlementDuration: evt.SettlementDuration,
+		Authorization:      evt.Authorization,
 	}
 
 	if !p.isMyPubKey(evt.Provider) {

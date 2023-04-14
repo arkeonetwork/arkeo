@@ -14,7 +14,7 @@ const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int) *MsgOpenContract {
+func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
@@ -26,6 +26,7 @@ func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, servi
 		Deposit:            deposit,
 		Delegate:           delegate,
 		SettlementDuration: settlementDuration,
+		Authorization:      authorization,
 	}
 }
 
@@ -99,6 +100,15 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 
 	if msg.SettlementDuration < 0 {
 		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
+	}
+
+	// cannot open pay-as-you-go contract and be "open" authorization. The
+	// reason for this is a pay-as-you-go contract that is open allows anyone
+	// (including the data provider) to completely empty the contract tokens to
+	// the data provider without providing any data to the contract owner. It
+	// would be too easy to "rug" contract owners.
+	if msg.ContractType == ContractType_PAY_AS_YOU_GO && msg.Authorization == ContractAuthorization_OPEN {
+		return errors.Wrapf(ErrInvalidAuthorization, "pay-as-you-go contract cannot use open authorization")
 	}
 
 	return nil

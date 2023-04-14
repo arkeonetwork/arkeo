@@ -17,11 +17,12 @@
               "1"
             ]
           },
-          "height": "26"
+          "height": "21"
         }
       ],
       "contracts": [
         {
+          "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "100",
@@ -41,10 +42,11 @@
           "type": "SUBSCRIPTION"
         },
         {
+          "authorization": "OPEN",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "20",
-          "duration": "10",
+          "duration": "5",
           "height": "16",
           "id": "1",
           "nonce": "0",

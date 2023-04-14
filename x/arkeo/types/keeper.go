@@ -131,6 +131,20 @@ func (contractType *ContractType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (contractAuth *ContractAuthorization) UnmarshalJSON(b []byte) error {
+	var item interface{}
+	if err := json.Unmarshal(b, &item); err != nil {
+		return err
+	}
+	switch v := item.(type) {
+	case int:
+		*contractAuth = ContractAuthorization(v)
+	case string:
+		*contractAuth = ContractAuthorization(ContractAuthorization_value[v])
+	}
+	return nil
+}
+
 func (userContractSet *UserContractSet) RemoveContractFromSet(contractIdToRemove uint64) error {
 	if userContractSet == nil {
 		return fmt.Errorf("user contract set is nil")

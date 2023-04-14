@@ -33,6 +33,7 @@ func newOpenContractCmd() *cobra.Command {
 	openContractCmd.Flags().Int64("duration", 0, "contract duration")
 	openContractCmd.Flags().Int64("rate", 0, "contract rate")
 	openContractCmd.Flags().Int64("settlement-duration", 0, "contract settlement duration")
+	openContractCmd.Flags().String("contract-authorization", "strict", "contract authorization (strict or open)")
 	return openContractCmd
 }
 
@@ -98,6 +99,11 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 	}
+	argContractType = strings.ToUpper(strings.ReplaceAll(argContractType, "-", "_"))
+	if _, ok := types.ContractType_value[argContractType]; !ok {
+		return fmt.Errorf("invalid contract type: %s", argContractType)
+	}
+	contractType := types.ContractType(types.ContractType_value[argContractType])
 
 	argDuration, _ := cmd.Flags().GetInt64("duration")
 	if argDuration == 0 {
@@ -147,11 +153,19 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	argContractType = strings.ToUpper(strings.ReplaceAll(argContractType, "-", "_"))
-	if _, ok := types.ContractType_value[argContractType]; !ok {
-		return fmt.Errorf("invalid contract type: %s", argContractType)
+	argContractAuth, _ := cmd.Flags().GetString("contract-authorization")
+	if argContractAuth == "" {
+		argContractAuth, err = promptForArg(cmd, "Specify contract authorization (strict or open): ")
+		if err != nil {
+			return err
+		}
 	}
-	contractType := types.ContractType(types.ContractType_value[argContractType])
+	argContractAuth = strings.ToUpper(strings.ReplaceAll(argContractAuth, "-", "_"))
+	if _, ok := types.ContractAuthorization_value[argContractAuth]; !ok {
+		return fmt.Errorf("invalid contract authorization: %s", argContractAuth)
+	}
+	contractAuth := types.ContractAuthorization(types.ContractAuthorization_value[argContractAuth])
+
 	pubkey, err := common.NewPubKey(argProviderPubkey)
 	if err != nil {
 		return err
@@ -168,6 +182,7 @@ func runOpenContractCmd(cmd *cobra.Command, args []string) (err error) {
 		argSettlementDuration,
 		rate,
 		deposit,
+		contractAuth,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err
