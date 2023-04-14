@@ -102,7 +102,11 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return errors.Wrapf(ErrInvalidModProviderSettlementDuration, "settlement duration cannot be negative")
 	}
 
-	// cannot open pay-as-you-go contract and be "open" authorization
+	// cannot open pay-as-you-go contract and be "open" authorization. The
+	// reason for this is a pay-as-you-go contract that is open allows anyone
+	// (including the data provider) to completely empty the contract tokens to
+	// the data provider without providing any data to the contract owner. It
+	// would be too easy to "rug" contract owners.
 	if msg.ContractType == ContractType_PAY_AS_YOU_GO && msg.Authorization == ContractAuthorization_OPEN {
 		return errors.Wrapf(ErrInvalidAuthorization, "pay-as-you-go contract cannot use open authorization")
 	}
