@@ -17,7 +17,7 @@ func NewConfigValue010() *ConfigVals {
 			MinProviderBond:            common.Tokens(1),           // min bond for a data provider to be able to open contracts with
 			ReserveTax:                 1000,                       // reserve income off provider income, in basis points
 			BlocksPerYear:              5256666,                    // blocks per year
-			EmissionCurve:              4,                          // rate in which the reserve is depleted to pay validators
+			EmissionCurve:              6,                          // rate in which the reserve is depleted to pay validators
 			ValidatorPayoutCycle:       1,                          // how often validators are paid out rewards
 		},
 		boolValues:   map[ConfigName]bool{},
