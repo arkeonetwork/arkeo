@@ -73,6 +73,7 @@ message Contract {
   uint64 id = 13;
   int64 settlement_duration = 14;
   ContractAuthorization authorization = 15;
+  int64 queries_per_minute = 16;
 }
 
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }

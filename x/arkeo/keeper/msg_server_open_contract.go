@@ -87,8 +87,8 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		if !msg.Rate.Amount.Equal(cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom)) {
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).Int64(), msg.Rate.Amount.Int64())
 		}
-		if !cosmos.NewInt(msg.Rate.Amount.Int64() * msg.Duration).Equal(msg.Deposit) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.Deposit.Int64())
+		if !cosmos.NewInt(msg.Rate.Amount.Int64() * msg.Duration * msg.QueriesPerMinute).Equal(msg.Deposit) {
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.QueriesPerMinute, msg.Deposit.Int64())
 		}
 	case types.ContractType_PAY_AS_YOU_GO:
 		if cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom).IsZero() {
@@ -147,6 +147,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		Height:             ctx.BlockHeight(),
 		SettlementDuration: msg.SettlementDuration,
 		Authorization:      msg.Authorization,
+		QueriesPerMinute:   msg.QueriesPerMinute,
 	}
 
 	// create expiration set

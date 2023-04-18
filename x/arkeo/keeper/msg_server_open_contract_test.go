@@ -47,14 +47,15 @@ func TestOpenContractValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		Provider:     providerPubkey,
-		Service:      service.String(),
-		Client:       clientPubKey,
-		Creator:      acc,
-		ContractType: types.ContractType_SUBSCRIPTION,
-		Duration:     100,
-		Rate:         sRates[0],
-		Deposit:      cosmos.NewInt(100 * 15),
+		Provider:         providerPubkey,
+		Service:          service.String(),
+		Client:           clientPubKey,
+		Creator:          acc,
+		ContractType:     types.ContractType_SUBSCRIPTION,
+		Duration:         100,
+		Rate:             sRates[0],
+		Deposit:          cosmos.NewInt(100 * 15),
+		QueriesPerMinute: 1,
 	}
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(100*25))))
 	require.NoError(t, s.OpenContractValidate(ctx, &msg))
@@ -116,14 +117,15 @@ func TestOpenContractHandle(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     pubkey,
-		Service:      service.String(),
-		Creator:      acc,
-		Client:       pubkey,
-		ContractType: types.ContractType_PAY_AS_YOU_GO,
-		Duration:     100,
-		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
-		Deposit:      cosmos.NewInt(1000),
+		Provider:         pubkey,
+		Service:          service.String(),
+		Creator:          acc,
+		Client:           pubkey,
+		ContractType:     types.ContractType_PAY_AS_YOU_GO,
+		Duration:         100,
+		Rate:             cosmos.NewInt64Coin("uarkeo", 15),
+		Deposit:          cosmos.NewInt(1000),
+		QueriesPerMinute: 1,
 	}
 	require.NoError(t, s.OpenContractHandle(ctx, &msg))
 

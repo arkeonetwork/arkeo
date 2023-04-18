@@ -30,6 +30,7 @@ func TestHandleActiveContract(t *testing.T) {
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
+		QueriesPerMinute:   100,
 	}
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
@@ -77,8 +78,9 @@ func TestHandleClaim(t *testing.T) {
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
 		Deposit:            sdk.NewInt(100),
 		Nonce:              0,
-		Id:                 151,
+		Id:                 150,
 		SettlementDuration: 10,
+		QueriesPerMinute:   1,
 	}
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
@@ -145,6 +147,7 @@ func TestHandleOpenClaims(t *testing.T) {
 		Nonce:              0,
 		Id:                 151,
 		SettlementDuration: 10,
+		QueriesPerMinute:   100,
 	}
 	openCost := int64(100)
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)

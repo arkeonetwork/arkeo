@@ -145,34 +145,20 @@ func (p Proxy) freeTier(remoteAddr string) (int, error) {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
-	if ok := p.isRateLimited(key, -1); ok {
+	if ok := p.isRateLimited(key, p.Config.FreeTierRateLimit); ok {
 		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
 	}
 
 	return http.StatusOK, nil
 }
 
-func (p Proxy) isRateLimited(key string, contractType types.ContractType) bool {
+func (p Proxy) isRateLimited(key string, limitTokens int) bool {
 	mu.Lock()
 	defer mu.Unlock()
 
-	var limitTokens int
-	var limitDuration time.Duration
-	switch contractType {
-	case types.ContractType_SUBSCRIPTION:
-		limitTokens = p.Config.SubTierRateLimit
-		limitDuration = p.Config.SubTierRateLimitDuration
-	case types.ContractType_PAY_AS_YOU_GO:
-		limitTokens = p.Config.AsGoTierRateLimit
-		limitDuration = p.Config.AsGoTierRateLimitDuration
-	default:
-		limitTokens = p.Config.FreeTierRateLimit
-		limitDuration = p.Config.FreeTierRateLimitDuration
-	}
-
 	limiter, exists := visitors[key]
 	if !exists {
-		limiter = rate.NewLimiter(rate.Every(limitDuration), limitTokens)
+		limiter = rate.NewLimiter(rate.Every(time.Minute), limitTokens)
 		visitors[key] = limiter
 	}
 
@@ -210,7 +196,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		}
 	}
 
-	if ok := p.isRateLimited(key, contract.Type); ok {
+	if ok := p.isRateLimited(key, int(contract.QueriesPerMinute)); ok {
 		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
 	}
 

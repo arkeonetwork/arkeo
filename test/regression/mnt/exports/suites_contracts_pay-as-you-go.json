@@ -24,6 +24,7 @@
           "nonce": "1",
           "paid": "3",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
+          "queries_per_minute": "1",
           "rate": {
             "amount": "3",
             "denom": "uarkeo"

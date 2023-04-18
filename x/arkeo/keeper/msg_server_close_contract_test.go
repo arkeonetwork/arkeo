@@ -142,14 +142,15 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Provider:     providerPubKey,
-		Service:      service.String(),
-		Creator:      providerAddress,
-		Client:       userPubKey,
-		ContractType: types.ContractType_SUBSCRIPTION,
-		Duration:     100,
-		Rate:         rates[0],
-		Deposit:      cosmos.NewInt(1500),
+		Provider:         providerPubKey,
+		Service:          service.String(),
+		Creator:          providerAddress,
+		Client:           userPubKey,
+		ContractType:     types.ContractType_SUBSCRIPTION,
+		Duration:         100,
+		Rate:             rates[0],
+		Deposit:          cosmos.NewInt(1500),
+		QueriesPerMinute: 1,
 	}
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)

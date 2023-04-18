@@ -74,6 +74,7 @@ message MsgOpenContract {
   ];
   int64 settlement_duration = 10;
   ContractAuthorization authorization = 11;
+  int64 queries_per_minute = 12;
 }
 
 message MsgOpenContractResponse {}
