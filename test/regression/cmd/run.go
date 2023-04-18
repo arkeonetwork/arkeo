@@ -264,7 +264,6 @@ func run(path string) error {
 		"DESCRIPTION=n/a",
 		"LOCATION=n/a",
 		"PORT=3636",
-		"PROXY_HOST=https://swapi.dev", // TODO: remove me
 		"SOURCE_CHAIN=http://localhost:1317",
 		"EVENT_STREAM_HOST=localhost:26657",
 		"FREE_RATE_LIMIT=10",

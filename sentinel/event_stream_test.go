@@ -25,7 +25,6 @@ func newTestConfig() conf.Configuration {
 		Description:        "the best testnet ever",
 		Location:           "100,100",
 		Port:               "3636",
-		ProxyHost:          "localhost:3637",
 		SourceChain:        "http://localhost:1317", // this should point to arkeo rpc endpoints, but we can ignore for testing
 		EventStreamHost:    "localhost",
 		ProviderPubKey:     types.GetRandomPubKey(),

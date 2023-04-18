@@ -226,6 +226,6 @@ func (d *DirectoryDB) UpsertProviderMetadata(providerID int64, data sentinel.Met
 
 	// TODO - always insert instead of upsert, fail on dupe (or read and fail on exists). are there any restrictions on version string?
 	return insert(conn, sqlUpsertProviderMetadata, providerID, c.Nonce, c.Moniker, c.Website, c.Description, location,
-		c.Port, c.ProxyHost, c.SourceChain, c.EventStreamHost, c.ClaimStoreLocation, c.FreeTierRateLimit, c.FreeTierRateLimitDuration,
+		c.Port, c.SourceChain, c.EventStreamHost, c.ClaimStoreLocation, c.FreeTierRateLimit, c.FreeTierRateLimitDuration,
 		c.SubTierRateLimit, c.SubTierRateLimitDuration, c.AsGoTierRateLimit, c.AsGoTierRateLimitDuration)
 }
