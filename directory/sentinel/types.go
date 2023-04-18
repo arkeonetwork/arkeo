@@ -12,7 +12,6 @@ type Configuration struct {
 	Description               string        `json:"description"`
 	Location                  string        `json:"location"`
 	Port                      string        `json:"port"`
-	ProxyHost                 string        `json:"proxy_host"`
 	SourceChain               string        `json:"source_chain"` // base url for arceo block chain
 	EventStreamHost           string        `json:"event_stream_host"`
 	ClaimStoreLocation        string        `json:"claim_store_location"` // file location where claims are stored

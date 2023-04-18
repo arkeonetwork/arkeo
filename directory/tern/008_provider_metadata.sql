@@ -13,7 +13,6 @@ create table provider_metadata
     description                   text,
     location                      text,
     port                          text,
-    proxy_host                    text,
     source_chain                  text,
     event_stream_host             text,
     claim_store_location          text,

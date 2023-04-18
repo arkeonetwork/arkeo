@@ -43,7 +43,6 @@ services:
       DESCRIPTION: "n/a"
       LOCATION: "n/a"
       PORT: "3636"
-      PROXY_HOST: "https://swapi.dev"
       SOURCE_CHAIN: "http://arkeod:1317"
       EVENT_STREAM_HOST: "arkeod:26657"
       FREE_RATE_LIMIT: 10
