@@ -63,7 +63,7 @@ install:
 # ------------------------------ Docker Build ------------------------------
 
 docker-build: proto-gen
-	@docker build --platform=linux/amd64 . --file Dockerfile -t ${IMAGE}:${TAG}
+	@docker build . --file Dockerfile -t ${IMAGE}:${TAG}
 
 docker-run:
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}

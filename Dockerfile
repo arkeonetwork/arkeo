@@ -44,10 +44,10 @@ RUN update-ca-certificates
 COPY --from=builder /go/bin/sentinel /go/bin/arkeod /go/bin/indexer /go/bin/api /go/bin/tern /usr/bin/
 COPY scripts /scripts
 
-
-
 ARG TAG=testnet
 ENV NET=$TAG
+
+ENTRYPOINT ["scripts/genesis.sh"]
 
 # default to fullnode
 CMD ["arkeod", "start"]
