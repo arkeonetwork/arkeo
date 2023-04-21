@@ -58,12 +58,9 @@ func loadProxies() map[string]*url.URL {
 		// parse default values for services
 		switch serviceName {
 		case "btc-mainnet-fullnode", "bch-mainnet-fullnode", "doge-mainnet-fullnode", "ltc-mainnet-fullnode":
-			// add username/password to request
-			uri := fmt.Sprintf("http://infra:password@%s:8332", serviceName)
-			proxies[serviceName] = common.MustParseURL(uri)
+			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("http://infra:password@%s:8332", serviceName))
 		case "arkeo-mainnet-fullnode":
-			uri := "http://arkeod:1317"
-			proxies[serviceName] = common.MustParseURL(uri)
+			proxies[serviceName] = common.MustParseURL("http://arkeod:1317")
 		case "swapi.dev":
 			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("https://%s", serviceName))
 		default:

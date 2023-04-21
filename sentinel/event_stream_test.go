@@ -30,7 +30,6 @@ func newTestConfig() conf.Configuration {
 		ProviderPubKey:     types.GetRandomPubKey(),
 		FreeTierRateLimit:  100,
 		ClaimStoreLocation: "",
-		GaiaRpcArchiveHost: "gaia-host",
 	}
 }
 

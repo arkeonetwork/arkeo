@@ -21,7 +21,6 @@ type Configuration struct {
 	ClaimStoreLocation string        `json:"claim_store_location"` // file location where claims are stored
 	ProviderPubKey     common.PubKey `json:"provider_pubkey"`
 	FreeTierRateLimit  int           `json:"free_tier_rate_limit"`
-	GaiaRpcArchiveHost string        `json:"gaia_rpc_archive_host"`
 }
 
 // Simple helper function to read an environment or return a default value
@@ -76,7 +75,6 @@ func NewConfiguration() Configuration {
 		ProviderPubKey:     loadVarPubKey("PROVIDER_PUBKEY"),
 		FreeTierRateLimit:  loadVarInt("FREE_RATE_LIMIT"),
 		ClaimStoreLocation: loadVarString("CLAIM_STORE_LOCATION"),
-		GaiaRpcArchiveHost: loadVarString("GAIA_RPC_ARCHIVE_HOST"),
 	}
 }
 
