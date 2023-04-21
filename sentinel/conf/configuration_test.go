@@ -18,7 +18,6 @@ func TestConfiguration(t *testing.T) {
 	os.Setenv("PROVIDER_PUBKEY", "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	os.Setenv("FREE_RATE_LIMIT", "99")
 	os.Setenv("CLAIM_STORE_LOCATION", "clammy")
-	os.Setenv("GAIA_RPC_ARCHIVE_HOST", "gaia-host")
 
 	config := NewConfiguration()
 

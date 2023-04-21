@@ -268,7 +268,6 @@ func run(path string) error {
 		"EVENT_STREAM_HOST=localhost:26657",
 		"FREE_RATE_LIMIT=10",
 		"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
-		"GAIA_RPC_ARCHIVE_HOST=http://176.34.207.130:26657",
 	)
 	stderr, err = sentinel.StderrPipe()
 	if err != nil {
