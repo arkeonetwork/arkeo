@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -23,6 +24,7 @@ type Proxy struct {
 	MemStore   *MemStore
 	ClaimStore *ClaimStore
 	logger     log.Logger
+	proxies    map[string]*url.URL
 }
 
 func NewProxy(config conf.Configuration) Proxy {
@@ -31,13 +33,44 @@ func NewProxy(config conf.Configuration) Proxy {
 	if err != nil {
 		panic(err)
 	}
+
 	return Proxy{
 		Metadata:   NewMetadata(config),
 		Config:     config,
 		MemStore:   NewMemStore(config.SourceChain, logger),
 		ClaimStore: claimStore,
+		proxies:    loadProxies(),
 		logger:     logger,
 	}
+}
+
+func loadProxies() map[string]*url.URL {
+	proxies := make(map[string]*url.URL)
+	for serviceName := range common.ServiceLookup {
+		// if we have an override for a given service, parse that instead of
+		// the default below
+		env, envOk := os.LookupEnv(strings.ToUpper(serviceName))
+		if envOk {
+			proxies[serviceName] = common.MustParseURL(env)
+			continue
+		}
+
+		// parse default values for services
+		switch serviceName {
+		case "btc-mainnet-fullnode", "bch-mainnet-fullnode", "doge-mainnet-fullnode", "ltc-mainnet-fullnode":
+			// add username/password to request
+			uri := fmt.Sprintf("http://infra:password@%s:8332", serviceName)
+			proxies[serviceName] = common.MustParseURL(uri)
+		case "arkeo-mainnet-fullnode":
+			uri := "http://arkeod:1317"
+			proxies[serviceName] = common.MustParseURL(uri)
+		case "swapi.dev":
+			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("https://%s", serviceName))
+		default:
+			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("http://%s", serviceName))
+		}
+	}
+	return proxies
 }
 
 // Given a request send it to the appropriate url
@@ -48,32 +81,24 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.RawQuery = values.Encode()
 
 	parts := strings.Split(r.URL.Path, "/")
-	host := parts[1]
-	parts = append(parts[:1], parts[1+1:]...)
-	r.URL.Scheme = "http"
-	r.URL.Host = host
-	r.URL.Path = strings.Join(parts, "/")
+	serviceName := parts[1]
 
-	switch host { // nolint
-	case "swapi.dev":
-		// TODO
-	case "btc-mainnet-fullnode":
-		// TODO
-	case "eth-mainnet-fullnode":
-		// TODO
-	case "arkeo-mainnet-fullnode":
-		// we forbid arkeo-mainnet-fullnode see chain.go:L50
-		// TODO
-	case "gaia-mainnet-rpc-archive":
-		gaiaHost := p.Config.GaiaRpcArchiveHost
-		gaiaHostUrl, err := url.Parse(gaiaHost)
-		if err != nil {
-			respondWithError(w, "failed to parse backend url", http.StatusInternalServerError)
-			return
-		}
-		r.URL.Scheme = gaiaHostUrl.Scheme
-		r.URL.Host = gaiaHostUrl.Host
-		r.URL.Path = gaiaHostUrl.Path
+	uri, exists := p.proxies[serviceName]
+	if !exists {
+		respondWithError(w, "could not find service", http.StatusBadRequest)
+		return
+	}
+
+	r.URL.Scheme = uri.Scheme
+	r.URL.Host = uri.Host
+	r.URL.User = uri.User
+	parts[1] = uri.Path // replace service name with uri path (if exists)
+	r.URL.Path = path.Join(parts...)
+
+	// Sanitize URL
+	// ensure path always has "/" prefix
+	if len(r.URL.Path) > 1 && !strings.HasPrefix(r.URL.Path, "/") {
+		r.URL.Path = fmt.Sprintf("/%s", r.URL.Path)
 	}
 
 	// Serve a reverse proxy for a given url

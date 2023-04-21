@@ -2,6 +2,8 @@ package common
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
@@ -48,4 +50,13 @@ func GetUncappedShare(part, total, allocation cosmos.Int) (share cosmos.Int) {
 
 func Tokens(i int64) int64 {
 	return i * 1e8
+}
+
+func MustParseURL(uri string) *url.URL {
+	uri = strings.TrimSpace(uri)
+	u, err := url.Parse(uri)
+	if err != nil {
+		panic(fmt.Errorf("unable to parse uri %s: %w", uri, err))
+	}
+	return u
 }
