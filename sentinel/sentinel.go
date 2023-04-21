@@ -46,7 +46,7 @@ func NewProxy(config conf.Configuration) Proxy {
 
 func loadProxies() map[string]*url.URL {
 	proxies := make(map[string]*url.URL)
-	for serviceName, _ := range common.ServiceLookup {
+	for serviceName := range common.ServiceLookup {
 		// if we have an override for a given service, parse that instead of
 		// the default below
 		env, envOk := os.LookupEnv(strings.ToUpper(serviceName))
@@ -62,7 +62,7 @@ func loadProxies() map[string]*url.URL {
 			uri := fmt.Sprintf("http://infra:password@%s:8332", serviceName)
 			proxies[serviceName] = common.MustParseURL(uri)
 		case "arkeo-mainnet-fullnode":
-			uri := fmt.Sprintf("http://arkeod:1317")
+			uri := "http://arkeod:1317"
 			proxies[serviceName] = common.MustParseURL(uri)
 		case "swapi.dev":
 			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("https://%s", serviceName))
