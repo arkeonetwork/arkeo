@@ -58,11 +58,11 @@ func loadProxies() map[string]*url.URL {
 		// parse default values for services
 		switch serviceName {
 		case "btc-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL("http://infra:password@bitcoin-daemon:8332")
+			proxies[serviceName] = common.MustParseURL("http://thorchain:password@bitcoin-daemon:8332")
 		case "bch-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://infra:password@bitcoin-cash-daemon:8332")
 		case "doge-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL("http://infra:password@doge-daemon:8332")
+			proxies[serviceName] = common.MustParseURL("http://thorchain:password@doge-daemon:8332")
 		case "ltc-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://infra:password@litecoin-daemon:8332")
 		case "arkeo-mainnet-fullnode":
