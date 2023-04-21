@@ -31,7 +31,7 @@ var ServiceLookup = map[string]int32{
 	"btc-mainnet-fullnode":         10,
 	"btc-mainnet-lightnode":        11,
 	"cardano-mainnet-relaynode":    12,
-	"gaia-mainnet-fullnode":        13,
+	"gaia-mainnet-rpc":             13,
 	"doge-mainnet-fullnode":        14,
 	"doge-mainnet-lightnode":       15,
 	"etc-mainnet-archivenode":      16,
@@ -62,6 +62,7 @@ var ServiceLookup = map[string]int32{
 	"osmosis-mainnet-unchained":    43,
 	"thorchain-mainnet-unchained":  44,
 	"optimism-mainnet-unchained":   45,
+	"gaia-mainnet-grpc":            46,
 }
 
 var ServiceReverseLookup = map[Service]string{
@@ -78,7 +79,7 @@ var ServiceReverseLookup = map[Service]string{
 	10: "btc-mainnet-fullnode",
 	11: "btc-mainnet-lightnode",
 	12: "cardano-mainnet-relaynode",
-	13: "gaia-mainnet-fullnode",
+	13: "gaia-mainnet-rpc",
 	14: "doge-mainnet-fullnode",
 	15: "doge-mainnet-lightnode",
 	16: "etc-mainnet-archivenode",
@@ -111,6 +112,7 @@ var ServiceReverseLookup = map[Service]string{
 	43: "osmosis-mainnet-unchained",
 	44: "thorchain-mainnet-unchained",
 	45: "optimism-mainnet-unchained",
+	46: "gaia-mainnet-grpc",
 }
 
 func (service Service) String() string {

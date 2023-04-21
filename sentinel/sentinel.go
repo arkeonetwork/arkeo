@@ -57,10 +57,22 @@ func loadProxies() map[string]*url.URL {
 
 		// parse default values for services
 		switch serviceName {
-		case "btc-mainnet-fullnode", "bch-mainnet-fullnode", "doge-mainnet-fullnode", "ltc-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("http://infra:password@%s:8332", serviceName))
+		case "btc-mainnet-fullnode":
+			proxies[serviceName] = common.MustParseURL("http://infra:password@bitcoin-daemon:8332")
+		case "bch-mainnet-fullnode":
+			proxies[serviceName] = common.MustParseURL("http://infra:password@bitcoin-cash-daemon:8332")
+		case "doge-mainnet-fullnode":
+			proxies[serviceName] = common.MustParseURL("http://infra:password@doge-daemon:8332")
+		case "ltc-mainnet-fullnode":
+			proxies[serviceName] = common.MustParseURL("http://infra:password@litecoin-daemon:8332")
 		case "arkeo-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL("http://arkeod:1317")
+			proxies[serviceName] = common.MustParseURL("http://arkeo:1317")
+		case "eth-mainnet-fullnode":
+			proxies[serviceName] = common.MustParseURL("http://ethereum-daemon:8545")
+		case "gaia-mainnet-grpc":
+			proxies[serviceName] = common.MustParseURL("http://gaia-daemon:9090")
+		case "gaia-mainnet-rpc":
+			proxies[serviceName] = common.MustParseURL("http://gaia-daemon:26657")
 		case "swapi.dev":
 			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("https://%s", serviceName))
 		default:
