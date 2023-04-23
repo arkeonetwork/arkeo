@@ -97,9 +97,20 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		}
 		remoteAddr := p.getRemoteAddr(r)
 		contract, _ := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
-		if err == nil && (contract.Authorization == types.ContractAuthorization_OPEN || aa.Validate(p.Config.ProviderPubKey) == nil) {
+
+		if err == nil && !contract.IsExpired(p.MemStore.GetHeight()) && (contract.Authorization == types.ContractAuthorization_OPEN || aa.Validate(p.Config.ProviderPubKey) == nil) {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
 			w.Header().Set("tier", "paid")
+
+			// ensure service of the contract matches first item in the path
+			parts := strings.Split(r.URL.Path, "/")
+			serviceName := parts[1]
+			ser, err := common.NewService(serviceName)
+			if err != nil || ser != contract.Service {
+				http.Error(w, "contract service doesn't match the serivce name in the path", http.StatusUnauthorized)
+				return
+			}
+
 			httpCode, err := p.paidTier(aa, remoteAddr)
 			// paidTier can serve the request
 			if err == nil {

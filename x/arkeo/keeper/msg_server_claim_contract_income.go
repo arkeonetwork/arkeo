@@ -53,6 +53,11 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "settled on block: %d", contract.SettlementPeriodEnd())
 	}
 
+	// open subscription contracts do NOT need to verify the signature
+	if contract.Type == types.ContractType_SUBSCRIPTION && contract.Authorization == types.ContractAuthorization_OPEN {
+		return nil
+	}
+
 	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
 	if err != nil {
 		return err
