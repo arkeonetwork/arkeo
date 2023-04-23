@@ -201,4 +201,6 @@ func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPost, target, nil)
 	handlerForTest.ServeHTTP(responseRecorder, r)
 	require.Equal(t, responseRecorder.Code, 200)
+	fmt.Println(responseRecorder.Header())
+	require.Equal(t, "free", responseRecorder.Header()["Tier"][0])
 }
