@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/arkeonetwork/arkeo/directory/sentinel"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
+	"github.com/arkeonetwork/arkeo/sentinel"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/pkg/errors"
@@ -206,7 +206,7 @@ func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProv
 		evt.MinContractDuration, evt.MaxContractDuration, evt.SubscriptionRate, evt.PayAsYouGoRate)
 }
 
-func (d *DirectoryDB) UpsertProviderMetadata(providerID int64, data sentinel.Metadata) (*Entity, error) {
+func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
@@ -225,7 +225,5 @@ func (d *DirectoryDB) UpsertProviderMetadata(providerID int64, data sentinel.Met
 	}
 
 	// TODO - always insert instead of upsert, fail on dupe (or read and fail on exists). are there any restrictions on version string?
-	return insert(conn, sqlUpsertProviderMetadata, providerID, c.Nonce, c.Moniker, c.Website, c.Description, location,
-		c.Port, c.SourceChain, c.EventStreamHost, c.ClaimStoreLocation, c.FreeTierRateLimit, c.FreeTierRateLimitDuration,
-		c.SubTierRateLimit, c.SubTierRateLimitDuration, c.AsGoTierRateLimit, c.AsGoTierRateLimitDuration)
+	return insert(conn, sqlUpsertProviderMetadata, providerID, nonce, c.Moniker, c.Website, c.Description, location, c.FreeTierRateLimit)
 }

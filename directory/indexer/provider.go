@@ -59,8 +59,7 @@ func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
 		return nil
 	}
 
-	providerMetadata.Configuration.Nonce = int64(provider.MetadataNonce)
-	if _, err = a.db.UpsertProviderMetadata(provider.ID, *providerMetadata); err != nil {
+	if _, err = a.db.UpsertProviderMetadata(provider.ID, int64(provider.MetadataNonce), *providerMetadata); err != nil {
 		return errors.Wrapf(err, "error updating provider metadta for mod event %s chain %s", provider.Pubkey, provider.Chain)
 	}
 	return nil
