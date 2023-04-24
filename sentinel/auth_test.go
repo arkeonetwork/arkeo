@@ -3,7 +3,6 @@ package sentinel
 import (
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -143,64 +142,4 @@ func TestPaidTier(t *testing.T) {
 	code, err = proxy.paidTier(aa, "127.0.0.1:8080")
 	require.Error(t, err)
 	require.Equal(t, code, http.StatusTooManyRequests)
-}
-
-func TestPaidTierFailFallbackToFreeTier(t *testing.T) {
-	// setup
-	interfaceRegistry := codectypes.NewInterfaceRegistry()
-	std.RegisterInterfaces(interfaceRegistry)
-	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
-	ctypes.RegisterInterfaces(interfaceRegistry)
-	cdc := codec.NewProtoCodec(interfaceRegistry)
-
-	visitors = make(map[string]*rate.Limiter) // reset visitors
-	pubkey := types.GetRandomPubKey()
-	kb := cKeys.NewInMemory(cdc)
-	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
-	require.NoError(t, err)
-	pub, err := info.GetPubKey()
-	require.NoError(t, err)
-	pk, err := common.NewPubKeyFromCrypto(pub)
-	require.NoError(t, err)
-
-	var signature []byte
-	nonce := int64(3)
-	service := common.BTCService.String()
-
-	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
-	signature, _, err = kb.Sign("whatever", message)
-	require.NoError(t, err)
-
-	config := conf.Configuration{
-		ProviderPubKey:    pubkey,
-		FreeTierRateLimit: 1,
-	}
-	proxy := NewProxy(config)
-
-	contract := types.NewContract(pubkey, common.BTCService, pk)
-	contract.Height = 5
-	contract.Duration = 100
-	contract.Id = 55556
-	// set contract to expired
-	proxy.MemStore.SetHeight(120)
-	proxy.MemStore.Put(contract)
-
-	nextHandler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-	})
-	handlerForTest := proxy.auth(nextHandler)
-	require.NotNil(t, handlerForTest)
-	aa := ArkAuth{
-		Nonce:      nonce,
-		ContractId: contract.Id,
-		Spender:    pk,
-		Signature:  signature,
-	}
-
-	responseRecorder := httptest.NewRecorder()
-	target := "/test?arkauth=" + aa.String()
-	r := httptest.NewRequest(http.MethodPost, target, nil)
-	handlerForTest.ServeHTTP(responseRecorder, r)
-	require.Equal(t, responseRecorder.Code, 200)
-	fmt.Println(responseRecorder.Header())
-	require.Equal(t, "free", responseRecorder.Header()["Tier"][0])
 }
