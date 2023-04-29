@@ -1,9 +1,16 @@
 package utils
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
+	"time"
 
 	"github.com/arkeonetwork/arkeo/directory/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestParseCoordinates(t *testing.T) {
@@ -70,22 +77,41 @@ func TestParseContractType(t *testing.T) {
 }
 
 func TestDownloadProviderMetadata(t *testing.T) {
-	uri := "https://raw.githubusercontent.com/arkeonetwork/directory/main/docs/sample-metadata.json"
-	metadata, err := DownloadProviderMetadata(uri, 5, 1e6)
-	if metadata == nil {
+	sdkConfig := sdk.GetConfig()
+	sdkConfig.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
+
+	// Open the sample file from the disk
+	sourceFile, err := os.Open("../../testutil/sample/metadata.json")
+	if err != nil {
+		t.Fatalf("Failed to open source file: %v", err)
+	}
+	defer sourceFile.Close()
+
+	// Create a temporary HTTP server to serve the file
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeContent(w, r, "metadata.json", time.Now(), sourceFile)
+	}))
+	defer ts.Close()
+
+	metadata, err := DownloadProviderMetadata(ts.URL, 5, 1e6)
+	if err != nil {
+		fmt.Println("foo", err)
 		t.FailNow()
 	}
 
-	if err != nil {
+	if metadata == nil {
+		fmt.Println("foo")
 		t.FailNow()
 	}
 
 	if metadata.Version == "" {
+		fmt.Println("baz")
 		t.FailNow()
 	}
 
-	_, err = DownloadProviderMetadata(uri, 5, 1)
+	_, err = DownloadProviderMetadata(ts.URL, 5, 1)
 	if err == nil {
+		fmt.Println("bazz", err)
 		t.FailNow()
 	}
 }

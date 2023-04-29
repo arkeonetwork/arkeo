@@ -1,0 +1,21 @@
+{
+  "config": {
+    "moniker": "n/a",
+    "website": "n/a",
+    "description": "n/a",
+    "location": "40.0176,-105.27",
+    "port": "3636",
+    "proxy_host": "https://swapi.dev",
+    "source_chain": "arkeod:1317",
+    "event_stream_host": "arkeod:26657",
+    "claim_store_location": "/Users/cbarraford/.arkeo/claims",
+    "provider_pubkey": "tarkeopub1addwnpepqvnhygy00gx3uncfmgjev643c20dh8wz6h0gmmv9rxh77jmjt53h79tq4he",
+    "free_tier_rate_limit": 10,
+    "free_tier_rate_limit_duration": 60000000000,
+    "subscription_tier_rate_limit": 10,
+    "subscription_tier_rate_limit_duration": 60000000000,
+    "pay_as_you_go_tier_rate_limit": 10,
+    "pay_as_you_go_tier_rate_limit_duration": 60000000000
+  },
+  "version": "0.1.0"
+}

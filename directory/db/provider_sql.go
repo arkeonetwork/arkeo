@@ -55,9 +55,8 @@ var (
 		returning id, created, updated
 	`
 	sqlUpsertProviderMetadata = `
-		insert into provider_metadata(provider_id,nonce,moniker,website,description,location,port,source_chain,event_stream_host,claim_store_location,
-			free_rate_limit,free_rate_limit_duration,subscribe_rate_limit,subscribe_rate_limit_duration,paygo_rate_limit,paygo_rate_limit_duration)
-		values ($1,$2,$3,$4,$5,CAST(NULLIF($6, '') AS point),$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+		insert into provider_metadata(provider_id,nonce,moniker,website,description,location,free_rate_limit)
+		values ($1,$2,$3,$4,$5,CAST(NULLIF($6, '') AS point),$7,$8)
 		on conflict on constraint prov_metanonce_uniq
 		do update set updated = now()
 		where provider_metadata.provider_id = $1

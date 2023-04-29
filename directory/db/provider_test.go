@@ -2,10 +2,10 @@ package db
 
 import (
 	"testing"
-	"time"
 
-	"github.com/arkeonetwork/arkeo/directory/sentinel"
 	"github.com/arkeonetwork/arkeo/directory/types"
+	"github.com/arkeonetwork/arkeo/sentinel"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/google/uuid"
 )
 
@@ -69,7 +69,7 @@ func TestUpsertProviderMetadata(t *testing.T) {
 	if err != nil {
 		t.Errorf("error getting db: %+v", err)
 	}
-	if _, err = db.UpsertProviderMetadata(1, sentinel.Metadata{Version: "0.0.6t", Configuration: sentinel.Configuration{Moniker: "UnitTestOper", AsGoTierRateLimitDuration: time.Hour * 24 * 365 * 10, Location: "50.1535,-19.165"}}); err != nil {
+	if _, err = db.UpsertProviderMetadata(1, 1, sentinel.Metadata{Version: "0.0.6t", Configuration: conf.Configuration{Moniker: "UnitTestOper", Location: "50.1535,-19.165"}}); err != nil {
 		t.Errorf("error upserting: %+v", err)
 	}
 }
