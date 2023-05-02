@@ -5,5 +5,6 @@ const (
 	RoutesActiveContract = "/active-contract/"
 	RoutesClaim          = "/claim/"
 	RoutesOpenClaims     = "/open-claims/"
+	RouteManage          = "/manage/contract/"
 	RoutesDefault        = "/"
 )

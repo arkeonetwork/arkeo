@@ -18,6 +18,7 @@ func TestConfiguration(t *testing.T) {
 	os.Setenv("PROVIDER_PUBKEY", "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	os.Setenv("FREE_RATE_LIMIT", "99")
 	os.Setenv("CLAIM_STORE_LOCATION", "clammy")
+	os.Setenv("CONTRACT_CONFIG_STORE_LOCATION", "configy")
 
 	config := NewConfiguration()
 
@@ -30,4 +31,5 @@ func TestConfiguration(t *testing.T) {
 	require.Equal(t, config.ProviderPubKey.String(), "cosmospub1addwnpepqg3523h7e7ggeh6na2lsde6s394tqxnvufsz0urld6zwl8687ue9c3dasgu")
 	require.Equal(t, config.FreeTierRateLimit, 99)
 	require.Equal(t, config.ClaimStoreLocation, "clammy")
+	require.Equal(t, config.ContractConfigStoreLocation, "configy")
 }

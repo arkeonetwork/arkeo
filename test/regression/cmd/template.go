@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"text/template"
+	"time"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +61,9 @@ var funcMap = template.FuncMap{
 	},
 	"addr_module_reserve": func() string {
 		return ModuleAddrReserve
+	},
+	"timestamp": func() int64 {
+		return time.Now().UnixNano()
 	},
 }
 

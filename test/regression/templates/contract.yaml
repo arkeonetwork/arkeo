@@ -1,0 +1,53 @@
+type: state
+genesis:
+  app_state:
+    bank:
+      balances:
+        - address: {{ addr_module_contract }}
+          coins:
+            - amount: "300"
+              denom: uarkeo
+    arkeo:
+      contracts:
+        - provider: {{ pubkey_fox }}
+          service: 1
+          client: {{ pubkey_cat }}
+          type: 0
+          height: 1
+          duration: 1000000000000
+          rate: 
+            denom: "uarkeo"
+            amount: "1"
+          deposit: "100"
+          paid: "0"
+          id: "1"
+          authorization: 0
+          queries_per_minute: 100
+        - provider: {{ pubkey_fox }}
+          service: 1
+          client: {{ pubkey_pig }}
+          type: 1
+          height: 1
+          duration: 1000000000000
+          rate: 
+            denom: "uarkeo"
+            amount: "1"
+          deposit: "100"
+          paid: "0"
+          id: "2"
+          authorization: 1
+          queries_per_minute: 100
+        - provider: {{ pubkey_fox }}
+          service: 1
+          client: {{ pubkey_dog }}
+          type: 1
+          height: 1
+          duration: 1000000000000
+          rate: 
+            denom: "uarkeo"
+            amount: "1"
+          deposit: "100"
+          paid: "0"
+          id: "3"
+          authorization: 0
+          queries_per_minute: 100

@@ -268,6 +268,7 @@ func run(path string) error {
 		"EVENT_STREAM_HOST=localhost:26657",
 		"FREE_RATE_LIMIT=10",
 		"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
+		"CONTRACT_CONFIG_STORE_LOCATION=/regtest/.arkeo/contract_configs",
 	)
 	stderr, err = sentinel.StderrPipe()
 	if err != nil {

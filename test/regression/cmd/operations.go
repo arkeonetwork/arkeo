@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -175,11 +176,44 @@ type OpCheck struct {
 	OpBase        `yaml:",inline"`
 	Description   string            `json:"description"`
 	Endpoint      string            `json:"endpoint"`
+	Method        string            `json:"method"`
+	Body          string            `json:"body"`
 	Params        map[string]string `json:"params"`
 	ArkAuth       map[string]string `json:"arkauth"`
+	ContractAuth  map[string]string `json:"contractauth"`
 	Status        int               `json:"status"`
 	AssertHeaders map[string]string `json:"headers"`
 	Asserts       []string          `json:"asserts"`
+}
+
+func createContractAuth(input map[string]string) (string, bool, error) {
+	///////// create contract auth signature //////////////
+	if len(input) == 0 {
+		return "", false, nil
+	}
+
+	// validate inputs
+	if len(input["id"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: id")
+	}
+
+	if len(input["timestamp"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: timestamp")
+	}
+
+	id, err := strconv.ParseUint(input["id"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse id: %s", err)
+	}
+	timestamp, err := strconv.ParseInt(input["timestamp"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse timestamp: %s", err)
+	}
+
+	// sign our msg
+	msg := sentinel.GenerateMessageToSign(id, timestamp)
+	auth, err := signThis(msg, input["signer"])
+	return auth, true, err
 }
 
 func createAuth(input map[string]string) (string, bool, error) {
@@ -210,9 +244,15 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
 	}
+	msg := sentinel.GenerateMessageToSign(id, nonce)
+	auth, err := signThis(msg, input["signer"])
+	return auth, true, err
+}
 
+func signThis(msg, signer string) (string, error) {
+	///////// create ark auth signature //////////////
 	mnemonic := ""
-	switch input["signer"] {
+	switch signer {
 	case "dog":
 		mnemonic = dogMnemonic
 	case "cat":
@@ -222,7 +262,7 @@ func createAuth(input map[string]string) (string, bool, error) {
 	case "pig":
 		mnemonic = pigMnemonic
 	default:
-		return "", true, fmt.Errorf("ark auth requires a valid signer (dog, cat, fox, pig): %s", input["signer"])
+		return "", fmt.Errorf("ark auth requires a valid signer (dog, cat, fox, pig): %s", signer)
 	}
 	// get default hd path
 	hdPath := hd.NewFundraiserParams(0, 118, 0).String()
@@ -234,15 +274,11 @@ func createAuth(input map[string]string) (string, bool, error) {
 	}
 	privKey := hd.Secp256k1.Generate()(derivedPriv)
 
-	// sign our msg
-	msg := sentinel.GenerateMessageToSign(id, nonce)
 	sig, err := privKey.Sign([]byte(msg))
 	if err != nil {
-		return "", true, fmt.Errorf("failed to sign message: %s", err)
+		return "", fmt.Errorf("failed to sign message: %s", err)
 	}
-	arkauth := sentinel.GenerateArkAuthString(id, nonce, sig)
-
-	return arkauth, true, nil
+	return fmt.Sprintf("%s:%s", msg, hex.EncodeToString(sig)), nil
 }
 
 func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
@@ -251,8 +287,17 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 		return fmt.Errorf("check")
 	}
 
+	if op.Method == "" {
+		op.Method = http.MethodGet
+	}
+
+	var body io.Reader
+	if len(op.Body) > 0 {
+		body = strings.NewReader(op.Body)
+	}
+
 	// build request
-	req, err := http.NewRequest("GET", op.Endpoint, nil)
+	req, err := http.NewRequest(op.Method, op.Endpoint, body)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to build request")
 	}
@@ -268,6 +313,13 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	}
 	if authOK {
 		q.Add(sentinel.QueryArkAuth, arkauth)
+	}
+	contractAuth, contractAuthOK, err := createContractAuth(op.ContractAuth)
+	if err != nil {
+		return err
+	}
+	if contractAuthOK {
+		q.Add(sentinel.QueryContract, contractAuth)
 	}
 	req.URL.RawQuery = q.Encode()
 

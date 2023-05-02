@@ -3,6 +3,7 @@ package sentinel
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -19,12 +20,13 @@ import (
 )
 
 type Proxy struct {
-	Metadata   Metadata
-	Config     conf.Configuration
-	MemStore   *MemStore
-	ClaimStore *ClaimStore
-	logger     log.Logger
-	proxies    map[string]*url.URL
+	Metadata            Metadata
+	Config              conf.Configuration
+	MemStore            *MemStore
+	ClaimStore          *ClaimStore
+	ContractConfigStore *ContractConfigurationStore
+	logger              log.Logger
+	proxies             map[string]*url.URL
 }
 
 func NewProxy(config conf.Configuration) Proxy {
@@ -33,14 +35,19 @@ func NewProxy(config conf.Configuration) Proxy {
 	if err != nil {
 		panic(err)
 	}
+	contractConfigStore, err := NewContractConfigurationStore(config.ContractConfigStoreLocation)
+	if err != nil {
+		panic(err)
+	}
 
 	return Proxy{
-		Metadata:   NewMetadata(config),
-		Config:     config,
-		MemStore:   NewMemStore(config.SourceChain, logger),
-		ClaimStore: claimStore,
-		proxies:    loadProxies(),
-		logger:     logger,
+		Metadata:            NewMetadata(config),
+		Config:              config,
+		MemStore:            NewMemStore(config.SourceChain, logger),
+		ClaimStore:          claimStore,
+		ContractConfigStore: contractConfigStore,
+		proxies:             loadProxies(),
+		logger:              logger,
 	}
 }
 
@@ -123,6 +130,96 @@ func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
 
 	d, _ := json.Marshal(p.Metadata)
 	_, _ = w.Write(d)
+}
+
+func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
+	path := r.URL.Path
+
+	parts := strings.Split(path, "/")
+	if len(parts) < 4 {
+		respondWithError(w, "not enough parameters", http.StatusBadRequest)
+		return
+	}
+
+	contractId, err := strconv.ParseUint(parts[3], 10, 64)
+	if err != nil {
+		p.logger.Error("fail to parse contract id", "error", err, "id", parts[1])
+		respondWithError(w, fmt.Sprintf("bad contract id: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	conf, err := p.ContractConfigStore.Get(contractId)
+	if err != nil {
+		p.logger.Error("fail to fetch contract", "error", err, "id", contractId)
+		respondWithError(w, fmt.Sprintf("bad contract id: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	// check authorization
+	args := r.URL.Query()
+	var auth ContractAuth
+	raw, ok := args[QueryContract]
+	if ok {
+		auth, err = parseContractAuth(raw[0])
+		if err != nil {
+			p.logger.Error("fail to parse contract auth", "error", err, "auth", raw[0])
+			respondWithError(w, fmt.Sprintf("bad contract auth: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		contract, err := p.MemStore.Get(conf.Key())
+		if err != nil {
+			p.logger.Error("fail to fetch contract", "error", err, "id", conf.Key())
+			respondWithError(w, fmt.Sprintf("missing contract: %s", err), http.StatusNotFound)
+			return
+		}
+		if err := auth.Validate(conf.LastTimeStamp, contract.Client); err != nil {
+			p.logger.Error("fail to validate contract auth", "error", err, "auth", auth.String())
+			respondWithError(w, fmt.Sprintf("bad contract auth: %s", err), http.StatusBadRequest)
+			return
+		}
+	} else {
+		p.logger.Error("missing contract auth")
+		respondWithError(w, fmt.Sprintf("missing contract auth: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		d, _ := json.Marshal(conf)
+		_, _ = w.Write(d)
+	case http.MethodPost:
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading request body", http.StatusInternalServerError)
+			return
+		}
+
+		type PostContractConfig struct {
+			PerUserRateLimit     int      `json:"per_user_rate_limit"`
+			CORs                 CORs     `json:"cors"`
+			WhitelistIPAddresses []string `json:"white_listed_ip_addresses"`
+		}
+		var changes PostContractConfig
+		if err := json.Unmarshal(body, &changes); err != nil {
+			http.Error(w, "Error unmarshaling JSON data", http.StatusBadRequest)
+			return
+		}
+
+		conf.PerUserRateLimit = changes.PerUserRateLimit
+		conf.CORs = changes.CORs
+		conf.WhitelistIPAddresses = changes.WhitelistIPAddresses
+		err = p.ContractConfigStore.Set(conf)
+		if err != nil {
+			p.logger.Error("fail to save contract config", "error", err, "id", conf.ContractId)
+			respondWithError(w, fmt.Sprintf("failed to save contract config: %s", err), http.StatusInternalServerError)
+			return
+		}
+	default:
+		p.logger.Error("unsupported request method", "method", r.Method)
+		respondWithError(w, fmt.Sprintf("unsupported request method: %s", r.Method), http.StatusBadRequest)
+	}
 }
 
 func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
@@ -233,6 +330,7 @@ func (p Proxy) Run() {
 	mux.Handle(RoutesActiveContract, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleActiveContract)))
 	mux.Handle(RoutesClaim, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
 	mux.Handle(RoutesOpenClaims, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
+	mux.Handle(RouteManage, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
 	mux.Handle(RoutesDefault, p.auth(
 		handlers.LoggingHandler(
 			os.Stdout,

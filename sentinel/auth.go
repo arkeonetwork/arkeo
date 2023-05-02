@@ -3,7 +3,6 @@ package sentinel
 import (
 	"encoding/hex"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,7 +17,8 @@ import (
 )
 
 const (
-	QueryArkAuth = "arkauth"
+	QueryArkAuth  = "arkauth"
+	QueryContract = "arkcontract"
 )
 
 // Create a map to hold the rate limiters for each visitor and a mutex.
@@ -26,6 +26,12 @@ var (
 	visitors = make(map[string]*rate.Limiter)
 	mu       sync.Mutex
 )
+
+type ContractAuth struct {
+	ContractId uint64
+	Timestamp  int64
+	Signature  []byte
+}
 
 type ArkAuth struct {
 	ContractId uint64
@@ -45,6 +51,35 @@ func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte) str
 
 func GenerateMessageToSign(contractId uint64, nonce int64) string {
 	return fmt.Sprintf("%d:%d", contractId, nonce)
+}
+
+func parseContractAuth(raw string) (ContractAuth, error) {
+	var auth ContractAuth
+	var err error
+
+	parts := strings.SplitN(raw, ":", 3)
+
+	if len(parts) > 0 {
+		auth.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
+		if err != nil {
+			return auth, err
+		}
+	}
+
+	if len(parts) > 0 {
+		auth.Timestamp, err = strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			return auth, err
+		}
+	}
+
+	if len(parts) > 2 {
+		auth.Signature, err = hex.DecodeString(parts[2])
+		if err != nil {
+			return auth, err
+		}
+	}
+	return auth, nil
 }
 
 func parseArkAuth(raw string) (ArkAuth, error) {
@@ -86,6 +121,31 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	return err
 }
 
+func (auth ContractAuth) Validate(lastTimestamp int64, client common.PubKey) error {
+	if auth.ContractId == 0 {
+		return fmt.Errorf("contract id cannot be zero")
+	}
+	if auth.Timestamp <= lastTimestamp {
+		return fmt.Errorf("timestamp must be larger than %d", lastTimestamp)
+	}
+
+	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, client.String())
+	if err != nil {
+		return err
+	}
+	msg := fmt.Sprintf("%d:%d", auth.ContractId, auth.Timestamp)
+	if !pk.VerifySignature([]byte(msg), auth.Signature) {
+		return fmt.Errorf("invalid signature")
+	}
+
+	return nil
+}
+
+func (auth ContractAuth) String() string {
+	sig := hex.EncodeToString(auth.Signature)
+	return fmt.Sprintf("Contract Id: %d, Timestamp: %d, Signature: %s", auth.ContractId, auth.Timestamp, sig)
+}
+
 func (p Proxy) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -96,7 +156,42 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			aa, err = parseArkAuth(raw[0])
 		}
 		remoteAddr := p.getRemoteAddr(r)
-		contract, _ := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
+		contract, err := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
+		if err != nil {
+			p.logger.Error("failed to fetch contract", "error", err)
+		}
+		fmt.Printf("LOAD CONTRACT: %+v, %w\n", contract, err)
+		// collect contract configuration
+		if contract.Id > 0 {
+			conf, err := p.ContractConfigStore.Get(contract.Id)
+			if err != nil {
+				p.logger.Error("failed to fetch contract configuration", "error", err)
+			}
+			fmt.Printf(">>>>>>>> CORS: %+v\n", conf.CORs)
+			w = p.enableCORS(w, conf.CORs)
+
+			// enfore IP Whitelist
+			if len(conf.WhitelistIPAddresses) > 0 {
+				// TODO: using a map would be faster than iterating over a slice
+				found := false
+				for _, ip := range conf.WhitelistIPAddresses {
+					if strings.EqualFold(remoteAddr, ip) {
+						found = true
+					}
+				}
+				if !found {
+					http.Error(w, "Forbidden", http.StatusForbidden)
+					return
+				}
+			}
+
+			if conf.PerUserRateLimit > 0 {
+				if ok := p.isRateLimited(contract.Id, remoteAddr, conf.PerUserRateLimit); ok {
+					http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
+					return
+				}
+			}
+		}
 
 		if err == nil && (contract.Authorization == types.ContractAuthorization_OPEN || aa.Validate(p.Config.ProviderPubKey) == nil) {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
@@ -107,7 +202,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			serviceName := parts[1]
 			ser, err := common.NewService(serviceName)
 			if err != nil || ser != contract.Service {
-				http.Error(w, "contract service doesn't match the serivce name in the path", http.StatusUnauthorized)
+				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d): %w", ser, contract.Service, err), http.StatusUnauthorized)
 				return
 			}
 
@@ -150,23 +245,18 @@ func (p Proxy) getRemoteAddr(r *http.Request) string {
 }
 
 func (p Proxy) freeTier(remoteAddr string) (int, error) {
-	// Get the IP address for the current user.
-	key, _, err := net.SplitHostPort(remoteAddr)
-	if err != nil {
-		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
-	}
-
-	if ok := p.isRateLimited(key, p.Config.FreeTierRateLimit); ok {
+	if ok := p.isRateLimited(0, remoteAddr, p.Config.FreeTierRateLimit); ok {
 		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
 	}
 
 	return http.StatusOK, nil
 }
 
-func (p Proxy) isRateLimited(key string, limitTokens int) bool {
+func (p Proxy) isRateLimited(contractId uint64, key string, limitTokens int) bool {
 	mu.Lock()
 	defer mu.Unlock()
 
+	key = fmt.Sprintf("%d-%s", contractId, key)
 	limiter, exists := visitors[key]
 	if !exists {
 		limiter = rate.NewLimiter(rate.Every(time.Minute), limitTokens)
@@ -207,7 +297,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		}
 	}
 
-	if ok := p.isRateLimited(key, int(contract.QueriesPerMinute)); ok {
+	if ok := p.isRateLimited(contract.Id, key, int(contract.QueriesPerMinute)); ok {
 		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
 	}
 
@@ -220,4 +310,20 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	contract.Nonce = aa.Nonce
 	p.MemStore.Put(contract)
 	return http.StatusOK, nil
+}
+
+func (p Proxy) enableCORS(w http.ResponseWriter, cors CORs) http.ResponseWriter {
+	if len(cors.AllowOrigins) > 0 {
+		fmt.Println("Adding origins header")
+		w.Header().Set("Access-Control-Allow-Origin", strings.Join(cors.AllowOrigins, ", "))
+	}
+	if len(cors.AllowMethods) > 0 {
+		fmt.Println("Adding methods header")
+		w.Header().Set("Access-Control-Allow-Methods", strings.Join(cors.AllowMethods, ", "))
+	}
+	if len(cors.AllowHeaders) > 0 {
+		fmt.Println("Adding headers header")
+		w.Header().Set("Access-Control-Allow-Headers", strings.Join(cors.AllowHeaders, ", "))
+	}
+	return w
 }

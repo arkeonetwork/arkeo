@@ -1,0 +1,137 @@
+{{ template "default-state.yaml" }}
+---
+{{ template "provider.yaml" }}
+---
+{{ template "contract.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# fetch contract configuration
+########################################################################################
+type: check
+description: check metadata.json
+endpoint: http://localhost:3636/manage/contract/1
+contractauth:
+  id: "1"
+  timestamp: "10"
+  signer: "cat"
+status: 200
+asserts:
+  - .per_user_rate_limit == 0
+---
+########################################################################################
+# update contract configuration
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/manage/contract/1
+method: "POST"
+body: '{"per_user_rate_limit":100,"cors":{"allow_origins":["foo","bar","baz"],"allow_methods":["meth1", "meth2", "meth3"],"allow_headers":["head1", "head2", "head3"]},"white_listed_ip_addresses":["ip1", "ip2", "ip3"]}'
+contractauth:
+  id: "1"
+  timestamp: "11"
+  signer: "cat"
+status: 200
+---
+########################################################################################
+# check that contract configuration has been updated
+########################################################################################
+type: check
+description: check metadata.json
+endpoint: http://localhost:3636/manage/contract/1
+contractauth:
+  id: "1"
+  timestamp: "10"
+  signer: "cat"
+status: 200
+asserts:
+  - .per_user_rate_limit == 100
+  - .white_listed_ip_addresses[0] == "ip1"
+  - .white_listed_ip_addresses[1] == "ip2"
+  - .white_listed_ip_addresses[2] == "ip3"
+  - .cors.allow_origins[0] == "foo"
+  - .cors.allow_origins[1] == "bar"
+  - .cors.allow_origins[2] == "baz"
+  - .cors.allow_methods[0] == "meth1"
+  - .cors.allow_methods[1] == "meth2"
+  - .cors.allow_methods[2] == "meth3"
+  - .cors.allow_headers[0] == "head1"
+  - .cors.allow_headers[1] == "head2"
+  - .cors.allow_headers[2] == "head3"
+---
+########################################################################################
+# update contract configuration, test CORs and per user rate limit
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/manage/contract/1
+method: "POST"
+body: '{"per_user_rate_limit":1,"cors":{"allow_origins":["foo","bar","baz"],"allow_methods":["meth1", "meth2", "meth3"],"allow_headers":["head1", "head2", "head3"]},"white_listed_ip_addresses":[]}'
+contractauth:
+  id: "1"
+  timestamp: "12"
+  signer: "cat"
+status: 200
+---
+########################################################################################
+# check CORs
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "1"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+headers:
+  Tier: "paid"
+  Access-Control-Allow-Origin: "foo, bar, baz"
+  Access-Control-Allow-Methods: "meth1, meth2, meth3"
+  Access-Control-Allow-Headers: "head1, head2, head3"
+status: 200
+asserts:
+  - .name == "Luke Skywalker"
+---
+########################################################################################
+# check per user rate limit
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "1"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+status: 429
+---
+########################################################################################
+# update contract configuration to test IP white listing
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/manage/contract/1
+method: "POST"
+body: '{"per_user_rate_limit":100,"cors":{"allow_origins":["foo","bar","baz"],"allow_methods":["meth1", "meth2", "meth3"],"allow_headers":["head1", "head2", "head3"]},"white_listed_ip_addresses":["ip1", "ip2", "ip3"]}'
+contractauth:
+  id: "1"
+  timestamp: "13"
+  signer: "cat"
+status: 200
+---
+########################################################################################
+# check CORs
+########################################################################################
+type: check
+description: check tier header
+endpoint: http://localhost:3636/swapi.dev/api/people/1
+arkauth:
+  signer: cat
+  id: "1"
+  spender: {{ pubkey_cat }}
+  nonce: "1"
+status: 403
+---
