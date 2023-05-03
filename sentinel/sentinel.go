@@ -179,6 +179,12 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, fmt.Sprintf("bad contract auth: %s", err), http.StatusBadRequest)
 			return
 		}
+		conf.LastTimeStamp = auth.Timestamp
+		if err := p.ContractConfigStore.Set(conf); err != nil {
+			p.logger.Error("fail to save contract config", "error", err, "auth", auth.String())
+			respondWithError(w, fmt.Sprintf("fail to save contract config: %s", err), http.StatusBadRequest)
+			return
+		}
 	} else {
 		p.logger.Error("missing contract auth")
 		respondWithError(w, fmt.Sprintf("missing contract auth: %s", err), http.StatusBadRequest)

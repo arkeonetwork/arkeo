@@ -43,7 +43,7 @@ description: check metadata.json
 endpoint: http://localhost:3636/manage/contract/1
 contractauth:
   id: "1"
-  timestamp: "10"
+  timestamp: "12"
   signer: "cat"
 status: 200
 asserts:
@@ -71,7 +71,7 @@ method: "POST"
 body: '{"per_user_rate_limit":1,"cors":{"allow_origins":["foo","bar","baz"],"allow_methods":["meth1", "meth2", "meth3"],"allow_headers":["head1", "head2", "head3"]},"white_listed_ip_addresses":[]}'
 contractauth:
   id: "1"
-  timestamp: "12"
+  timestamp: "13"
   signer: "cat"
 status: 200
 ---
@@ -118,7 +118,7 @@ method: "POST"
 body: '{"per_user_rate_limit":100,"cors":{"allow_origins":["foo","bar","baz"],"allow_methods":["meth1", "meth2", "meth3"],"allow_headers":["head1", "head2", "head3"]},"white_listed_ip_addresses":["ip1", "ip2", "ip3"]}'
 contractauth:
   id: "1"
-  timestamp: "13"
+  timestamp: "14"
   signer: "cat"
 status: 200
 ---

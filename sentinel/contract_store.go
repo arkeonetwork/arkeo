@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -166,8 +165,4 @@ func (s *ContractConfigurationStore) Close() error {
 
 func (s *ContractConfigurationStore) GetInternalDb() *leveldb.DB {
 	return s.db
-}
-
-func getTimeStamp() int64 {
-	return time.Now().UnixNano()
 }

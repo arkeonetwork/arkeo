@@ -154,20 +154,23 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		raw, aaOK := args[QueryArkAuth]
 		if aaOK {
 			aa, err = parseArkAuth(raw[0])
+			if err != nil {
+				p.logger.Error("failed to parse ark auth", "error", err)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 		}
 		remoteAddr := p.getRemoteAddr(r)
 		contract, err := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
 		if err != nil {
 			p.logger.Error("failed to fetch contract", "error", err)
 		}
-		fmt.Printf("LOAD CONTRACT: %+v, %w\n", contract, err)
 		// collect contract configuration
 		if contract.Id > 0 {
 			conf, err := p.ContractConfigStore.Get(contract.Id)
 			if err != nil {
 				p.logger.Error("failed to fetch contract configuration", "error", err)
 			}
-			fmt.Printf(">>>>>>>> CORS: %+v\n", conf.CORs)
 			w = p.enableCORS(w, conf.CORs)
 
 			// enfore IP Whitelist
@@ -202,7 +205,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			serviceName := parts[1]
 			ser, err := common.NewService(serviceName)
 			if err != nil || ser != contract.Service {
-				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d): %w", ser, contract.Service, err), http.StatusUnauthorized)
+				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d): %s", ser, contract.Service, err.Error()), http.StatusUnauthorized)
 				return
 			}
 
@@ -314,15 +317,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 
 func (p Proxy) enableCORS(w http.ResponseWriter, cors CORs) http.ResponseWriter {
 	if len(cors.AllowOrigins) > 0 {
-		fmt.Println("Adding origins header")
 		w.Header().Set("Access-Control-Allow-Origin", strings.Join(cors.AllowOrigins, ", "))
 	}
 	if len(cors.AllowMethods) > 0 {
-		fmt.Println("Adding methods header")
 		w.Header().Set("Access-Control-Allow-Methods", strings.Join(cors.AllowMethods, ", "))
 	}
 	if len(cors.AllowHeaders) > 0 {
-		fmt.Println("Adding headers header")
 		w.Header().Set("Access-Control-Allow-Headers", strings.Join(cors.AllowHeaders, ", "))
 	}
 	return w
