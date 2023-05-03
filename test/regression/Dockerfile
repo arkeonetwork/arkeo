@@ -12,6 +12,7 @@ ENV GOPATH=/go
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 
+RUN go install github.com/jackc/tern@latest
 RUN mkdir /regtest
 
 WORKDIR /app

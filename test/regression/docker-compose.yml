@@ -1,0 +1,37 @@
+version: "3.6"
+services:
+  arkeod:
+    hostname: arkeod
+    image: arkeo-regtest
+    build:
+      context: ../..
+      dockerfile: ./test/regression/Dockerfile
+    ports:
+      - "1317:1317"
+      - "26656:26656"
+      - "26657:26657"
+    volumes:
+      - "./mnt:/mnt"
+      - "./suites:/app/test/regression/suites"
+      - "./templates:/app/test/regression/templates"
+    environment:
+      NET: "regtest"
+      HOME: "/regtest"
+      DEBUG: 1
+        # - EXPORT
+        # - TIME_FACTOR
+    command: make _test-regression
+    depends_on:
+      - directory-postgres
+
+  directory-postgres:
+    hostname: directory-postgres
+    image: postgres:15.1-alpine
+    container_name: directory-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: arkeo_directory
+      POSTGRES_USER: arkeo
+      POSTGRES_PASSWORD: arkeo123
+    ports:
+      - 5432:5432
