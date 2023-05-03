@@ -11,12 +11,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
-
-	"github.com/gorilla/handlers"
 )
 
 type Proxy struct {
@@ -134,17 +135,16 @@ func (p Proxy) handleMetadata(w http.ResponseWriter, r *http.Request) {
 
 func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
-	path := r.URL.Path
-
-	parts := strings.Split(path, "/")
-	if len(parts) < 4 {
-		respondWithError(w, "not enough parameters", http.StatusBadRequest)
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		respondWithError(w, "missing id in uri", http.StatusBadRequest)
 		return
 	}
 
-	contractId, err := strconv.ParseUint(parts[3], 10, 64)
+	contractId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse contract id", "error", err, "id", parts[1])
+		p.logger.Error("fail to parse contract id", "error", err, "id", id)
 		respondWithError(w, fmt.Sprintf("bad contract id: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -259,26 +259,30 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 
 func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
-	path := r.URL.Path
-
-	parts := strings.Split(path, "/")
-	if len(parts) < 4 {
-		respondWithError(w, "not enough parameters", http.StatusBadRequest)
+	vars := mux.Vars(r)
+	ser, ok := vars["service"]
+	if !ok {
+		respondWithError(w, "missing service in uri", http.StatusBadRequest)
+		return
+	}
+	pubkey, ok := vars["spender"]
+	if !ok {
+		respondWithError(w, "missing spender pubkey in uri", http.StatusBadRequest)
 		return
 	}
 
 	providerPK := p.Config.ProviderPubKey
 
-	service, err := common.NewService(parts[2])
+	service, err := common.NewService(ser)
 	if err != nil {
-		p.logger.Error("fail to parse service", "error", err, "service", parts[2])
+		p.logger.Error("fail to parse service", "error", err, "service", ser)
 		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
 		return
 	}
 
-	spenderPK, err := common.NewPubKey(parts[3])
+	spenderPK, err := common.NewPubKey(pubkey)
 	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "service", parts[3])
+		p.logger.Error("fail to parse spender pubkey", "error", err, "pubkey", pubkey)
 		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
 		return
 	}
@@ -296,17 +300,15 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 
 func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
-	path := r.URL.Path
-
-	parts := strings.Split(path, "/")
-	if len(parts) < 3 {
-		respondWithError(w, "not enough parameters", http.StatusBadRequest)
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		respondWithError(w, "missing id in uri", http.StatusBadRequest)
 		return
 	}
-
-	contractId, err := strconv.ParseUint(parts[2], 10, 64)
+	contractId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		p.logger.Error("fail to parse contractId", "error", err, "contractId", parts[2])
+		p.logger.Error("fail to parse contractId", "error", err, "contractId", id)
 		respondWithError(w, fmt.Sprintf("bad contractId: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -329,26 +331,49 @@ func (p Proxy) Run() {
 
 	go p.EventListener(p.Config.EventStreamHost)
 
-	mux := http.NewServeMux()
+	router := p.getRouter()
 
-	// start server
-	mux.Handle(RoutesMetaData, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleMetadata)))
-	mux.Handle(RoutesActiveContract, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleActiveContract)))
-	mux.Handle(RoutesClaim, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleClaim)))
-	mux.Handle(RoutesOpenClaims, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleOpenClaims)))
-	mux.Handle(RouteManage, handlers.LoggingHandler(os.Stdout, http.HandlerFunc(p.handleContract)))
-	mux.Handle(RoutesDefault, p.auth(
-		handlers.LoggingHandler(
-			os.Stdout,
+	// Configure Logrus
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.InfoLevel)
+
+	// Add the Logrus middleware to the router
+	loggingRouter := p.logrusMiddleware(router)
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), loggingRouter); err != nil {
+		panic(err)
+	}
+}
+
+func (p *Proxy) getRouter() *mux.Router {
+	router := mux.NewRouter()
+	router.HandleFunc(RoutesMetaData, http.HandlerFunc(p.handleMetadata)).Methods(http.MethodGet)
+	router.HandleFunc(RoutesActiveContract, http.HandlerFunc(p.handleActiveContract)).Methods(http.MethodGet)
+	router.HandleFunc(RoutesClaim, http.HandlerFunc(p.handleClaim)).Methods(http.MethodGet)
+	router.HandleFunc(RoutesOpenClaims, http.HandlerFunc(p.handleOpenClaims)).Methods(http.MethodGet)
+	router.HandleFunc(RouteManage, http.HandlerFunc(p.handleContract)).Methods(http.MethodGet, http.MethodPost)
+	router.PathPrefix("/").Handler(
+		p.auth(
 			handlers.ProxyHeaders(
 				http.HandlerFunc(p.handleRequestAndRedirect),
 			),
 		),
-	))
+	).Methods(http.MethodGet, http.MethodPost)
+	return router
+}
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), mux); err != nil {
-		panic(err)
-	}
+func (p *Proxy) logrusMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := logrus.WithFields(logrus.Fields{
+			"method": r.Method,
+			"url":    r.URL.String(),
+			"remote": p.getRemoteAddr(r),
+		})
+
+		logger.Info("New request")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func respondWithError(w http.ResponseWriter, message string, code int) {

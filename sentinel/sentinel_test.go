@@ -40,12 +40,14 @@ func TestHandleActiveContract(t *testing.T) {
 	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
 	proxy.handleOpenContractEvent(resultEvent)
 
-	url := fmt.Sprintf("%s%s/%s", RoutesActiveContract, inputContract.Service, inputContract.GetSpender())
+	router := proxy.getRouter()
+
+	url := fmt.Sprintf("/active-contract/%s/%s", inputContract.Service, inputContract.GetSpender())
 
 	req, err := http.NewRequest("GET", url, nil)
 	require.NoError(t, err)
 	response := httptest.NewRecorder()
-	proxy.handleActiveContract(response, req)
+	router.ServeHTTP(response, req)
 
 	// Check the status code is what we expect.
 	require.Equal(t, http.StatusOK, response.Code)
@@ -90,6 +92,7 @@ func TestHandleClaim(t *testing.T) {
 	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
 	proxy.handleOpenContractEvent(resultEvent)
 
+	router := proxy.getRouter()
 	// simulate 10 calls being made to sentinel on the contract.
 	arkAuth := ArkAuth{
 		ContractId: inputContract.Id,
@@ -108,12 +111,12 @@ func TestHandleClaim(t *testing.T) {
 
 	// we should have a valid claim in our store.
 	// check that we can retrieve it.
-	url := fmt.Sprintf("%s%d", RoutesClaim, inputContract.Id)
+	url := fmt.Sprintf("/claim/%d", inputContract.Id)
 
 	req, err := http.NewRequest("GET", url, nil)
 	require.NoError(t, err)
 	response := httptest.NewRecorder()
-	proxy.handleClaim(response, req)
+	router.ServeHTTP(response, req)
 
 	// Check the status code is what we expect.
 	require.Equal(t, http.StatusOK, response.Code)
