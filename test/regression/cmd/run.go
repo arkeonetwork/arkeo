@@ -325,7 +325,7 @@ func run(path string) error {
 
 		for _, proc := range procs {
 			// restart process
-			log.Debug().Msgf("Restarting process ", proc.name)
+			log.Debug().Msgf("Restarting process %s", proc.name)
 			proc.process = runProcess(proc, stderrLines)
 		}
 	}
