@@ -103,6 +103,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	var contract types.Contract
 
 	type fetchContract struct {
+		Id               string                      `protobuf:"varint,13,opt,name=id,proto3" json:"id,omitempty"`
 		ProviderPubKey   common.PubKey               `protobuf:"bytes,1,opt,name=provider_pub_key,json=providerPubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider_pub_key,omitempty"`
 		Service          common.Service              `protobuf:"varint,2,opt,name=service,proto3,casttype=github.com/arkeonetwork/arkeo/common.Service" json:"service,omitempty"`
 		Client           common.PubKey               `protobuf:"bytes,3,opt,name=client,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"client,omitempty"`
@@ -110,13 +111,13 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		Type             types.ContractType          `protobuf:"varint,5,opt,name=type,proto3,enum=arkeo.arkeo.ContractType" json:"type,omitempty"`
 		Height           string                      `protobuf:"varint,6,opt,name=height,proto3" json:"height,omitempty"`
 		Duration         string                      `protobuf:"varint,7,opt,name=duration,proto3" json:"duration,omitempty"`
-		Rate             string                      `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
+		Rate             cosmos.Coin                 `protobuf:"varint,8,opt,name=rate,proto3" json:"rate,omitempty"`
 		Deposit          string                      `protobuf:"varint,9,opt,name=deposit,proto3" json:"deposit,omitempty"`
 		Paid             string                      `protobuf:"varint,10,opt,name=paid,proto3" json:"paid,omitempty"`
 		Nonce            string                      `protobuf:"varint,11,opt,name=nonce,proto3" json:"nonce,omitempty"`
 		SettlementHeight string                      `protobuf:"varint,12,opt,name=settlement_height,json=settlementHeight,proto3" json:"settlement_height,omitempty"`
 		Authorization    types.ContractAuthorization `protobuf:"varint,15,opt,name=authorization,proto3,enum=arkeo.arkeo.ContractAuthorization" json:"authorization,omitempty"`
-		QueriesPerMinute int64                       `protobuf:"varint,16,opt,name=queries_per_minute,json=queriesPerMinute,proto3" json:"queries_per_minute,omitempty"`
+		QueriesPerMinute string                      `protobuf:"varint,16,opt,name=queries_per_minute,json=queriesPerMinute,proto3" json:"queries_per_minute,omitempty"`
 	}
 
 	type fetch struct {
@@ -125,6 +126,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 
 	var data fetch
 	requestURL := fmt.Sprintf("%s/arkeo/contract/%s", k.baseURL, key)
+	k.logger.Info("request uri", "uri", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		k.logger.Error("fail to create http request", "error", err)
@@ -143,12 +145,15 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		return contract, err
 	}
 
+	k.logger.Info("response body", "body", string(resBody))
+
 	err = json.Unmarshal(resBody, &data)
 	if err != nil {
 		k.logger.Error("fail to unmarshal response", "error", err)
 		return contract, err
 	}
 
+	contract.Id, _ = strconv.ParseUint(data.Contract.Id, 10, 64)
 	contract.Provider = data.Contract.ProviderPubKey
 	contract.Service = data.Contract.Service
 	contract.Client = data.Contract.Client
@@ -156,13 +161,13 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	contract.Type = data.Contract.Type
 	contract.Height, _ = strconv.ParseInt(data.Contract.Height, 10, 64)
 	contract.Duration, _ = strconv.ParseInt(data.Contract.Duration, 10, 64)
-	contract.Rate, _ = cosmos.ParseCoin(data.Contract.Rate)
+	contract.Rate = data.Contract.Rate
 	contract.Deposit, _ = cosmos.NewIntFromString(data.Contract.Deposit)
 	contract.Paid, _ = cosmos.NewIntFromString(data.Contract.Paid)
 	contract.Nonce, _ = strconv.ParseInt(data.Contract.Nonce, 10, 64)
 	contract.SettlementHeight, _ = strconv.ParseInt(data.Contract.SettlementHeight, 10, 64)
 	contract.Authorization = data.Contract.Authorization
-	contract.QueriesPerMinute = data.Contract.QueriesPerMinute
+	contract.QueriesPerMinute, _ = strconv.ParseInt(data.Contract.QueriesPerMinute, 10, 64)
 
 	return contract, nil
 }
