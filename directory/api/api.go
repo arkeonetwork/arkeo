@@ -72,6 +72,9 @@ func buildRouter(a *ApiService) *mux.Router {
 	fileServer := http.FileServer(http.Dir(a.params.StaticDir))
 	router.PathPrefix("/docs").Handler(http.StripPrefix("/docs", fileServer))
 
+	contractRouter := router.PathPrefix("/contract").Subrouter()
+	contractRouter.HandleFunc("/{id}", a.getContract).Methods(http.MethodGet)
+
 	providerRouter := router.PathPrefix("/provider").Subrouter()
 	providerRouter.HandleFunc("/{pubkey}", a.getProvider).Methods(http.MethodGet)
 	providerRouter.HandleFunc("/search/", a.searchProviders).Methods(http.MethodGet)

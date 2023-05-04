@@ -17,6 +17,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/directory/db"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -104,6 +108,8 @@ func run(path string) error {
 	// track whether we've seen non-state operations
 	seenNonState := false
 
+	providers := make([]types.Provider, 0)
+
 	dec := yaml.NewDecoder(buf)
 	for {
 		// decode into temporary type
@@ -130,6 +136,25 @@ func run(path string) error {
 			seenNonState = true
 		}
 
+		if op["type"] == "state" {
+			// if we are pre-populating with providers, pull them out to insert
+			// them into postgres as well
+			if genesis, ok := op["genesis"]; ok {
+				if app_state, ok := genesis.(map[string]any)["app_state"]; ok {
+					if arkeo, ok := app_state.(map[string]any)["arkeo"]; ok {
+						if provs, ok := arkeo.(map[string]any)["providers"]; ok {
+							for _, p := range provs.([]interface{}) {
+								pk := p.(map[string]any)["pub_key"].(string)
+								ser := p.(map[string]any)["service"].(int)
+								provider := types.NewProvider(common.PubKey(pk), common.Service(ser))
+								providers = append(providers, provider)
+							}
+						}
+					}
+				}
+			}
+		}
+
 		ops = append(ops, NewOperation(op))
 	}
 
@@ -150,6 +175,8 @@ func run(path string) error {
 				log.Fatal().Err(err).Msg("failed to execute state operation")
 			}
 			stateOpCount++
+
+			// if its a state OpState and has provider, we need to push them into postgres
 		}
 	}
 	ops = ops[stateOpCount:]
@@ -204,7 +231,7 @@ func run(path string) error {
 	// wait for postgres
 	waitForPort("postgres", "directory-postgres:5432")
 	iter := time.Now().UnixNano()
-	tern(iter) // create postgres db
+	tern(iter, providers) // create postgres db
 
 	sharedDirectoryEnv := []string{
 		"DB_HOST=directory-postgres",
@@ -332,7 +359,7 @@ func run(path string) error {
 		}
 
 		iter = time.Now().UnixNano()
-		tern(iter)
+		tern(iter, providers)
 		for _, proc := range procs {
 			// restart process
 			log.Debug().Msgf("Restarting process %s", proc.name)
@@ -412,7 +439,7 @@ func stopProcess(proc process) {
 	}
 }
 
-func tern(iter int64) {
+func tern(iter int64, providers []types.Provider) {
 	// migrate postgres
 	dbname := fmt.Sprintf("arkeo_directory%d", iter)
 	log.Debug().Msgf("migrate postres %s", dbname)
@@ -431,6 +458,33 @@ func tern(iter int64) {
 	if err != nil {
 		log.Debug().Msg(string(out))
 		log.Fatal().Err(err).Msg("failed to migrate postres")
+	}
+
+	// insert providers
+	for _, provider := range providers {
+		conf := db.DBConfig{
+			Host:         "directory-postgres",
+			Port:         5432,
+			User:         "arkeo",
+			Pass:         "arkeo123",
+			DBName:       dbname,
+			PoolMinConns: 0,
+			PoolMaxConns: 5,
+			SSLMode:      "prefer",
+		}
+		database, err := db.New(conf)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to load db")
+		}
+		prov := db.ArkeoProvider{
+			Pubkey:  provider.PubKey.String(),
+			Service: provider.Service.String(),
+			Bond:    "0",
+		}
+		_, err = database.InsertProvider(&prov)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to save provider")
+		}
 	}
 }
 

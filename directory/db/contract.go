@@ -8,20 +8,25 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO: missing provider pubkey and service, need to expand ProviderID
 type ArkeoContract struct {
 	Entity
-	ProviderID     int64              `db:"provider_id"`
-	DelegatePubkey string             `db:"delegate_pubkey"`
-	ClientPubkey   string             `db:"client_pubkey"`
-	Height         int64              `db:"height"`
-	ContractType   types.ContractType `db:"contract_type"`
-	Duration       int64              `db:"duration"`
-	Rate           int64              `db:"rate"`
-	OpenCost       int64              `db:"open_cost"`
-	ClosedHeight   int64              `db:"closed_height"`
+	ContractID       int64              `json:"contract_id" db:"contract_id"`
+	DelegatePubkey   string             `json:"delegate_pubkey" db:"delegate_pubkey"`
+	ClientPubkey     string             `json:"client_pubkey" db:"client_pubkey"`
+	Height           int64              `json:"height" db:"height"`
+	ContractType     types.ContractType `json:"contract_type" db:"contract_type"`
+	Duration         int64              `json:"duration" db:"duration"`
+	Rate             int64              `json:"rate" db:"rate"`
+	OpenCost         int64              `json:"open_cost" db:"open_cost"`
+	ClosedHeight     int64              `json:"closed_height" db:"closed_height"`
+	ProviderID       int64              `json:"-" db:"provider_id"`
+	Deposit          int64              `json:"deposit" db:"deposit"`
+	Authorization    types.AuthType     `json:"authorization" db:"auth"`
+	QueriesPerMinute int64              `json:"queries_per_minute" db:"queries_per_minute"`
 }
 
-func (d *DirectoryDB) FindContract(providerID int64, delegatePubkey string, height int64) (*ArkeoContract, error) {
+func (d *DirectoryDB) FindContract(contractId uint64) (*ArkeoContract, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
@@ -29,12 +34,12 @@ func (d *DirectoryDB) FindContract(providerID int64, delegatePubkey string, heig
 	}
 
 	contract := ArkeoContract{}
-	if err = selectOne(conn, sqlFindContract, &contract, providerID, delegatePubkey, height); err != nil {
+	if err = selectOne(conn, sqlFindContract, &contract, contractId); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 
 	// not found
-	if contract.ID == 0 {
+	if contract.ClientPubkey == "" {
 		return nil, nil
 	}
 	return &contract, nil
@@ -81,7 +86,7 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt types.OpenContractEve
 	}
 
 	return upsert(conn, sqlUpsertContract, providerID, evt.GetDelegatePubkey(), evt.ClientPubkey, evt.ContractType,
-		evt.Duration, evt.Rate, evt.OpenCost, evt.Height)
+		evt.Duration, evt.Rate, evt.OpenCost, evt.Height, evt.Deposit, evt.SettlementDuration, evt.Authorization, evt.QueriesPerMinute, evt.ContractId)
 }
 
 func (d *DirectoryDB) CloseContract(contractID, height int64) (*Entity, error) {
@@ -113,7 +118,7 @@ func (d *DirectoryDB) UpsertOpenContractEvent(contractID int64, evt types.OpenCo
 	}
 
 	return upsert(conn, sqlUpsertOpenContractEvent, contractID, evt.ClientPubkey, evt.ContractType, evt.EventHeight, evt.TxID,
-		evt.Duration, evt.Rate, evt.OpenCost)
+		evt.Duration, evt.Rate, evt.OpenCost, evt.Deposit, evt.SettlementDuration, evt.Authorization, evt.QueriesPerMinute)
 }
 
 func (d *DirectoryDB) UpsertCloseContractEvent(contractID int64, evt types.CloseContractEvent) (*Entity, error) {
