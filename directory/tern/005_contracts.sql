@@ -12,7 +12,11 @@ create table contracts
     contract_type   text                      not null references contract_types (val),
     duration        bigint                    not null,
     rate            bigint                    not null,
-    open_cost       bigint                    not null
+    auth   text                      not null references auth_types (val),
+    open_cost       bigint                    not null,
+    deposit         bigint                    not null,
+    settlement_duration         bigint                    not null,
+    queries_per_minute         bigint                    not null
 );
 
 alter table contracts

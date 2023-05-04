@@ -30,6 +30,7 @@ description: ensure contract is created
 endpoint: http://localhost:1317/arkeo/contracts
 asserts:
   - .contract | length == 1
+  - .contract[0].id | tonumber == 0
 ---
 type: check
 description: ensure contract is available at specific endpoint
@@ -37,6 +38,20 @@ endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
   - .contract.type == "SUBSCRIPTION"
   - .contract.paid == "0"
+---
+type: check
+description: check that contract is in directory service
+endpoint: http://localhost:7777/contract/0
+asserts:
+  - .contract_id | tonumber == 0
+  - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
+  - .contract_type == "SUBSCRIPTION"
+  - .duration == 10
+  - .open_cost == 100000000
+  - .closed_height == 0
+  - .deposit == 100
+  - .authorization == "STRICT"
+  - .queries_per_minute == 1
 ---
 type: check
 description: cat account balance should decrease
@@ -80,6 +95,15 @@ asserts:
   - .balances|length == 1
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000090 # fox gets 90 due to 10% tax to reserve
 ---
+type: check
+description: check that contract is in directory service
+endpoint: http://localhost:7777/contract/0
+asserts:
+  - .contract_id | tonumber == 0
+  - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
+  - .contract_type == "SUBSCRIPTION"
+    # TODO check paid - .paid == 100
+---
 ########################################################################################
 # open subscription contract (again)
 ########################################################################################
@@ -109,6 +133,20 @@ asserts:
   - .contract.paid == "0"
   - .contract.id == "1"
   - .contract.authorization == "OPEN"
+---
+type: check
+description: check that contract is in directory service
+endpoint: http://localhost:7777/contract/1
+asserts:
+  - .contract_id | tonumber == 1
+  - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
+  - .contract_type == "SUBSCRIPTION"
+  - .duration == 5
+  - .open_cost == 100000000
+  - .closed_height == 0
+  - .deposit == 50
+  - .authorization == "OPEN"
+  - .queries_per_minute == 1
 ---
 ########################################################################################
 # check can make a paid request (without authentication/signature)

@@ -16,7 +16,15 @@ var (
 	ContractTypeSubscription ContractType = "Subscription"
 )
 
+type AuthType string
+
+var (
+	AuthTypeStrict AuthType = "STRICT"
+	AuthTypeOpen   AuthType = "OPEN"
+)
+
 type BaseContractEvent struct {
+	ContractId     uint64 `mapstructure:"contract_id"`
 	ProviderPubkey string `mapstructure:"provider"`
 	Service        string `mapstructure:"service"`
 	ClientPubkey   string `mapstructure:"client"`
@@ -35,11 +43,15 @@ func (b BaseContractEvent) GetDelegatePubkey() string {
 }
 
 type OpenContractEvent struct {
-	BaseContractEvent `mapstructure:",squash"`
-	Duration          int64        `mapstructure:"duration"`
-	ContractType      ContractType `mapstructure:"type"`
-	Rate              int64        `mapstructure:"rate"`
-	OpenCost          int64        `mapstructure:"open_cost"`
+	BaseContractEvent  `mapstructure:",squash"`
+	Duration           int64        `mapstructure:"duration"`
+	ContractType       ContractType `mapstructure:"type"`
+	Rate               int64        `mapstructure:"-"` // TODO redo to cosmos.Coin
+	OpenCost           int64        `mapstructure:"open_cost"`
+	Deposit            string       `mapstructure:"deposit"`
+	SettlementDuration int64        `mapstructure:"settlement_duration"`
+	Authorization      string       `mapstructure:"authorization"`
+	QueriesPerMinute   int64        `mapstructure:"queries_per_minute"`
 }
 
 type ContractSettlementEvent struct {
@@ -50,7 +62,22 @@ type ContractSettlementEvent struct {
 }
 
 type CloseContractEvent struct {
-	ContractSettlementEvent `mapstructure:",squash"`
+	ContractId     uint64 `mapstructure:"contract_id"`
+	ProviderPubkey string `mapstructure:"provider"`
+	Service        string `mapstructure:"service"`
+	ClientPubkey   string `mapstructure:"client"`
+	DelegatePubkey string `mapstructure:"delegate"`
+	TxID           string `mapstructure:"hash"`
+	Height         int64  `mapstructure:"height"`
+	EventHeight    int64  `mapstructure:"eventHeight"`
+}
+
+// get the delegate pubkey falling back to client pubkey if undefined
+func (c CloseContractEvent) GetDelegatePubkey() string {
+	if c.DelegatePubkey != "" {
+		return c.DelegatePubkey
+	}
+	return c.ClientPubkey
 }
 
 type ClaimContractIncomeEvent struct {

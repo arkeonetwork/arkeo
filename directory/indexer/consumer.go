@@ -206,10 +206,6 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
 				log.Errorf("error handling close_contract event: %+v", err)
 			}
-
-			if err := a.handleContractSettlementEvent(closeContractEvent.ContractSettlementEvent); err != nil {
-				log.Errorf("error handling close_contract contract_settlement event: %+v", err)
-			}
 		case <-quit:
 			log.Infof("received os quit signal")
 			return nil

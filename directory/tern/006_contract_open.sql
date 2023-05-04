@@ -12,7 +12,11 @@ create table open_contract_events
     duration      bigint                    not null,
     rate          bigint                    not null,
     open_cost     bigint                    not null,
-    height        numeric                   not null check ( height > 0 )
+    height        numeric                   not null check ( height > 0 ),
+    deposit         bigint                    not null,
+    settlement_duration         bigint                    not null,
+    auth   text                      not null references auth_types (val),
+    queries_per_minute         bigint                    not null
 );
 
 create index open_cntrc_evts_cntrc_id_idx on open_contract_events (contract_id);
