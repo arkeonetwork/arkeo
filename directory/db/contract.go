@@ -9,9 +9,10 @@ import (
 )
 
 // TODO: missing provider pubkey and service, need to expand ProviderID
+// TODO: add paid
 type ArkeoContract struct {
 	Entity
-	ContractID       int64              `json:"contract_id" db:"contract_id"`
+	ContractID       int64              `json:"contract_id" db:"id"`
 	DelegatePubkey   string             `json:"delegate_pubkey" db:"delegate_pubkey"`
 	ClientPubkey     string             `json:"client_pubkey" db:"client_pubkey"`
 	Height           int64              `json:"height" db:"height"`
