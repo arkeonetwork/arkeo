@@ -50,7 +50,7 @@ jobs:
         run: |
           make proto-gen
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Regression Tests
         run: |
           make test-regression-ci
