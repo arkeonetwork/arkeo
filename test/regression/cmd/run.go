@@ -249,24 +249,30 @@ func run(path string) error {
 			name:  "directory-api",
 			cmd:   []string{"directory-api"},
 			ports: []string{"7777"},
-			env: append([]string{
-				"API_LISTEN=0.0.0.0:7777",
-				"API_STATIC_DIR=/var/www/html"},
-				sharedDirectoryEnv...),
+			env: append(
+				[]string{
+					"API_LISTEN=0.0.0.0:7777",
+					"API_STATIC_DIR=/var/www/html",
+				},
+				sharedDirectoryEnv...,
+			),
 			sigkill: syscall.SIGUSR1,
 		},
 		{
 			name:  "directory-indexer",
 			cmd:   []string{"directory-indexer"},
 			ports: []string{},
-			env: append([]string{
-				"CHAIN_ID=arkeo",
-				"BECH32_PREF_ACC_ADDR=tarkeo",
-				"BECH32_PREF_ACC_PUB=tarkeopub",
-				"ARKEO_API=http://localhost:1317",
-				"TENDERMINT_API=http://localhost:26657",
-				"TENDERMINT_WS=tcp://localhost:26657"},
-				sharedDirectoryEnv...),
+			env: append(
+				[]string{
+					"CHAIN_ID=arkeo",
+					"BECH32_PREF_ACC_ADDR=tarkeo",
+					"BECH32_PREF_ACC_PUB=tarkeopub",
+					"ARKEO_API=http://localhost:1317",
+					"TENDERMINT_API=http://localhost:26657",
+					"TENDERMINT_WS=tcp://localhost:26657",
+				},
+				sharedDirectoryEnv...,
+			),
 			sigkill: syscall.SIGUSR1,
 		},
 	}
@@ -353,7 +359,12 @@ type process struct {
 
 func runProcess(proc process, stderrLines chan string) *exec.Cmd {
 	// setup process io
-	process := exec.Command(proc.cmd[0], proc.cmd[1:len(proc.cmd)]...)
+	var process *exec.Cmd
+	if len(proc.cmd) == 1 {
+		process = exec.Command(proc.cmd[0], []string{}...) // #nosec G204
+	} else if len(proc.cmd) > 1 {
+		process = exec.Command(proc.cmd[0], proc.cmd[1:]...) // #nosec G204
+	}
 	process.Env = append(os.Environ(), proc.env...)
 	stderr, err := process.StderrPipe()
 	if err != nil {

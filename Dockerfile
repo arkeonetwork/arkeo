@@ -23,7 +23,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 ARG TAG=testnet
-RUN go install github.com/jackc/tern@latest
 RUN make install
 
 #

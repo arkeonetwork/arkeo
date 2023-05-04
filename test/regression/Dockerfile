@@ -5,14 +5,14 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     curl git jq make protobuf-compiler xz-utils sudo postgresql postgresql-contrib python3-pip \
     && rm -rf /var/cache/apt/lists \
-    && go install mvdan.cc/gofumpt@v0.3.0
+    && go install mvdan.cc/gofumpt@v0.3.0 \
+    && go install github.com/jackc/tern@latest
 
 ENV GOBIN=/go/bin
 ENV GOPATH=/go
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 
-RUN go install github.com/jackc/tern@latest
 RUN mkdir /regtest
 
 WORKDIR /app
