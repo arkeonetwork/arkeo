@@ -218,11 +218,13 @@ func run(path string) error {
 	}
 	procs := []process{
 		{
-			name:    "arkeod",
-			cmd:     []string{"/regtest/cover-arkeod", "start"},
-			ports:   []string{"8080", "26657"},
-			env:     []string{"GOCOVERDIR=/mnt/coverage"},
-			sigkill: syscall.SIGUSR1,
+			name:  "arkeod",
+			cmd:   []string{"/regtest/cover-arkeod", "start"},
+			ports: []string{"8080", "26657"},
+			env: []string{
+				"GOCOVERDIR=/mnt/coverage",
+			},
+			sigkill: syscall.SIGKILL,
 		},
 		{
 			name:  "sentinel",
@@ -256,7 +258,7 @@ func run(path string) error {
 				},
 				sharedDirectoryEnv...,
 			),
-			sigkill: syscall.SIGUSR1,
+			sigkill: syscall.SIGKILL,
 		},
 		{
 			name:  "directory-indexer",
@@ -273,7 +275,7 @@ func run(path string) error {
 				},
 				sharedDirectoryEnv...,
 			),
-			sigkill: syscall.SIGUSR1,
+			sigkill: syscall.SIGKILL,
 		},
 	}
 
@@ -398,7 +400,7 @@ func runProcess(proc process, stderrLines chan string) *exec.Cmd {
 func stopProcess(proc process) {
 	// stop process
 	log.Debug().Msgf("Stopping process %s", proc.name)
-	err := proc.process.Process.Signal(syscall.SIGKILL)
+	err := proc.process.Process.Signal(proc.sigkill)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("failed to stop process %s", proc.name)
 	}
