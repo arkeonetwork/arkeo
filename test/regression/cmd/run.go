@@ -143,11 +143,20 @@ func run(path string) error {
 				if app_state, ok := genesis.(map[string]any)["app_state"]; ok {
 					if arkeo, ok := app_state.(map[string]any)["arkeo"]; ok {
 						if provs, ok := arkeo.(map[string]any)["providers"]; ok {
-							for _, p := range provs.([]interface{}) {
-								pk := p.(map[string]any)["pub_key"].(string)
-								ser := p.(map[string]any)["service"].(int)
-								provider := types.NewProvider(common.PubKey(pk), common.Service(ser))
-								providers = append(providers, provider)
+							provsConvert, ok := provs.([]interface{})
+							if ok {
+								for _, p := range provsConvert {
+									pk, ok := p.(map[string]any)["pub_key"].(string)
+									if !ok {
+										continue
+									}
+									ser, ok := p.(map[string]any)["service"].(int)
+									if !ok {
+										continue
+									}
+									provider := types.NewProvider(common.PubKey(pk), common.Service(ser))
+									providers = append(providers, provider)
+								}
 							}
 						}
 					}
