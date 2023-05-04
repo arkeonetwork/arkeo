@@ -117,8 +117,7 @@ test-regression:
 	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
 
 test-regression-ci:
-	docker-compose --version
-	DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build -- arkeo make _test-regression
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
 
 test-regression-coverage:
 	@go tool cover -html=test/regression/mnt/coverage/coverage.txt
