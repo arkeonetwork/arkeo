@@ -34,7 +34,7 @@ func (k msgServer) EmitModProviderEvent(ctx cosmos.Context, msg *types.MsgModPro
 			Creator:             msg.Creator,
 			Provider:            provider.PubKey,
 			Service:             provider.Service.String(),
-			MetadataURI:         provider.MetadataUri,
+			MetadataUri:         provider.MetadataUri,
 			MetadataNonce:       provider.MetadataNonce,
 			Status:              provider.Status,
 			MinContractDuration: provider.MinContractDuration,

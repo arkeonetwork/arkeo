@@ -22,12 +22,6 @@ endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
 asserts:
   - .balances[]|select(.denom=="uarkeo")|.amount|tonumber == 1000000000000000
 ---
-type: check
-description: provider should exist
-endpoint: http://localhost:1317/arkeo/providers
-asserts:
-  - .provider | length == 0
----
 ########################################################################################
 # bond up a provider
 ########################################################################################
@@ -54,6 +48,19 @@ asserts:
   - .provider | length == 1
   - .provider[0] | .pub_key == "{{ pubkey_fox }}"
   - .provider[0] | .bond | tonumber == 100000
+---
+type: check
+description: provider should exist in directory service
+endpoint: http://localhost:7777/provider/{{ pubkey_fox }}?service=btc-mainnet-fullnode
+asserts:
+  - .pubkey == "{{ pubkey_fox }}"
+  - .service == "btc-mainnet-fullnode"
+  - .bond | tonumber == 100000
+  - .metadata_uri == ""
+  - .metadata_nonce | tonumber == 0
+  - .status == "Offline"
+  - .min_contract_duration | tonumber == -1
+  - .max_contract_duration | tonumber == -1
 ---
 ########################################################################################
 # modify bond provider
@@ -100,6 +107,20 @@ asserts:
   - .provider[0] | .subscription_rate[0].amount | tonumber == 4
   - .provider[0] | .pay_as_you_go_rate[0].amount | tonumber == 5
   - .provider[0] | .settlement_duration | tonumber == 6
+---
+type: check
+description: provider should exist in directory service
+endpoint: http://localhost:7777/provider/{{ pubkey_fox }}?service=btc-mainnet-fullnode
+asserts:
+  - .pubkey == "{{ pubkey_fox }}"
+  - .service == "btc-mainnet-fullnode"
+  - .bond | tonumber == 100000
+  - .metadata_uri == "my_uri"
+  - .metadata_nonce | tonumber == 1
+  - .status == "ONLINE"
+  - .min_contract_duration | tonumber == 2
+  - .max_contract_duration | tonumber == 3
+# - .settlement_duration | tonumber == 6
 ---
 ########################################################################################
 # unbond up a provider (too much)
@@ -152,3 +173,12 @@ description: provider should exist
 endpoint: http://localhost:1317/arkeo/providers
 asserts:
   - .provider | length == 0
+---
+type: check
+description: provider should exist in directory service
+endpoint: http://localhost:7777/provider/{{ pubkey_fox }}?service=btc-mainnet-fullnode
+asserts:
+  - .pubkey == "{{ pubkey_fox }}"
+  - .service == "btc-mainnet-fullnode"
+  - .bond | tonumber == 0
+---

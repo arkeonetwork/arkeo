@@ -16,17 +16,17 @@ import (
 
 type ArkeoProvider struct {
 	Entity  `json:"-"`
-	Pubkey  string `db:"pubkey"`
-	Service string `db:"service"`
+	Pubkey  string `json:"pubkey" db:"pubkey"`
+	Service string `json:"service" db:"service"`
 	// this is a DECIMAL type in the db
-	Bond                string               `db:"bond"`
-	MetadataURI         string               `db:"metadata_uri"`
-	MetadataNonce       uint64               `db:"metadata_nonce"`
-	Status              types.ProviderStatus `db:"status,text"`
-	MinContractDuration int64                `db:"min_contract_duration"`
-	MaxContractDuration int64                `db:"max_contract_duration"`
-	SubscriptionRate    int64                `db:"subscription_rate"`
-	PayAsYouGoRate      int64                `db:"paygo_rate"`
+	Bond                string               `json:"bond" db:"bond"`
+	MetadataURI         string               `json:"metadata_uri" db:"metadata_uri"`
+	MetadataNonce       uint64               `json:"metadata_nonce" db:"metadata_nonce"`
+	Status              types.ProviderStatus `json:"status" db:"status,text"`
+	MinContractDuration int64                `json:"min_contract_duration" db:"min_contract_duration"`
+	MaxContractDuration int64                `json:"max_contract_duration" db:"max_contract_duration"`
+	SubscriptionRate    int64                `json:"subscription_rate" db:"subscription_rate"`
+	PayAsYouGoRate      int64                `json:"paygo_rate" db:"paygo_rate"`
 }
 
 func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {

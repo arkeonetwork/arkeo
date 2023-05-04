@@ -72,7 +72,7 @@ var (
 )
 
 type ModProviderEvent struct {
-	Pubkey              string         `mapstructure:"pubkey"` // TODO provider
+	Pubkey              string         `mapstructure:"provider"`
 	Service             string         `mapstructure:"service"`
 	Height              int64          `mapstructure:"height"`
 	TxID                string         `mapstructure:"hash"`
@@ -81,8 +81,9 @@ type ModProviderEvent struct {
 	Status              ProviderStatus `mapstructure:"status"`
 	MinContractDuration int64          `mapstructure:"min_contract_duration"`
 	MaxContractDuration int64          `mapstructure:"max_contract_duration"`
-	SubscriptionRate    int64          `mapstructure:"subscription_rate"`
-	PayAsYouGoRate      int64          `mapstructure:"pay-as-you-go_rate"`
+	SubscriptionRate    int64          `mapstructure:"-"` // TODO
+	PayAsYouGoRate      int64          `mapstructure:"-"` // TODO
+	// TODO: add settlement_duration
 }
 
 type Coordinates struct {
