@@ -56,7 +56,6 @@ func (a *ApiService) getProvider(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "service is required")
 		return
 	}
-	// "bitcoin-mainnet"
 	provider, err := a.findProvider(pubkey, service)
 	if err != nil {
 		log.Errorf("error finding provider for %s service %s: %+v", pubkey, service, err)

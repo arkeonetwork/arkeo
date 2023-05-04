@@ -32,8 +32,6 @@ services:
   directory-postgres:
     hostname: directory-postgres
     image: postgres:15.1-alpine
-    logging:
-      driver: none
     restart: always
     environment:
       POSTGRES_DB: arkeo_directory
