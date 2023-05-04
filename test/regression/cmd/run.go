@@ -176,7 +176,6 @@ func run(path string) error {
 		fmt.Println(string(out))
 		log.Fatal().Err(err).Msg("genesis validation failed")
 	}
-	log.Info().Msg("Genesis Validated!")
 
 	// overwrite private validator key
 	log.Debug().Msg("Overwriting private validator key")
