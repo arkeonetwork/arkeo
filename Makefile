@@ -35,7 +35,7 @@ TEST_DIR?="./..."
 BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet -test.short=true
 GOBIN?=${GOPATH}/bin
-BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/indexer ./cmd/directory/api
+BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/directory-indexer ./cmd/directory/directory-api
 
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH
@@ -114,35 +114,20 @@ test-watch:
 # ------------------------------ Regression Tests ------------------------------
 
 test-regression:
-	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
-	@docker run --rm -it \
-		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
-		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
-		-p 1317:1317 -p 26657:26657 \
-		-v $(shell pwd)/test/regression/mnt:/mnt \
-		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
-		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
-		-w /app arkeo-regtest sh -c 'make _test-regression'
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run -i --rm --build arkeo
 
-test-regression-ci:
-	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
-	@docker run --rm \
-		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
-		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
-		-p 1317:1317 -p 26657:26657 \
-		-v $(shell pwd)/test/regression/mnt:/mnt \
-		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
-		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
-		-w /app arkeo-regtest sh -c 'make _test-regression'
+test-regression-ci: test-regression
 
 test-regression-coverage:
 	@go tool cover -html=test/regression/mnt/coverage/coverage.txt
 
 # internal target used in docker build
 _build-test-regression:
-	@go install -ldflags '$(ldflags)' -tags=testnet,regtest ./cmd/arkeod ./cmd/sentinel
+	@go install -ldflags '$(ldflags)' -tags=testnet,regtest ${BINARIES}
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-arkeod ./cmd/arkeod
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-sentinel ./cmd/sentinel
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-api ./cmd/directory/directory-api
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-indexer ./cmd/directory/directory-indexer
 	@go build -ldflags '$(ldflags)' -tags testnet -o /regtest/regtest ./test/regression/cmd
 
 # internal target used in test run

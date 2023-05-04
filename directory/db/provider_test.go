@@ -20,9 +20,9 @@ func TestInsertProvider(t *testing.T) {
 	}
 
 	entity, err := db.InsertProvider(&ArkeoProvider{
-		Pubkey: uuid.NewString(),
-		Chain:  "btc-mainnet-fullnode",
-		Bond:   "1234567890",
+		Pubkey:  uuid.NewString(),
+		Service: "btc-mainnet-fullnode",
+		Bond:    "1234567890",
 	})
 	if err != nil {
 		t.Errorf("error inserting provider: %+v", err)
@@ -41,8 +41,8 @@ func TestFindProvider(t *testing.T) {
 		t.Errorf("error getting db: %+v", err)
 	}
 	pubkey := "arkeopub1addwnpepqg5fsc756nx3wlrp7f4328slhgfulhu53epxnyy4q6ln3htrhxxsczgwfyf"
-	chain := "btc-mainnet"
-	provider, err := db.FindProvider(pubkey, chain)
+	service := "btc-mainnet"
+	provider, err := db.FindProvider(pubkey, service)
 	if err != nil {
 		t.Errorf("error finding provider: %+v", err)
 		t.FailNow()
@@ -50,7 +50,7 @@ func TestFindProvider(t *testing.T) {
 	log.Infof("found provider %d", provider.ID)
 
 	pubkey = "nosuchthing"
-	provider, err = db.FindProvider(pubkey, chain)
+	provider, err = db.FindProvider(pubkey, service)
 	if err != nil {
 		t.Errorf("error finding provider: %+v", err)
 		t.FailNow()

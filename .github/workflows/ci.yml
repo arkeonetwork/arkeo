@@ -49,8 +49,14 @@ jobs:
       - name: Compile Protobuf
         run: |
           make proto-gen
+      - name: Install Compose
+        uses: ndeloof/install-compose-action@v0.0.1
+        with:
+          version: v2.15.1 # defaults to 'latest'
+          legacy: true # will also install in PATH as `docker-compose`
+      - run: docker-compose --version
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Regression Tests
         run: |
           make test-regression-ci

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"text/template"
 	"time"
@@ -200,110 +201,94 @@ func run(path string) error {
 		log.Fatal().Err(err).Msg("failed to overwrite private validator key")
 	}
 
-	// setup process io
-	arkeo := exec.Command("/regtest/cover-arkeod", "start")
-	arkeo.Env = append(os.Environ(), "GOCOVERDIR=/mnt/coverage")
-	stderr, err := arkeo.StderrPipe()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to setup arkeo stderr")
+	// wait for postgres
+	waitForPort("postgres", "directory-postgres:5432")
+	iter := time.Now().UnixNano()
+	tern(iter) // create postgres db
+
+	sharedDirectoryEnv := []string{
+		"DB_HOST=directory-postgres",
+		"DB_PORT=5432",
+		"DB_USER=arkeo",
+		"DB_PASS=arkeo123",
+		fmt.Sprintf("DB_NAME=arkeo_directory%d", iter),
+		"DB_POOL_MAX_CONNS=2",
+		"DB_POOL_MIN_CONNS=1",
+		"DB_SSL_MODE=prefer",
 	}
-	stderrScanner := bufio.NewScanner(stderr)
+	procs := []process{
+		{
+			name:  "arkeod",
+			cmd:   []string{"/regtest/cover-arkeod", "start"},
+			ports: []string{"8080", "26657"},
+			env: []string{
+				"GOCOVERDIR=/mnt/coverage",
+			},
+			sigkill: syscall.SIGKILL,
+		},
+		{
+			name:  "sentinel",
+			cmd:   []string{"/regtest/cover-sentinel"},
+			ports: []string{"3636"},
+			env: []string{
+				"GOCOVERDIR=/mnt/coverage",
+				fmt.Sprintf("PROVIDER_PUBKEY=%s", templatePubKey["pubkey_fox"]), // fox pubkey
+				"NET=regtest",
+				"MONIKER=regtest",
+				"WEBSITE=n/a",
+				"DESCRIPTION=n/a",
+				"LOCATION=n/a",
+				"PORT=3636",
+				"SOURCE_CHAIN=http://localhost:1317",
+				"EVENT_STREAM_HOST=localhost:26657",
+				"FREE_RATE_LIMIT=10",
+				"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
+				"CONTRACT_CONFIG_STORE_LOCATION=/regtest/.arkeo/contract_configs",
+			},
+			sigkill: syscall.SIGKILL,
+		},
+		{
+			name:  "directory-api",
+			cmd:   []string{"directory-api"},
+			ports: []string{"7777"},
+			env: append(
+				[]string{
+					"API_LISTEN=0.0.0.0:7777",
+					"API_STATIC_DIR=/var/www/html",
+				},
+				sharedDirectoryEnv...,
+			),
+			sigkill: syscall.SIGKILL,
+		},
+		{
+			name:  "directory-indexer",
+			cmd:   []string{"directory-indexer"},
+			ports: []string{},
+			env: append(
+				[]string{
+					"CHAIN_ID=arkeo",
+					"BECH32_PREF_ACC_ADDR=tarkeo",
+					"BECH32_PREF_ACC_PUB=tarkeopub",
+					"ARKEO_API=http://localhost:1317",
+					"TENDERMINT_API=http://localhost:26657",
+					"TENDERMINT_WS=tcp://localhost:26657",
+				},
+				sharedDirectoryEnv...,
+			),
+			sigkill: syscall.SIGKILL,
+		},
+	}
+
 	stderrLines := make(chan string, 100)
-	go func() {
-		for stderrScanner.Scan() {
-			stderrLines <- stderrScanner.Text()
+	for i, proc := range procs {
+		if strings.HasPrefix(proc.name, "directory-") {
+			for j := range proc.env {
+				if strings.HasPrefix(proc.env[j], "DB_NAME=") {
+					proc.env[j] = fmt.Sprintf("DB_NAME=arkeo_directory%d", iter)
+				}
+			}
 		}
-	}()
-	if os.Getenv("DEBUG") != "" {
-		arkeo.Stdout = os.Stdout
-		arkeo.Stderr = os.Stderr
-	}
-
-	// start arkeo process
-	log.Debug().Msg("Starting arkeod")
-	err = arkeo.Start()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start arkeod")
-	}
-
-	// wait for arkeo to listen on block creation port
-	for i := 0; ; i++ {
-		time.Sleep(100 * time.Millisecond)
-		conn, err := net.Dial("tcp", "localhost:8080")
-		if err == nil {
-			conn.Close()
-			break
-		}
-		if i%100 == 0 {
-			log.Debug().Msg("Waiting for arkeo to listen")
-		}
-	}
-
-	// wait for arkeo to listen on block rpc port
-	for i := 0; ; i++ {
-		time.Sleep(100 * time.Millisecond)
-		conn, err := net.Dial("tcp", "localhost:26657")
-		if err == nil {
-			conn.Close()
-			break
-		}
-		if i%100 == 0 {
-			log.Debug().Msg("Waiting for arkeo to listen")
-		}
-	}
-
-	// setup process for sentinel
-	sentinel := exec.Command("/regtest/cover-sentinel")
-	sentinel.Env = append(
-		os.Environ(),
-		"GOCOVERDIR=/mnt/coverage",
-		fmt.Sprintf("PROVIDER_PUBKEY=%s", templatePubKey["pubkey_fox"]), // fox pubkey
-		"NET=regtest",
-		"MONIKER=regtest",
-		"WEBSITE=n/a",
-		"DESCRIPTION=n/a",
-		"LOCATION=n/a",
-		"PORT=3636",
-		"SOURCE_CHAIN=http://localhost:1317",
-		"EVENT_STREAM_HOST=localhost:26657",
-		"FREE_RATE_LIMIT=10",
-		"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
-		"CONTRACT_CONFIG_STORE_LOCATION=/regtest/.arkeo/contract_configs",
-	)
-	stderr, err = sentinel.StderrPipe()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to setup sentinel stderr")
-	}
-	stderrScanner2 := bufio.NewScanner(stderr)
-	stderrLines2 := make(chan string, 100)
-	go func() {
-		for stderrScanner2.Scan() {
-			stderrLines2 <- stderrScanner.Text()
-		}
-	}()
-	if os.Getenv("DEBUG") != "" {
-		sentinel.Stdout = os.Stdout
-		sentinel.Stderr = os.Stderr
-	}
-
-	// start arkeo process
-	log.Debug().Msg("Starting sentinel")
-	err = sentinel.Start()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start sentinel")
-	}
-
-	// wait for sentinel to listen on block creation port
-	for i := 0; ; i++ {
-		time.Sleep(100 * time.Millisecond)
-		conn, err := net.Dial("tcp", "localhost:3636")
-		if err == nil {
-			conn.Close()
-			break
-		}
-		if i%100 == 0 {
-			log.Debug().Msg("Waiting for sentinel to listen")
-		}
+		procs[i].process = runProcess(proc, stderrLines)
 	}
 
 	// run the operations
@@ -311,7 +296,7 @@ func run(path string) error {
 	log.Info().Msgf("Executing %d operations", len(ops))
 	for i, op := range ops {
 		log.Info().Int("line", opLines[i]).Msgf(">>> [%d] %s", stateOpCount+i+1, op.OpType())
-		returnErr = op.Execute(arkeo.Process, stderrLines)
+		returnErr = op.Execute(procs[0].process.Process, stderrLines)
 		if returnErr != nil {
 			log.Error().Err(returnErr).
 				Int("line", opLines[i]).
@@ -330,30 +315,8 @@ func run(path string) error {
 		log.Info().Msg("All operations succeeded")
 	}
 
-	// stop arkeo process
-	log.Debug().Msg("Stopping arkeod")
-	err = arkeo.Process.Signal(syscall.SIGUSR1)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to stop arkeod")
-	}
-
-	// wait for process to exit
-	_, err = arkeo.Process.Wait()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to wait for arkeod")
-	}
-
-	// stop sentinel process
-	log.Debug().Msg("Stopping sentinel")
-	err = sentinel.Process.Signal(syscall.SIGKILL)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to stop sentinel")
-	}
-
-	// wait for process to exit
-	_, err = sentinel.Process.Wait()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to wait for sentinel")
+	for _, proc := range procs {
+		stopProcess(proc)
 	}
 
 	// if failed and debug enabled restart to allow inspection
@@ -368,68 +331,121 @@ func run(path string) error {
 			log.Fatal().Err(err).Msg("failed to remove validator key")
 		}
 
-		// restart arkeo
-		log.Debug().Msg("Restarting arkeod")
-		arkeo = exec.Command("arkeod", "start")
-		arkeo.Stdout = os.Stdout
-		arkeo.Stderr = os.Stderr
-		err = arkeo.Start()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to restart arkeod")
-		}
-
-		// wait for arkeo
-		log.Debug().Msg("Waiting for arkeod")
-		_, err = arkeo.Process.Wait()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to wait for arkeod")
-		}
-
-		// wait for arkeo to listen on block creation port
-		for i := 0; ; i++ {
-			time.Sleep(100 * time.Millisecond)
-			conn, err := net.Dial("tcp", "localhost:8080")
-			if err == nil {
-				conn.Close()
-				break
+		iter = time.Now().UnixNano()
+		tern(iter)
+		for _, proc := range procs {
+			// restart process
+			log.Debug().Msgf("Restarting process %s", proc.name)
+			if strings.HasPrefix(proc.name, "directory-") {
+				for j := range proc.env {
+					if strings.HasPrefix(proc.env[j], "DB_NAME=") {
+						proc.env[j] = fmt.Sprintf("DB_NAME=arkeo_directory%d", iter)
+					}
+				}
 			}
-			if i%100 == 0 {
-				log.Debug().Msg("Waiting for arkeo to listen")
-			}
+			proc.process = runProcess(proc, stderrLines)
 		}
-
-		// wait for arkeo to listen on block rpc port
-		for i := 0; ; i++ {
-			time.Sleep(100 * time.Millisecond)
-			conn, err := net.Dial("tcp", "localhost:26657")
-			if err == nil {
-				conn.Close()
-				break
-			}
-			if i%100 == 0 {
-				log.Debug().Msg("Waiting for arkeo to listen")
-			}
-		}
-
-		// restart sentinel
-		log.Debug().Msg("Restarting sentinel")
-		restartSentinel := exec.Command("sentinel")
-		restartSentinel.Env = sentinel.Env
-		restartSentinel.Stdout = os.Stdout
-		restartSentinel.Stderr = os.Stderr
-		err = restartSentinel.Start()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to restart sentinel")
-		}
-
-		// wait for sentinel
-		log.Debug().Msg("Waiting for sentinel")
-		_, err = sentinel.Process.Wait()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to wait for sentinel")
-		}
-
 	}
 
 	return returnErr
+}
+
+type process struct {
+	name    string
+	cmd     []string
+	ports   []string
+	env     []string
+	process *exec.Cmd
+	sigkill syscall.Signal
+}
+
+func runProcess(proc process, stderrLines chan string) *exec.Cmd {
+	// setup process io
+	var process *exec.Cmd
+	if len(proc.cmd) == 1 {
+		process = exec.Command(proc.cmd[0], []string{}...) // #nosec G204
+	} else if len(proc.cmd) > 1 {
+		process = exec.Command(proc.cmd[0], proc.cmd[1:]...) // #nosec G204
+	}
+	process.Env = append(os.Environ(), proc.env...)
+	stderr, err := process.StderrPipe()
+	if err != nil {
+		log.Fatal().Err(err).Msgf("failed to setup stderr process %s", proc.name)
+	}
+	stderrScanner := bufio.NewScanner(stderr)
+	go func() {
+		for stderrScanner.Scan() {
+			stderrLines <- fmt.Sprintf(">> %s > %s", proc.name, stderrScanner.Text())
+		}
+	}()
+	if os.Getenv("DEBUG") != "" {
+		process.Stdout = os.Stdout
+		process.Stderr = os.Stderr
+	}
+
+	// start process
+	log.Debug().Msgf("Starting process %s", proc.name)
+	err = process.Start()
+	if err != nil {
+		log.Fatal().Err(err).Msgf("failed to start process %s", proc.name)
+	}
+
+	// wait for process to listen on block creation port
+	for _, port := range proc.ports {
+		waitForPort(proc.name, fmt.Sprintf("localhost:%s", port))
+	}
+	return process
+}
+
+func stopProcess(proc process) {
+	// stop process
+	log.Debug().Msgf("Stopping process %s", proc.name)
+	err := proc.process.Process.Signal(proc.sigkill)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("failed to stop process %s", proc.name)
+	}
+
+	// wait for process to exit
+	_, err = proc.process.Process.Wait()
+	if err != nil {
+		log.Fatal().Err(err).Msgf("failed to wait for process %s", proc.name)
+	}
+}
+
+func tern(iter int64) {
+	// migrate postgres
+	dbname := fmt.Sprintf("arkeo_directory%d", iter)
+	log.Debug().Msgf("migrate postres %s", dbname)
+	_, err := exec.Command("createdb", dbname).CombinedOutput()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to createdb")
+	}
+	cmd := exec.Command("tern", "migrate", "-c", "/app/directory/tern/tern.conf", "--database", dbname, "-m", "/app/directory/tern")
+	cmd.Env = append(
+		os.Environ(),
+		fmt.Sprintf("POSTGRES_DB=%s", dbname),
+		"POSTGRES_USER=arkeo",
+		"POSTGRES_PASSWORD=arkeo123",
+	)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Debug().Msg(string(out))
+		log.Fatal().Err(err).Msg("failed to migrate postres")
+	}
+}
+
+func waitForPort(name, host string) {
+	// wait for process to listen on block creation port
+	log.Debug().Msgf("Waiting for %s port %s", name, host)
+	for i := 0; ; i++ {
+		time.Sleep(100 * time.Millisecond)
+		conn, err := net.Dial("tcp", host)
+		if err == nil {
+			conn.Close()
+			break
+		}
+		if i%100 == 0 {
+			log.Debug().Msgf("Waiting for process to listen %s: %s", name, host)
+		}
+	}
 }

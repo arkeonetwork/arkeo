@@ -12,12 +12,12 @@ import (
 )
 
 func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
-	provider, err := a.db.FindProvider(evt.Pubkey, evt.Chain)
+	provider, err := a.db.FindProvider(evt.Pubkey, evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for chain %s", evt.Pubkey, evt.Chain)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Pubkey, evt.Service)
 	}
 	if provider == nil {
-		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Pubkey, evt.Chain)
+		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Pubkey, evt.Service)
 	}
 
 	log := log.WithField("provider", strconv.FormatInt(provider.ID, 10))
@@ -32,11 +32,11 @@ func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
 	provider.PayAsYouGoRate = evt.PayAsYouGoRate
 
 	if _, err = a.db.UpdateProvider(provider); err != nil {
-		return errors.Wrapf(err, "error updating provider for mod event %s chain %s", provider.Pubkey, provider.Chain)
+		return errors.Wrapf(err, "error updating provider for mod event %s service %s", provider.Pubkey, provider.Service)
 	}
-	log.Infof("updated provider %s chain %s", provider.Pubkey, provider.Chain)
+	log.Infof("updated provider %s service %s", provider.Pubkey, provider.Service)
 	if _, err = a.db.InsertModProviderEvent(provider.ID, evt); err != nil {
-		return errors.Wrapf(err, "error inserting ModProviderEvent for %s chain %s", evt.Pubkey, evt.Chain)
+		return errors.Wrapf(err, "error inserting ModProviderEvent for %s service %s", evt.Pubkey, evt.Service)
 	}
 
 	if !isMetaDataUpdated {
@@ -60,48 +60,48 @@ func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
 	}
 
 	if _, err = a.db.UpsertProviderMetadata(provider.ID, int64(provider.MetadataNonce), *providerMetadata); err != nil {
-		return errors.Wrapf(err, "error updating provider metadta for mod event %s chain %s", provider.Pubkey, provider.Chain)
+		return errors.Wrapf(err, "error updating provider metadta for mod event %s service %s", provider.Pubkey, provider.Service)
 	}
 	return nil
 }
 
 func (a *IndexerApp) handleBondProviderEvent(evt types.BondProviderEvent) error {
-	provider, err := a.db.FindProvider(evt.Pubkey, evt.Chain)
+	provider, err := a.db.FindProvider(evt.Pubkey, evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for chain %s", evt.Pubkey, evt.Chain)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Pubkey, evt.Service)
 	}
 	if provider == nil {
-		// new provider for chain, insert
+		// new provider for service, insert
 		if provider, err = a.createProvider(evt); err != nil {
-			return errors.Wrapf(err, "error creating provider %s chain %s", evt.Pubkey, evt.Chain)
+			return errors.Wrapf(err, "error creating provider %s service %s", evt.Pubkey, evt.Service)
 		}
 	} else {
 		if evt.BondAbsolute != "" {
 			provider.Bond = evt.BondAbsolute
 		}
 		if _, err = a.db.UpdateProvider(provider); err != nil {
-			return errors.Wrapf(err, "error updating provider for bond event %s chain %s", evt.Pubkey, evt.Chain)
+			return errors.Wrapf(err, "error updating provider for bond event %s service %s", evt.Pubkey, evt.Service)
 		}
 	}
 
-	log.Debugf("handled bond provider event for %s chain %s", evt.Pubkey, evt.Chain)
+	log.Debugf("handled bond provider event for %s service %s", evt.Pubkey, evt.Service)
 	if _, err = a.db.InsertBondProviderEvent(provider.ID, evt); err != nil {
-		return errors.Wrapf(err, "error inserting BondProviderEvent for %s chain %s", evt.Pubkey, evt.Chain)
+		return errors.Wrapf(err, "error inserting BondProviderEvent for %s service %s", evt.Pubkey, evt.Service)
 	}
 	return nil
 }
 
 func (a *IndexerApp) createProvider(evt types.BondProviderEvent) (*db.ArkeoProvider, error) {
-	// new provider for chain, insert
-	provider := &db.ArkeoProvider{Pubkey: evt.Pubkey, Chain: evt.Chain, Bond: evt.BondAbsolute}
+	// new provider for service, insert
+	provider := &db.ArkeoProvider{Pubkey: evt.Pubkey, Service: evt.Service, Bond: evt.BondAbsolute}
 	entity, err := a.db.InsertProvider(provider)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error inserting provider %s %s", evt.Pubkey, evt.Chain)
+		return nil, errors.Wrapf(err, "error inserting provider %s %s", evt.Pubkey, evt.Service)
 	}
 	if entity == nil {
 		return nil, fmt.Errorf("nil entity after inserting provider")
 	}
-	log.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Chain)
+	log.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Service)
 	provider.Entity = *entity
 	return provider, nil
 }

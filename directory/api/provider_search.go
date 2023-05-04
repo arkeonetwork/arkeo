@@ -14,9 +14,9 @@ import (
 // queries the service for a list of providers
 //
 // Parameters:
-//   + name: chain
+//   + name: service
 //     in: query
-//     description: chain provider services
+//     description: service provider services
 //     required: false
 //     schema:
 //      type: string
@@ -80,7 +80,7 @@ import (
 
 func (a *ApiService) searchProviders(response http.ResponseWriter, request *http.Request) {
 	sort := request.FormValue("sort")
-	chain := request.FormValue("chain")
+	service := request.FormValue("service")
 	pubkey := request.FormValue("pubkey")
 	maxDistanceInput := request.FormValue("max-distance")
 	coordinatesInput := request.FormValue("coordinates")
@@ -113,10 +113,10 @@ func (a *ApiService) searchProviders(response http.ResponseWriter, request *http
 
 	searchParams.Pubkey = pubkey
 
-	if chain != "" && !utils.ValidateChain(chain) {
-		respondWithError(response, http.StatusBadRequest, fmt.Sprintf("%s is not a valid chain", chain))
+	if service != "" && !utils.ValidateService(service) {
+		respondWithError(response, http.StatusBadRequest, fmt.Sprintf("%s is not a valid service", service))
 	}
-	searchParams.Chain = chain
+	searchParams.Service = service
 
 	if maxDistanceInput != "" {
 		var err error

@@ -94,6 +94,11 @@ func (a *IndexerApp) gapFiller() {
 		if err != nil {
 			log.Panicf("error finding latest block: %+v", err)
 		}
+		if latest.Block == nil {
+			log.Errorf("latest block is nil, skipping")
+			time.Sleep(time.Minute)
+			continue
+		}
 
 		if latestStored == nil {
 			log.Infof("no latestStored, initializing")

@@ -5,7 +5,7 @@ with indexed_height as (select height
                         limit 1)
 select p.id,
        p.pubkey,
-       p.chain,
+       p.service,
        p.bond,
        p.metadata_uri,
        p.metadata_nonce,

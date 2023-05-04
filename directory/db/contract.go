@@ -40,21 +40,21 @@ func (d *DirectoryDB) FindContract(providerID int64, delegatePubkey string, heig
 	return &contract, nil
 }
 
-func (d *DirectoryDB) FindContractsByPubKeys(chain, providerPubkey, delegatePubkey string) ([]*ArkeoContract, error) {
+func (d *DirectoryDB) FindContractsByPubKeys(service, providerPubkey, delegatePubkey string) ([]*ArkeoContract, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	results := make([]*ArkeoContract, 0, 128)
-	if err = pgxscan.Select(context.Background(), conn, &results, sqlFindContractsByPubKeys, chain, providerPubkey, delegatePubkey); err != nil {
+	if err = pgxscan.Select(context.Background(), conn, &results, sqlFindContractsByPubKeys, service, providerPubkey, delegatePubkey); err != nil {
 		return nil, errors.Wrapf(err, "error scanning")
 	}
 
 	return results, nil
 }
 
-func (d *DirectoryDB) FindContractByPubKeys(chain, providerPubkey, delegatePubkey string, height int64) (*ArkeoContract, error) {
+func (d *DirectoryDB) FindContractByPubKeys(service, providerPubkey, delegatePubkey string, height int64) (*ArkeoContract, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
@@ -62,7 +62,7 @@ func (d *DirectoryDB) FindContractByPubKeys(chain, providerPubkey, delegatePubke
 	}
 
 	contract := ArkeoContract{}
-	if err = selectOne(conn, sqlFindContractByPubKeys, &contract, chain, providerPubkey, delegatePubkey, height); err != nil {
+	if err = selectOne(conn, sqlFindContractByPubKeys, &contract, service, providerPubkey, delegatePubkey, height); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 

@@ -61,7 +61,7 @@ func buildRouter(a *ApiService) *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", handleHealth).Methods(http.MethodGet)
 	router.HandleFunc("/stats", a.getStatsArkeo).Methods(http.MethodGet)
-	router.HandleFunc("/stats/{chain}", getStatsChain).Methods(http.MethodGet)
+	router.HandleFunc("/stats/{service}", getStatsService).Methods(http.MethodGet)
 
 	if a.params.StaticDir == "" {
 		log.Warnf("API_STATIC_DIR not set, using ./auto_static")

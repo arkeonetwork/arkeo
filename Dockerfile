@@ -23,7 +23,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 ARG TAG=testnet
-RUN make install && go install github.com/jackc/tern@latest
+RUN make install
 
 #
 # Main
@@ -41,7 +41,7 @@ RUN apt-get update -y && \
 RUN update-ca-certificates
 
 # Copy the compiled binaries over.
-COPY --from=builder /go/bin/sentinel /go/bin/arkeod /go/bin/indexer /go/bin/api /go/bin/tern /usr/bin/
+COPY --from=builder /go/bin/sentinel /go/bin/arkeod /go/bin/directory-indexer /go/bin/directory-api /go/bin/tern /usr/bin/
 COPY scripts /scripts
 
 ARG TAG=testnet

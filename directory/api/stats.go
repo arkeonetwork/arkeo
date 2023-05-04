@@ -25,27 +25,27 @@ func (a *ApiService) getStatsArkeo(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, arkeoStats)
 }
 
-// swagger:route Get /stats/{chain} getStatsChain
+// swagger:route Get /stats/{service} getStatsService
 //
-// get chain specific network stats
+// get service specific network stats
 // Parameters:
-//   + name: chain
+//   + name: service
 //     in: path
-//     description: chain identifier
+//     description: service identifier
 //     required: true
 //     type: string
 //
 // Responses:
 //
-//	200: ChainStats
+//	200: ServiceStats
 //	500: InternalServerError
 
-func getStatsChain(w http.ResponseWriter, r *http.Request) {
+func getStatsService(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	chain := vars["chain"]
-	if chain == "" {
-		respondWithError(w, http.StatusBadRequest, "chain is required")
+	service := vars["service"]
+	if service == "" {
+		respondWithError(w, http.StatusBadRequest, "service is required")
 		return
 	}
-	respondWithJSON(w, http.StatusOK, &types.ChainStats{})
+	respondWithJSON(w, http.StatusOK, &types.ServiceStats{})
 }
