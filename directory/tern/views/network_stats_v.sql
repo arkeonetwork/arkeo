@@ -5,11 +5,11 @@
 - total number of contracts
 - median contract length of open contracts
 - median contract rate of open contracts (pay-as-you-go and subscription)
-- number of online providers, and per chain
-- total number of queries (sum of nonces), and per chain
-- total number of queries in the last 24hrs, and per chain
-- total income, and per chain
-- total income in the last 24hrs and per chain
+- number of online providers, and per service
+- total number of queries (sum of nonces), and per service
+- total number of queries in the last 24hrs, and per service
+- total income, and per service
+- total income in the last 24hrs and per service
  */
 
 create or replace view network_stats_v as

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
@@ -14,9 +15,9 @@ import (
 )
 
 type ArkeoProvider struct {
-	Entity `json:"-"`
-	Pubkey string `db:"pubkey"`
-	Chain  string `db:"chain"`
+	Entity  `json:"-"`
+	Pubkey  string `db:"pubkey"`
+	Service string `db:"service"`
 	// this is a DECIMAL type in the db
 	Bond                string               `db:"bond"`
 	MetadataURI         string               `db:"metadata_uri"`
@@ -38,7 +39,11 @@ func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 
-	return insert(conn, sqlInsertProvider, provider.Pubkey, provider.Chain, provider.Bond)
+	bond, err := strconv.ParseInt(provider.Bond, 10, 64)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error converting bond to int64 (%s)", provider.Bond)
+	}
+	return insert(conn, sqlInsertProvider, provider.Pubkey, provider.Service, bond)
 }
 
 func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
@@ -54,7 +59,7 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 	return update(conn,
 		sqlUpdateProvider,
 		provider.Pubkey,
-		provider.Chain,
+		provider.Service,
 		provider.Bond,
 		provider.MetadataURI,
 		provider.MetadataNonce,
@@ -66,14 +71,14 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 	)
 }
 
-func (d *DirectoryDB) FindProvider(pubkey, chain string) (*ArkeoProvider, error) {
+func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	provider := ArkeoProvider{}
-	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, chain); err != nil {
+	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 	// not found
@@ -87,7 +92,7 @@ const provSearchCols = `
 	p.id,
 	p.created,
 	p.pubkey,
-	p.chain, 
+	p.service, 
 	coalesce(p.status,'Offline') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
@@ -114,8 +119,8 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 	if criteria.Pubkey != "" {
 		sb = sb.Where(sb.Equal("p.pubkey", criteria.Pubkey))
 	}
-	if criteria.Chain != "" {
-		sb = sb.Where(sb.Equal("p.chain", criteria.Chain))
+	if criteria.Service != "" {
+		sb = sb.Where(sb.Equal("p.service", criteria.Service))
 	}
 	if criteria.IsMaxDistanceSet || criteria.IsMinFreeRateLimitSet || criteria.IsMinPaygoRateLimitSet || criteria.IsMinSubscribeRateLimitSet {
 		sb = sb.JoinWithOption(sqlbuilder.LeftJoin, "provider_metadata", "p.id = provider_metadata.provider_id and p.metadata_nonce = provider_metadata.nonce")

@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"text/template"
 	"time"
@@ -203,22 +204,15 @@ func run(path string) error {
 
 	// wait for postgres
 	waitForPort("postgres", "directory-postgres:5432")
-
-	// migrate postgres
-	log.Debug().Msg("Tern postres")
-	cmd = exec.Command("tern", "migrate", "-c", "/app/directory/tern/tern.conf", "-m", "/app/directory/tern")
-	cmd.Env = append(os.Environ(), "POSTGRES_DB=arkeo_directory", "POSTGRES_USER=arkeo", "POSTGRES_PASSWORD=arkeo123")
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to overwrite private validator key")
-	}
+	iter := time.Now().UnixNano()
+	tern(iter) // create postgres db
 
 	sharedDirectoryEnv := []string{
 		"DB_HOST=directory-postgres",
 		"DB_PORT=5432",
 		"DB_USER=arkeo",
 		"DB_PASS=arkeo123",
-		"DB_NAME=arkeo_directory",
+		fmt.Sprintf("DB_NAME=arkeo_directory%d", iter),
 		"DB_POOL_MAX_CONNS=2",
 		"DB_POOL_MIN_CONNS=1",
 		"DB_SSL_MODE=prefer",
@@ -280,6 +274,13 @@ func run(path string) error {
 
 	stderrLines := make(chan string, 100)
 	for i, proc := range procs {
+		if strings.HasPrefix(proc.name, "directory-") {
+			for j := range proc.env {
+				if strings.HasPrefix(proc.env[j], "DB_NAME=") {
+					proc.env[j] = fmt.Sprintf("DB_NAME=arkeo_directory%d", iter)
+				}
+			}
+		}
 		procs[i].process = runProcess(proc, stderrLines)
 	}
 
@@ -323,9 +324,18 @@ func run(path string) error {
 			log.Fatal().Err(err).Msg("failed to remove validator key")
 		}
 
+		iter = time.Now().UnixNano()
+		tern(iter)
 		for _, proc := range procs {
 			// restart process
 			log.Debug().Msgf("Restarting process %s", proc.name)
+			if strings.HasPrefix(proc.name, "directory-") {
+				for j := range proc.env {
+					if strings.HasPrefix(proc.env[j], "DB_NAME=") {
+						proc.env[j] = fmt.Sprintf("DB_NAME=arkeo_directory%d", iter)
+					}
+				}
+			}
 			proc.process = runProcess(proc, stderrLines)
 		}
 	}
@@ -387,6 +397,28 @@ func stopProcess(proc process) {
 	_, err = proc.process.Process.Wait()
 	if err != nil {
 		log.Fatal().Err(err).Msgf("failed to wait for process %s", proc.name)
+	}
+}
+
+func tern(iter int64) {
+	// migrate postgres
+	dbname := fmt.Sprintf("arkeo_directory%d", iter)
+	log.Debug().Msgf("migrate postres %s", dbname)
+	_, err := exec.Command("createdb", dbname).CombinedOutput()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to createdb")
+	}
+	cmd := exec.Command("tern", "migrate", "-c", "/app/directory/tern/tern.conf", "--database", dbname, "-m", "/app/directory/tern")
+	cmd.Env = append(
+		os.Environ(),
+		fmt.Sprintf("POSTGRES_DB=%s", dbname),
+		"POSTGRES_USER=arkeo",
+		"POSTGRES_PASSWORD=arkeo123",
+	)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Debug().Msg(string(out))
+		log.Fatal().Err(err).Msg("failed to migrate postres")
 	}
 }
 

@@ -52,11 +52,11 @@ func IsNearEqual(a, b, epsilon float64) bool {
 	return math.Abs(a-b) <= epsilon
 }
 
-// see arkeo-protocol/common/chain.go
-var validChains = map[string]struct{}{"arkeo-mainnet-fullnode": {}, "btc-mainnet-fullnode": {}, "eth-mainnet-fullnode": {}, "gaia-mainnet-rpc-archive": {}, "swapi.dev": {}}
+// see arkeo-protocol/common/service.go
+var validServices = map[string]struct{}{"arkeo-mainnet-fullnode": {}, "btc-mainnet-fullnode": {}, "eth-mainnet-fullnode": {}, "gaia-mainnet-rpc-archive": {}, "swapi.dev": {}}
 
-func ValidateChain(chain string) (ok bool) {
-	_, ok = validChains[chain]
+func ValidateService(service string) (ok bool) {
+	_, ok = validServices[service]
 	return
 }
 

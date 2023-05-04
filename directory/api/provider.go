@@ -25,7 +25,7 @@ type ArkeoProviders []*db.ArkeoProvider
 
 // swagger:route Get /provider/{pubkey} getProvider
 //
-// Get a specific ArkeoProvider by a unique id (pubkey+chain)
+// Get a specific ArkeoProvider by a unique id (pubkey+service)
 //
 // Parameters:
 //   + name: pubkey
@@ -33,9 +33,9 @@ type ArkeoProviders []*db.ArkeoProvider
 //     description: provider public key
 //     required: true
 //     type: string
-//   + name: chain
+//   + name: service
 //	   in: query
-//     description: chain identifier
+//     description: service identifier
 //     required: true
 //     type: string
 //
@@ -47,19 +47,19 @@ type ArkeoProviders []*db.ArkeoProvider
 func (a *ApiService) getProvider(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	pubkey := vars["pubkey"]
-	chain := r.FormValue("chain")
+	service := r.FormValue("service")
 	if pubkey == "" {
 		respondWithError(w, http.StatusBadRequest, "pubkey is required")
 		return
 	}
-	if chain == "" {
-		respondWithError(w, http.StatusBadRequest, "chain is required")
+	if service == "" {
+		respondWithError(w, http.StatusBadRequest, "service is required")
 		return
 	}
 	// "bitcoin-mainnet"
-	provider, err := a.findProvider(pubkey, chain)
+	provider, err := a.findProvider(pubkey, service)
 	if err != nil {
-		log.Errorf("error finding provider for %s chain %s: %+v", pubkey, chain, err)
+		log.Errorf("error finding provider for %s service %s: %+v", pubkey, service, err)
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error finding provider with pubkey %s", pubkey))
 		return
 	}
@@ -67,11 +67,11 @@ func (a *ApiService) getProvider(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, provider)
 }
 
-// find a provider by pubkey+chain
-func (a *ApiService) findProvider(pubkey, chain string) (*db.ArkeoProvider, error) {
-	dbProvider, err := a.db.FindProvider(pubkey, chain)
+// find a provider by pubkey+service
+func (a *ApiService) findProvider(pubkey, service string) (*db.ArkeoProvider, error) {
+	dbProvider, err := a.db.FindProvider(pubkey, service)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error finding provider for %s %s", pubkey, chain)
+		return nil, errors.Wrapf(err, "error finding provider for %s %s", pubkey, service)
 	}
 	if dbProvider == nil {
 		return nil, nil

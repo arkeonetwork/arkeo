@@ -2,7 +2,7 @@ package db
 
 var (
 	sqlInsertProvider = `
-		insert into providers(pubkey,chain,bond) values ($1,$2,$3) returning id, created, updated
+		insert into providers(pubkey,service,bond) values ($1,$2,$3) returning id, created, updated
 	`
 	sqlUpdateProvider = `
 		update providers
@@ -16,7 +16,7 @@ var (
 				paygo_rate = $10,
 				updated = now()
 		where pubkey = $1
-		  and chain = $2
+		  and service = $2
 		returning id, created, updated
 	`
 	sqlFindProvider = `
@@ -25,7 +25,7 @@ var (
 			created,
 			updated,
 			pubkey,
-			chain,
+			service,
 			coalesce(bond,0) as bond,
 			coalesce(metadata_uri,'') as metadata_uri,
 			coalesce(metadata_nonce,0) as metadata_nonce,
@@ -36,7 +36,7 @@ var (
 			coalesce(paygo_rate,-1) as paygo_rate
 		from providers p
 		where p.pubkey = $1
-		  and p.chain = $2
+		  and p.service = $2
 	`
 	sqlInsertBondProviderEvent = `
 		insert into provider_bond_events(provider_id,height,txid,bond_rel,bond_abs)

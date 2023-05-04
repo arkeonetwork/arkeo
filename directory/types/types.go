@@ -2,7 +2,7 @@ package types
 
 type BondProviderEvent struct {
 	Pubkey       string `mapstructure:"provider"`
-	Chain        string `mapstructure:"chain"`
+	Service      string `mapstructure:"service"`
 	Height       int64  `mapstructure:"height"`
 	TxID         string `mapstructure:"hash"`
 	BondRelative string `mapstructure:"bond_rel"`
@@ -18,7 +18,7 @@ var (
 
 type BaseContractEvent struct {
 	ProviderPubkey string `mapstructure:"provider"`
-	Chain          string `mapstructure:"chain"`
+	Service        string `mapstructure:"service"`
 	ClientPubkey   string `mapstructure:"client"`
 	DelegatePubkey string `mapstructure:"delegate"` // see BaseContractEvent.GetDelegatePubkey()
 	TxID           string `mapstructure:"hash"`
@@ -73,7 +73,7 @@ var (
 
 type ModProviderEvent struct {
 	Pubkey              string         `mapstructure:"pubkey"` // TODO provider
-	Chain               string         `mapstructure:"chain"`
+	Service             string         `mapstructure:"service"`
 	Height              int64          `mapstructure:"height"`
 	TxID                string         `mapstructure:"hash"`
 	MetadataURI         string         `mapstructure:"metadata_uri"`
@@ -101,7 +101,7 @@ var (
 
 type ProviderSearchParams struct {
 	Pubkey                     string
-	Chain                      string
+	Service                    string
 	SortKey                    ProviderSortKey
 	MaxDistance                int64
 	IsMaxDistanceSet           bool
@@ -132,12 +132,12 @@ type ArkeoStats struct {
 	// TODO: in the future we can add more complicated structure
 	// ContractsMedianRatePayPer       int64
 	// ContractsMedianRateSubscription int64
-	// ChainStats                      map[string]*ChainStats
+	// ServiceStats                      map[string]*ServiceStats
 }
 
-// swagger:model ChainStats
-type ChainStats struct {
-	Chain              string
+// swagger:model ServiceStats
+type ServiceStats struct {
+	Service            string
 	ProviderCount      int64
 	QueryCount         int64
 	QueryCountLastDay  int64

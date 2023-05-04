@@ -8,12 +8,12 @@ import (
 )
 
 func (a *IndexerApp) handleOpenContractEvent(evt types.OpenContractEvent) error {
-	provider, err := a.db.FindProvider(evt.ProviderPubkey, evt.Chain)
+	provider, err := a.db.FindProvider(evt.ProviderPubkey, evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for chain %s", evt.ProviderPubkey, evt.Chain)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.ProviderPubkey, evt.Service)
 	}
 	if provider == nil {
-		return fmt.Errorf("no provider found: DNE %s %s", evt.ProviderPubkey, evt.Chain)
+		return fmt.Errorf("no provider found: DNE %s %s", evt.ProviderPubkey, evt.Service)
 	}
 	ent, err := a.db.UpsertContract(provider.ID, evt)
 	if err != nil {
@@ -27,12 +27,12 @@ func (a *IndexerApp) handleOpenContractEvent(evt types.OpenContractEvent) error 
 }
 
 func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) error {
-	contracts, err := a.db.FindContractsByPubKeys(evt.Chain, evt.ProviderPubkey, evt.GetDelegatePubkey())
+	contracts, err := a.db.FindContractsByPubKeys(evt.Service, evt.ProviderPubkey, evt.GetDelegatePubkey())
 	if err != nil {
-		return errors.Wrapf(err, "error finding contract for %s:%s %s", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey())
+		return errors.Wrapf(err, "error finding contract for %s:%s %s", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey())
 	}
 	if len(contracts) < 1 {
-		return fmt.Errorf("no contracts found: %s:%s %s", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey())
+		return fmt.Errorf("no contracts found: %s:%s %s", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey())
 	}
 
 	// FindContractsByPubKeys returns by id descending (newest)
@@ -49,12 +49,12 @@ func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) erro
 
 func (a *IndexerApp) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
 	log.Infof("receieved contractSettlementEvent %#v", evt)
-	contract, err := a.db.FindContractByPubKeys(evt.Chain, evt.ProviderPubkey, evt.GetDelegatePubkey(), evt.Height)
+	contract, err := a.db.FindContractByPubKeys(evt.Service, evt.ProviderPubkey, evt.GetDelegatePubkey(), evt.Height)
 	if err != nil {
-		return errors.Wrapf(err, "error finding contract provider %s chain %s", evt.ProviderPubkey, evt.Chain)
+		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.ProviderPubkey, evt.Service)
 	}
 	if contract == nil {
-		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Chain, evt.GetDelegatePubkey(), evt.Height)
+		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey(), evt.Height)
 	}
 	if _, err = a.db.UpsertContractSettlementEvent(contract.ID, evt); err != nil {
 		return errors.Wrapf(err, "error upserting contract settlement event")

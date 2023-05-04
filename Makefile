@@ -114,26 +114,10 @@ test-watch:
 # ------------------------------ Regression Tests ------------------------------
 
 test-regression:
-	@docker-compose -f ./test/regression/docker-compose.yml up --build --remove-orphans --force-recreate -V 
-	# @docker run --rm -it \
-		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
-		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
-		-p 1317:1317 -p 26657:26657 -p 5432:5432 \
-		-v $(shell pwd)/test/regression/mnt:/mnt \
-		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
-		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
-		-w /app arkeo-regtest sh -c 'make _test-regression'
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
 
 test-regression-ci:
-	@DOCKER_BUILDKIT=1 docker build -t arkeo-regtest -f test/regression/Dockerfile .
-	@docker run --rm \
-		-e DEBUG -e RUN -e EXPORT -e TIME_FACTOR \
-		-e HOME=/regtest -e UID=$(shell id -u) -e GID=$(shell id -g) \
-		-p 1317:1317 -p 26657:26657 -p 5432:5432 \
-		-v $(shell pwd)/test/regression/mnt:/mnt \
-		-v $(shell pwd)/test/regression/suites:/app/test/regression/suites \
-		-v $(shell pwd)/test/regression/templates:/app/test/regression/templates \
-		-w /app arkeo-regtest sh -c 'make _test-regression'
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
 
 test-regression-coverage:
 	@go tool cover -html=test/regression/mnt/coverage/coverage.txt

@@ -35,12 +35,12 @@ func wsAttributeSource(src ctypes.ResultEvent) func() map[string]string {
 		if len(v) > 0 {
 			key := k
 			if sl := strings.Split(k, "."); len(sl) > 1 {
-				key = sl[1]
+				key = sl[len(sl)-1]
 			}
 			if _, ok := attribs[key]; ok {
 				log.Debugf("key %s already in results with value %s, overwriting with %s", key, attribs[key], v[0])
 			}
-			attribs[key] = v[0]
+			attribs[key] = strings.Trim(v[0], `"`)
 		}
 		if len(v) > 1 {
 			log.Warnf("attrib %s has %d array values: %v", k, len(v), v)

@@ -46,12 +46,12 @@ const (
 	-- c.rate,
 	-- c.open_cost
 	from providers p join contracts c on p.id = c.provider_id
-	where p.chain = $1 and p.pubkey = $2 and c.delegate_pubkey = $3
+	where p.service = $1 and p.pubkey = $2 and c.delegate_pubkey = $3
 	order by c.id desc
 	`
 	sqlFindContractByPubKeys = `select ` + contractCols + `
 	from providers p join contracts c on p.id = c.provider_id
-	where p.chain = $1 and p.pubkey = $2 and c.delegate_pubkey = $3 and c.height = $4
+	where p.service = $1 and p.pubkey = $2 and c.delegate_pubkey = $3 and c.height = $4
 	`
 	sqlUpsertContract = `
 		insert into contracts(provider_id,delegate_pubkey,client_pubkey,contract_type,duration,rate,open_cost,height)

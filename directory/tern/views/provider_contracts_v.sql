@@ -6,7 +6,7 @@ with indexed_height as (select height
 select p.id as provider_id,
        c.id as contract_id,
        p.pubkey,
-       p.chain,
+       p.service,
        c.delegate_pubkey,
        c.client_pubkey,
        c.height,

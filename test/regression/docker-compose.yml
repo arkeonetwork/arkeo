@@ -1,7 +1,8 @@
 version: "3.6"
 services:
-  arkeod:
-    hostname: arkeod
+  arkeo:
+    hostname: arkeo
+    container_name: arkeo
     image: arkeo-regtest
     build:
       context: ../..
@@ -15,11 +16,15 @@ services:
       - "./suites:/app/test/regression/suites"
       - "./templates:/app/test/regression/templates"
     environment:
-      NET: "regtest"
-      HOME: "/regtest"
-      DEBUG: 1
-        # - EXPORT
-        # - TIME_FACTOR
+      - NET=regtest
+      - HOME=/regtest
+      - DEBUG=${DEBUG}
+      - EXPORT=${EXPORT}
+      - RUN=${RUN}
+      - TIME_FACTOR=${TIME_FACTOR}
+      - PGHOST=directory-postgres
+      - PGUSER=arkeo
+      - PGPASSWORD=arkeo123
     command: make _test-regression
     depends_on:
       - directory-postgres
@@ -27,7 +32,8 @@ services:
   directory-postgres:
     hostname: directory-postgres
     image: postgres:15.1-alpine
-    container_name: directory-postgres
+    logging:
+      driver: none
     restart: always
     environment:
       POSTGRES_DB: arkeo_directory

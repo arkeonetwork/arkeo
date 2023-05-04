@@ -6,7 +6,7 @@ create table providers
     created               timestamptz default now() not null,
     updated               timestamptz default now() not null,
     pubkey                text                      not null,
-    chain                 text                      not null,
+    service                 text                      not null,
     bond                  numeric                   not null,
     metadata_uri          text,
     metadata_nonce        numeric,
@@ -18,7 +18,7 @@ create table providers
 );
 
 alter table providers
-    add constraint pubkey_chain_uniq unique (pubkey, chain);
+    add constraint pubkey_service_uniq unique (pubkey, service);
 
 ---- create above / drop below ----
 
