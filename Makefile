@@ -114,10 +114,9 @@ test-watch:
 # ------------------------------ Regression Tests ------------------------------
 
 test-regression:
-	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run -i --rm --build arkeo
 
-test-regression-ci:
-	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run --build arkeo
+test-regression-ci: test-regression
 
 test-regression-coverage:
 	@go tool cover -html=test/regression/mnt/coverage/coverage.txt
