@@ -13,6 +13,7 @@ var (
 			status = $6,
 			min_contract_duration = $7,
 			max_contract_duration = $8,
+			settlement_duration = $9,
 			updated = now()
 		where pubkey = $1
 		  and service = $2
@@ -31,7 +32,8 @@ var (
 			coalesce(metadata_nonce,0) as metadata_nonce,
 			coalesce(status,'Offline') as status,
 			coalesce(min_contract_duration,-1) as min_contract_duration,
-			coalesce(max_contract_duration,-1) as max_contract_duration
+			coalesce(max_contract_duration,-1) as max_contract_duration,
+			coalesce(settlement_duration,-1) as settlement_duration
 		from providers p
 		where p.pubkey = $1
 		  and p.service = $2

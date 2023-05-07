@@ -29,6 +29,7 @@ type ArkeoProvider struct {
 	Status              types.ProviderStatus `json:"status" db:"status,text"`
 	MinContractDuration int64                `json:"min_contract_duration" db:"min_contract_duration"`
 	MaxContractDuration int64                `json:"max_contract_duration" db:"max_contract_duration"`
+	SettlementDuration  int64                `json:"settlement_duration" db:"settlement_duration"`
 	SubscriptionRate    cosmos.Coins         `json:"subscription_rates" db:"-"`
 	PayAsYouGoRate      cosmos.Coins         `json:"paygo_rates" db:"-"`
 }
@@ -83,6 +84,7 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		provider.Status,
 		provider.MinContractDuration,
 		provider.MaxContractDuration,
+		provider.SettlementDuration,
 	).Scan(&providerID, &created, &updated)
 	if err != nil {
 		return nil, err

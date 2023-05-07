@@ -120,7 +120,7 @@ asserts:
   - .status == "ONLINE"
   - .min_contract_duration | tonumber == 2
   - .max_contract_duration | tonumber == 3
-# - .settlement_duration | tonumber == 6
+  - .settlement_duration | tonumber == 6
   - .subscription_rates | length == 1
   - .subscription_rates[0].denom == "uarkeo"
   - .subscription_rates[0].amount == "4"

@@ -31,6 +31,7 @@ func (a *IndexerApp) handleModProviderEvent(evt atypes.EventModProvider) error {
 	provider.MaxContractDuration = evt.MaxContractDuration
 	provider.SubscriptionRate = evt.SubscriptionRate
 	provider.PayAsYouGoRate = evt.PayAsYouGoRate
+	provider.SettlementDuration = evt.SettlementDuration
 
 	if _, err = a.db.UpdateProvider(provider); err != nil {
 		return errors.Wrapf(err, "error updating provider for mod event %s service %s", provider.Pubkey, provider.Service)
