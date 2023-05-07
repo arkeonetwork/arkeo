@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/arkeonetwork/arkeo/directory/types"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
@@ -28,6 +30,78 @@ import (
 // }
 
 type attributes func() map[string]string
+
+func parseEventToEventModProvider(event interface{}) (atypes.EventModProvider, error) {
+	eventData := make(map[string]string)
+
+	switch evt := event.(type) {
+	case ctypes.ResultEvent:
+		for key, attribute := range evt.Events {
+			key = strings.TrimLeft(key, "arkeo.arkeo.EventModProvider.")
+			value := strings.Trim(attribute[0], `"`)
+			eventData[key] = value
+		}
+	case abcitypes.Event:
+		for _, attribute := range evt.Attributes {
+			key := strings.TrimLeft(string(attribute.GetKey()), "arkeo.arkeo.EventModProvider.")
+			value := strings.Trim(string(attribute.GetValue()), `"`)
+			eventData[key] = value
+		}
+	default:
+		return atypes.EventModProvider{}, fmt.Errorf("unsupported event type: %T", evt)
+	}
+
+	type eventModProviderAlias atypes.EventModProvider
+	eventModProvider := struct {
+		MaxContractDuration string `json:"max_contract_duration,omitempty"`
+		MinContractDuration string `json:"min_contract_duration,omitempty"`
+		SettlementDuration  string `json:"settlement_duration,omitempty"`
+		MetadataNonce       string `json:"metadata_nonce,omitempty"`
+		SubscriptionRate    string `json:"subscription_rate"`
+		PayAsYouGoRate      string `json:"pay_as_you_go_rate"`
+		Status              string `json:"status"`
+		eventModProviderAlias
+	}{}
+
+	jsonData, err := json.Marshal(eventData)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+
+	if err := json.Unmarshal(jsonData, &eventModProvider); err != nil {
+		return atypes.EventModProvider{}, err
+	}
+
+	result := atypes.EventModProvider(eventModProvider.eventModProviderAlias)
+
+	// make conversions
+	result.MaxContractDuration, err = strconv.ParseInt(eventModProvider.MaxContractDuration, 10, 64)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	result.MinContractDuration, err = strconv.ParseInt(eventModProvider.MinContractDuration, 10, 64)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	result.SettlementDuration, err = strconv.ParseInt(eventModProvider.SettlementDuration, 10, 64)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	result.MetadataNonce, err = strconv.ParseUint(eventModProvider.MetadataNonce, 10, 64)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	err = json.Unmarshal([]byte(eventModProvider.SubscriptionRate), &result.SubscriptionRate)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	err = json.Unmarshal([]byte(eventModProvider.PayAsYouGoRate), &result.PayAsYouGoRate)
+	if err != nil {
+		return atypes.EventModProvider{}, err
+	}
+	result.Status = atypes.ProviderStatus(atypes.ProviderStatus_value[eventModProvider.Status])
+	return result, nil
+}
 
 func wsAttributeSource(src ctypes.ResultEvent) func() map[string]string {
 	attribs := make(map[string]string, len(src.Events))
@@ -159,8 +233,8 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-modProviderEvents:
 			log.Debugf("received mod provider event")
-			modProviderEvent := types.ModProviderEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &modProviderEvent); err != nil {
+			modProviderEvent, err := parseEventToEventModProvider(evt)
+			if err != nil {
 				log.Errorf("error converting mod_provider event: %+v", err)
 				break
 			}
@@ -291,8 +365,8 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case "provider_mod":
-		modProviderEvent := types.ModProviderEvent{}
-		if err = convertEvent(tmAttributeSource(transaction, event, height), &modProviderEvent); err != nil {
+		modProviderEvent, err := parseEventToEventModProvider(event)
+		if err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}

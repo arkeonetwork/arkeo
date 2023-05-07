@@ -1,5 +1,7 @@
 package types
 
+import "github.com/arkeonetwork/arkeo/common/cosmos"
+
 type BondProviderEvent struct {
 	Pubkey       string `mapstructure:"provider"`
 	Service      string `mapstructure:"service"`
@@ -108,8 +110,8 @@ type ModProviderEvent struct {
 	Status              ProviderStatus `mapstructure:"status"`
 	MinContractDuration int64          `mapstructure:"min_contract_duration"`
 	MaxContractDuration int64          `mapstructure:"max_contract_duration"`
-	SubscriptionRate    int64          `mapstructure:"-"` // TODO
-	PayAsYouGoRate      int64          `mapstructure:"-"` // TODO
+	SubscriptionRate    cosmos.Coins   `mapstructure:"subscription_rate"`
+	PayAsYouGoRate      cosmos.Coins   `mapstructure:"pay_as_you_go_rate"`
 	// TODO: add settlement_duration
 }
 
