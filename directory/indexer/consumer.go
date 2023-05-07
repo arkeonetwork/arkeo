@@ -34,16 +34,17 @@ type attributes func() map[string]string
 func parseEventToEventModProvider(event interface{}) (atypes.EventModProvider, error) {
 	eventData := make(map[string]string)
 
+	prefix := "arkeo.arkeo.EventModProvider."
 	switch evt := event.(type) {
 	case ctypes.ResultEvent:
 		for key, attribute := range evt.Events {
-			key = strings.TrimLeft(key, "arkeo.arkeo.EventModProvider.")
-			value := strings.Trim(attribute[0], `"`)
-			eventData[key] = value
+			k := strings.TrimPrefix(key, prefix)
+			v := strings.Trim(attribute[0], `"`)
+			eventData[k] = v
 		}
 	case abcitypes.Event:
 		for _, attribute := range evt.Attributes {
-			key := strings.TrimLeft(string(attribute.GetKey()), "arkeo.arkeo.EventModProvider.")
+			key := strings.TrimPrefix(string(attribute.GetKey()), prefix)
 			value := strings.Trim(string(attribute.GetValue()), `"`)
 			eventData[key] = value
 		}
