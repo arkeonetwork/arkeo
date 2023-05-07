@@ -13,6 +13,7 @@ create table providers
     status                text references provider_status (status),
     min_contract_duration numeric,
     max_contract_duration numeric,
+    settlement_duration   numeric,
     subscription_rate     numeric,
     paygo_rate            numeric
 );

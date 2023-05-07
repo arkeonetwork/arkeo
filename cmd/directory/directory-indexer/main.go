@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -56,6 +58,9 @@ func init() {
 
 func main() {
 	log.Info("starting indexer")
+
+	cosmos.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
+
 	flag.Parse()
 	c := &Config{}
 	if *envPath == "" {

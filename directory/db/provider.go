@@ -5,12 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
 	"github.com/arkeonetwork/arkeo/sentinel"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 )
 
@@ -25,8 +29,9 @@ type ArkeoProvider struct {
 	Status              types.ProviderStatus `json:"status" db:"status,text"`
 	MinContractDuration int64                `json:"min_contract_duration" db:"min_contract_duration"`
 	MaxContractDuration int64                `json:"max_contract_duration" db:"max_contract_duration"`
-	SubscriptionRate    int64                `json:"subscription_rate" db:"subscription_rate"`
-	PayAsYouGoRate      int64                `json:"paygo_rate" db:"paygo_rate"`
+	SettlementDuration  int64                `json:"settlement_duration" db:"settlement_duration"`
+	SubscriptionRate    cosmos.Coins         `json:"subscription_rates" db:"-"`
+	PayAsYouGoRate      cosmos.Coins         `json:"paygo_rates" db:"-"`
 }
 
 func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
@@ -56,8 +61,21 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 
-	return update(conn,
-		sqlUpdateProvider,
+	ctx := context.Background()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback(ctx)
+		}
+	}()
+
+	// update provide records
+	var providerID int64
+	var created, updated time.Time
+	err = tx.QueryRow(ctx, sqlUpdateProvider,
 		provider.Pubkey,
 		provider.Service,
 		provider.Bond,
@@ -66,9 +84,61 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		provider.Status,
 		provider.MinContractDuration,
 		provider.MaxContractDuration,
-		provider.SubscriptionRate,
-		provider.PayAsYouGoRate,
-	)
+		provider.SettlementDuration,
+	).Scan(&providerID, &created, &updated)
+	if err != nil {
+		return nil, err
+	}
+	entity := &Entity{ID: providerID, Created: created, Updated: updated}
+
+	// delete current subscription rate and pay-as-you-go rates before inserting new ones
+	_, err = tx.Exec(ctx, sqlDeleteSubscriptionRates, provider.Pubkey, provider.Service)
+	if err != nil {
+		return entity, err
+	}
+	_, err = tx.Exec(ctx, sqlDeletePayAsYouGoRates, provider.Pubkey, provider.Service)
+	if err != nil {
+		return entity, err
+	}
+
+	// insert new subscription and pay-as-you-go rates
+	query, args := d.getRateArgs(providerID, sqlInsertSubscriptionRates, provider.SubscriptionRate)
+	_, err = tx.Exec(ctx, query, args...)
+	if err != nil {
+		return entity, err
+	}
+	query, args = d.getRateArgs(providerID, sqlInsertPayAsYouGoRates, provider.PayAsYouGoRate)
+	_, err = tx.Exec(ctx, query, args...)
+	if err != nil {
+		return entity, err
+	}
+
+	// Commit the transaction
+	err = tx.Commit(ctx)
+	return entity, err
+}
+
+func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.Coins) (string, []interface{}) {
+	var args []interface{}
+	type insertRate struct {
+		ProviderID  int64
+		TokenName   string
+		TokenAmount int64
+	}
+	rates := make([]insertRate, len(coins))
+	for i, rate := range coins {
+		rates[i] = insertRate{providerID, strings.ToLower(rate.Denom), rate.Amount.Int64()}
+	}
+
+	for i, row := range rates {
+		if i > 0 {
+			query += ","
+		}
+		query += "($1, $2, $3)"
+
+		args = append(args, row.ProviderID, row.TokenName, row.TokenAmount)
+	}
+	return query, args
 }
 
 func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
@@ -85,7 +155,53 @@ func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, erro
 	if provider.Pubkey == "" {
 		return nil, nil
 	}
+
+	// fetch subscription and pay-as-you-go rates
+	provider.SubscriptionRate, err = d.findRates(conn, provider.ID, sqlFindProviderSubscriptionRates)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error finding subscription rates")
+	}
+	provider.PayAsYouGoRate, err = d.findRates(conn, provider.ID, sqlFindProviderPayAsYouGoRates)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error finding pay-as-you-go rates")
+	}
+
 	return &provider, nil
+}
+
+func (d *DirectoryDB) findRates(conn *pgxpool.Conn, providerID int64, query string) (cosmos.Coins, error) {
+	// Execute the query
+	ctx := context.Background()
+	rows, err := conn.Query(ctx, query, providerID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query rates: %v", err)
+	}
+	defer rows.Close()
+
+	type loadRate struct {
+		ID         int64
+		ProviderID int64
+		Denom      string
+		Amount     int64
+	}
+
+	// Iterate over the rows and store the results in a slice of slices
+	results := make(cosmos.Coins, 0)
+	for rows.Next() {
+		// You should replace 'YourStruct' with the appropriate struct type
+		// and the number of fields in the struct with the number of columns in the table
+		var r loadRate
+		if err := rows.Scan(&r.ID, &r.ProviderID, &r.Denom, &r.Amount); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %v", err)
+		}
+		results = append(results, cosmos.NewInt64Coin(r.Denom, r.Amount))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to process rows: %v", err)
+	}
+
+	return results, nil
 }
 
 const provSearchCols = `

@@ -8,36 +8,50 @@ import (
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/pkg/errors"
 )
 
-func (a *IndexerApp) handleModProviderEvent(evt types.ModProviderEvent) error {
-	provider, err := a.db.FindProvider(evt.Pubkey, evt.Service)
+func (a *IndexerApp) handleModProviderEvent(evt atypes.EventModProvider) error {
+	provider, err := a.db.FindProvider(evt.Provider.String(), evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Pubkey, evt.Service)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
 	}
 	if provider == nil {
-		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Pubkey, evt.Service)
+		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Provider, evt.Service)
 	}
 
 	log := log.WithField("provider", strconv.FormatInt(provider.ID, 10))
 
 	isMetaDataUpdated := provider.MetadataNonce == 0 || provider.MetadataNonce < evt.MetadataNonce
-	provider.MetadataURI = evt.MetadataURI
+	provider.MetadataURI = evt.MetadataUri
 	provider.MetadataNonce = evt.MetadataNonce
-	provider.Status = evt.Status
+	provider.Status = types.ProviderStatus(evt.Status.String())
 	provider.MinContractDuration = evt.MinContractDuration
 	provider.MaxContractDuration = evt.MaxContractDuration
 	provider.SubscriptionRate = evt.SubscriptionRate
 	provider.PayAsYouGoRate = evt.PayAsYouGoRate
+	provider.SettlementDuration = evt.SettlementDuration
 
 	if _, err = a.db.UpdateProvider(provider); err != nil {
 		return errors.Wrapf(err, "error updating provider for mod event %s service %s", provider.Pubkey, provider.Service)
 	}
-	log.Infof("updated provider %s service %s", provider.Pubkey, provider.Service)
-	if _, err = a.db.InsertModProviderEvent(provider.ID, evt); err != nil {
-		return errors.Wrapf(err, "error inserting ModProviderEvent for %s service %s", evt.Pubkey, evt.Service)
-	}
+	/*
+		// currently, we're not utilizing the inserts for mod provider events, so
+		// i'm disabling for now. If we want to re-enable it (because we see a need
+		// for it), we should create a new modevent struct that looks something
+		// like this...
+		type ModProviderEvent struct {
+			atypes.EventModProvider
+			Height              int64          `mapstructure:"height"`
+			TxID                string         `mapstructure:"hash"`
+		}
+
+		log.Infof("updated provider %s service %s", provider.Pubkey, provider.Service)
+		if _, err = a.db.InsertModProviderEvent(provider.ID, evt); err != nil {
+			return errors.Wrapf(err, "error inserting ModProviderEvent for %s service %s", evt.Provider, evt.Service)
+		}
+	*/
 
 	if !isMetaDataUpdated {
 		return nil
