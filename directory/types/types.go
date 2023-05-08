@@ -110,9 +110,9 @@ type ModProviderEvent struct {
 	Status              ProviderStatus `mapstructure:"status"`
 	MinContractDuration int64          `mapstructure:"min_contract_duration"`
 	MaxContractDuration int64          `mapstructure:"max_contract_duration"`
+	SettlementDuration  int64          `mapstructure:"settlement_duration"`
 	SubscriptionRate    cosmos.Coins   `mapstructure:"subscription_rate"`
 	PayAsYouGoRate      cosmos.Coins   `mapstructure:"pay_as_you_go_rate"`
-	// TODO: add settlement_duration
 }
 
 type Coordinates struct {

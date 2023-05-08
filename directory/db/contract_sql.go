@@ -79,14 +79,18 @@ const (
 	where id = $2
 	returning id, created, updated
 	`
-	sqlUpsertOpenContractEvent = `
-	insert into open_contract_events(contract_id,client_pubkey,contract_type,height,txid,duration,rate,open_cost,deposit,settlement_duration,auth,queries_per_minute)
-	values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-	on conflict on constraint open_contract_events_txid_unq
-	do update set updated = now()
-	where open_contract_events.txid = $5
-	returning id, created, updated
-	`
+
+	/*
+		sqlUpsertOpenContractEvent = `
+		insert into open_contract_events(contract_id,client_pubkey,contract_type,height,txid,duration,rate,open_cost,deposit,settlement_duration,auth,queries_per_minute)
+		values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		on conflict on constraint open_contract_events_txid_unq
+		do update set updated = now()
+		where open_contract_events.txid = $5
+		returning id, created, updated
+		`
+	*/
+
 	sqlUpsertCloseContractEvent = `
 	insert into close_contract_events(contract_id,client_pubkey,delegate_pubkey,height,txid)
 	values ($1,$2,$3,$4,$5)

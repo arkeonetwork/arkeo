@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -30,6 +31,88 @@ import (
 // }
 
 type attributes func() map[string]string
+
+func parseEventToEventOpenContract(event interface{}) (atypes.EventOpenContract, error) {
+	eventData := make(map[string]string)
+
+	prefix := "arkeo.arkeo.EventOpenContract."
+	switch evt := event.(type) {
+	case ctypes.ResultEvent:
+		for key, attribute := range evt.Events {
+			k := strings.TrimPrefix(key, prefix)
+			v := strings.Trim(attribute[0], `"`)
+			eventData[k] = v
+		}
+	case abcitypes.Event:
+		for _, attribute := range evt.Attributes {
+			key := strings.TrimPrefix(string(attribute.GetKey()), prefix)
+			value := strings.Trim(string(attribute.GetValue()), `"`)
+			eventData[key] = value
+		}
+	default:
+		return atypes.EventOpenContract{}, fmt.Errorf("unsupported event type: %T", evt)
+	}
+
+	type eventOpenContractAlias atypes.EventOpenContract
+	eventOpenContract := struct {
+		ContractId         string `json:"contract_id,omitempty"`
+		Height             string `json:"height,omitempty"`
+		Duration           string `json:"duration,omitempty"`
+		Rate               string `json:"rate,omitempty"`
+		Deposit            string `json:"deposit,omitempty"`
+		Type               string `json:"type"`
+		OpenCost           string `json:"open_cost"`
+		SettlementDuration string `json:"settlement_duration"`
+		Authorization      string `json:"authorization"`
+		QueriesPerMinute   string `json:"queries_per_minute"`
+		eventOpenContractAlias
+	}{}
+
+	jsonData, err := json.Marshal(eventData)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+
+	if err := json.Unmarshal(jsonData, &eventOpenContract); err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+
+	result := atypes.EventOpenContract(eventOpenContract.eventOpenContractAlias)
+
+	// make conversions
+	result.QueriesPerMinute, err = strconv.ParseInt(eventOpenContract.QueriesPerMinute, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.OpenCost, err = strconv.ParseInt(eventOpenContract.OpenCost, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.Deposit, _ = cosmos.NewIntFromString(eventOpenContract.Deposit)
+	result.ContractId, err = strconv.ParseUint(eventOpenContract.ContractId, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.Height, err = strconv.ParseInt(eventOpenContract.Height, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.SettlementDuration, err = strconv.ParseInt(eventOpenContract.SettlementDuration, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.Duration, err = strconv.ParseInt(eventOpenContract.Duration, 10, 64)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	err = json.Unmarshal([]byte(eventOpenContract.Rate), &result.Rate)
+	if err != nil {
+		return atypes.EventOpenContract{}, err
+	}
+	result.Authorization = atypes.ContractAuthorization(atypes.ContractAuthorization_value[eventOpenContract.Authorization])
+	result.Type = atypes.ContractType(atypes.ContractType_value[eventOpenContract.Type])
+	return result, nil
+}
 
 func parseEventToEventModProvider(event interface{}) (atypes.EventModProvider, error) {
 	eventData := make(map[string]string)
@@ -214,8 +297,8 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 		case evt := <-openContractEvents:
 			log.Debugf("received open contract event")
-			openContractEvent := types.OpenContractEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &openContractEvent); err != nil {
+			openContractEvent, err := parseEventToEventOpenContract(evt)
+			if err != nil {
 				log.Errorf("error converting open_contract event: %+v", err)
 				break
 			}
@@ -375,8 +458,8 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case "open_contract":
-		openContractEvent := types.OpenContractEvent{}
-		if err := convertEvent(tmAttributeSource(transaction, event, height), &openContractEvent); err != nil {
+		openContractEvent, err := parseEventToEventOpenContract(event)
+		if err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
