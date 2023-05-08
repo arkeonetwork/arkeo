@@ -242,6 +242,12 @@ func run(path string) error {
 	iter := time.Now().UnixNano()
 	tern(iter, providers) // create postgres db
 
+	logLevel := "info"
+	switch os.Getenv("DEBUG") {
+	case "trace", "debug", "info", "warn", "error", "fatal", "panic":
+		logLevel = os.Getenv("DEBUG")
+	}
+
 	sharedDirectoryEnv := []string{
 		"DB_HOST=directory-postgres",
 		"DB_PORT=5432",
@@ -255,7 +261,7 @@ func run(path string) error {
 	procs := []process{
 		{
 			name:  "arkeod",
-			cmd:   []string{"/regtest/cover-arkeod", "start"},
+			cmd:   []string{"/regtest/cover-arkeod", "--log_level", logLevel, "start"},
 			ports: []string{"8080", "26657"},
 			env: []string{
 				"GOCOVERDIR=/mnt/coverage",

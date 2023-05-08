@@ -19,13 +19,11 @@ func (a *IndexerApp) handleOpenContractEvent(evt atypes.EventOpenContract) error
 	}
 	_, err = a.db.UpsertContract(provider.ID, evt)
 	if err != nil {
-		fmt.Println("FOO")
 		return errors.Wrapf(err, "error upserting contract")
 	}
 	/*
 		// not currently using this
 		if _, err = a.db.UpsertOpenContractEvent(ent.ID, evt); err != nil {
-			fmt.Println("BAR")
 			return errors.Wrapf(err, "error upserting open contract event")
 		}
 	*/

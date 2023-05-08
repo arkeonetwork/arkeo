@@ -52,6 +52,7 @@ asserts:
   - .deposit == 100
   - .authorization == "STRICT"
   - .queries_per_minute == 1
+  - .nonce == 1
 ---
 type: check
 description: cat account balance should decrease

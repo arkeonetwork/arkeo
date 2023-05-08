@@ -19,7 +19,7 @@ select (select count(1) from contracts)                                 as total
        (SELECT percentile_cont(0.5) within group (order by duration) -- percentile_disc
         from contracts c
         where c.closed_height = 0)                                      as median_open_contract_length,
-       (SELECT percentile_cont(0.5) within group (order by rate)
+       (SELECT percentile_cont(0.5) within group (order by rate_amount)
         from contracts c
         where c.closed_height = 0)                                      as median_open_contract_rate,
        (select count(1) from providers where status = 'Online')         as total_online_providers,

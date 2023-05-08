@@ -19,7 +19,7 @@ type ArkeoContract struct {
 	Entity
 	ContractID          int64              `json:"contract_id" db:"id"`
 	Provider            string             `json:"provider" db:"-"`
-	Client              string             `json:"service" db:"-"`
+	Service             string             `json:"service" db:"-"`
 	DelegatePubkey      string             `json:"delegate_pubkey" db:"delegate_pubkey"`
 	ClientPubkey        string             `json:"client_pubkey" db:"client_pubkey"`
 	Height              int64              `json:"height" db:"height"`
@@ -52,6 +52,15 @@ func (d *DirectoryDB) FindContract(contractId uint64) (*ArkeoContract, error) {
 	if err = selectOne(conn, sqlFindContract, &contract, contractId); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
+
+	provider := ArkeoProvider{}
+	if err = selectOne(conn, `SELECT pubkey, service FROM providers WHERE id = $1`, &provider, contract.ProviderID); err != nil {
+		return nil, errors.Wrapf(err, "error selecting")
+	}
+	contract.Provider = provider.Pubkey
+	contract.Service = provider.Service
+
+	contract.Rate = cosmos.NewInt64Coin(contract.RateAsset, contract.RateAmount)
 
 	// not found
 	if contract.ClientPubkey == "" {
@@ -87,7 +96,7 @@ func (d *DirectoryDB) FindContractByPubKeys(service, providerPubkey, delegatePub
 	}
 
 	// not found
-	if contract.ID == 0 {
+	if contract.ClientPubkey == "" {
 		return nil, nil
 	}
 	return &contract, nil
@@ -100,8 +109,28 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt atypes.EventOpenContr
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 
-	return upsert(conn, sqlUpsertContract, providerID, evt.Delegate, evt.Client, evt.Type,
-		evt.Duration, evt.Rate, evt.OpenCost, evt.Height, evt.Deposit, evt.SettlementDuration, evt.Authorization, evt.QueriesPerMinute, evt.ContractId)
+	if evt.Delegate.String() == "" {
+		evt.Delegate = evt.Client
+	}
+
+	return upsert(
+		conn,
+		sqlUpsertContract,
+		providerID,
+		evt.Delegate,
+		evt.Client,
+		evt.Type,
+		evt.Duration,
+		evt.Rate.Denom,
+		evt.Rate.Amount.Int64(),
+		evt.OpenCost,
+		evt.Height,
+		evt.Deposit.Int64(),
+		evt.SettlementDuration,
+		evt.Authorization,
+		evt.QueriesPerMinute,
+		evt.ContractId,
+	)
 }
 
 func (d *DirectoryDB) CloseContract(contractID, height int64) (*Entity, error) {
@@ -121,8 +150,7 @@ func (d *DirectoryDB) UpsertContractSettlementEvent(contractID int64, evt types.
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 
-	return upsert(conn, sqlUpsertContractSettlementEvent, contractID, evt.TxID, evt.ClientPubkey, evt.EventHeight,
-		evt.Nonce, evt.Paid, evt.Reserve)
+	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid, evt.Reserve, contractID)
 }
 
 func (d *DirectoryDB) UpsertOpenContractEvent(contractID int64, evt atypes.EventOpenContract) (*Entity, error) {

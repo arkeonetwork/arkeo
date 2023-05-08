@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	EventTypeProviderBond       = "arkeo.arkeo.EventProviderBond"
-	EventTypeProviderMod        = "arkeo.arkeo.EventProviderMod"
-	EventTypeOpenContract       = "arkeo.arkeo.EventOpenContract"
-	EventTypeCloseContract      = "arkeo.arkeo.Event.CloseContract"
-	EventTypeContractSettlement = "arkeo.arkeo.EventContractSettlement"
-	EventTypeValidatorPayout    = "arkeo.arkeo.EventValidatorPayout"
+	EventTypeProviderBond    = "arkeo.arkeo.EventProviderBond"
+	EventTypeProviderMod     = "arkeo.arkeo.EventProviderMod"
+	EventTypeOpenContract    = "arkeo.arkeo.EventOpenContract"
+	EventTypeCloseContract   = "arkeo.arkeo.EventCloseContract"
+	EventTypeSettleContract  = "arkeo.arkeo.EventSettleContract"
+	EventTypeValidatorPayout = "arkeo.arkeo.EventValidatorPayout"
 )
 
 func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract {

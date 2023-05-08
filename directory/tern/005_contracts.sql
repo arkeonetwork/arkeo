@@ -11,16 +11,17 @@ create table contracts
     height          bigint                    not null check ( height > 0 ),
     contract_type   text                      not null references contract_types (val),
     duration        bigint                    not null,
-    rate            bigint                    not null,
+    rate_asset      text                      not null,
+    rate_amount     bigint                    not null,
     auth            text                      not null references auth_types (val),
     open_cost       bigint                    not null,
     deposit         bigint                    not null,
     queries_per_minute      bigint                    not null,
     settlement_duration     bigint                    not null,
-    nonce           bigint                    not null,
-    paid            bigint                    not null,
-    reserve_contrib_asset   bigint                    not null,
-    reserve_contrib_usd     bigint                    not null
+    nonce           bigint                    not null DEFAULT 0,
+    paid            bigint                    not null DEFAULT 0,
+    reserve_contrib_asset   bigint                    not null DEFAULT 0,
+    reserve_contrib_usd     bigint                    not null DEFAULT 0
 );
 
 alter table contracts
