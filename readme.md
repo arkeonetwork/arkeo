@@ -57,8 +57,9 @@ Install the Arkeo binary
 ```bash
 git clone [https://github.com/arkeonetwork/arkeo](https://github.com/arkeonetwork/arkeo)
 cd arkeo
-git checkout [version number]
-make install
+git checkout <version hash, found at
+https://github.com/arkeonetwork/infra/blob/master/arkeo-stack/mainnet.yaml#L3>
+make proto-gen install
 [binary] version
 ```
 
