@@ -86,7 +86,7 @@
           ],
           "pub_key": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
           "service": 1,
-          "settlement_duration": "0",
+          "settlement_duration": "11",
           "status": "ONLINE",
           "subscription_rate": [
             {

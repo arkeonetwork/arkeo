@@ -5,11 +5,11 @@ import (
 )
 
 const (
-	EventTypeProviderBond    = "arkeo.arkeo.EventProviderBond"
-	EventTypeProviderMod     = "arkeo.arkeo.EventProviderMod"
+	EventTypeBondProvider    = "arkeo.arkeo.EventBondProvider"
+	EventTypeModProvider     = "arkeo.arkeo.EventModProvider"
 	EventTypeOpenContract    = "arkeo.arkeo.EventOpenContract"
-	EventTypeCloseContract   = "arkeo.arkeo.EventCloseContract"
 	EventTypeSettleContract  = "arkeo.arkeo.EventSettleContract"
+	EventTypeCloseContract   = "arkeo.arkeo.EventCloseContract"
 	EventTypeValidatorPayout = "arkeo.arkeo.EventValidatorPayout"
 )
 

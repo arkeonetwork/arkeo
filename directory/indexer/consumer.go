@@ -320,7 +320,7 @@ func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64
 func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	var err error
 	switch event.Type {
-	case atypes.EventTypeProviderBond:
+	case atypes.EventTypeBondProvider:
 		bondProviderEvent := types.BondProviderEvent{}
 		if err = convertEvent(tmAttributeSource(transaction, event, height), &bondProviderEvent); err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
@@ -329,7 +329,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err = a.handleBondProviderEvent(bondProviderEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
-	case atypes.EventTypeProviderMod:
+	case atypes.EventTypeModProvider:
 		modProviderEvent, err := parseEventToEventModProvider(event)
 		if err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
