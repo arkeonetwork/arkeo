@@ -16,6 +16,7 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "PAY_AS_YOU_GO"
 queries_per_minute: 1
+settlement_duration: 11
 duration: 10
 rate:
   denom: "uarkeo"
@@ -38,6 +39,7 @@ asserts:
   - .contract.type == "PAY_AS_YOU_GO"
   - .contract.paid == "0"
   - .contract.id == "0"
+  - .contract.nonce == "0"
 ---
 type: check
 description: check that contract is in directory service
@@ -52,7 +54,8 @@ asserts:
   - .deposit == 100
   - .authorization == "STRICT"
   - .queries_per_minute == 1
-  - .nonce == 1
+  - .nonce == 0
+  - .settlement_duration == 11 
 ---
 type: check
 description: cat account balance should decrease

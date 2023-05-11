@@ -296,7 +296,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		return contract, err
 	}
 
-	if err = mgr.EmitContractSettlementEvent(ctx, debt, valIncome, &contract); err != nil {
+	if err = mgr.EmitContractSettlementEvent(ctx, totalDebt, valIncome, &contract); err != nil {
 		return contract, err
 	}
 

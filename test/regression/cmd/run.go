@@ -27,6 +27,25 @@ import (
 // Run
 ////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+type daemonLogger struct {
+	name   string
+	writer io.Writer
+}
+
+func (logger daemonLogger) Write(p []byte) (n int, err error) {
+	padded := fmt.Sprintf("%-10s", fmt.Sprintf("[<%s>]", logger.name))
+	return logger.writer.Write(append([]byte(padded), p...))
+}
+
+func newDaemonLogger(name string, writer io.Writer) daemonLogger {
+	return daemonLogger{
+		name:   name,
+		writer: writer,
+	}
+}
+*/
+
 func run(path string) error {
 	log.Info().Msgf("Running regression test: %s", path)
 
@@ -421,8 +440,8 @@ func runProcess(proc process, stderrLines chan string) *exec.Cmd {
 		}
 	}()
 	if os.Getenv("DEBUG") != "" {
-		process.Stdout = os.Stdout
-		process.Stderr = os.Stderr
+		process.Stdout = os.Stdout // newDaemonLogger(proc.name, os.Stdout)
+		process.Stderr = os.Stderr // newDaemonLogger(proc.name, os.Stderr)
 	}
 
 	// start process

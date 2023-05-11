@@ -60,7 +60,9 @@ func (d *DirectoryDB) FindContract(contractId uint64) (*ArkeoContract, error) {
 	contract.Provider = provider.Pubkey
 	contract.Service = provider.Service
 
-	contract.Rate = cosmos.NewInt64Coin(contract.RateAsset, contract.RateAmount)
+	if len(contract.RateAsset) > 0 {
+		contract.Rate = cosmos.NewInt64Coin(contract.RateAsset, contract.RateAmount)
+	}
 
 	// not found
 	if contract.ClientPubkey == "" {
@@ -143,14 +145,14 @@ func (d *DirectoryDB) CloseContract(contractID, height int64) (*Entity, error) {
 	return update(conn, sqlCloseContract, height, contractID)
 }
 
-func (d *DirectoryDB) UpsertContractSettlementEvent(contractID int64, evt types.ContractSettlementEvent) (*Entity, error) {
+func (d *DirectoryDB) UpsertContractSettlementEvent(evt types.ContractSettlementEvent) (*Entity, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 
-	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid, evt.Reserve, contractID)
+	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid, evt.Reserve, evt.ContractId)
 }
 
 func (d *DirectoryDB) UpsertOpenContractEvent(contractID int64, evt atypes.EventOpenContract) (*Entity, error) {

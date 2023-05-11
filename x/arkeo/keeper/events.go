@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
@@ -19,11 +17,6 @@ func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, ms
 }
 
 func (k msgServer) EmitCloseContractEvent(ctx cosmos.Context, contract *types.Contract) error {
-	for _, evt := range ctx.EventManager().ABCIEvents() {
-		for _, attr := range evt.Attributes {
-			fmt.Println(">>>>> ABCI EVT:", evt.Type, string(attr.Key), string(attr.Value))
-		}
-	}
 	return ctx.EventManager().EmitTypedEvent(
 		&types.EventCloseContract{
 			ContractId: contract.Id,
@@ -94,7 +87,7 @@ func (mgr Manager) EmitContractSettlementEvent(ctx cosmos.Context, debt, valInco
 
 func (mgr Manager) EmitValidatorPayoutEvent(ctx cosmos.Context, acc cosmos.AccAddress, rwd cosmos.Int) error {
 	return ctx.EventManager().EmitTypedEvent(
-		&types.ValidatorPayoutEvent{
+		&types.EventValidatorPayout{
 			Validator: acc,
 			Reward:    rwd,
 		},

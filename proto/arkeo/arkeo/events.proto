@@ -107,7 +107,7 @@ message EventCloseContract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
 }
 
-message ValidatorPayoutEvent {
+message EventValidatorPayout {
   bytes validator = 1 [ (gogoproto.casttype) =
                             "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   string reward = 2 [

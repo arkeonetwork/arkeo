@@ -31,7 +31,22 @@ var logger Logger
 func init() {
 	logger = logrus.StandardLogger()
 
-	logrus.SetLevel(logrus.InfoLevel)
+	switch os.Getenv("DEBUG") {
+	case "debug":
+		logrus.SetLevel(logrus.DebugLevel)
+	case "panic":
+		logrus.SetLevel(logrus.PanicLevel)
+	case "error":
+		logrus.SetLevel(logrus.ErrorLevel)
+	case "warn":
+		logrus.SetLevel(logrus.WarnLevel)
+	case "info":
+		logrus.SetLevel(logrus.InfoLevel)
+	case "trace":
+		logrus.SetLevel(logrus.TraceLevel)
+	default:
+		logrus.SetLevel(logrus.InfoLevel)
+	}
 	logrus.SetReportCaller(true)
 	// logrus.SetFormatter(&logrus.TextFormatter{TimestampFormat: timestampFormat})
 	logrus.SetFormatter(NewCustomLogFormatter())

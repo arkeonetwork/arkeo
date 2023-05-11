@@ -109,7 +109,7 @@ asserts:
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
   - .settlement_duration == 11 
-  - .paid == 90
+  - .paid == 100
   - .reserve_contrib_asset == 10
 # - .reserve_contrib_usd == 10 # TODO
 ---
@@ -124,6 +124,7 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 queries_per_minute: 1
+settlement_duration: 11
 duration: 5
 rate:
   denom: "uarkeo"

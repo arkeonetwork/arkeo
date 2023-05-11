@@ -66,8 +66,8 @@ func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) EventBondProvid
 	}
 }
 
-func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) ValidatorPayoutEvent {
-	return ValidatorPayoutEvent{
+func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) EventValidatorPayout {
+	return EventValidatorPayout{
 		Validator: acc,
 		Reward:    reward,
 	}

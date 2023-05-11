@@ -187,27 +187,6 @@ func parseEventToEventModProvider(event interface{}) (atypes.EventModProvider, e
 	return result, nil
 }
 
-func wsAttributeSource(src ctypes.ResultEvent) func() map[string]string {
-	attribs := make(map[string]string, len(src.Events))
-	for k, v := range src.Events {
-		if len(v) > 0 {
-			key := k
-			if sl := strings.Split(k, "."); len(sl) > 1 {
-				key = sl[len(sl)-1]
-			}
-			if _, ok := attribs[key]; ok {
-				log.Debugf("key %s already in results with value %s, overwriting with %s", key, attribs[key], v[0])
-			}
-			attribs[key] = strings.Trim(v[0], `"`)
-		}
-		if len(v) > 1 {
-			log.Warnf("attrib %s has %d array values: %v", k, len(v), v)
-		}
-	}
-	attribs["eventHeight"] = attribs["height"]
-	return func() map[string]string { return attribs }
-}
-
 func tmAttributeSource(tx tmtypes.Tx, evt abcitypes.Event, height int64) func() map[string]string {
 	attribs := make(map[string]string, 0)
 	for _, attr := range evt.Attributes {
@@ -246,11 +225,6 @@ func (a *IndexerApp) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) 
 func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 	// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
 	blockEvents := subscribe(clients[0], "tm.event = 'NewBlock'")
-	bondProviderEvents := subscribe(clients[0], "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgBondProvider'")
-	modProviderEvents := subscribe(clients[0], "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgModProvider'")
-	openContractEvents := subscribe(clients[1], "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'")
-	closeContractEvents := subscribe(clients[1], "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'")
-	eventSettleContract := subscribe(clients[1], "tm.event = 'Tx' AND message.action='/arkeo.arkeo.EventSettleContract'")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
@@ -267,106 +241,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			log := log.WithField("height", strconv.FormatInt(data.Block.Height, 10))
 			log.Debugf("received block: %d", data.Block.Height)
 
-			if err := a.handleBlockEvent(data.Block); err != nil {
-				log.Errorf("error handling block event %d: %+v", data.Block.Height, err)
-			}
-
-			endBlockEvents := data.ResultEndBlock.Events
-			log.Debugf("block %d with %d endBlock events", data.Block.Height, len(endBlockEvents))
-			for _, evt := range endBlockEvents {
-				fmt.Println(">>>>> End Block Evt:", evt.GetType())
-				switch evt.GetType() {
-				case atypes.EventTypeValidatorPayout:
-					validatorPayoutEvent := types.ValidatorPayoutEvent{}
-					if err := convertEvent(tmAttributeSource(nil, evt, data.Block.Height), &validatorPayoutEvent); err != nil {
-						log.Errorf("error converting validator_payout event: %+v", err)
-						break
-					}
-					if err := a.handleValidatorPayoutEvent(validatorPayoutEvent); err != nil {
-						log.Errorf("error handling validator_payout event: %+v", err)
-					}
-				case atypes.EventTypeSettleContract:
-					fmt.Println(">>>>>>>>>>>>>>>>> FOO 4")
-					contractSettlementEvent := types.ContractSettlementEvent{}
-					if err := convertEvent(tmAttributeSource(nil, evt, data.Block.Height), &contractSettlementEvent); err != nil {
-						log.Errorf("error converting contract_settlement event: %+v", err)
-						break
-					}
-					if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
-						log.Errorf("error handling contract_settlement event: %+v", err)
-					}
-				}
-			}
-		case evt := <-openContractEvents:
-			log.Debugf("received open contract event")
-			openContractEvent, err := parseEventToEventOpenContract(evt)
-			if err != nil {
-				log.Errorf("error converting open_contract event: %+v", err)
-				break
-			}
-			if err := a.handleOpenContractEvent(openContractEvent); err != nil {
-				log.Errorf("error handling open_contract event: %+v", err)
-			}
-		case evt := <-bondProviderEvents:
-			log.Debugf("received bond provider event")
-			bondProviderEvent := types.BondProviderEvent{}
-			if err := convertEvent(wsAttributeSource(evt), &bondProviderEvent); err != nil {
-				log.Errorf("error converting bond_provider event: %+v", err)
-				break
-			}
-			if err := a.handleBondProviderEvent(bondProviderEvent); err != nil {
-				log.Errorf("error handling bond_provider event: %+v", err)
-			}
-		case evt := <-modProviderEvents:
-			log.Debugf("received mod provider event")
-			modProviderEvent, err := parseEventToEventModProvider(evt)
-			if err != nil {
-				log.Errorf("error converting mod_provider event: %+v", err)
-				break
-			}
-			if err := a.handleModProviderEvent(modProviderEvent); err != nil {
-				log.Errorf("error handling mod_provider event: %+v", err)
-			}
-		case evt := <-eventSettleContract:
-			log.Debugf("received settle contract event")
-			fmt.Println(">>>>>>>>>>>>>>>>> FOO 1.1")
-			claimContractIncomeEvent := types.ClaimContractIncomeEvent{}
-			attribs := wsAttributeSource(evt)
-			// hack contract_settlement height
-			wrapped := func() map[string]string {
-				tmp := attribs()
-				if ev, ok := evt.Events["contract_settlement.height"]; ok && len(ev) > 0 {
-					tmp["height"] = evt.Events["contract_settlement.height"][0]
-				}
-				return tmp
-			}
-			if err := convertEvent(wrapped, &claimContractIncomeEvent); err != nil {
-				log.Errorf("error converting open_contract event: %+v", err)
-				break
-			}
-			if err := a.handleContractSettlementEvent(claimContractIncomeEvent.ContractSettlementEvent); err != nil {
-				log.Errorf("error handling claim contract income event: %+v", err)
-			}
-		case evt := <-closeContractEvents:
-			log.Debugf("received close_contract event")
-			closeContractEvent := types.CloseContractEvent{}
-			attribs := wsAttributeSource(evt)
-			wrapped := func() map[string]string {
-				tmp := attribs()
-				if ev, ok := evt.Events["contract_settlement.height"]; ok && len(ev) > 0 {
-					tmp["height"] = evt.Events["contract_settlement.height"][0]
-				}
-				return tmp
-			}
-
-			if err := convertEvent(wrapped, &closeContractEvent); err != nil {
-				log.Errorf("error converting close_contract event: %+v", err)
-				break
-			}
-
-			if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
-				log.Errorf("error handling close_contract event: %+v", err)
-			}
+			a.gapFiller()
 		case <-quit:
 			log.Infof("received os quit signal")
 			return nil
@@ -374,6 +249,9 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 	}
 }
 
+// TODO: this function should take in a height range instead of one
+// block at at time. The max range should be set to something like 1,000
+// blocks.
 func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64) (result *db.Block, err error) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
@@ -441,9 +319,8 @@ func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64
 
 func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	var err error
-	fmt.Println(">>>>>> ABCI EVENT:", event.Type)
 	switch event.Type {
-	case "provider_bond":
+	case atypes.EventTypeProviderBond:
 		bondProviderEvent := types.BondProviderEvent{}
 		if err = convertEvent(tmAttributeSource(transaction, event, height), &bondProviderEvent); err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
@@ -452,7 +329,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err = a.handleBondProviderEvent(bondProviderEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
-	case "provider_mod":
+	case atypes.EventTypeProviderMod:
 		modProviderEvent, err := parseEventToEventModProvider(event)
 		if err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
@@ -461,7 +338,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err = a.handleModProviderEvent(modProviderEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
-	case "open_contract":
+	case atypes.EventTypeOpenContract:
 		openContractEvent, err := parseEventToEventOpenContract(event)
 		if err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
@@ -470,9 +347,8 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err = a.handleOpenContractEvent(openContractEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
-	case "claim_contract_income", "contract_settlement":
+	case atypes.EventTypeSettleContract:
 		contractSettlementEvent := types.ContractSettlementEvent{}
-		fmt.Println(">>>>>>>>>>>>>>>>> FOO 2")
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &contractSettlementEvent); err != nil {
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
@@ -480,7 +356,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
-	case "validator_payout":
+	case atypes.EventTypeValidatorPayout:
 		validatorPayoutEvent := types.ValidatorPayoutEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &validatorPayoutEvent); err != nil {
 			log.Errorf("error converting validatorPayoutEvent event: %+v", err)
@@ -489,7 +365,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err := a.handleValidatorPayoutEvent(validatorPayoutEvent); err != nil {
 			log.Errorf("error handling claim contract income event: %+v", err)
 		}
-	case "close_contract":
+	case atypes.EventTypeCloseContract:
 		log.Debugf("received close_contract event")
 		closeContractEvent := types.CloseContractEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &closeContractEvent); err != nil {
@@ -499,8 +375,12 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 		if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
 			log.Errorf("error handling close contract event: %+v", err)
 		}
+	case "coin_spent", "coin_received", "transfer", "message", "tx":
+		// do nothing
 	default:
-		log.Debugf("ignored event %s", event.Type)
+		// panic to make it immediately obvious that something is not handled
+		// by directory indexer
+		log.Panicf("unrecognized event %s", event.Type)
 	}
 	return nil
 }

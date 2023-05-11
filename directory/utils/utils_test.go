@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -95,23 +94,19 @@ func TestDownloadProviderMetadata(t *testing.T) {
 
 	metadata, err := DownloadProviderMetadata(ts.URL, 5, 1e6)
 	if err != nil {
-		fmt.Println("foo", err)
 		t.FailNow()
 	}
 
 	if metadata == nil {
-		fmt.Println("foo")
 		t.FailNow()
 	}
 
 	if metadata.Version == "" {
-		fmt.Println("baz")
 		t.FailNow()
 	}
 
 	_, err = DownloadProviderMetadata(ts.URL, 5, 1)
 	if err == nil {
-		fmt.Println("bazz", err)
 		t.FailNow()
 	}
 }

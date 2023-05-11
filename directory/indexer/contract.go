@@ -54,14 +54,14 @@ func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) erro
 
 func (a *IndexerApp) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
 	log.Infof("receieved contractSettlementEvent %#v", evt)
-	contract, err := a.db.FindContractByPubKeys(evt.Service, evt.ProviderPubkey, evt.GetDelegatePubkey(), evt.Height)
+	contract, err := a.db.FindContract(evt.ContractId)
 	if err != nil {
 		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.ProviderPubkey, evt.Service)
 	}
 	if contract == nil {
 		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey(), evt.Height)
 	}
-	if _, err = a.db.UpsertContractSettlementEvent(contract.ID, evt); err != nil {
+	if _, err = a.db.UpsertContractSettlementEvent(evt); err != nil {
 		return errors.Wrapf(err, "error upserting contract settlement event")
 	}
 	return nil
