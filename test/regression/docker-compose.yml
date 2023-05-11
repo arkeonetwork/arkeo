@@ -34,6 +34,8 @@ services:
     image: postgres:15.1-alpine
     restart: always
     environment:
+      POSTGRES_LOG_STATEMENT: all
+      POSTGRES_LOG_DURATION: on
       POSTGRES_DB: arkeo_directory
       POSTGRES_USER: arkeo
       POSTGRES_PASSWORD: arkeo123

@@ -87,7 +87,7 @@ func (mgr Manager) EmitContractSettlementEvent(ctx cosmos.Context, debt, valInco
 
 func (mgr Manager) EmitValidatorPayoutEvent(ctx cosmos.Context, acc cosmos.AccAddress, rwd cosmos.Int) error {
 	return ctx.EventManager().EmitTypedEvent(
-		&types.ValidatorPayoutEvent{
+		&types.EventValidatorPayout{
 			Validator: acc,
 			Reward:    rwd,
 		},

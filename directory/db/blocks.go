@@ -39,10 +39,6 @@ func (d *DirectoryDB) FindLatestBlock() (*Block, error) {
 	if err = selectOne(conn, sqlFindLatestBlock, block); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
-	// not found
-	if block.Height == 0 {
-		return nil, nil
-	}
 	return block, nil
 }
 

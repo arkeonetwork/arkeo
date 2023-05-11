@@ -16,6 +16,7 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 queries_per_minute: 1
+settlement_duration: 11
 duration: 10
 rate:
   denom: "uarkeo"
@@ -52,6 +53,11 @@ asserts:
   - .deposit == 100
   - .authorization == "STRICT"
   - .queries_per_minute == 1
+  - .settlement_duration == 11
+  - .rate.amount == "10"
+  - .rate.denom == "uarkeo"
+  - .provider == "{{ pubkey_fox }}"
+  - .service == "swapi.dev"
 ---
 type: check
 description: cat account balance should decrease
@@ -102,7 +108,10 @@ asserts:
   - .contract_id | tonumber == 0
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
-    # TODO check paid - .paid == 100
+  - .settlement_duration == 11 
+  - .paid == 100
+  - .reserve_contrib_asset == 10
+# - .reserve_contrib_usd == 10 # TODO
 ---
 ########################################################################################
 # open subscription contract (again)
@@ -115,6 +124,7 @@ service: "swapi.dev"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 queries_per_minute: 1
+settlement_duration: 11
 duration: 5
 rate:
   denom: "uarkeo"
@@ -202,3 +212,14 @@ description: ensure contract is closed
 endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "20"
+---
+type: check
+description: check that contract is in directory service
+endpoint: http://localhost:7777/contract/1
+asserts:
+  - .contract_id == 1
+  - .paid == 20
+  - .reserve_contrib_asset == 2
+# - .reserve_contrib_usd == 10 # TODO
+  - .settlement_duration == 11 
+

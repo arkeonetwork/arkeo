@@ -41,8 +41,7 @@ func (s *MemStoreSuite) SetUpTest() {
 				"settlement_height": "0"
 			}}`)
 		default:
-			fmt.Println(req.RequestURI)
-			panic("could not serve request")
+			panic(fmt.Sprintf("could not serve request: %s", req.RequestURI))
 		}
 	}))
 }

@@ -189,14 +189,14 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 	p.MemStore.SetHeight(height)
 
 	for _, evt := range data.ResultEndBlock.Events {
-		if evt.Type == types.EventTypeContractSettlement {
+		if evt.Type == types.EventTypeSettleContract {
 			input := make(map[string]string)
 			for _, attr := range evt.Attributes {
 				input[string(attr.Key)] = string(attr.Value)
 			}
 			evt, err := parseContractSettlementEvent(input)
 			if err != nil {
-				p.logger.Error("failed to get close contract event", "error", err)
+				p.logger.Error("failed to parse contract settlement event", "error", err)
 				continue
 			}
 			if !p.isMyPubKey(evt.Contract.Provider) {

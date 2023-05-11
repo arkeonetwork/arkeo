@@ -3,27 +3,30 @@ package indexer
 import (
 	"fmt"
 
-	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/directory/types"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
-func (a *IndexerApp) handleOpenContractEvent(evt types.OpenContractEvent) error {
-	provider, err := a.db.FindProvider(evt.ProviderPubkey, evt.Service)
+func (a *IndexerApp) handleOpenContractEvent(evt atypes.EventOpenContract) error {
+	provider, err := a.db.FindProvider(evt.Provider.String(), evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for service %s", evt.ProviderPubkey, evt.Service)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider.String(), evt.Service)
 	}
 	if provider == nil {
-		return fmt.Errorf("no provider found: DNE %s %s", evt.ProviderPubkey, evt.Service)
+		return fmt.Errorf("no provider found: DNE %s %s", evt.Provider.String(), evt.Service)
 	}
-	ent, err := a.db.UpsertContract(provider.ID, evt)
+	_, err = a.db.UpsertContract(provider.ID, evt)
 	if err != nil {
-		fmt.Println("FOO")
 		return errors.Wrapf(err, "error upserting contract")
 	}
-	if _, err = a.db.UpsertOpenContractEvent(ent.ID, evt); err != nil {
-		fmt.Println("BAR")
-		return errors.Wrapf(err, "error upserting open contract event")
-	}
+	/*
+		// not currently using this
+		if _, err = a.db.UpsertOpenContractEvent(ent.ID, evt); err != nil {
+			return errors.Wrapf(err, "error upserting open contract event")
+		}
+	*/
 
 	return nil
 }
@@ -51,14 +54,14 @@ func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) erro
 
 func (a *IndexerApp) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
 	log.Infof("receieved contractSettlementEvent %#v", evt)
-	contract, err := a.db.FindContractByPubKeys(evt.Service, evt.ProviderPubkey, evt.GetDelegatePubkey(), evt.Height)
+	contract, err := a.db.FindContract(evt.ContractId)
 	if err != nil {
 		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.ProviderPubkey, evt.Service)
 	}
 	if contract == nil {
 		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey(), evt.Height)
 	}
-	if _, err = a.db.UpsertContractSettlementEvent(contract.ID, evt); err != nil {
+	if _, err = a.db.UpsertContractSettlementEvent(evt); err != nil {
 		return errors.Wrapf(err, "error upserting contract settlement event")
 	}
 	return nil

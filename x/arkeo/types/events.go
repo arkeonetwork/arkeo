@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	EventTypeProviderBond       = "arkeo.arkeo.EventProviderBond"
-	EventTypeProviderMod        = "arkeo.arkeo.EventProviderMod"
-	EventTypeOpenContract       = "arkeo.arkeo.EventOpenContract"
-	EventTypeCloseContract      = "arkeo.arkeo.Event.CloseContract"
-	EventTypeContractSettlement = "arkeo.arkeo.EventContractSettlement"
-	EventTypeValidatorPayout    = "arkeo.arkeo.EventValidatorPayout"
+	EventTypeBondProvider    = "arkeo.arkeo.EventBondProvider"
+	EventTypeModProvider     = "arkeo.arkeo.EventModProvider"
+	EventTypeOpenContract    = "arkeo.arkeo.EventOpenContract"
+	EventTypeSettleContract  = "arkeo.arkeo.EventSettleContract"
+	EventTypeCloseContract   = "arkeo.arkeo.EventCloseContract"
+	EventTypeValidatorPayout = "arkeo.arkeo.EventValidatorPayout"
 )
 
 func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract {
@@ -66,8 +66,8 @@ func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) EventBondProvid
 	}
 }
 
-func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) ValidatorPayoutEvent {
-	return ValidatorPayoutEvent{
+func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) EventValidatorPayout {
+	return EventValidatorPayout{
 		Validator: acc,
 		Reward:    reward,
 	}
