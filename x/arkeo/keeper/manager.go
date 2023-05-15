@@ -5,6 +5,7 @@ import (
 
 	"cosmossdk.io/errors"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -24,7 +25,7 @@ func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
 	}
 }
 
-func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
+func (mgr *Manager) BeginBlock(ctx cosmos.Context, req abci.RequestBeginBlock) error {
 	// if local version is behind the consensus version, panic and don't try to
 	// create a new block
 	ver := mgr.keeper.GetVersion(ctx)
@@ -36,14 +37,15 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 			),
 		)
 	}
+
+	if err := mgr.ValidatorPayout(ctx, req.LastCommitInfo.GetVotes()); err != nil {
+		ctx.Logger().Error("unable to settle contracts", "error", err)
+	}
 	return nil
 }
 
 func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.ContractEndBlock(ctx); err != nil {
-		ctx.Logger().Error("unable to settle contracts", "error", err)
-	}
-	if err := mgr.ValidatorEndBlock(ctx); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
 	}
 
@@ -167,12 +169,11 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 // units = U / (T / t)
 // Since the development goal at the moment is to get this chain up and
 // running, we can save this optimization for another day.
-func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
+func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) error {
 	valCycle := mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle)
 	if valCycle == 0 || ctx.BlockHeight()%valCycle != 0 {
 		return nil
 	}
-	validators := mgr.sk.GetBondedValidatorsByPower(ctx)
 	emissionCurve := mgr.FetchConfig(ctx, configs.EmissionCurve)
 	blocksPerYear := mgr.FetchConfig(ctx, configs.BlocksPerYear)
 
@@ -187,24 +188,46 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 
 		// sum tokens
 		total := cosmos.ZeroInt()
-		for _, val := range validators {
+		for _, vote := range votes {
+			val := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
+			if val == nil {
+				ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
+				continue
+			}
 			if !val.IsBonded() || val.IsJailed() {
 				continue
 			}
-			total = total.Add(val.DelegatorShares.RoundInt())
+			total = total.Add(val.GetDelegatorShares().RoundInt())
+		}
+		if total.IsZero() {
+			return nil
 		}
 
-		for _, val := range validators {
+		for _, vote := range votes {
+			if !vote.SignedLastBlock {
+				ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
+				continue
+			}
+
+			val := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
+			if val == nil {
+				ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
+				continue
+			}
 			if !val.IsBonded() || val.IsJailed() {
-				ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.String())
+				ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator().String())
 				continue
 			}
 
 			acc := cosmos.AccAddress(val.GetOperator())
+			valVersion := mgr.keeper.GetStoreVersionForAddress(ctx, acc)
+			if valVersion < mgr.keeper.GetVersion(ctx) {
+				continue
+			}
 
-			totalReward := common.GetSafeShare(val.DelegatorShares.RoundInt(), total, blockReward)
+			totalReward := common.GetSafeShare(val.GetDelegatorShares().RoundInt(), total, blockReward)
 			validatorReward := cosmos.ZeroInt()
-			rateBasisPts := val.Commission.CommissionRates.Rate.MulInt64(100).RoundInt()
+			rateBasisPts := val.GetCommission().MulInt64(100).RoundInt()
 
 			delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
 			for _, delegate := range delegates {
@@ -213,7 +236,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 					ctx.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
 					continue
 				}
-				delegateReward := common.GetSafeShare(delegate.Shares.RoundInt(), val.DelegatorShares.RoundInt(), totalReward)
+				delegateReward := common.GetSafeShare(delegate.GetShares().RoundInt(), val.GetDelegatorShares().RoundInt(), totalReward)
 				if acc.String() != delegate.DelegatorAddress {
 					valFee := common.GetSafeShare(rateBasisPts, cosmos.NewInt(configs.MaxBasisPoints), delegateReward)
 					delegateReward = delegateReward.Sub(valFee)
@@ -227,7 +250,7 @@ func (mgr Manager) ValidatorEndBlock(ctx cosmos.Context) error {
 
 			if !validatorReward.IsZero() {
 				if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, cosmos.NewCoins(cosmos.NewCoin(bal.Denom, validatorReward))); err != nil {
-					ctx.Logger().Error("unable to pay rewards to validator", "validator", val.OperatorAddress, "error", err)
+					ctx.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator().String(), "error", err)
 					continue
 				}
 				ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)

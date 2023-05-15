@@ -17,6 +17,8 @@ ENV GOPATH=/go
 ENV CGO_ENABLED=0
 ENV GOOS=linux
 
+RUN go install github.com/jackc/tern@latest
+
 # Download go dependencies
 WORKDIR /app
 COPY go.mod go.sum ./
