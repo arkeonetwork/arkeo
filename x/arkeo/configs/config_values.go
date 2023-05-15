@@ -2,8 +2,6 @@ package configs
 
 import (
 	"fmt"
-
-	"github.com/blang/semver"
 )
 
 // ConfigName the name we used to get constant values
@@ -59,8 +57,8 @@ type ConfigValues interface {
 }
 
 // GetConfigValues will return an  implementation of ConfigValues which provide ways to get constant values
-func GetConfigValues(ver semver.Version) ConfigValues {
-	if ver.GTE(semver.MustParse("0.0.0")) {
+func GetConfigValues(ver int64) ConfigValues {
+	if ver > 0 {
 		return NewConfigValue010()
 	}
 	return nil

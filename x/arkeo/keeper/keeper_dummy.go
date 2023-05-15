@@ -9,7 +9,6 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
-	"github.com/blang/semver"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -36,17 +35,12 @@ func (k KVStoreDummy) Logger(ctx cosmos.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k KVStoreDummy) GetVersion() semver.Version { return semver.MustParse("9999999.0.0") }
-func (k KVStoreDummy) GetVersionWithCtx(ctx cosmos.Context) (semver.Version, bool) {
-	return semver.MustParse("9999999.0.0"), true
-}
-func (k KVStoreDummy) SetVersionWithCtx(ctx cosmos.Context, v semver.Version) {}
-
+func (k KVStoreDummy) GetVersion(_ cosmos.Context) int64 { return -1 }
 func (k KVStoreDummy) GetKey(_ cosmos.Context, prefix dbPrefix, key string) string {
 	return fmt.Sprintf("%s/1/%s", prefix, key)
 }
 
-func (k KVStoreDummy) GetStoreVersion(ctx cosmos.Context) int64      { return 1 }
+func (k KVStoreDummy) GetStoreVersion(ctx cosmos.Context) int64      { return -1 }
 func (k KVStoreDummy) SetStoreVersion(ctx cosmos.Context, ver int64) {}
 
 func (k KVStoreDummy) GetRuneBalanceOfModule(ctx cosmos.Context, moduleName string) cosmos.Int {

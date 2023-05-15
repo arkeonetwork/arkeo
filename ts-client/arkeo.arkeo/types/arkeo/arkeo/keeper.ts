@@ -1,6 +1,7 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "arkeo.arkeo";
 
@@ -70,36 +71,71 @@ export function contractTypeToJSON(object: ContractType): string {
   }
 }
 
+export enum ContractAuthorization {
+  STRICT = 0,
+  OPEN = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function contractAuthorizationFromJSON(object: any): ContractAuthorization {
+  switch (object) {
+    case 0:
+    case "STRICT":
+      return ContractAuthorization.STRICT;
+    case 1:
+    case "OPEN":
+      return ContractAuthorization.OPEN;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ContractAuthorization.UNRECOGNIZED;
+  }
+}
+
+export function contractAuthorizationToJSON(object: ContractAuthorization): string {
+  switch (object) {
+    case ContractAuthorization.STRICT:
+      return "STRICT";
+    case ContractAuthorization.OPEN:
+      return "OPEN";
+    case ContractAuthorization.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface Provider {
-  pubKey: string;
+  pubKey: Uint8Array;
   service: number;
   metadataUri: string;
   metadataNonce: number;
   status: ProviderStatus;
   minContractDuration: number;
   maxContractDuration: number;
-  subscriptionRate: number;
-  payAsYouGoRate: number;
+  subscriptionRate: Coin[];
+  payAsYouGoRate: Coin[];
   bond: string;
   lastUpdate: number;
   settlementDuration: number;
 }
 
 export interface Contract {
-  provider: string;
+  provider: Uint8Array;
   service: number;
-  client: string;
-  delegate: string;
+  client: Uint8Array;
+  delegate: Uint8Array;
   type: ContractType;
   height: number;
   duration: number;
-  rate: number;
+  rate: Coin | undefined;
   deposit: string;
   paid: string;
   nonce: number;
   settlementHeight: number;
   id: number;
   settlementDuration: number;
+  authorization: ContractAuthorization;
+  queriesPerMinute: number;
 }
 
 export interface ContractSet {
@@ -112,21 +148,21 @@ export interface ContractExpirationSet {
 }
 
 export interface UserContractSet {
-  user: string;
+  user: Uint8Array;
   contractSet: ContractSet | undefined;
 }
 
 function createBaseProvider(): Provider {
   return {
-    pubKey: "",
+    pubKey: new Uint8Array(),
     service: 0,
     metadataUri: "",
     metadataNonce: 0,
     status: 0,
     minContractDuration: 0,
     maxContractDuration: 0,
-    subscriptionRate: 0,
-    payAsYouGoRate: 0,
+    subscriptionRate: [],
+    payAsYouGoRate: [],
     bond: "",
     lastUpdate: 0,
     settlementDuration: 0,
@@ -135,8 +171,8 @@ function createBaseProvider(): Provider {
 
 export const Provider = {
   encode(message: Provider, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.pubKey !== "") {
-      writer.uint32(10).string(message.pubKey);
+    if (message.pubKey.length !== 0) {
+      writer.uint32(10).bytes(message.pubKey);
     }
     if (message.service !== 0) {
       writer.uint32(16).int32(message.service);
@@ -156,11 +192,11 @@ export const Provider = {
     if (message.maxContractDuration !== 0) {
       writer.uint32(56).int64(message.maxContractDuration);
     }
-    if (message.subscriptionRate !== 0) {
-      writer.uint32(64).int64(message.subscriptionRate);
+    for (const v of message.subscriptionRate) {
+      Coin.encode(v!, writer.uint32(66).fork()).ldelim();
     }
-    if (message.payAsYouGoRate !== 0) {
-      writer.uint32(72).int64(message.payAsYouGoRate);
+    for (const v of message.payAsYouGoRate) {
+      Coin.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     if (message.bond !== "") {
       writer.uint32(82).string(message.bond);
@@ -182,7 +218,7 @@ export const Provider = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.pubKey = reader.string();
+          message.pubKey = reader.bytes();
           break;
         case 2:
           message.service = reader.int32();
@@ -203,10 +239,10 @@ export const Provider = {
           message.maxContractDuration = longToNumber(reader.int64() as Long);
           break;
         case 8:
-          message.subscriptionRate = longToNumber(reader.int64() as Long);
+          message.subscriptionRate.push(Coin.decode(reader, reader.uint32()));
           break;
         case 9:
-          message.payAsYouGoRate = longToNumber(reader.int64() as Long);
+          message.payAsYouGoRate.push(Coin.decode(reader, reader.uint32()));
           break;
         case 10:
           message.bond = reader.string();
@@ -227,15 +263,19 @@ export const Provider = {
 
   fromJSON(object: any): Provider {
     return {
-      pubKey: isSet(object.pubKey) ? String(object.pubKey) : "",
+      pubKey: isSet(object.pubKey) ? bytesFromBase64(object.pubKey) : new Uint8Array(),
       service: isSet(object.service) ? Number(object.service) : 0,
       metadataUri: isSet(object.metadataUri) ? String(object.metadataUri) : "",
       metadataNonce: isSet(object.metadataNonce) ? Number(object.metadataNonce) : 0,
       status: isSet(object.status) ? providerStatusFromJSON(object.status) : 0,
       minContractDuration: isSet(object.minContractDuration) ? Number(object.minContractDuration) : 0,
       maxContractDuration: isSet(object.maxContractDuration) ? Number(object.maxContractDuration) : 0,
-      subscriptionRate: isSet(object.subscriptionRate) ? Number(object.subscriptionRate) : 0,
-      payAsYouGoRate: isSet(object.payAsYouGoRate) ? Number(object.payAsYouGoRate) : 0,
+      subscriptionRate: Array.isArray(object?.subscriptionRate)
+        ? object.subscriptionRate.map((e: any) => Coin.fromJSON(e))
+        : [],
+      payAsYouGoRate: Array.isArray(object?.payAsYouGoRate)
+        ? object.payAsYouGoRate.map((e: any) => Coin.fromJSON(e))
+        : [],
       bond: isSet(object.bond) ? String(object.bond) : "",
       lastUpdate: isSet(object.lastUpdate) ? Number(object.lastUpdate) : 0,
       settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
@@ -244,15 +284,24 @@ export const Provider = {
 
   toJSON(message: Provider): unknown {
     const obj: any = {};
-    message.pubKey !== undefined && (obj.pubKey = message.pubKey);
+    message.pubKey !== undefined
+      && (obj.pubKey = base64FromBytes(message.pubKey !== undefined ? message.pubKey : new Uint8Array()));
     message.service !== undefined && (obj.service = Math.round(message.service));
     message.metadataUri !== undefined && (obj.metadataUri = message.metadataUri);
     message.metadataNonce !== undefined && (obj.metadataNonce = Math.round(message.metadataNonce));
     message.status !== undefined && (obj.status = providerStatusToJSON(message.status));
     message.minContractDuration !== undefined && (obj.minContractDuration = Math.round(message.minContractDuration));
     message.maxContractDuration !== undefined && (obj.maxContractDuration = Math.round(message.maxContractDuration));
-    message.subscriptionRate !== undefined && (obj.subscriptionRate = Math.round(message.subscriptionRate));
-    message.payAsYouGoRate !== undefined && (obj.payAsYouGoRate = Math.round(message.payAsYouGoRate));
+    if (message.subscriptionRate) {
+      obj.subscriptionRate = message.subscriptionRate.map((e) => e ? Coin.toJSON(e) : undefined);
+    } else {
+      obj.subscriptionRate = [];
+    }
+    if (message.payAsYouGoRate) {
+      obj.payAsYouGoRate = message.payAsYouGoRate.map((e) => e ? Coin.toJSON(e) : undefined);
+    } else {
+      obj.payAsYouGoRate = [];
+    }
     message.bond !== undefined && (obj.bond = message.bond);
     message.lastUpdate !== undefined && (obj.lastUpdate = Math.round(message.lastUpdate));
     message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
@@ -261,15 +310,15 @@ export const Provider = {
 
   fromPartial<I extends Exact<DeepPartial<Provider>, I>>(object: I): Provider {
     const message = createBaseProvider();
-    message.pubKey = object.pubKey ?? "";
+    message.pubKey = object.pubKey ?? new Uint8Array();
     message.service = object.service ?? 0;
     message.metadataUri = object.metadataUri ?? "";
     message.metadataNonce = object.metadataNonce ?? 0;
     message.status = object.status ?? 0;
     message.minContractDuration = object.minContractDuration ?? 0;
     message.maxContractDuration = object.maxContractDuration ?? 0;
-    message.subscriptionRate = object.subscriptionRate ?? 0;
-    message.payAsYouGoRate = object.payAsYouGoRate ?? 0;
+    message.subscriptionRate = object.subscriptionRate?.map((e) => Coin.fromPartial(e)) || [];
+    message.payAsYouGoRate = object.payAsYouGoRate?.map((e) => Coin.fromPartial(e)) || [];
     message.bond = object.bond ?? "";
     message.lastUpdate = object.lastUpdate ?? 0;
     message.settlementDuration = object.settlementDuration ?? 0;
@@ -279,36 +328,38 @@ export const Provider = {
 
 function createBaseContract(): Contract {
   return {
-    provider: "",
+    provider: new Uint8Array(),
     service: 0,
-    client: "",
-    delegate: "",
+    client: new Uint8Array(),
+    delegate: new Uint8Array(),
     type: 0,
     height: 0,
     duration: 0,
-    rate: 0,
+    rate: undefined,
     deposit: "",
     paid: "",
     nonce: 0,
     settlementHeight: 0,
     id: 0,
     settlementDuration: 0,
+    authorization: 0,
+    queriesPerMinute: 0,
   };
 }
 
 export const Contract = {
   encode(message: Contract, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.provider !== "") {
-      writer.uint32(10).string(message.provider);
+    if (message.provider.length !== 0) {
+      writer.uint32(10).bytes(message.provider);
     }
     if (message.service !== 0) {
       writer.uint32(16).int32(message.service);
     }
-    if (message.client !== "") {
-      writer.uint32(26).string(message.client);
+    if (message.client.length !== 0) {
+      writer.uint32(26).bytes(message.client);
     }
-    if (message.delegate !== "") {
-      writer.uint32(34).string(message.delegate);
+    if (message.delegate.length !== 0) {
+      writer.uint32(34).bytes(message.delegate);
     }
     if (message.type !== 0) {
       writer.uint32(40).int32(message.type);
@@ -319,8 +370,8 @@ export const Contract = {
     if (message.duration !== 0) {
       writer.uint32(56).int64(message.duration);
     }
-    if (message.rate !== 0) {
-      writer.uint32(64).int64(message.rate);
+    if (message.rate !== undefined) {
+      Coin.encode(message.rate, writer.uint32(66).fork()).ldelim();
     }
     if (message.deposit !== "") {
       writer.uint32(74).string(message.deposit);
@@ -340,6 +391,12 @@ export const Contract = {
     if (message.settlementDuration !== 0) {
       writer.uint32(112).int64(message.settlementDuration);
     }
+    if (message.authorization !== 0) {
+      writer.uint32(120).int32(message.authorization);
+    }
+    if (message.queriesPerMinute !== 0) {
+      writer.uint32(128).int64(message.queriesPerMinute);
+    }
     return writer;
   },
 
@@ -351,16 +408,16 @@ export const Contract = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.provider = reader.string();
+          message.provider = reader.bytes();
           break;
         case 2:
           message.service = reader.int32();
           break;
         case 3:
-          message.client = reader.string();
+          message.client = reader.bytes();
           break;
         case 4:
-          message.delegate = reader.string();
+          message.delegate = reader.bytes();
           break;
         case 5:
           message.type = reader.int32() as any;
@@ -372,7 +429,7 @@ export const Contract = {
           message.duration = longToNumber(reader.int64() as Long);
           break;
         case 8:
-          message.rate = longToNumber(reader.int64() as Long);
+          message.rate = Coin.decode(reader, reader.uint32());
           break;
         case 9:
           message.deposit = reader.string();
@@ -392,6 +449,12 @@ export const Contract = {
         case 14:
           message.settlementDuration = longToNumber(reader.int64() as Long);
           break;
+        case 15:
+          message.authorization = reader.int32() as any;
+          break;
+        case 16:
+          message.queriesPerMinute = longToNumber(reader.int64() as Long);
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -402,58 +465,67 @@ export const Contract = {
 
   fromJSON(object: any): Contract {
     return {
-      provider: isSet(object.provider) ? String(object.provider) : "",
+      provider: isSet(object.provider) ? bytesFromBase64(object.provider) : new Uint8Array(),
       service: isSet(object.service) ? Number(object.service) : 0,
-      client: isSet(object.client) ? String(object.client) : "",
-      delegate: isSet(object.delegate) ? String(object.delegate) : "",
+      client: isSet(object.client) ? bytesFromBase64(object.client) : new Uint8Array(),
+      delegate: isSet(object.delegate) ? bytesFromBase64(object.delegate) : new Uint8Array(),
       type: isSet(object.type) ? contractTypeFromJSON(object.type) : 0,
       height: isSet(object.height) ? Number(object.height) : 0,
       duration: isSet(object.duration) ? Number(object.duration) : 0,
-      rate: isSet(object.rate) ? Number(object.rate) : 0,
+      rate: isSet(object.rate) ? Coin.fromJSON(object.rate) : undefined,
       deposit: isSet(object.deposit) ? String(object.deposit) : "",
       paid: isSet(object.paid) ? String(object.paid) : "",
       nonce: isSet(object.nonce) ? Number(object.nonce) : 0,
       settlementHeight: isSet(object.settlementHeight) ? Number(object.settlementHeight) : 0,
       id: isSet(object.id) ? Number(object.id) : 0,
       settlementDuration: isSet(object.settlementDuration) ? Number(object.settlementDuration) : 0,
+      authorization: isSet(object.authorization) ? contractAuthorizationFromJSON(object.authorization) : 0,
+      queriesPerMinute: isSet(object.queriesPerMinute) ? Number(object.queriesPerMinute) : 0,
     };
   },
 
   toJSON(message: Contract): unknown {
     const obj: any = {};
-    message.provider !== undefined && (obj.provider = message.provider);
+    message.provider !== undefined
+      && (obj.provider = base64FromBytes(message.provider !== undefined ? message.provider : new Uint8Array()));
     message.service !== undefined && (obj.service = Math.round(message.service));
-    message.client !== undefined && (obj.client = message.client);
-    message.delegate !== undefined && (obj.delegate = message.delegate);
+    message.client !== undefined
+      && (obj.client = base64FromBytes(message.client !== undefined ? message.client : new Uint8Array()));
+    message.delegate !== undefined
+      && (obj.delegate = base64FromBytes(message.delegate !== undefined ? message.delegate : new Uint8Array()));
     message.type !== undefined && (obj.type = contractTypeToJSON(message.type));
     message.height !== undefined && (obj.height = Math.round(message.height));
     message.duration !== undefined && (obj.duration = Math.round(message.duration));
-    message.rate !== undefined && (obj.rate = Math.round(message.rate));
+    message.rate !== undefined && (obj.rate = message.rate ? Coin.toJSON(message.rate) : undefined);
     message.deposit !== undefined && (obj.deposit = message.deposit);
     message.paid !== undefined && (obj.paid = message.paid);
     message.nonce !== undefined && (obj.nonce = Math.round(message.nonce));
     message.settlementHeight !== undefined && (obj.settlementHeight = Math.round(message.settlementHeight));
     message.id !== undefined && (obj.id = Math.round(message.id));
     message.settlementDuration !== undefined && (obj.settlementDuration = Math.round(message.settlementDuration));
+    message.authorization !== undefined && (obj.authorization = contractAuthorizationToJSON(message.authorization));
+    message.queriesPerMinute !== undefined && (obj.queriesPerMinute = Math.round(message.queriesPerMinute));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<Contract>, I>>(object: I): Contract {
     const message = createBaseContract();
-    message.provider = object.provider ?? "";
+    message.provider = object.provider ?? new Uint8Array();
     message.service = object.service ?? 0;
-    message.client = object.client ?? "";
-    message.delegate = object.delegate ?? "";
+    message.client = object.client ?? new Uint8Array();
+    message.delegate = object.delegate ?? new Uint8Array();
     message.type = object.type ?? 0;
     message.height = object.height ?? 0;
     message.duration = object.duration ?? 0;
-    message.rate = object.rate ?? 0;
+    message.rate = (object.rate !== undefined && object.rate !== null) ? Coin.fromPartial(object.rate) : undefined;
     message.deposit = object.deposit ?? "";
     message.paid = object.paid ?? "";
     message.nonce = object.nonce ?? 0;
     message.settlementHeight = object.settlementHeight ?? 0;
     message.id = object.id ?? 0;
     message.settlementDuration = object.settlementDuration ?? 0;
+    message.authorization = object.authorization ?? 0;
+    message.queriesPerMinute = object.queriesPerMinute ?? 0;
     return message;
   },
 };
@@ -580,13 +652,13 @@ export const ContractExpirationSet = {
 };
 
 function createBaseUserContractSet(): UserContractSet {
-  return { user: "", contractSet: undefined };
+  return { user: new Uint8Array(), contractSet: undefined };
 }
 
 export const UserContractSet = {
   encode(message: UserContractSet, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.user !== "") {
-      writer.uint32(10).string(message.user);
+    if (message.user.length !== 0) {
+      writer.uint32(10).bytes(message.user);
     }
     if (message.contractSet !== undefined) {
       ContractSet.encode(message.contractSet, writer.uint32(18).fork()).ldelim();
@@ -602,7 +674,7 @@ export const UserContractSet = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.user = reader.string();
+          message.user = reader.bytes();
           break;
         case 2:
           message.contractSet = ContractSet.decode(reader, reader.uint32());
@@ -617,14 +689,15 @@ export const UserContractSet = {
 
   fromJSON(object: any): UserContractSet {
     return {
-      user: isSet(object.user) ? String(object.user) : "",
+      user: isSet(object.user) ? bytesFromBase64(object.user) : new Uint8Array(),
       contractSet: isSet(object.contractSet) ? ContractSet.fromJSON(object.contractSet) : undefined,
     };
   },
 
   toJSON(message: UserContractSet): unknown {
     const obj: any = {};
-    message.user !== undefined && (obj.user = message.user);
+    message.user !== undefined
+      && (obj.user = base64FromBytes(message.user !== undefined ? message.user : new Uint8Array()));
     message.contractSet !== undefined
       && (obj.contractSet = message.contractSet ? ContractSet.toJSON(message.contractSet) : undefined);
     return obj;
@@ -632,7 +705,7 @@ export const UserContractSet = {
 
   fromPartial<I extends Exact<DeepPartial<UserContractSet>, I>>(object: I): UserContractSet {
     const message = createBaseUserContractSet();
-    message.user = object.user ?? "";
+    message.user = object.user ?? new Uint8Array();
     message.contractSet = (object.contractSet !== undefined && object.contractSet !== null)
       ? ContractSet.fromPartial(object.contractSet)
       : undefined;
@@ -658,6 +731,31 @@ var globalThis: any = (() => {
   }
   throw "Unable to locate global object";
 })();
+
+function bytesFromBase64(b64: string): Uint8Array {
+  if (globalThis.Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  } else {
+    const bin = globalThis.atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; ++i) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  }
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  if (globalThis.Buffer) {
+    return globalThis.Buffer.from(arr).toString("base64");
+  } else {
+    const bin: string[] = [];
+    arr.forEach((byte) => {
+      bin.push(String.fromCharCode(byte));
+    });
+    return globalThis.btoa(bin.join(""));
+  }
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

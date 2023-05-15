@@ -4,7 +4,7 @@ info:
   name: ''
   description: ''
 paths:
-  /arkeo/active-contract/{spender}/{provider}/{service}:
+  /arkeo/active-contract/{provider}/{service}/{spender}:
     get:
       summary: Queries an active contract by spender, provider and service.
       operationId: ArkeoArkeoActiveContract
@@ -19,13 +19,16 @@ paths:
                 properties:
                   provider:
                     type: string
+                    format: byte
                   service:
                     type: integer
                     format: int32
                   client:
                     type: string
+                    format: byte
                   delegate:
                     type: string
+                    format: byte
                   type:
                     type: string
                     enum:
@@ -39,8 +42,20 @@ paths:
                     type: string
                     format: int64
                   rate:
-                    type: string
-                    format: int64
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
                   deposit:
                     type: string
                   paid:
@@ -55,6 +70,15 @@ paths:
                     type: string
                     format: uint64
                   settlement_duration:
+                    type: string
+                    format: int64
+                  authorization:
+                    type: string
+                    enum:
+                      - STRICT
+                      - OPEN
+                    default: STRICT
+                  queries_per_minute:
                     type: string
                     format: int64
         default:
@@ -76,15 +100,15 @@ paths:
                       type: string
                   additionalProperties: {}
       parameters:
-        - name: spender
-          in: path
-          required: true
-          type: string
         - name: provider
           in: path
           required: true
           type: string
         - name: service
+          in: path
+          required: true
+          type: string
+        - name: spender
           in: path
           required: true
           type: string
@@ -104,13 +128,16 @@ paths:
                 properties:
                   provider:
                     type: string
+                    format: byte
                   service:
                     type: integer
                     format: int32
                   client:
                     type: string
+                    format: byte
                   delegate:
                     type: string
+                    format: byte
                   type:
                     type: string
                     enum:
@@ -124,8 +151,20 @@ paths:
                     type: string
                     format: int64
                   rate:
-                    type: string
-                    format: int64
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
                   deposit:
                     type: string
                   paid:
@@ -140,6 +179,15 @@ paths:
                     type: string
                     format: uint64
                   settlement_duration:
+                    type: string
+                    format: int64
+                  authorization:
+                    type: string
+                    enum:
+                      - STRICT
+                      - OPEN
+                    default: STRICT
+                  queries_per_minute:
                     type: string
                     format: int64
         default:
@@ -184,13 +232,16 @@ paths:
                   properties:
                     provider:
                       type: string
+                      format: byte
                     service:
                       type: integer
                       format: int32
                     client:
                       type: string
+                      format: byte
                     delegate:
                       type: string
+                      format: byte
                     type:
                       type: string
                       enum:
@@ -204,8 +255,20 @@ paths:
                       type: string
                       format: int64
                     rate:
-                      type: string
-                      format: int64
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
                     deposit:
                       type: string
                     paid:
@@ -220,6 +283,15 @@ paths:
                       type: string
                       format: uint64
                     settlement_duration:
+                      type: string
+                      format: int64
+                    authorization:
+                      type: string
+                      enum:
+                        - STRICT
+                        - OPEN
+                      default: STRICT
+                    queries_per_minute:
                       type: string
                       format: int64
               pagination:
@@ -377,6 +449,7 @@ paths:
                 properties:
                   pub_key:
                     type: string
+                    format: byte
                   service:
                     type: integer
                     format: int32
@@ -398,11 +471,39 @@ paths:
                     type: string
                     format: int64
                   subscription_rate:
-                    type: string
-                    format: int64
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
                   pay_as_you_go_rate:
-                    type: string
-                    format: int64
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
                   bond:
                     type: string
                   last_update:
@@ -456,6 +557,7 @@ paths:
                   properties:
                     pub_key:
                       type: string
+                      format: byte
                     service:
                       type: integer
                       format: int32
@@ -477,11 +579,41 @@ paths:
                       type: string
                       format: int64
                     subscription_rate:
-                      type: string
-                      format: int64
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          denom:
+                            type: string
+                          amount:
+                            type: string
+                        description: >-
+                          Coin defines a token with a denomination and an
+                          amount.
+
+
+                          NOTE: The amount field is an Int which implements the
+                          custom method
+
+                          signatures required by gogoproto.
                     pay_as_you_go_rate:
-                      type: string
-                      format: int64
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          denom:
+                            type: string
+                          amount:
+                            type: string
+                        description: >-
+                          Coin defines a token with a denomination and an
+                          amount.
+
+
+                          NOTE: The amount field is an Int which implements the
+                          custom method
+
+                          signatures required by gogoproto.
                     bond:
                       type: string
                     last_update:
@@ -44003,13 +44135,16 @@ definitions:
     properties:
       provider:
         type: string
+        format: byte
       service:
         type: integer
         format: int32
       client:
         type: string
+        format: byte
       delegate:
         type: string
+        format: byte
       type:
         type: string
         enum:
@@ -44023,8 +44158,17 @@ definitions:
         type: string
         format: int64
       rate:
-        type: string
-        format: int64
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
       deposit:
         type: string
       paid:
@@ -44041,6 +44185,21 @@ definitions:
       settlement_duration:
         type: string
         format: int64
+      authorization:
+        type: string
+        enum:
+          - STRICT
+          - OPEN
+        default: STRICT
+      queries_per_minute:
+        type: string
+        format: int64
+  arkeo.arkeo.ContractAuthorization:
+    type: string
+    enum:
+      - STRICT
+      - OPEN
+    default: STRICT
   arkeo.arkeo.ContractType:
     type: string
     enum:
@@ -44057,6 +44216,8 @@ definitions:
     type: object
   arkeo.arkeo.MsgOpenContractResponse:
     type: object
+  arkeo.arkeo.MsgSetVersionResponse:
+    type: object
   arkeo.arkeo.Params:
     type: object
     description: Params defines the parameters for the module.
@@ -44065,6 +44226,7 @@ definitions:
     properties:
       pub_key:
         type: string
+        format: byte
       service:
         type: integer
         format: int32
@@ -44086,11 +44248,33 @@ definitions:
         type: string
         format: int64
       subscription_rate:
-        type: string
-        format: int64
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
       pay_as_you_go_rate:
-        type: string
-        format: int64
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
       bond:
         type: string
       last_update:
@@ -44113,13 +44297,16 @@ definitions:
         properties:
           provider:
             type: string
+            format: byte
           service:
             type: integer
             format: int32
           client:
             type: string
+            format: byte
           delegate:
             type: string
+            format: byte
           type:
             type: string
             enum:
@@ -44133,8 +44320,20 @@ definitions:
             type: string
             format: int64
           rate:
-            type: string
-            format: int64
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
           deposit:
             type: string
           paid:
@@ -44151,6 +44350,15 @@ definitions:
           settlement_duration:
             type: string
             format: int64
+          authorization:
+            type: string
+            enum:
+              - STRICT
+              - OPEN
+            default: STRICT
+          queries_per_minute:
+            type: string
+            format: int64
   arkeo.arkeo.QueryAllContractResponse:
     type: object
     properties:
@@ -44161,13 +44369,16 @@ definitions:
           properties:
             provider:
               type: string
+              format: byte
             service:
               type: integer
               format: int32
             client:
               type: string
+              format: byte
             delegate:
               type: string
+              format: byte
             type:
               type: string
               enum:
@@ -44181,8 +44392,20 @@ definitions:
               type: string
               format: int64
             rate:
-              type: string
-              format: int64
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
             deposit:
               type: string
             paid:
@@ -44197,6 +44420,15 @@ definitions:
               type: string
               format: uint64
             settlement_duration:
+              type: string
+              format: int64
+            authorization:
+              type: string
+              enum:
+                - STRICT
+                - OPEN
+              default: STRICT
+            queries_per_minute:
               type: string
               format: int64
       pagination:
@@ -44235,6 +44467,7 @@ definitions:
           properties:
             pub_key:
               type: string
+              format: byte
             service:
               type: integer
               format: int32
@@ -44256,11 +44489,39 @@ definitions:
               type: string
               format: int64
             subscription_rate:
-              type: string
-              format: int64
+              type: array
+              items:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
             pay_as_you_go_rate:
-              type: string
-              format: int64
+              type: array
+              items:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
             bond:
               type: string
             last_update:
@@ -44303,13 +44564,16 @@ definitions:
         properties:
           provider:
             type: string
+            format: byte
           service:
             type: integer
             format: int32
           client:
             type: string
+            format: byte
           delegate:
             type: string
+            format: byte
           type:
             type: string
             enum:
@@ -44323,8 +44587,20 @@ definitions:
             type: string
             format: int64
           rate:
-            type: string
-            format: int64
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
           deposit:
             type: string
           paid:
@@ -44341,6 +44617,15 @@ definitions:
           settlement_duration:
             type: string
             format: int64
+          authorization:
+            type: string
+            enum:
+              - STRICT
+              - OPEN
+            default: STRICT
+          queries_per_minute:
+            type: string
+            format: int64
   arkeo.arkeo.QueryFetchProviderResponse:
     type: object
     properties:
@@ -44349,6 +44634,7 @@ definitions:
         properties:
           pub_key:
             type: string
+            format: byte
           service:
             type: integer
             format: int32
@@ -44370,11 +44656,39 @@ definitions:
             type: string
             format: int64
           subscription_rate:
-            type: string
-            format: int64
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
           pay_as_you_go_rate:
-            type: string
-            format: int64
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
           bond:
             type: string
           last_update:
@@ -44467,6 +44781,18 @@ definitions:
                repeated Bar results = 1;
                PageResponse page = 2;
        }
+  cosmos.base.v1beta1.Coin:
+    type: object
+    properties:
+      denom:
+        type: string
+      amount:
+        type: string
+    description: |-
+      Coin defines a token with a denomination and an amount.
+
+      NOTE: The amount field is an Int which implements the custom method
+      signatures required by gogoproto.
   google.protobuf.Any:
     type: object
     properties:
@@ -44991,18 +45317,6 @@ definitions:
               uarkeo to distribute to arkeo account for gas to make claiming
               easier
     description: QueryParamsResponse is response type for the Query/Params RPC method.
-  cosmos.base.v1beta1.Coin:
-    type: object
-    properties:
-      denom:
-        type: string
-      amount:
-        type: string
-    description: |-
-      Coin defines a token with a denomination and an amount.
-
-      NOTE: The amount field is an Int which implements the custom method
-      signatures required by gogoproto.
   cosmos.auth.v1beta1.AddressBytesToStringResponse:
     type: object
     properties:

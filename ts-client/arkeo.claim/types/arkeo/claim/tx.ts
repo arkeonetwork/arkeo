@@ -6,7 +6,7 @@ import { Chain, chainFromJSON, chainToJSON } from "./claim_record";
 export const protobufPackage = "arkeo.claim";
 
 export interface MsgClaimEth {
-  creator: string;
+  creator: Uint8Array;
   /** the adress the claim is for */
   ethAddress: string;
   /** EIP712 signature that has to be signed by ethAddress */
@@ -17,22 +17,22 @@ export interface MsgClaimEthResponse {
 }
 
 export interface MsgClaimArkeo {
-  creator: string;
+  creator: Uint8Array;
 }
 
 export interface MsgClaimArkeoResponse {
 }
 
 export interface MsgTransferClaim {
-  creator: string;
-  toAddress: string;
+  creator: Uint8Array;
+  toAddress: Uint8Array;
 }
 
 export interface MsgTransferClaimResponse {
 }
 
 export interface MsgAddClaim {
-  creator: string;
+  creator: Uint8Array;
   chain: Chain;
   address: string;
   amount: number;
@@ -42,13 +42,13 @@ export interface MsgAddClaimResponse {
 }
 
 function createBaseMsgClaimEth(): MsgClaimEth {
-  return { creator: "", ethAddress: "", signature: "" };
+  return { creator: new Uint8Array(), ethAddress: "", signature: "" };
 }
 
 export const MsgClaimEth = {
   encode(message: MsgClaimEth, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.creator.length !== 0) {
+      writer.uint32(10).bytes(message.creator);
     }
     if (message.ethAddress !== "") {
       writer.uint32(18).string(message.ethAddress);
@@ -67,7 +67,7 @@ export const MsgClaimEth = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.creator = reader.bytes();
           break;
         case 2:
           message.ethAddress = reader.string();
@@ -85,7 +85,7 @@ export const MsgClaimEth = {
 
   fromJSON(object: any): MsgClaimEth {
     return {
-      creator: isSet(object.creator) ? String(object.creator) : "",
+      creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
       ethAddress: isSet(object.ethAddress) ? String(object.ethAddress) : "",
       signature: isSet(object.signature) ? String(object.signature) : "",
     };
@@ -93,7 +93,8 @@ export const MsgClaimEth = {
 
   toJSON(message: MsgClaimEth): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
+    message.creator !== undefined
+      && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
     message.ethAddress !== undefined && (obj.ethAddress = message.ethAddress);
     message.signature !== undefined && (obj.signature = message.signature);
     return obj;
@@ -101,7 +102,7 @@ export const MsgClaimEth = {
 
   fromPartial<I extends Exact<DeepPartial<MsgClaimEth>, I>>(object: I): MsgClaimEth {
     const message = createBaseMsgClaimEth();
-    message.creator = object.creator ?? "";
+    message.creator = object.creator ?? new Uint8Array();
     message.ethAddress = object.ethAddress ?? "";
     message.signature = object.signature ?? "";
     return message;
@@ -148,13 +149,13 @@ export const MsgClaimEthResponse = {
 };
 
 function createBaseMsgClaimArkeo(): MsgClaimArkeo {
-  return { creator: "" };
+  return { creator: new Uint8Array() };
 }
 
 export const MsgClaimArkeo = {
   encode(message: MsgClaimArkeo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.creator.length !== 0) {
+      writer.uint32(10).bytes(message.creator);
     }
     return writer;
   },
@@ -167,7 +168,7 @@ export const MsgClaimArkeo = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.creator = reader.bytes();
           break;
         default:
           reader.skipType(tag & 7);
@@ -178,18 +179,19 @@ export const MsgClaimArkeo = {
   },
 
   fromJSON(object: any): MsgClaimArkeo {
-    return { creator: isSet(object.creator) ? String(object.creator) : "" };
+    return { creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array() };
   },
 
   toJSON(message: MsgClaimArkeo): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
+    message.creator !== undefined
+      && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgClaimArkeo>, I>>(object: I): MsgClaimArkeo {
     const message = createBaseMsgClaimArkeo();
-    message.creator = object.creator ?? "";
+    message.creator = object.creator ?? new Uint8Array();
     return message;
   },
 };
@@ -234,16 +236,16 @@ export const MsgClaimArkeoResponse = {
 };
 
 function createBaseMsgTransferClaim(): MsgTransferClaim {
-  return { creator: "", toAddress: "" };
+  return { creator: new Uint8Array(), toAddress: new Uint8Array() };
 }
 
 export const MsgTransferClaim = {
   encode(message: MsgTransferClaim, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.creator.length !== 0) {
+      writer.uint32(10).bytes(message.creator);
     }
-    if (message.toAddress !== "") {
-      writer.uint32(18).string(message.toAddress);
+    if (message.toAddress.length !== 0) {
+      writer.uint32(18).bytes(message.toAddress);
     }
     return writer;
   },
@@ -256,10 +258,10 @@ export const MsgTransferClaim = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.creator = reader.bytes();
           break;
         case 2:
-          message.toAddress = reader.string();
+          message.toAddress = reader.bytes();
           break;
         default:
           reader.skipType(tag & 7);
@@ -271,22 +273,24 @@ export const MsgTransferClaim = {
 
   fromJSON(object: any): MsgTransferClaim {
     return {
-      creator: isSet(object.creator) ? String(object.creator) : "",
-      toAddress: isSet(object.toAddress) ? String(object.toAddress) : "",
+      creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
+      toAddress: isSet(object.toAddress) ? bytesFromBase64(object.toAddress) : new Uint8Array(),
     };
   },
 
   toJSON(message: MsgTransferClaim): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
-    message.toAddress !== undefined && (obj.toAddress = message.toAddress);
+    message.creator !== undefined
+      && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
+    message.toAddress !== undefined
+      && (obj.toAddress = base64FromBytes(message.toAddress !== undefined ? message.toAddress : new Uint8Array()));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgTransferClaim>, I>>(object: I): MsgTransferClaim {
     const message = createBaseMsgTransferClaim();
-    message.creator = object.creator ?? "";
-    message.toAddress = object.toAddress ?? "";
+    message.creator = object.creator ?? new Uint8Array();
+    message.toAddress = object.toAddress ?? new Uint8Array();
     return message;
   },
 };
@@ -331,13 +335,13 @@ export const MsgTransferClaimResponse = {
 };
 
 function createBaseMsgAddClaim(): MsgAddClaim {
-  return { creator: "", chain: 0, address: "", amount: 0 };
+  return { creator: new Uint8Array(), chain: 0, address: "", amount: 0 };
 }
 
 export const MsgAddClaim = {
   encode(message: MsgAddClaim, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.creator.length !== 0) {
+      writer.uint32(10).bytes(message.creator);
     }
     if (message.chain !== 0) {
       writer.uint32(16).int32(message.chain);
@@ -359,7 +363,7 @@ export const MsgAddClaim = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.creator = reader.bytes();
           break;
         case 2:
           message.chain = reader.int32() as any;
@@ -380,7 +384,7 @@ export const MsgAddClaim = {
 
   fromJSON(object: any): MsgAddClaim {
     return {
-      creator: isSet(object.creator) ? String(object.creator) : "",
+      creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
       chain: isSet(object.chain) ? chainFromJSON(object.chain) : 0,
       address: isSet(object.address) ? String(object.address) : "",
       amount: isSet(object.amount) ? Number(object.amount) : 0,
@@ -389,7 +393,8 @@ export const MsgAddClaim = {
 
   toJSON(message: MsgAddClaim): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
+    message.creator !== undefined
+      && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
     message.chain !== undefined && (obj.chain = chainToJSON(message.chain));
     message.address !== undefined && (obj.address = message.address);
     message.amount !== undefined && (obj.amount = Math.round(message.amount));
@@ -398,7 +403,7 @@ export const MsgAddClaim = {
 
   fromPartial<I extends Exact<DeepPartial<MsgAddClaim>, I>>(object: I): MsgAddClaim {
     const message = createBaseMsgAddClaim();
-    message.creator = object.creator ?? "";
+    message.creator = object.creator ?? new Uint8Array();
     message.chain = object.chain ?? 0;
     message.address = object.address ?? "";
     message.amount = object.amount ?? 0;
@@ -510,6 +515,31 @@ var globalThis: any = (() => {
   }
   throw "Unable to locate global object";
 })();
+
+function bytesFromBase64(b64: string): Uint8Array {
+  if (globalThis.Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+  } else {
+    const bin = globalThis.atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; ++i) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  }
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  if (globalThis.Buffer) {
+    return globalThis.Buffer.from(arr).toString("base64");
+  } else {
+    const bin: string[] = [];
+    arr.forEach((byte) => {
+      bin.push(String.fromCharCode(byte));
+    });
+    return globalThis.btoa(bin.join(""));
+  }
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

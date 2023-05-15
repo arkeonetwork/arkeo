@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	"cosmossdk.io/errors"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
@@ -11,18 +13,30 @@ import (
 )
 
 type Manager struct {
-	keeper  Keeper
-	sk      stakingkeeper.Keeper
-	configs configs.ConfigValues
+	keeper Keeper
+	sk     stakingkeeper.Keeper
 }
 
 func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
-	ver := k.GetVersion()
 	return Manager{
-		keeper:  k,
-		sk:      sk,
-		configs: configs.GetConfigValues(ver),
+		keeper: k,
+		sk:     sk,
 	}
+}
+
+func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
+	// if local version is behind the consensus version, panic and don't try to
+	// create a new block
+	ver := mgr.keeper.GetVersion(ctx)
+	if ver > configs.SWVersion {
+		panic(
+			fmt.Sprintf("Unsupported Version: update your binary (your version: %d, network consensus version: %d)",
+				configs.SWVersion,
+				ver,
+			),
+		)
+	}
+	return nil
 }
 
 func (mgr Manager) EndBlock(ctx cosmos.Context) error {
@@ -44,6 +58,10 @@ func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 		panic(err)
 	}
 	return nil
+}
+
+func (mgr Manager) Configs(ctx cosmos.Context) configs.ConfigValues {
+	return configs.GetConfigValues(mgr.keeper.GetVersion(ctx))
 }
 
 // test that the bond module has enough bond in it
@@ -239,7 +257,7 @@ func (mgr Manager) calcBlockReward(totalReserve, emissionCurve, blocksPerYear in
 func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int64 {
 	// TODO: create a handler for admins to be able to change configs on the
 	// fly and check them here before returning
-	return mgr.configs.GetInt64Value(name)
+	return mgr.Configs(ctx).GetInt64Value(name)
 }
 
 // any owed debt is paid to data provider

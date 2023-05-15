@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
-	"github.com/blang/semver"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,10 +33,13 @@ type Keeper interface {
 	GetParams(ctx sdk.Context) types.Params
 	SetParams(ctx sdk.Context, params types.Params)
 	Cdc() codec.BinaryCodec
-	GetVersion() semver.Version
-	GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string
+	GetVersion(ctx cosmos.Context) int64
 	GetStoreVersion(ctx cosmos.Context) int64
 	SetStoreVersion(ctx cosmos.Context, ver int64)
+	GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string
+	GetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.AccAddress) int64
+	SetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.AccAddress, ver int64)
+	GetConsensusVersion(ctx cosmos.Context) int64
 	GetSupply(ctx cosmos.Context, denom string) cosmos.Coin
 	GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string) cosmos.Int
 	SendFromModuleToModule(ctx cosmos.Context, from, to string, coin cosmos.Coins) error
@@ -115,7 +117,6 @@ type KVStore struct {
 	coinKeeper    bankkeeper.Keeper
 	accountKeeper authkeeper.AccountKeeper
 	stakingKeeper stakingkeeper.Keeper
-	version       semver.Version
 }
 
 func NewKVStore(
@@ -126,7 +127,6 @@ func NewKVStore(
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
 	stakingKeeper stakingkeeper.Keeper,
-	version semver.Version,
 ) *KVStore {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -140,12 +140,16 @@ func NewKVStore(
 		paramstore:    ps,
 		coinKeeper:    coinKeeper,
 		accountKeeper: accountKeeper,
-		version:       version,
 	}
 }
 
 func (k KVStore) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+// GetKey return a key that can be used to store into key value store
+func (k KVStore) GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string {
+	return fmt.Sprintf("%s/%s", prefix, strings.ToUpper(key))
 }
 
 // Cdc return the amino codec
@@ -163,18 +167,14 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
-// GetVersion return the current version
-func (k KVStore) GetVersion() semver.Version {
-	return k.version
-}
-
-func (k *KVStore) SetVersion(ver semver.Version) {
-	k.version = ver
-}
-
-// GetKey return a key that can be used to store into key value store
-func (k KVStore) GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string {
-	return fmt.Sprintf("%s/%s", prefix, strings.ToUpper(key))
+func (k KVStore) GetVersion(ctx cosmos.Context) int64 {
+	ver := k.GetConsensusVersion(ctx)
+	storedVer := k.GetStoreVersion(ctx)
+	if ver > storedVer {
+		k.SetStoreVersion(ctx, ver)
+		return ver
+	}
+	return storedVer
 }
 
 // SetStoreVersion save the store version
@@ -188,6 +188,48 @@ func (k KVStore) SetStoreVersion(ctx cosmos.Context, value int64) {
 // GetStoreVersion get the current key value store version
 func (k KVStore) GetStoreVersion(ctx cosmos.Context) int64 {
 	key := k.GetKey(ctx, prefixVersion, "")
+	store := ctx.KVStore(k.storeKey)
+	if !store.Has([]byte(key)) {
+		return 1
+	}
+	var ver types.ProtoInt64
+	buf := store.Get([]byte(key))
+	k.cdc.MustUnmarshal(buf, &ver)
+	return ver.Value
+}
+
+func (k KVStore) GetConsensusVersion(ctx cosmos.Context) int64 {
+	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
+	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	min := int64(len(validators)) * 9 / 10 // TODO: make these values configurable
+	for _, val := range validators {
+		if !val.IsBonded() {
+			continue
+		}
+		acc := cosmos.AccAddress(val.GetOperator())
+		ver := k.GetStoreVersionForAddress(ctx, acc)
+		if _, ok := versions[ver]; !ok {
+			versions[ver] = 0
+		}
+		versions[ver] += 1
+		if versions[ver] >= min {
+			return ver
+		}
+	}
+	return -1
+}
+
+// SetStoreVersionForAddress save the store version
+func (k KVStore) SetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.AccAddress, value int64) {
+	key := k.GetKey(ctx, prefixVersion, addr.String())
+	store := ctx.KVStore(k.storeKey)
+	ver := types.ProtoInt64{Value: value}
+	store.Set([]byte(key), k.cdc.MustMarshal(&ver))
+}
+
+// GetStoreVersionForAddress get the current key value store version
+func (k KVStore) GetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.AccAddress) int64 {
+	key := k.GetKey(ctx, prefixVersion, addr.String())
 	store := ctx.KVStore(k.storeKey)
 	if !store.Has([]byte(key)) {
 		return 1

@@ -2,10 +2,21 @@ package common
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/url"
+	"path"
+	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+)
+
+const (
+	// SuperMajorityFactor - super majority 2/3
+	SuperMajorityFactor = 3
+	// SimpleMajorityFactor - simple majority 1/2
+	SimpleMajorityFactor = 2
 )
 
 // GetSafeShare does the same as GetUncappedShare , but GetSafeShare will guarantee the result will not more than total
@@ -59,4 +70,21 @@ func MustParseURL(uri string) *url.URL {
 		panic(fmt.Errorf("unable to parse uri %s: %w", uri, err))
 	}
 	return u
+}
+
+// GetCurrentVersion - intended for unit tests, fetches the current version of
+// arkeo via `version` file
+// #nosec G304 this is a method only used for test purpose
+func GetCurrentVersion() int64 {
+	_, filename, _, _ := runtime.Caller(0)
+	dir := path.Join(path.Dir(filename), "./../")
+	dat, err := ioutil.ReadFile(path.Join(dir, "version"))
+	if err != nil {
+		panic(err)
+	}
+	v, err := strconv.ParseInt(strings.TrimSpace(string(dat)), 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

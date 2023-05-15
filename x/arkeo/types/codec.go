@@ -13,7 +13,8 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgOpenContract{}, "arkeo/OpenContract", nil)
 	cdc.RegisterConcrete(&MsgCloseContract{}, "arkeo/CloseContract", nil)
 	cdc.RegisterConcrete(&MsgClaimContractIncome{}, "arkeo/ClaimContractIncome", nil)
-	// this line is used by starport scaffolding # 2
+	cdc.RegisterConcrete(&MsgSetVersion{}, "arkeo/SetVersion", nil)
+// this line is used by starport scaffolding # 2
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -32,7 +33,10 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgClaimContractIncome{},
 	)
-	// this line is used by starport scaffolding # 3
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+	&MsgSetVersion{},
+)
+// this line is used by starport scaffolding # 3
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }
