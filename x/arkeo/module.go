@@ -160,7 +160,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) ConsensusVersion() uint64 { return am.conVersion }
 
 // BeginBlock contains the logic that is automatically triggered at the beginning of each block
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+func (am *AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
 	mgr := keeper.NewManager(am.keeper, am.stakingKeeper)
 	if err := mgr.BeginBlock(ctx); err != nil {
 		ctx.Logger().Error("manager beginblock error ", "error", err)

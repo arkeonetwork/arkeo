@@ -46,7 +46,7 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgClaimContractIncome int = 100
 
-	opWeightMsgSetVersion = "op_weight_msg_set_version"
+	opWeightMsgSetVersion = "op_weight_msg_set_version" // nolint
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgSetVersion int = 100
 
