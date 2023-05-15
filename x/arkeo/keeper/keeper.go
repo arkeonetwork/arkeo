@@ -140,6 +140,7 @@ func NewKVStore(
 		paramstore:    ps,
 		coinKeeper:    coinKeeper,
 		accountKeeper: accountKeeper,
+		stakingKeeper: stakingKeeper,
 	}
 }
 
