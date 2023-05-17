@@ -82,7 +82,7 @@ message MsgClaimContractIncomeResponse {}
 // this line is used by starport scaffolding # proto/tx/message
 message MsgSetVersion {
   string creator = 1;
-  int32  version = 2;
+  int64  version = 2;
 }
 
 message MsgSetVersionResponse {}
