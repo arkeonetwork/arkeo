@@ -249,7 +249,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "99999988",
+              "amount": "99999991",
               "denom": "uarkeo"
             }
           ]
@@ -276,7 +276,7 @@
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
           "coins": [
             {
-              "amount": "12",
+              "amount": "9",
               "denom": "uarkeo"
             }
           ]
