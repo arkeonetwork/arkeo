@@ -24,6 +24,7 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		}
 	}
 	k.SetNextContractId(ctx, genState.NextContractId)
+	k.SetVersion(ctx, genState.Version)
 
 	for _, expirationSet := range genState.ContractExpirationSets {
 		if err := k.SetContractExpirationSet(ctx, expirationSet); err != nil {
@@ -67,6 +68,7 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	}
 	iter.Close()
 	genesis.NextContractId = k.GetNextContractId(ctx)
+	genesis.Version = k.GetVersion(ctx)
 
 	// contract expiration sets
 	iter = k.GetContractExpirationSetIterator(ctx)
