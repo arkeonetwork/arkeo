@@ -179,8 +179,8 @@ func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 		return configs.SWVersion
 	}
 
-	storedVersion := k.GetVersion(ctx)
-	minNum := configs.GetConfigValues(storedVersion).GetInt64Value(configs.VersionConsensus)
+	currentVersion := k.GetVersion(ctx)
+	minNum := configs.GetConfigValues(currentVersion).GetInt64Value(configs.VersionConsensus)
 	min := int64(len(validators)) * minNum / 100
 
 	for _, val := range validators {
@@ -196,7 +196,7 @@ func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 			return ver
 		}
 	}
-	return storedVersion
+	return currentVersion
 }
 
 // SetVersion save the store version
