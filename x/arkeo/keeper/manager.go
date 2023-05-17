@@ -219,11 +219,11 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 				continue
 			}
 
-			acc := cosmos.AccAddress(val.GetOperator())
-			valVersion := mgr.keeper.GetStoreVersionForAddress(ctx, acc)
+			valVersion := mgr.keeper.GetStoreVersionForAddress(ctx, val.GetOperator())
 			if valVersion < mgr.keeper.GetVersion(ctx) {
 				continue
 			}
+			acc := cosmos.AccAddress(val.GetOperator())
 
 			totalReward := common.GetSafeShare(val.GetDelegatorShares().RoundInt(), total, blockReward)
 			validatorReward := cosmos.ZeroInt()

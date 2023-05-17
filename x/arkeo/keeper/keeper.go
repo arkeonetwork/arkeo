@@ -37,8 +37,8 @@ type Keeper interface {
 	GetStoreVersion(ctx cosmos.Context) int64
 	SetStoreVersion(ctx cosmos.Context, ver int64)
 	GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string
-	GetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.AccAddress) int64
-	SetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.AccAddress, ver int64)
+	GetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress) int64
+	SetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress, ver int64)
 	GetConsensusVersion(ctx cosmos.Context) int64
 	GetSupply(ctx cosmos.Context, denom string) cosmos.Coin
 	GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string) cosmos.Int
@@ -207,7 +207,7 @@ func (k KVStore) GetConsensusVersion(ctx cosmos.Context) int64 {
 		if !val.IsBonded() {
 			continue
 		}
-		acc := cosmos.AccAddress(val.GetOperator())
+		acc := cosmos.ValAddress(val.GetOperator())
 		ver := k.GetStoreVersionForAddress(ctx, acc)
 		if _, ok := versions[ver]; !ok {
 			versions[ver] = 0
@@ -221,7 +221,7 @@ func (k KVStore) GetConsensusVersion(ctx cosmos.Context) int64 {
 }
 
 // SetStoreVersionForAddress save the store version
-func (k KVStore) SetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.AccAddress, value int64) {
+func (k KVStore) SetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress, value int64) {
 	key := k.GetKey(ctx, prefixVersion, addr.String())
 	store := ctx.KVStore(k.storeKey)
 	ver := types.ProtoInt64{Value: value}
@@ -229,7 +229,7 @@ func (k KVStore) SetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.AccAd
 }
 
 // GetStoreVersionForAddress get the current key value store version
-func (k KVStore) GetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.AccAddress) int64 {
+func (k KVStore) GetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress) int64 {
 	key := k.GetKey(ctx, prefixVersion, addr.String())
 	store := ctx.KVStore(k.storeKey)
 	if !store.Has([]byte(key)) {
