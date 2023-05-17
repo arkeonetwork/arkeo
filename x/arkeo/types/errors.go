@@ -40,4 +40,5 @@ var (
 	ErrInvariantContractModule                = errors.Register(ModuleName, 31, "contract module invariant")
 	ErrInvariantMaxSupply                     = errors.Register(ModuleName, 32, "max supply invariant")
 	ErrInvalidAuthorization                   = errors.Register(ModuleName, 33, "invalid authorization")
+	ErrInvalidVersion                         = errors.Register(ModuleName, 34, "version cannot be zero or lower")
 )

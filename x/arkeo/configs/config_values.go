@@ -2,8 +2,6 @@ package configs
 
 import (
 	"fmt"
-
-	"github.com/blang/semver"
 )
 
 // ConfigName the name we used to get constant values
@@ -15,6 +13,7 @@ const (
 	HandlerOpenContract
 	HandlerCloseContract
 	HandlerClaimContractIncome
+	HandlerSetVersion
 	MaxSupply
 	MaxContractLength
 	OpenContractCost
@@ -23,6 +22,7 @@ const (
 	BlocksPerYear
 	EmissionCurve
 	ValidatorPayoutCycle
+	VersionConsensus
 )
 
 var nameToString = map[ConfigName]string{
@@ -31,6 +31,7 @@ var nameToString = map[ConfigName]string{
 	HandlerOpenContract:        "HandlerOpenContract",
 	HandlerCloseContract:       "HandlerCloseContract",
 	HandlerClaimContractIncome: "HandlerClaimContractIncome",
+	HandlerSetVersion:          "HandlerSetVersion",
 	MaxSupply:                  "MaxSupply",
 	MaxContractLength:          "MaxContractLength",
 	OpenContractCost:           "OpenContractCost",
@@ -39,6 +40,7 @@ var nameToString = map[ConfigName]string{
 	BlocksPerYear:              "BlocksPerYear",
 	EmissionCurve:              "EmissionCurve",
 	ValidatorPayoutCycle:       "ValidatorPayoutCycle",
+	VersionConsensus:           "VersionConsensus",
 }
 
 // String implement fmt.stringer
@@ -59,9 +61,7 @@ type ConfigValues interface {
 }
 
 // GetConfigValues will return an  implementation of ConfigValues which provide ways to get constant values
-func GetConfigValues(ver semver.Version) ConfigValues {
-	if ver.GTE(semver.MustParse("0.0.0")) {
-		return NewConfigValue010()
-	}
-	return nil
+func GetConfigValues(ver int64) ConfigValues {
+	// TODO: create a switcher based on version
+	return NewConfigValue010()
 }

@@ -10,16 +10,13 @@ import (
 
 type msgServer struct {
 	Keeper
-	mgr     Manager
-	configs configs.ConfigValues
+	mgr Manager
 }
 
 func newMsgServer(keeper Keeper, sk stakingkeeper.Keeper) *msgServer {
-	ver := keeper.GetVersion()
 	return &msgServer{
-		Keeper:  keeper,
-		mgr:     NewManager(keeper, sk),
-		configs: configs.GetConfigValues(ver),
+		Keeper: keeper,
+		mgr:    NewManager(keeper, sk),
 	}
 }
 
@@ -33,7 +30,7 @@ var _ types.MsgServer = msgServer{}
 
 func (k msgServer) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int64 {
 	// TODO: use ctx to fetch config overrides from the chain state
-	return k.configs.GetInt64Value(name)
+	return k.mgr.Configs(ctx).GetInt64Value(name)
 }
 
 // convert int64s into coins asset

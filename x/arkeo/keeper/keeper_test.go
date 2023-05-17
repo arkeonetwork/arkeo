@@ -3,12 +3,11 @@ package keeper
 import (
 	"testing"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
-
-	"github.com/blang/semver"
 
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -83,8 +82,8 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		bk,
 		ak,
 		sk,
-		semver.MustParse("0.0.0"),
 	)
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
@@ -151,8 +150,8 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		bk,
 		ak,
 		sk,
-		semver.MustParse("0.0.0"),
 	)
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())

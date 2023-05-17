@@ -54,9 +54,9 @@ export interface QueryAllContractResponse {
 
 /** this line is used by starport scaffolding # 3 */
 export interface QueryActiveContractRequest {
-  spender: string;
   provider: string;
   service: string;
+  spender: string;
 }
 
 export interface QueryActiveContractResponse {
@@ -585,19 +585,19 @@ export const QueryAllContractResponse = {
 };
 
 function createBaseQueryActiveContractRequest(): QueryActiveContractRequest {
-  return { spender: "", provider: "", service: "" };
+  return { provider: "", service: "", spender: "" };
 }
 
 export const QueryActiveContractRequest = {
   encode(message: QueryActiveContractRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.spender !== "") {
-      writer.uint32(10).string(message.spender);
-    }
     if (message.provider !== "") {
-      writer.uint32(18).string(message.provider);
+      writer.uint32(10).string(message.provider);
     }
     if (message.service !== "") {
-      writer.uint32(26).string(message.service);
+      writer.uint32(18).string(message.service);
+    }
+    if (message.spender !== "") {
+      writer.uint32(26).string(message.spender);
     }
     return writer;
   },
@@ -610,13 +610,13 @@ export const QueryActiveContractRequest = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.spender = reader.string();
-          break;
-        case 2:
           message.provider = reader.string();
           break;
-        case 3:
+        case 2:
           message.service = reader.string();
+          break;
+        case 3:
+          message.spender = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -628,25 +628,25 @@ export const QueryActiveContractRequest = {
 
   fromJSON(object: any): QueryActiveContractRequest {
     return {
-      spender: isSet(object.spender) ? String(object.spender) : "",
       provider: isSet(object.provider) ? String(object.provider) : "",
       service: isSet(object.service) ? String(object.service) : "",
+      spender: isSet(object.spender) ? String(object.spender) : "",
     };
   },
 
   toJSON(message: QueryActiveContractRequest): unknown {
     const obj: any = {};
-    message.spender !== undefined && (obj.spender = message.spender);
     message.provider !== undefined && (obj.provider = message.provider);
     message.service !== undefined && (obj.service = message.service);
+    message.spender !== undefined && (obj.spender = message.spender);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<QueryActiveContractRequest>, I>>(object: I): QueryActiveContractRequest {
     const message = createBaseQueryActiveContractRequest();
-    message.spender = object.spender ?? "";
     message.provider = object.provider ?? "";
     message.service = object.service ?? "";
+    message.spender = object.spender ?? "";
     return message;
   },
 };

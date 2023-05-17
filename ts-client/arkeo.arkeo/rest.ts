@@ -10,11 +10,16 @@
  */
 
 export interface ArkeoContract {
+  /** @format byte */
   provider?: string;
 
   /** @format int32 */
   service?: number;
+
+  /** @format byte */
   client?: string;
+
+  /** @format byte */
   delegate?: string;
   type?: ArkeoContractType;
 
@@ -24,8 +29,13 @@ export interface ArkeoContract {
   /** @format int64 */
   duration?: string;
 
-  /** @format int64 */
-  rate?: string;
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  rate?: V1Beta1Coin;
   deposit?: string;
   paid?: string;
 
@@ -40,6 +50,15 @@ export interface ArkeoContract {
 
   /** @format int64 */
   settlement_duration?: string;
+  authorization?: ArkeoContractAuthorization;
+
+  /** @format int64 */
+  queries_per_minute?: string;
+}
+
+export enum ArkeoContractAuthorization {
+  STRICT = "STRICT",
+  OPEN = "OPEN",
 }
 
 export enum ArkeoContractType {
@@ -57,12 +76,15 @@ export type ArkeoMsgModProviderResponse = object;
 
 export type ArkeoMsgOpenContractResponse = object;
 
+export type ArkeoMsgSetVersionResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
 export type ArkeoParams = object;
 
 export interface ArkeoProvider {
+  /** @format byte */
   pub_key?: string;
 
   /** @format int32 */
@@ -78,12 +100,8 @@ export interface ArkeoProvider {
 
   /** @format int64 */
   max_contract_duration?: string;
-
-  /** @format int64 */
-  subscription_rate?: string;
-
-  /** @format int64 */
-  pay_as_you_go_rate?: string;
+  subscription_rate?: V1Beta1Coin[];
+  pay_as_you_go_rate?: V1Beta1Coin[];
   bond?: string;
 
   /** @format int64 */
@@ -157,6 +175,17 @@ export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 /**
@@ -352,7 +381,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title arkeo/arkeo/genesis.proto
+ * @title arkeo/arkeo/events.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -362,11 +391,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryActiveContract
    * @summary Queries an active contract by spender, provider and service.
-   * @request GET:/arkeo/active-contract/{spender}/{provider}/{service}
+   * @request GET:/arkeo/active-contract/{provider}/{service}/{spender}
    */
-  queryActiveContract = (spender: string, provider: string, service: string, params: RequestParams = {}) =>
+  queryActiveContract = (provider: string, service: string, spender: string, params: RequestParams = {}) =>
     this.request<ArkeoQueryActiveContractResponse, RpcStatus>({
-      path: `/arkeo/active-contract/${spender}/${provider}/${service}`,
+      path: `/arkeo/active-contract/${provider}/${service}/${spender}`,
       method: "GET",
       format: "json",
       ...params,

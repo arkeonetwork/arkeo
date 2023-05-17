@@ -1,18 +1,13 @@
 package keeper
 
 import (
-	"io/ioutil"
-	"path"
-	"runtime"
-	"strings"
 	"testing"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	"github.com/blang/semver"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -81,30 +76,13 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		bk,
 		ak,
 		sk,
-		GetCurrentVersion(),
 	)
-
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
 	return ctx, k
-}
-
-// GetCurrentVersion - intended for unit tests, fetches the current version of
-// arkeo via `version` file
-// #nosec G304 this is a method only used for test purpose
-func GetCurrentVersion() semver.Version {
-	_, filename, _, _ := runtime.Caller(0)
-	dir := path.Join(path.Dir(filename), "../..")
-	dat, err := ioutil.ReadFile(path.Join(dir, "version"))
-	if err != nil {
-		panic(err)
-	}
-	v, err := semver.Make(strings.TrimSpace(string(dat)))
-	if err != nil {
-		panic(err)
-	}
-	return v
 }

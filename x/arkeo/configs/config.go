@@ -3,16 +3,15 @@ package configs
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/blang/semver"
 )
 
 var (
-	GitCommit             = "null"  // sha1 revision used to build the program
-	BuildTime             = "null"  // when the executable was built
-	Version               = "0.1.0" // software version
+	GitCommit             = "null" // sha1 revision used to build the program
+	BuildTime             = "null" // when the executable was built
+	Version               = "1"    // software version
 	Denom                 = "uarkeo"
 	MaxBasisPoints  int64 = 10_000
 	int64Overrides        = map[ConfigName]int64{}
@@ -20,7 +19,7 @@ var (
 	stringOverrides       = map[ConfigName]string{}
 )
 
-var SWVersion, _ = semver.Make(Version)
+var SWVersion, _ = strconv.ParseInt(Version, 10, 64)
 
 var BlockTime = 5 * time.Second
 

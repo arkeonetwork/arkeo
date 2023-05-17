@@ -11,6 +11,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestValidatorPayout(t *testing.T) {
@@ -69,8 +70,8 @@ func TestValidatorPayout(t *testing.T) {
 	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3, valAddrs[2], cosmos.NewDec(500)))
 
 	del1 := stakingtypes.NewDelegation(delAcc1, valAddrs[0], cosmos.NewDec(10))
-	del2 := stakingtypes.NewDelegation(delAcc2, valAddrs[0], cosmos.NewDec(20))
-	del3 := stakingtypes.NewDelegation(delAcc3, valAddrs[1], cosmos.NewDec(20))
+	del2 := stakingtypes.NewDelegation(delAcc2, valAddrs[1], cosmos.NewDec(20))
+	del3 := stakingtypes.NewDelegation(delAcc3, valAddrs[2], cosmos.NewDec(20))
 	sk.SetDelegation(ctx, del1)
 	sk.SetDelegation(ctx, del2)
 	sk.SetDelegation(ctx, del3)
@@ -86,16 +87,29 @@ func TestValidatorPayout(t *testing.T) {
 	mgr := NewManager(k, sk)
 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
 
+	votes := make([]abci.VoteInfo, len(vals))
+	for i, val := range vals {
+		consAddr, err := val.GetConsAddr()
+		require.NoError(t, err)
+		votes[i] = abci.VoteInfo{
+			Validator: abci.Validator{
+				Address: consAddr.Bytes(),
+				Power:   val.Tokens.Int64(),
+			},
+			SignedLastBlock: true,
+		}
+	}
+
 	blockReward := int64(158529)
-	require.NoError(t, mgr.ValidatorEndBlock(ctx))
+	require.NoError(t, mgr.ValidatorPayout(ctx, votes))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), 5000000000000-blockReward)
 
 	// check validator balances
 	totalBal := cosmos.ZeroInt()
 	bal := k.GetBalance(ctx, acc1)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18657))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18653))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18657))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18653))
 
 	bal = k.GetBalance(ctx, acc2)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(37308))
@@ -103,9 +117,9 @@ func TestValidatorPayout(t *testing.T) {
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(37308))
 
 	bal = k.GetBalance(ctx, acc3)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(93252))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(93271))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(93252))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(93271))
 
 	// check delegate balances
 	bal = k.GetBalance(ctx, delAcc1)
@@ -114,14 +128,14 @@ func TestValidatorPayout(t *testing.T) {
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(1863))
 
 	bal = k.GetBalance(ctx, delAcc2)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3726))
-	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3726))
-
-	bal = k.GetBalance(ctx, delAcc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3723))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3723))
+
+	bal = k.GetBalance(ctx, delAcc3)
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3711))
+	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3711))
 
 	// ensure block reward is equal to total rewarded to validators and delegates
 	require.Equal(t, blockReward, totalBal.Int64())

@@ -40,6 +40,7 @@ var (
 	NewDecFromBigInt             = sdk.NewDecFromBigInt
 	NewIntFromBigInt             = sdk.NewIntFromBigInt
 	NewUintFromBigInt            = sdkmath.NewUintFromBigInt
+	ValAddressFromBech32         = sdk.ValAddressFromBech32
 	AccAddressFromBech32         = sdk.AccAddressFromBech32
 	VerifyAddressFormat          = sdk.VerifyAddressFormat
 	GetFromBech32                = sdk.GetFromBech32
@@ -63,6 +64,7 @@ var (
 	Bech32ifyPubKey         = legacybech32.MarshalPubKey
 	Bech32PubKeyTypeConsPub = legacybech32.ConsPK
 	Bech32PubKeyTypeAccPub  = legacybech32.AccPK
+	Bech32PubkeyTypeValPK   = legacybech32.ValPK
 	Wrapf                   = errors.Wrapf
 	MustSortJSON            = sdk.MustSortJSON
 	CodeUnauthorized        = uint32(4)
@@ -77,6 +79,7 @@ type (
 	Coin       = sdk.Coin
 	Coins      = sdk.Coins
 	AccAddress = sdk.AccAddress
+	ValAddress = sdk.ValAddress
 	Attribute  = sdk.Attribute
 	Result     = sdk.Result
 	Event      = sdk.Event

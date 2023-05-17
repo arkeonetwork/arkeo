@@ -12,8 +12,6 @@ import (
 
 	"github.com/arkeonetwork/arkeo/docs"
 
-	"github.com/blang/semver"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -536,7 +534,6 @@ func New(
 		app.BankKeeper,
 		app.AccountKeeper,
 		app.StakingKeeper,
-		semver.MustParse("0.0.0"),
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper)
 

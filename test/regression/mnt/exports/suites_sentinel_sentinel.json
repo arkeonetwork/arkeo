@@ -7,7 +7,8 @@
       "next_contract_id": "0",
       "params": {},
       "providers": [],
-      "user_contract_sets": []
+      "user_contract_sets": [],
+      "version": "1"
     },
     "auth": {
       "accounts": [

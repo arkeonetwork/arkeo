@@ -60,7 +60,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 100m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		# add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m
+		add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)

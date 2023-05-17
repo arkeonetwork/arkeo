@@ -92,7 +92,8 @@
           ]
         }
       ],
-      "user_contract_sets": []
+      "user_contract_sets": [],
+      "version": "1"
     },
     "auth": {
       "accounts": [
@@ -266,7 +267,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "199999952",
+              "amount": "199999958",
               "denom": "uarkeo"
             }
           ]
@@ -284,7 +285,7 @@
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
           "coins": [
             {
-              "amount": "60",
+              "amount": "54",
               "denom": "uarkeo"
             }
           ]

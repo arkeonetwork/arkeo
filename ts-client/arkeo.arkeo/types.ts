@@ -1,3 +1,9 @@
+import { EventBondProvider } from "./types/arkeo/arkeo/events"
+import { EventModProvider } from "./types/arkeo/arkeo/events"
+import { EventOpenContract } from "./types/arkeo/arkeo/events"
+import { EventSettleContract } from "./types/arkeo/arkeo/events"
+import { EventCloseContract } from "./types/arkeo/arkeo/events"
+import { EventValidatorPayout } from "./types/arkeo/arkeo/events"
 import { Provider } from "./types/arkeo/arkeo/keeper"
 import { Contract } from "./types/arkeo/arkeo/keeper"
 import { ContractSet } from "./types/arkeo/arkeo/keeper"
@@ -12,6 +18,12 @@ import { Params } from "./types/arkeo/arkeo/params"
 
 
 export {     
+    EventBondProvider,
+    EventModProvider,
+    EventOpenContract,
+    EventSettleContract,
+    EventCloseContract,
+    EventValidatorPayout,
     Provider,
     Contract,
     ContractSet,
