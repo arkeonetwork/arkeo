@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/testutil/sample"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,16 +14,19 @@ func TestMsgSetVersion_ValidateBasic(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "invalid address",
-			msg: MsgSetVersion{
-				Creator: "invalid_address",
-			},
-			err: sdkerrors.ErrInvalidAddress,
-		}, {
 			name: "valid address",
 			msg: MsgSetVersion{
-				Creator: sample.AccAddress().String(),
+				Creator: sample.AccAddress(),
+				Version: 15,
 			},
+		},
+		{
+			name: "invalid version",
+			msg: MsgSetVersion{
+				Creator: sample.AccAddress(),
+				Version: 0,
+			},
+			err: ErrInvalidVersion,
 		},
 	}
 	for _, tt := range tests {

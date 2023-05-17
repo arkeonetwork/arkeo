@@ -79,7 +79,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
-	k.SetStoreVersion(ctx, common.GetCurrentVersion())
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())

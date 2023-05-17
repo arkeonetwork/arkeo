@@ -19,7 +19,7 @@ func CmdSetVersion() *cobra.Command {
 		Short: "Broadcast message set-version",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argVersion, err := cast.ToInt32E(args[0])
+			argVersion, err := cast.ToInt64E(args[0])
 			if err != nil {
 				return err
 			}
@@ -30,7 +30,7 @@ func CmdSetVersion() *cobra.Command {
 			}
 
 			msg := types.NewMsgSetVersion(
-				clientCtx.GetFromAddress().String(),
+				clientCtx.GetFromAddress(),
 				argVersion,
 			)
 			if err := msg.ValidateBasic(); err != nil {

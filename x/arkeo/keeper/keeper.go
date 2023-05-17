@@ -19,6 +19,7 @@ import (
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
@@ -33,13 +34,12 @@ type Keeper interface {
 	GetParams(ctx sdk.Context) types.Params
 	SetParams(ctx sdk.Context, params types.Params)
 	Cdc() codec.BinaryCodec
+	GetComputedVersion(ctx cosmos.Context) int64
 	GetVersion(ctx cosmos.Context) int64
-	GetStoreVersion(ctx cosmos.Context) int64
-	SetStoreVersion(ctx cosmos.Context, ver int64)
+	SetVersion(ctx cosmos.Context, ver int64)
 	GetKey(ctx cosmos.Context, prefix dbPrefix, key string) string
-	GetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress) int64
-	SetStoreVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress, ver int64)
-	GetConsensusVersion(ctx cosmos.Context) int64
+	GetVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress) int64
+	SetVersionForAddress(ctx cosmos.Context, _ cosmos.ValAddress, ver int64)
 	GetSupply(ctx cosmos.Context, denom string) cosmos.Coin
 	GetBalanceOfModule(ctx cosmos.Context, moduleName, denom string) cosmos.Int
 	SendFromModuleToModule(ctx cosmos.Context, from, to string, coin cosmos.Coins) error
@@ -168,26 +168,39 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
-func (k KVStore) GetVersion(ctx cosmos.Context) int64 {
-	ver := k.GetConsensusVersion(ctx)
-	storedVer := k.GetStoreVersion(ctx)
-	if ver > storedVer {
-		k.SetStoreVersion(ctx, ver)
-		return ver
+func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
+	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
+	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	storedVersion := k.GetVersion(ctx)
+	minNum := configs.GetConfigValues(storedVersion).GetInt64Value(configs.VersionConsensus)
+
+	min := int64(len(validators)) * minNum / 100
+	for _, val := range validators {
+		if !val.IsBonded() {
+			continue
+		}
+		ver := k.GetVersionForAddress(ctx, val.GetOperator())
+		if _, ok := versions[ver]; !ok {
+			versions[ver] = 0
+		}
+		versions[ver] += 1
+		if versions[ver] >= min {
+			return ver
+		}
 	}
-	return storedVer
+	return storedVersion
 }
 
-// SetStoreVersion save the store version
-func (k KVStore) SetStoreVersion(ctx cosmos.Context, value int64) {
+// SetVersion save the store version
+func (k KVStore) SetVersion(ctx cosmos.Context, value int64) {
 	key := k.GetKey(ctx, prefixVersion, "")
 	store := ctx.KVStore(k.storeKey)
 	ver := types.ProtoInt64{Value: value}
 	store.Set([]byte(key), k.cdc.MustMarshal(&ver))
 }
 
-// GetStoreVersion get the current key value store version
-func (k KVStore) GetStoreVersion(ctx cosmos.Context) int64 {
+// GetVersion get the current key value store version
+func (k KVStore) GetVersion(ctx cosmos.Context) int64 {
 	key := k.GetKey(ctx, prefixVersion, "")
 	store := ctx.KVStore(k.storeKey)
 	if !store.Has([]byte(key)) {
@@ -199,37 +212,16 @@ func (k KVStore) GetStoreVersion(ctx cosmos.Context) int64 {
 	return ver.Value
 }
 
-func (k KVStore) GetConsensusVersion(ctx cosmos.Context) int64 {
-	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
-	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
-	min := int64(len(validators)) * 9 / 10 // TODO: make these values configurable
-	for _, val := range validators {
-		if !val.IsBonded() {
-			continue
-		}
-		acc := cosmos.ValAddress(val.GetOperator())
-		ver := k.GetStoreVersionForAddress(ctx, acc)
-		if _, ok := versions[ver]; !ok {
-			versions[ver] = 0
-		}
-		versions[ver] += 1
-		if versions[ver] >= min {
-			return ver
-		}
-	}
-	return -1
-}
-
-// SetStoreVersionForAddress save the store version
-func (k KVStore) SetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress, value int64) {
+// SetVersionForAddress save the store version
+func (k KVStore) SetVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress, value int64) {
 	key := k.GetKey(ctx, prefixVersion, addr.String())
 	store := ctx.KVStore(k.storeKey)
 	ver := types.ProtoInt64{Value: value}
 	store.Set([]byte(key), k.cdc.MustMarshal(&ver))
 }
 
-// GetStoreVersionForAddress get the current key value store version
-func (k KVStore) GetStoreVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress) int64 {
+// GetVersionForAddress get the current key value store version
+func (k KVStore) GetVersionForAddress(ctx cosmos.Context, addr cosmos.ValAddress) int64 {
 	key := k.GetKey(ctx, prefixVersion, addr.String())
 	store := ctx.KVStore(k.storeKey)
 	if !store.Has([]byte(key)) {

@@ -83,7 +83,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		ak,
 		sk,
 	)
-	k.SetStoreVersion(ctx, common.GetCurrentVersion())
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
@@ -151,7 +151,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		ak,
 		sk,
 	)
-	k.SetStoreVersion(ctx, common.GetCurrentVersion())
+	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())

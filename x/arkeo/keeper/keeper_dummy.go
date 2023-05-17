@@ -35,13 +35,12 @@ func (k KVStoreDummy) Logger(ctx cosmos.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k KVStoreDummy) GetVersion(_ cosmos.Context) int64 { return -1 }
 func (k KVStoreDummy) GetKey(_ cosmos.Context, prefix dbPrefix, key string) string {
 	return fmt.Sprintf("%s/1/%s", prefix, key)
 }
 
-func (k KVStoreDummy) GetStoreVersion(ctx cosmos.Context) int64      { return -1 }
-func (k KVStoreDummy) SetStoreVersion(ctx cosmos.Context, ver int64) {}
+func (k KVStoreDummy) GetVersion(ctx cosmos.Context) int64      { return -1 }
+func (k KVStoreDummy) SetVersion(ctx cosmos.Context, ver int64) {}
 
 func (k KVStoreDummy) GetRuneBalanceOfModule(ctx cosmos.Context, moduleName string) cosmos.Int {
 	return cosmos.ZeroInt()

@@ -28,7 +28,7 @@ func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
 func (mgr *Manager) BeginBlock(ctx cosmos.Context, req abci.RequestBeginBlock) error {
 	// if local version is behind the consensus version, panic and don't try to
 	// create a new block
-	ver := mgr.keeper.GetVersion(ctx)
+	ver := mgr.keeper.GetComputedVersion(ctx)
 	if ver > configs.SWVersion {
 		panic(
 			fmt.Sprintf("Unsupported Version: update your binary (your version: %d, network consensus version: %d)",
@@ -37,6 +37,7 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context, req abci.RequestBeginBlock) e
 			),
 		)
 	}
+	mgr.keeper.SetVersion(ctx, ver) // update stored version
 
 	if err := mgr.ValidatorPayout(ctx, req.LastCommitInfo.GetVotes()); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
@@ -219,8 +220,9 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 				continue
 			}
 
-			valVersion := mgr.keeper.GetStoreVersionForAddress(ctx, val.GetOperator())
-			if valVersion < mgr.keeper.GetVersion(ctx) {
+			valVersion := mgr.keeper.GetVersionForAddress(ctx, val.GetOperator())
+			curVersion := mgr.keeper.GetVersion(ctx)
+			if valVersion < curVersion {
 				continue
 			}
 			acc := cosmos.AccAddress(val.GetOperator())

@@ -13,6 +13,7 @@ const (
 	HandlerOpenContract
 	HandlerCloseContract
 	HandlerClaimContractIncome
+	HandlerSetVersion
 	MaxSupply
 	MaxContractLength
 	OpenContractCost
@@ -21,6 +22,7 @@ const (
 	BlocksPerYear
 	EmissionCurve
 	ValidatorPayoutCycle
+	VersionConsensus
 )
 
 var nameToString = map[ConfigName]string{
@@ -29,6 +31,7 @@ var nameToString = map[ConfigName]string{
 	HandlerOpenContract:        "HandlerOpenContract",
 	HandlerCloseContract:       "HandlerCloseContract",
 	HandlerClaimContractIncome: "HandlerClaimContractIncome",
+	HandlerSetVersion:          "HandlerSetVersion",
 	MaxSupply:                  "MaxSupply",
 	MaxContractLength:          "MaxContractLength",
 	OpenContractCost:           "OpenContractCost",
@@ -37,6 +40,7 @@ var nameToString = map[ConfigName]string{
 	BlocksPerYear:              "BlocksPerYear",
 	EmissionCurve:              "EmissionCurve",
 	ValidatorPayoutCycle:       "ValidatorPayoutCycle",
+	VersionConsensus:           "VersionConsensus",
 }
 
 // String implement fmt.stringer

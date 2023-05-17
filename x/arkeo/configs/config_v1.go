@@ -11,6 +11,7 @@ func NewConfigValue010() *ConfigVals {
 			HandlerOpenContract:        0,                          // enable/disable open contract handler
 			HandlerCloseContract:       0,                          // enable/disable close contract handler
 			HandlerClaimContractIncome: 0,                          // enable/disable claim contract income handler
+			HandlerSetVersion:          0,                          // enable/disable set version handler
 			MaxContractLength:          5256000,                    // one year
 			MaxSupply:                  common.Tokens(121_000_000), // max supply of tokens
 			OpenContractCost:           common.Tokens(1),           // cost to open a contract
@@ -19,6 +20,7 @@ func NewConfigValue010() *ConfigVals {
 			BlocksPerYear:              5256666,                    // blocks per year
 			EmissionCurve:              6,                          // rate in which the reserve is depleted to pay validators
 			ValidatorPayoutCycle:       1,                          // how often validators are paid out rewards
+			VersionConsensus:           90,                         // out of 100, percentage of nodes on a specific version before it is accepted
 		},
 		boolValues:   map[ConfigName]bool{},
 		stringValues: map[ConfigName]string{},

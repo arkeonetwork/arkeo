@@ -19,7 +19,7 @@ func SimulateMsgSetVersion(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgSetVersion{
-			Creator: simAccount.Address.String(),
+			Creator: simAccount.Address,
 		}
 
 		// TODO: Handling the SetVersion simulation
