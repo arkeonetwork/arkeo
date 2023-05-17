@@ -62,8 +62,6 @@ type ConfigValues interface {
 
 // GetConfigValues will return an  implementation of ConfigValues which provide ways to get constant values
 func GetConfigValues(ver int64) ConfigValues {
-	if ver > 0 {
-		return NewConfigValue010()
-	}
-	return nil
+	// TODO: create a switcher based on version
+	return NewConfigValue010()
 }

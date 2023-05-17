@@ -96,7 +96,8 @@
           ]
         }
       ],
-      "user_contract_sets": []
+      "user_contract_sets": [],
+      "version": "1"
     },
     "auth": {
       "accounts": [
