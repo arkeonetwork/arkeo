@@ -171,10 +171,18 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
 	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+
+	// if there is only one validator, no need for consensus. Just return the
+	// validator's current version. This also helps makes
+	// integration/regression tests run the latest version
+	if len(validators) == 1 {
+		return configs.SWVersion
+	}
+
 	storedVersion := k.GetVersion(ctx)
 	minNum := configs.GetConfigValues(storedVersion).GetInt64Value(configs.VersionConsensus)
-
 	min := int64(len(validators)) * minNum / 100
+
 	for _, val := range validators {
 		if !val.IsBonded() {
 			continue
