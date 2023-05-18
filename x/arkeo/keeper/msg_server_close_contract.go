@@ -78,7 +78,21 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	_, err = k.mgr.SettleContract(ctx, contract, 0, true)
+	if contract.IsPayAsYouGo() {
+		// add a new expiration return deposit to user
+		newHeight := ctx.BlockHeight() + contract.SettlementDuration
+		expirationSet, err := k.GetContractExpirationSet(ctx, newHeight)
+		if err != nil {
+			return err
+		}
+		expirationSet.Append(contract.Id)
+		err = k.SetContractExpirationSet(ctx, expirationSet)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = k.mgr.SettleContract(ctx, contract, 0, contract.IsSubscription())
 	if err != nil {
 		return err
 	}

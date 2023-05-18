@@ -105,6 +105,30 @@ asserts:
   - .[0].claimed == false
 ---
 ########################################################################################
+# cancel pay-as-you-go from client
+########################################################################################
+type: tx-close-contract
+signer: {{ addr_cat }}
+creator: {{ addr_cat }}
+contract_id: 0
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: fox account balance should NOT increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000000
+---
+type: check
+description: ensure contract is closed
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.paid == "0"
+---
+########################################################################################
 # query specific claims on sentinel
 ########################################################################################
 type: check
@@ -116,7 +140,7 @@ asserts:
   - .contract_id == 0
 ---
 ########################################################################################
-# claim pay-as-you-go rewards
+# claim pay-as-you-go rewards, after cancellation
 ########################################################################################
 type: tx-claim-contract
 signer: {{ addr_fox }}

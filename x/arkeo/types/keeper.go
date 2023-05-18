@@ -59,10 +59,26 @@ func (contract Contract) Expiration() int64 {
 // but a claim can still be posted for previously made calls in order
 // to correctly settle the contract.
 func (contract Contract) SettlementPeriodEnd() int64 {
-	if contract.Type == ContractType_PAY_AS_YOU_GO {
+	if contract.IsPayAsYouGo() {
 		return contract.Expiration() + contract.SettlementDuration
 	}
 	return contract.Expiration()
+}
+
+func (contract Contract) IsPayAsYouGo() bool {
+	return contract.Type == ContractType_PAY_AS_YOU_GO
+}
+
+func (contract Contract) IsSubscription() bool {
+	return contract.Type == ContractType_SUBSCRIPTION
+}
+
+func (contract Contract) IsOpenAuthorization() bool {
+	return contract.Authorization == ContractAuthorization_OPEN
+}
+
+func (contract Contract) IsStrictAuthorization() bool {
+	return contract.Authorization == ContractAuthorization_STRICT
 }
 
 func (contract Contract) IsOpen(height int64) bool {
@@ -128,6 +144,10 @@ func (contractType *ContractType) UnmarshalJSON(b []byte) error {
 		*contractType = ContractType(ContractType_value[v])
 	}
 	return nil
+}
+
+func (exp *ContractExpirationSet) Append(id uint64) {
+	exp.ContractSet.ContractIds = append(exp.ContractSet.ContractIds, id)
 }
 
 func (contractAuth *ContractAuthorization) UnmarshalJSON(b []byte) error {

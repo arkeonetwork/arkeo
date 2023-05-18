@@ -149,6 +149,9 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Error("unable to fetch contract", "id", contractId, "error", err)
 			continue
 		}
+		if contract.Client.IsEmpty() {
+			continue
+		}
 
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {

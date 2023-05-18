@@ -294,7 +294,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// check if we've exceed the total number of pay-as-you-go queries
-	if contract.Type == types.ContractType_PAY_AS_YOU_GO {
+	if contract.IsPayAsYouGo() {
 		if contract.Deposit.IsNil() || contract.Deposit.LT(cosmos.NewInt(aa.Nonce*contract.Rate.Amount.Int64())) {
 			return http.StatusPaymentRequired, fmt.Errorf("contract spent")
 		}

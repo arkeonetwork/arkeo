@@ -9,6 +9,14 @@
               "0"
             ]
           },
+          "height": "15"
+        },
+        {
+          "contract_set": {
+            "contract_ids": [
+              "0"
+            ]
+          },
           "height": "23"
         }
       ],
@@ -192,7 +200,7 @@
             "@type": "/cosmos.crypto.secp256k1.PubKey",
             "key": "AoeYaXx+/R5+1IZCgOkRJH0MXSgmzEOLX4/x49vS4Xla"
           },
-          "sequence": "1"
+          "sequence": "2"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -250,7 +258,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "99999991",
+              "amount": "99999988",
               "denom": "uarkeo"
             }
           ]
@@ -259,7 +267,7 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "5355388717",
+              "amount": "6426466239",
               "denom": "stake"
             }
           ]
@@ -277,7 +285,7 @@
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
           "coins": [
             {
-              "amount": "9",
+              "amount": "12",
               "denom": "uarkeo"
             }
           ]
@@ -299,7 +307,7 @@
       },
       "supply": [
         {
-          "amount": "5355388717",
+          "amount": "6426466239",
           "denom": "stake"
         },
         {
@@ -378,7 +386,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "107107774.340000000000000000",
+            "amount": "128529324.780000000000000000",
             "denom": "stake"
           }
         ]
@@ -387,7 +395,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "5248280942.660000000000000000",
+              "amount": "6297936914.220000000000000000",
               "denom": "stake"
             }
           ],
@@ -406,7 +414,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "524828094.266000000000000000",
+                "amount": "629793691.422000000000000000",
                 "denom": "stake"
               }
             ]
@@ -420,7 +428,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "4723452848.394000000000000000",
+                "amount": "5668143222.798000000000000000",
                 "denom": "stake"
               }
             ]
@@ -536,8 +544,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6760127669846140.630585000000000000",
-        "inflation": "0.129999955190210585"
+        "annual_provisions": "6760127203815368.756702000000000000",
+        "inflation": "0.129999946228252702"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -568,7 +576,7 @@
           "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
           "validator_signing_info": {
             "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
-            "index_offset": "4",
+            "index_offset": "5",
             "jailed_until": "1970-01-01T00:00:00Z",
             "missed_blocks_counter": "0",
             "start_height": "0",
@@ -664,7 +672,7 @@
     },
     "version": {}
   },
-  "initial_height": "6",
+  "initial_height": "7",
   "validators": [
     {
       "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",
