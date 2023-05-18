@@ -25,7 +25,7 @@
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
-          "deposit": "100",
+          "deposit": "3",
           "duration": "10",
           "height": "2",
           "id": "0",
@@ -39,7 +39,7 @@
           },
           "service": 1,
           "settlement_duration": "11",
-          "settlement_height": "0",
+          "settlement_height": "15",
           "type": "PAY_AS_YOU_GO"
         }
       ],
@@ -71,16 +71,7 @@
           ]
         }
       ],
-      "user_contract_sets": [
-        {
-          "contract_set": {
-            "contract_ids": [
-              "0"
-            ]
-          },
-          "user": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
-        }
-      ],
+      "user_contract_sets": [],
       "version": "1"
     },
     "auth": {
@@ -258,7 +249,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "99999988",
+              "amount": "99999961",
               "denom": "uarkeo"
             }
           ]
@@ -267,17 +258,8 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "6426466239",
+              "amount": "16066160612",
               "denom": "stake"
-            }
-          ]
-        },
-        {
-          "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
-          "coins": [
-            {
-              "amount": "97",
-              "denom": "uarkeo"
             }
           ]
         },
@@ -285,7 +267,7 @@
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
           "coins": [
             {
-              "amount": "12",
+              "amount": "39",
               "denom": "uarkeo"
             }
           ]
@@ -294,7 +276,7 @@
           "address": "tarkeo1uhapc6jjq6ns0ydnk7zld5x7f5kl2ukemjw5fg",
           "coins": [
             {
-              "amount": "999999899999900",
+              "amount": "999999899999997",
               "denom": "uarkeo"
             }
           ]
@@ -307,7 +289,7 @@
       },
       "supply": [
         {
-          "amount": "6426466239",
+          "amount": "16066160612",
           "denom": "stake"
         },
         {
@@ -386,7 +368,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "128529324.780000000000000000",
+            "amount": "321323212.240000000000000000",
             "denom": "stake"
           }
         ]
@@ -395,7 +377,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "6297936914.220000000000000000",
+              "amount": "15744837399.760000000000000000",
               "denom": "stake"
             }
           ],
@@ -414,7 +396,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "629793691.422000000000000000",
+                "amount": "1574483739.976000000000000000",
                 "denom": "stake"
               }
             ]
@@ -428,7 +410,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "5668143222.798000000000000000",
+                "amount": "14170353659.784000000000000000",
                 "denom": "stake"
               }
             ]
@@ -544,8 +526,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6760127203815368.756702000000000000",
-        "inflation": "0.129999946228252702"
+        "annual_provisions": "6760123009538421.891755000000000000",
+        "inflation": "0.129999865570631755"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -576,7 +558,7 @@
           "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
           "validator_signing_info": {
             "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
-            "index_offset": "5",
+            "index_offset": "14",
             "jailed_until": "1970-01-01T00:00:00Z",
             "missed_blocks_counter": "0",
             "start_height": "0",
@@ -672,7 +654,7 @@
     },
     "version": {}
   },
-  "initial_height": "7",
+  "initial_height": "16",
   "validators": [
     {
       "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",

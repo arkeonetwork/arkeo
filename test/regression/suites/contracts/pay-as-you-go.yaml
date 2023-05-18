@@ -123,6 +123,13 @@ asserts:
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000000
 ---
 type: check
+description: cat account balance should NOT increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
+---
+type: check
 description: ensure contract is closed
 endpoint: http://localhost:1317/arkeo/contract/0
 asserts:
@@ -210,3 +217,31 @@ asserts:
   - .balances|length == 1
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
 ---
+########################################################################################
+# ensure contract is settled
+########################################################################################
+type: create-blocks
+count: 9
+---
+type: check
+description: fox account balance should NOT increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000003
+---
+type: check
+description: cat account balance should increase
+endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
+asserts:
+  - .balances|length == 1
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999997
+---
+type: check
+description: ensure contract is closed
+endpoint: http://localhost:1317/arkeo/contract/0
+asserts:
+  - .contract.paid == "3"
+  - .contract.deposit == "3"
+---
+
