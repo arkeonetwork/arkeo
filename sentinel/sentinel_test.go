@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -13,6 +14,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
+
+func setUpTest(t *testing.T, pk1, pk2 common.PubKey) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		switch {
+		case strings.HasPrefix(req.RequestURI, "/arkeo/active-contract/"):
+			httpTestHandler(t, rw, fmt.Sprintf(`{"provider":"%s","service":10,"client":"%s","type":1,"height":100,"duration":100,"rate":{"denom":"uarkeo","amount":"1"},"deposit":"100","paid":"0","id":1,"settlement_duration":10,"queries_per_minute":100}`, pk1, pk2))
+		default:
+			panic(fmt.Sprintf("could not serve request: %s", req.RequestURI))
+		}
+	}))
+}
 
 func TestHandleActiveContract(t *testing.T) {
 	testConfig := newTestConfig()
@@ -36,6 +48,9 @@ func TestHandleActiveContract(t *testing.T) {
 	openEvent := types.NewOpenContractEvent(openCost, &inputContract)
 	sdkEvt, err := sdk.TypedEventToEvent(&openEvent)
 	require.NoError(t, err)
+	server := setUpTest(t, testConfig.ProviderPubKey, inputContract.GetSpender())
+	defer server.Close()
+	proxy.proxies["arkeo-mainnet-fullnode"] = common.MustParseURL(server.URL)
 
 	resultEvent := makeResultEvent(sdkEvt, openEvent.Height)
 	proxy.handleOpenContractEvent(resultEvent)

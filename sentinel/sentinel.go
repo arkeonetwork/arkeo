@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"path"
@@ -260,7 +261,7 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
-	ser, ok := vars["service"]
+	service, ok := vars["service"]
 	if !ok {
 		respondWithError(w, "missing service in uri", http.StatusBadRequest)
 		return
@@ -273,29 +274,13 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 
 	providerPK := p.Config.ProviderPubKey
 
-	service, err := common.NewService(ser)
-	if err != nil {
-		p.logger.Error("fail to parse service", "error", err, "service", ser)
-		respondWithError(w, fmt.Sprintf("bad provider pubkey: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	spenderPK, err := common.NewPubKey(pubkey)
-	if err != nil {
-		p.logger.Error("fail to parse spender pubkey", "error", err, "pubkey", pubkey)
-		respondWithError(w, "Invalid spender pubkey", http.StatusBadRequest)
-		return
-	}
-
-	contract, err := p.MemStore.GetActiveContract(providerPK, service, spenderPK)
-	if err != nil {
-		p.logger.Error("fail to get contract from memstore", "error", err, "provider", providerPK, "service", service, "spender", spenderPK)
-		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
-		return
-	}
-
-	d, _ := json.Marshal(contract)
-	_, _ = w.Write(d)
+	r.URL.Path = fmt.Sprintf("/arkeo/active-contract/%s/%s/%s",
+		providerPK.String(),
+		service,
+		pubkey,
+	)
+	proxy := httputil.NewSingleHostReverseProxy(p.proxies["arkeo-mainnet-fullnode"])
+	proxy.ServeHTTP(w, r)
 }
 
 func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
