@@ -54,7 +54,7 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 	}
 
 	// open subscription contracts do NOT need to verify the signature
-	if contract.Type == types.ContractType_SUBSCRIPTION && contract.Authorization == types.ContractAuthorization_OPEN {
+	if contract.IsSubscription() && contract.IsOpenAuthorization() {
 		return nil
 	}
 

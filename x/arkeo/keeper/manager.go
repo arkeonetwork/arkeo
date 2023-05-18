@@ -149,6 +149,9 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Error("unable to fetch contract", "id", contractId, "error", err)
 			continue
 		}
+		if contract.Client.IsEmpty() {
+			continue
+		}
 
 		_, err = mgr.SettleContract(ctx, contract, 0, true)
 		if err != nil {
@@ -350,7 +353,11 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	var debt cosmos.Int
 	switch contract.Type {
 	case types.ContractType_SUBSCRIPTION:
-		debt = contract.Rate.Amount.MulRaw(ctx.BlockHeight() - contract.Height).Sub(contract.Paid)
+		height := ctx.BlockHeight()
+		if height > contract.SettlementPeriodEnd() {
+			height = contract.SettlementPeriodEnd()
+		}
+		debt = contract.Rate.Amount.MulRaw(height - contract.Height).Sub(contract.Paid)
 	case types.ContractType_PAY_AS_YOU_GO:
 		debt = contract.Rate.Amount.MulRaw(contract.Nonce).Sub(contract.Paid)
 	default:

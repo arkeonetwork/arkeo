@@ -273,11 +273,6 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
-	// confirm that the contract can not be closed by the client
-	closeContractMsg.Creator = userAddress
-	_, err = s.CloseContract(ctx, &closeContractMsg)
-	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
-
 	// reopen contract this time with a delagate address.
 	openContractMessage.Delegate = use2PubKey
 	_, err = s.OpenContract(ctx, &openContractMessage)
@@ -293,12 +288,8 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
-	// nor the client
-	closeContractMsg.Creator = userAddress
-	_, err = s.CloseContract(ctx, &closeContractMsg)
-	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
-
 	// unbond provider , unbond 100% will remove the provider
+	closeContractMsg.Creator = userAddress
 	k.RemoveProvider(ctx, providerPubKey, service)
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)

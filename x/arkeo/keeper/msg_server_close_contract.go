@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -65,18 +64,6 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	if !signerAccountAddress.Equals(clientAccountAddress) {
 		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
-	providerUnbonded, err := k.hasProviderUnbonded(ctx, contract.Provider, contract.Service)
-	if err != nil {
-		return err
-	}
-	if !providerUnbonded && contract.Type == types.ContractType_PAY_AS_YOU_GO {
-		// clients are not allowed to cancel a pay-as-you-go contract as it
-		// could be a way to game providers. IE, the client make 1,000 requests
-		// and before the provider can claim the rewards, the client cancels
-		// the contract. We do not want providers to feel "rushed" to claim
-		// their rewards or the income is gone.
-		return errors.Wrapf(types.ErrCloseContractUnauthorized, "client cannot cancel a pay-as-you-go contract")
-	}
 
 	if contract.IsExpired(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
@@ -85,21 +72,27 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 	return nil
 }
 
-func (k msgServer) hasProviderUnbonded(ctx cosmos.Context, providerKey common.PubKey, service common.Service) (bool, error) {
-	provider, err := k.Keeper.GetProvider(ctx, providerKey, service)
-	if err != nil {
-		return false, fmt.Errorf("fail to get provider,err: %w", err)
-	}
-	return provider.Bond.IsZero(), nil
-}
-
 func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseContract) error {
 	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
 	}
 
-	_, err = k.mgr.SettleContract(ctx, contract, 0, true)
+	if contract.IsPayAsYouGo() {
+		// add a new expiration return deposit to user
+		newHeight := ctx.BlockHeight() + contract.SettlementDuration
+		expirationSet, err := k.GetContractExpirationSet(ctx, newHeight)
+		if err != nil {
+			return err
+		}
+		expirationSet.Append(contract.Id)
+		err = k.SetContractExpirationSet(ctx, expirationSet)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = k.mgr.SettleContract(ctx, contract, 0, contract.IsSubscription())
 	if err != nil {
 		return err
 	}

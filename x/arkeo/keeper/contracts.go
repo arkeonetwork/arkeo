@@ -111,6 +111,9 @@ func (k KVStore) GetContractExpirationSet(ctx cosmos.Context, height int64) (typ
 		Height: height,
 	}
 	_, err := k.getContractExpirationSet(ctx, k.getContractExpirationSetKey(ctx, height), &record)
+	if record.ContractSet == nil {
+		record.ContractSet = &types.ContractSet{}
+	}
 	return record, err
 }
 

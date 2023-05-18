@@ -48,5 +48,5 @@ func TestContractExpirationSet(t *testing.T) {
 	k.RemoveContractExpirationSet(ctx, 100)
 	set, err = k.GetContractExpirationSet(ctx, set.Height)
 	require.NoError(t, err)
-	require.Nil(t, set.ContractSet)
+	require.Len(t, set.ContractSet.ContractIds, 0)
 }
