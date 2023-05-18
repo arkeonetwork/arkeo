@@ -274,16 +274,12 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 
 	providerPK := p.Config.ProviderPubKey
 
-	uri := common.MustParseURL(
-		fmt.Sprintf(
-			"%s/arkeo/active-contract/%s/%s/%s",
-			p.proxies["arkeo-mainnet-fullnode"].String(),
-			providerPK.String(),
-			service,
-			pubkey,
-		),
+	r.URL.Path = fmt.Sprintf("/arkeo/active-contract/%s/%s/%s",
+		providerPK.String(),
+		service,
+		pubkey,
 	)
-	proxy := httputil.NewSingleHostReverseProxy(uri)
+	proxy := httputil.NewSingleHostReverseProxy(p.proxies["arkeo-mainnet-fullnode"])
 	proxy.ServeHTTP(w, r)
 }
 

@@ -89,9 +89,9 @@ type: check
 description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/active-contract/swapi.dev/{{ pubkey_cat }}
 asserts:
-  - .provider == "{{ pubkey_fox }}"
-  - .service == 1
-  - .client == "{{ pubkey_cat }}"
+  - .contract.provider == "{{ pubkey_fox }}"
+  - .contract.service == 1
+  - .contract.client == "{{ pubkey_cat }}"
 ---
 ########################################################################################
 # query open claims on sentinel
