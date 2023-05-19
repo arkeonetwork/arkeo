@@ -31,20 +31,20 @@ description: ensure contract is created
 endpoint: http://localhost:1317/arkeo/contracts
 asserts:
   - .contract | length == 1
-  - .contract[0].id | tonumber == 0
+  - .contract[0].id | tonumber == 1
 ---
 type: check
 description: ensure contract is available at specific endpoint
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.type == "SUBSCRIPTION"
   - .contract.paid == "0"
 ---
 type: check
 description: check that contract is in directory service
-endpoint: http://localhost:7777/contract/0
+endpoint: http://localhost:7777/contract/1
 asserts:
-  - .contract_id | tonumber == 0
+  - .contract_id | tonumber == 1
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
   - .duration == 10
@@ -71,13 +71,15 @@ asserts:
 ########################################################################################
 type: check
 description: check can make paid request
-endpoint: http://localhost:3636/swapi.dev/api/people/1
+endpoint: http://localhost:3636/api/people/1
+headers:
+  arkservice: swapi.dev
 arkauth:
   signer: cat
-  id: "0"
+  id: "1"
   spender: {{ pubkey_cat }}
   nonce: "1"
-headers:
+assert_headers:
   Tier: "paid"
 asserts:
   - .name == "Luke Skywalker"
@@ -90,7 +92,7 @@ count: 13
 ---
 type: check
 description: ensure contract is closed
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "100"
 ---
@@ -103,9 +105,9 @@ asserts:
 ---
 type: check
 description: check that contract is in directory service
-endpoint: http://localhost:7777/contract/0
+endpoint: http://localhost:7777/contract/1
 asserts:
-  - .contract_id | tonumber == 0
+  - .contract_id | tonumber == 1
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
   - .settlement_duration == 11 
@@ -137,18 +139,18 @@ count: 1
 ---
 type: check
 description: ensure contract is available at specific endpoint
-endpoint: http://localhost:1317/arkeo/contract/1
+endpoint: http://localhost:1317/arkeo/contract/2
 asserts:
   - .contract.type == "SUBSCRIPTION"
   - .contract.paid == "0"
-  - .contract.id == "1"
+  - .contract.id == "2"
   - .contract.authorization == "OPEN"
 ---
 type: check
 description: check that contract is in directory service
-endpoint: http://localhost:7777/contract/1
+endpoint: http://localhost:7777/contract/2
 asserts:
-  - .contract_id | tonumber == 1
+  - .contract_id | tonumber == 2
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
   - .duration == 5
@@ -165,9 +167,9 @@ type: check
 description: check can make paid request
 endpoint: http://localhost:3636/swapi.dev/api/people/1
 arkauth:
-  id: "1"
+  id: "2"
   nosig: "true"
-headers:
+assert_headers:
   Tier: "paid"
 asserts:
   - .name == "Luke Skywalker"
@@ -178,14 +180,14 @@ asserts:
 type: tx-close-contract
 signer: {{ addr_dog }}
 creator: {{ addr_dog }}
-contract_id: 1
+contract_id: 2
 ---
 type: create-blocks
 count: 1
 ---
 type: check
 description: ensure contract is closed
-endpoint: http://localhost:1317/arkeo/contract/1
+endpoint: http://localhost:1317/arkeo/contract/2
 asserts:
   - .contract.paid == "0"
 ---
@@ -195,7 +197,7 @@ asserts:
 type: tx-close-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
-contract_id: 1
+contract_id: 2
 ---
 type: create-blocks
 count: 1
@@ -209,17 +211,16 @@ asserts:
 ---
 type: check
 description: ensure contract is closed
-endpoint: http://localhost:1317/arkeo/contract/1
+endpoint: http://localhost:1317/arkeo/contract/2
 asserts:
   - .contract.paid == "20"
 ---
 type: check
 description: check that contract is in directory service
-endpoint: http://localhost:7777/contract/1
+endpoint: http://localhost:7777/contract/2
 asserts:
-  - .contract_id == 1
+  - .contract_id == 2
   - .paid == 20
   - .reserve_contrib_asset == 2
 # - .reserve_contrib_usd == 10 # TODO
   - .settlement_duration == 11 
-

@@ -179,10 +179,11 @@ type OpCheck struct {
 	Method        string            `json:"method"`
 	Body          string            `json:"body"`
 	Params        map[string]string `json:"params"`
+	Headers       map[string]string `json:"headers"`
 	ArkAuth       map[string]string `json:"arkauth"`
 	ContractAuth  map[string]string `json:"contractauth"`
 	Status        int               `json:"status"`
-	AssertHeaders map[string]string `json:"headers"`
+	AssertHeaders map[string]string `json:"assert_headers"`
 	Asserts       []string          `json:"asserts"`
 }
 
@@ -302,24 +303,30 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 		log.Fatal().Err(err).Msg("failed to build request")
 	}
 
-	// add params
-	q := req.URL.Query()
-	for k, v := range op.Params {
-		q.Add(k, v)
+	for k, v := range op.Headers {
+		req.Header.Add(k, v)
 	}
+
+	// add auth headers
 	arkauth, authOK, err := createAuth(op.ArkAuth)
 	if err != nil {
 		return err
 	}
 	if authOK {
-		q.Add(sentinel.QueryArkAuth, arkauth)
+		req.Header.Add(sentinel.QueryArkAuth, arkauth)
 	}
 	contractAuth, contractAuthOK, err := createContractAuth(op.ContractAuth)
 	if err != nil {
 		return err
 	}
 	if contractAuthOK {
-		q.Add(sentinel.QueryContract, contractAuth)
+		req.Header.Add(sentinel.QueryContract, contractAuth)
+	}
+
+	// add params
+	q := req.URL.Query()
+	for k, v := range op.Params {
+		q.Add(k, v)
 	}
 	req.URL.RawQuery = q.Encode()
 

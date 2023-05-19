@@ -206,7 +206,7 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
-	require.Equal(t, contract.Id, uint64(0))
+	require.Equal(t, contract.Id, uint64(1))
 
 	clientPubKey := types.GetRandomPubKey()
 	clientAddress, err := clientPubKey.GetMyAddress()
@@ -229,7 +229,7 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
-	require.Equal(t, contract.Id, uint64(1))
+	require.Equal(t, contract.Id, uint64(2))
 
 	_, err = s.OpenContract(ctx, &msg)
 	require.ErrorIs(t, err, types.ErrOpenContractAlreadyOpen)
@@ -244,7 +244,7 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
-	require.Equal(t, contract.Id, uint64(2))
+	require.Equal(t, contract.Id, uint64(3))
 }
 
 func TestOpenContractWithSettlementPeriod(t *testing.T) {
@@ -314,7 +314,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	require.NoError(t, err)
 
 	require.False(t, contract.IsEmpty())
-	require.Equal(t, contract.Id, uint64(0))
+	require.Equal(t, contract.Id, uint64(1))
 
 	// confirm opening a new contract will fail since the user have an active one
 	_, err = s.OpenContract(ctx, &msg)

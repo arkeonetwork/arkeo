@@ -135,7 +135,7 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt atypes.EventOpenContr
 	)
 }
 
-func (d *DirectoryDB) CloseContract(contractID, height int64) (*Entity, error) {
+func (d *DirectoryDB) CloseContract(contractID uint64, height int64) (*Entity, error) {
 	conn, err := d.getConnection()
 	defer conn.Release()
 	if err != nil {

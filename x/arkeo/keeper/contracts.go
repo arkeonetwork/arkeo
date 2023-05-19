@@ -149,6 +149,9 @@ func (kvStore KVStore) GetNextContractId(ctx cosmos.Context) uint64 {
 		kvStore.cdc.MustUnmarshal(bz, &val)
 		contractId = val.GetValue()
 	}
+	if contractId == 0 {
+		return 1
+	}
 	return contractId
 }
 

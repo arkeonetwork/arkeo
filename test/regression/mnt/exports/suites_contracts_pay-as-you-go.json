@@ -6,7 +6,7 @@
         {
           "contract_set": {
             "contract_ids": [
-              "0"
+              "1"
             ]
           },
           "height": "15"
@@ -14,7 +14,7 @@
         {
           "contract_set": {
             "contract_ids": [
-              "0"
+              "1"
             ]
           },
           "height": "23"
@@ -28,7 +28,7 @@
           "deposit": "3",
           "duration": "10",
           "height": "2",
-          "id": "0",
+          "id": "1",
           "nonce": "1",
           "paid": "3",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
@@ -43,7 +43,7 @@
           "type": "PAY_AS_YOU_GO"
         }
       ],
-      "next_contract_id": "1",
+      "next_contract_id": "2",
       "params": {},
       "providers": [
         {
