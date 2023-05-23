@@ -78,7 +78,7 @@ func MustParseURL(uri string) *url.URL {
 func GetCurrentVersion() int64 {
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "./../")
-	dat, err := ioutil.ReadFile(path.Join(dir, "version"))
+	dat, err := ioutil.ReadFile(path.Join(dir, "chain.version"))
 	if err != nil {
 		panic(err)
 	}

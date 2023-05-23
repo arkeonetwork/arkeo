@@ -19,14 +19,16 @@ PROJECT_NAME= arkeo
 DOCKER         := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
-VERSION:=$(shell cat version)
+CHAIN_VERSION:=$(shell cat chain.version)
+SENTINEL_VERSION:=$(shell cat sentinel.version)
 TAG?=latest
-ldflags = -X github.com/arkeonetwork/arkeo/config.Version=$(VERSION) \
-          -X github.com/arkeonetwork/arkeo/config.GitCommit=$(COMMIT) \
-          -X github.com/arkeonetwork/arkeo/config.BuildTime=${NOW} \
+ldflags = -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=$(CHAIN_VERSION) \
+		  -X github.com/arkeonetwork/arkeo/sentinel.Version=$(SENTINEL_VERSION) \
+          -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit=$(COMMIT) \
+          -X github.com/arkeonetwork/arkeo/x/arkeo/configs.BuildTime=${NOW} \
 		  -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo \
-		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
+		  -X github.com/cosmos/cosmos-sdk/version.Version=$(CHAIN_VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X github.com/cosmos/cosmos-sdk/version.BuildTags=$(TAG)
 
@@ -114,7 +116,7 @@ test-watch:
 # ------------------------------ Regression Tests ------------------------------
 
 test-regression:
-	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run -i --rm --build arkeo
+	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run -i -p 1317:1317 -p 3636:3636 -p 26657 --rm --build arkeo
 
 test-regression-ci: test-regression
 
