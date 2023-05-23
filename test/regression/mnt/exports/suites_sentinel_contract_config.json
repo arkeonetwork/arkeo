@@ -68,7 +68,7 @@
           "type": "SUBSCRIPTION"
         }
       ],
-      "next_contract_id": "0",
+      "next_contract_id": "1",
       "params": {},
       "providers": [
         {

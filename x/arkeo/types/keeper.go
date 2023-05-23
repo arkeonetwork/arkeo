@@ -102,9 +102,6 @@ func (contract Contract) IsSettled(height int64) bool {
 	if contract.IsOpen(height) {
 		return false
 	}
-	if contract.SettlementHeight > 0 {
-		return true // contract has already been settled.
-	}
 	return contract.SettlementPeriodEnd() <= height
 }
 

@@ -158,7 +158,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	contract, err := s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
 	require.NoError(t, err)
 	require.False(t, contract.IsEmpty())
-	require.Equal(t, contract.Id, uint64(0))
+	require.Equal(t, contract.Id, uint64(1))
 	require.Equal(t, contract.Client, userPubKey)
 
 	// confirm that another user cannot close the contract
@@ -188,7 +188,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 
 	contract, err = s.GetActiveContractForUser(ctx, user2PubKey, providerPubKey, service)
 	require.NoError(t, err)
-	require.Equal(t, contract.Id, uint64(1))
+	require.Equal(t, contract.Id, uint64(2))
 	require.False(t, contract.IsEmpty())
 	require.True(t, contract.Delegate.Equals(user2PubKey))
 	closeContractMsg.ContractId = contract.Id

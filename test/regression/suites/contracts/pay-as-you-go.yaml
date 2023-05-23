@@ -34,18 +34,18 @@ asserts:
 ---
 type: check
 description: ensure contract is available at specific endpoint
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.type == "PAY_AS_YOU_GO"
   - .contract.paid == "0"
-  - .contract.id == "0"
+  - .contract.id == "1"
   - .contract.nonce == "0"
 ---
 type: check
 description: check that contract is in directory service
-endpoint: http://localhost:7777/contract/0
+endpoint: http://localhost:7777/contract/1
 asserts:
-  - .contract_id | tonumber == 0
+  - .contract_id | tonumber == 1
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "PAY_AS_YOU_GO"
   - .duration == 10
@@ -72,9 +72,9 @@ description: check can make paid request
 endpoint: http://localhost:3636/swapi.dev/api/people/1
 arkauth:
   signer: cat
-  id: "0"
+  id: "1"
   nonce: "1"
-headers:
+assert_headers:
   Tier: "paid"
 asserts:
   - .name == "Luke Skywalker"
@@ -101,7 +101,7 @@ description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/open-claims
 asserts:
   - length == 1
-  - .[0].signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
+  - .[0].signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
   - .[0].claimed == false
 ---
 ########################################################################################
@@ -110,7 +110,7 @@ asserts:
 type: tx-close-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
-contract_id: 0
+contract_id: 1
 ---
 type: create-blocks
 count: 1
@@ -131,7 +131,7 @@ asserts:
 ---
 type: check
 description: ensure contract is closed
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "0"
 ---
@@ -140,11 +140,11 @@ asserts:
 ########################################################################################
 type: check
 description: ensure contract shows up in active contracts
-endpoint: http://localhost:3636/claim/0
+endpoint: http://localhost:3636/claim/1
 asserts:
-  - .signature == "df75d819c52f4ab5f1cf85f3e51388ad42cf5f8e3c9ed5678eb8401c3b90e1ef4f7dc699e742a5fc4f6284e36c44408d657bb81ab1f2ddada25c74d79e07457a"
+  - .signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
   - .claimed == false
-  - .contract_id == 0
+  - .contract_id == 1
 ---
 ########################################################################################
 # claim pay-as-you-go rewards, after cancellation
@@ -152,11 +152,11 @@ asserts:
 type: tx-claim-contract
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
-contractId: 0
+contract_id: 1
 nonce: 1
 arkauth:
   signer: cat
-  id: "0"
+  id: "1"
   nonce: "1"
 ---
 type: create-blocks
@@ -164,11 +164,11 @@ count: 1
 ---
 type: check
 description: ensure contract is available at specific endpoint
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.type == "PAY_AS_YOU_GO"
   - .contract.paid == "3"
-  - .contract.id == "0"
+  - .contract.id == "1"
 ---
 type: check
 description: cat account balance should decrease
@@ -192,11 +192,11 @@ asserts:
 type: tx-claim-contract
 signer: {{ addr_fox }}
 creator: {{ addr_fox }}
-contractId: 0
+contract_id: 1
 nonce: 1
 arkauth:
   signer: cat
-  id: "0"
+  id: "1"
   nonce: "1"
 ---
 type: create-blocks
@@ -204,11 +204,11 @@ count: 1
 ---
 type: check
 description: ensure contract is available at specific endpoint
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.type == "PAY_AS_YOU_GO"
   - .contract.paid == "3"
-  - .contract.id == "0"
+  - .contract.id == "1"
 ---
 type: check
 description: cat account balance should NOT decrease
@@ -239,9 +239,8 @@ asserts:
 ---
 type: check
 description: ensure contract is closed
-endpoint: http://localhost:1317/arkeo/contract/0
+endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "3"
   - .contract.deposit == "3"
 ---
-

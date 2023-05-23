@@ -19,6 +19,7 @@ import (
 const (
 	QueryArkAuth  = "arkauth"
 	QueryContract = "arkcontract"
+	ServiceHeader = "arkservice"
 )
 
 // Create a map to hold the rate limiters for each visitor and a mutex.
@@ -146,27 +147,44 @@ func (auth ContractAuth) String() string {
 	return fmt.Sprintf("Contract Id: %d, Timestamp: %d, Signature: %s", auth.ContractId, auth.Timestamp, sig)
 }
 
+func (p Proxy) fetchArkAuth(r *http.Request) (aa ArkAuth, err error) {
+	rawHeader := r.Header.Get(QueryArkAuth)
+	if len(rawHeader) > 0 {
+		aa, err = parseArkAuth(rawHeader)
+		if err != nil {
+			return aa, err
+		}
+		return aa, nil
+	}
+	args := r.URL.Query()
+	raw, aaOK := args[QueryArkAuth]
+	if aaOK {
+		aa, err = parseArkAuth(raw[0])
+		if err != nil {
+			return aa, err
+		}
+	}
+	return aa, nil
+}
+
 func (p Proxy) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		var aa ArkAuth
-		args := r.URL.Query()
-		raw, aaOK := args[QueryArkAuth]
-		if aaOK {
-			aa, err = parseArkAuth(raw[0])
-			if err != nil {
-				p.logger.Error("failed to parse ark auth", "error", err)
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
+		aa, err := p.fetchArkAuth(r)
+		if err != nil {
+			p.logger.Error("failed to parse ark auth", "error", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		remoteAddr := p.getRemoteAddr(r)
-		contract, err := p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
-		if err != nil {
-			p.logger.Error("failed to fetch contract", "error", err)
+		var contract types.Contract
+		if aa.ContractId > 0 {
+			contract, err = p.MemStore.Get(strconv.FormatUint(aa.ContractId, 10))
+			if err != nil {
+				p.logger.Error("failed to fetch contract", "error", err)
+			}
 		}
 		// collect contract configuration
-		if contract.Id > 0 {
+		if !contract.Client.IsEmpty() {
 			conf, err := p.ContractConfigStore.Get(contract.Id)
 			if err != nil {
 				p.logger.Error("failed to fetch contract configuration", "error", err)
@@ -196,16 +214,19 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			}
 		}
 
-		if err == nil && (contract.Authorization == types.ContractAuthorization_OPEN || aa.Validate(p.Config.ProviderPubKey) == nil) {
+		if err == nil && (contract.IsOpenAuthorization() || aa.Validate(p.Config.ProviderPubKey) == nil) {
 			p.logger.Info("serving paid requests", "remote-addr", remoteAddr)
 			w.Header().Set("tier", "paid")
 
 			// ensure service of the contract matches first item in the path
-			parts := strings.Split(r.URL.Path, "/")
-			serviceName := parts[1]
+			serviceName := r.Header.Get(ServiceHeader)
+			if len(serviceName) == 0 {
+				parts := strings.Split(r.URL.Path, "/")
+				serviceName = parts[1]
+			}
 			ser, err := common.NewService(serviceName)
 			if err != nil || ser != contract.Service {
-				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d): %s", ser, contract.Service, err.Error()), http.StatusUnauthorized)
+				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d)", ser, contract.Service), http.StatusUnauthorized)
 				return
 			}
 

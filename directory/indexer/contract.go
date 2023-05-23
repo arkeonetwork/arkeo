@@ -32,22 +32,13 @@ func (a *IndexerApp) handleOpenContractEvent(evt atypes.EventOpenContract) error
 }
 
 func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) error {
-	contracts, err := a.db.FindContractsByPubKeys(evt.Service, evt.ProviderPubkey, evt.GetDelegatePubkey())
-	if err != nil {
-		return errors.Wrapf(err, "error finding contract for %s:%s %s", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey())
-	}
-	if len(contracts) < 1 {
-		return fmt.Errorf("no contracts found: %s:%s %s", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey())
-	}
-
-	// FindContractsByPubKeys returns by id descending (newest)
-	contract := contracts[0]
-	if _, err = a.db.UpsertCloseContractEvent(contract.ID, evt); err != nil {
-		return errors.Wrapf(err, "error upserting open contract event")
-	}
-
-	if _, err = a.db.CloseContract(contract.ID, evt.EventHeight); err != nil {
-		return errors.Wrapf(err, "error closing contract %d", contract.ID)
+	/*
+		if _, err = a.db.UpsertCloseContractEvent(contract.ID, evt); err != nil {
+			return errors.Wrapf(err, "error upserting close contract event")
+		}
+	*/
+	if _, err := a.db.CloseContract(evt.ContractId, evt.EventHeight); err != nil {
+		return errors.Wrapf(err, "error closing contract %d", evt.ContractId)
 	}
 	return nil
 }

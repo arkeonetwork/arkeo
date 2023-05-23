@@ -18,12 +18,16 @@ func CmdOpenContract() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "open-contract [provider_pubkey] [service] [client_pubkey] [c-type] [deposit] [duration] [rate] [queries-per-minute] [settlement-duration] [authorization-optional] [delegation-optional]",
 		Short: "Broadcast message openContract",
-		Args:  cobra.ExactArgs(8),
+		Args:  cobra.MinimumNArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
 			argService := args[1]
 			argClient := args[2]
 			argDeposit := args[4]
+			deposit, ok := cosmos.NewIntFromString(argDeposit)
+			if !ok {
+				return fmt.Errorf("bad deposit amount: %s", argDeposit)
+			}
 
 			pubkey, err := common.NewPubKey(argPubkey)
 			if err != nil {
@@ -60,18 +64,16 @@ func CmdOpenContract() *cobra.Command {
 				return err
 			}
 
-			argContractAuth, err := cast.ToInt32E(args[9])
-			if err != nil {
-				return err
-			}
-
-			deposit, ok := cosmos.NewIntFromString(argDeposit)
-			if !ok {
-				return fmt.Errorf("bad deposit amount: %s", argDeposit)
+			argContractAuth := int32(0)
+			if len(args) > 9 {
+				argContractAuth, err = cast.ToInt32E(args[9])
+				if err != nil {
+					return err
+				}
 			}
 
 			delegate := common.EmptyPubKey
-			if len(args) > 9 {
+			if len(args) > 10 {
 				delegate, err = common.NewPubKey(args[10])
 				if err != nil {
 					return err

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -192,7 +193,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 		if evt.Type == types.EventTypeSettleContract {
 			input := make(map[string]string)
 			for _, attr := range evt.Attributes {
-				input[string(attr.Key)] = string(attr.Value)
+				input[string(attr.Key)] = strings.Trim(string(attr.Value), `"`)
 			}
 			evt, err := parseContractSettlementEvent(input)
 			if err != nil {

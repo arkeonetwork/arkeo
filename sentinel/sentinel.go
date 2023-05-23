@@ -99,7 +99,13 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.RawQuery = values.Encode()
 
 	parts := strings.Split(r.URL.Path, "/")
-	serviceName := parts[1]
+
+	serviceName := r.Header.Get(ServiceHeader)
+	pulledFromPath := false
+	if len(serviceName) == 0 && len(parts) > 1 {
+		pulledFromPath = true
+		serviceName = parts[1]
+	}
 
 	uri, exists := p.proxies[serviceName]
 	if !exists {
@@ -110,8 +116,10 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	r.URL.Scheme = uri.Scheme
 	r.URL.Host = uri.Host
 	r.URL.User = uri.User
-	parts[1] = uri.Path // replace service name with uri path (if exists)
-	r.URL.Path = path.Join(parts...)
+	if pulledFromPath {
+		parts[1] = uri.Path // replace service name with uri path (if exists)
+		r.URL.Path = path.Join(parts...)
+	}
 
 	// Sanitize URL
 	// ensure path always has "/" prefix
@@ -158,11 +166,10 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check authorization
-	args := r.URL.Query()
 	var auth ContractAuth
-	raw, ok := args[QueryContract]
-	if ok {
-		auth, err = parseContractAuth(raw[0])
+	raw := r.Header.Get(QueryContract)
+	if len(raw) > 0 {
+		auth, err = parseContractAuth(raw)
 		if err != nil {
 			p.logger.Error("fail to parse contract auth", "error", err, "auth", raw[0])
 			respondWithError(w, fmt.Sprintf("bad contract auth: %s", err), http.StatusBadRequest)

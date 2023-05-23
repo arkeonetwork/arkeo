@@ -6,7 +6,7 @@
         {
           "contract_set": {
             "contract_ids": [
-              "0"
+              "1"
             ]
           },
           "height": "12"
@@ -14,7 +14,7 @@
         {
           "contract_set": {
             "contract_ids": [
-              "1"
+              "2"
             ]
           },
           "height": "21"
@@ -28,7 +28,7 @@
           "deposit": "100",
           "duration": "10",
           "height": "2",
-          "id": "0",
+          "id": "1",
           "nonce": "0",
           "paid": "100",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
@@ -49,7 +49,7 @@
           "deposit": "20",
           "duration": "5",
           "height": "16",
-          "id": "1",
+          "id": "2",
           "nonce": "0",
           "paid": "20",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
@@ -64,7 +64,7 @@
           "type": "SUBSCRIPTION"
         }
       ],
-      "next_contract_id": "2",
+      "next_contract_id": "3",
       "params": {},
       "providers": [
         {
