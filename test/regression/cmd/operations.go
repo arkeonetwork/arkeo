@@ -16,12 +16,14 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel"
 	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -58,6 +60,8 @@ func NewOperation(opMap map[string]any) Operation {
 		op = &OpState{}
 	case "check":
 		op = &OpCheck{}
+	case "check-websocket":
+		op = &OpCheckWebsocket{}
 	case "create-blocks":
 		op = &OpCreateBlocks{}
 	case "tx-send":
@@ -166,6 +170,60 @@ func (op *OpState) Execute(*os.Process, chan string) error {
 	}
 
 	return f.Close()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// OpCheckWebsocket
+////////////////////////////////////////////////////////////////////////////////////////
+
+type OpCheckWebsocket struct {
+	OpBase        `yaml:",inline"`
+	Description   string            `json:"description"`
+	Endpoint      string            `json:"endpoint"`
+	Method        string            `json:"method"`
+	Body          string            `json:"body"`
+	Params        map[string]string `json:"params"`
+	Headers       map[string]string `json:"headers"`
+	ArkAuth       map[string]string `json:"arkauth"`
+	ContractAuth  map[string]string `json:"contractauth"`
+	Status        int               `json:"status"`
+	AssertHeaders map[string]string `json:"assert_headers"`
+	Asserts       []string          `json:"asserts"`
+}
+
+func (op *OpCheckWebsocket) Execute(_ *os.Process, logs chan string) error {
+	// abort if no endpoint is set (empty check op is allowed for breakpoint convenience)
+	if op.Endpoint == "" {
+		return fmt.Errorf("check endpoint")
+	}
+
+	uri := common.MustParseURL(op.Endpoint)
+
+	// Connect to WebSocket server.
+	c, _, err := websocket.DefaultDialer.Dial(uri.String(), nil)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	// Write a message to the WebSocket server
+	err = c.WriteMessage(websocket.TextMessage, []byte("ping"))
+	if err != nil {
+		return err
+	}
+
+	// This loop continuously reads from the WebSocket connection and prints
+	// received messages to the console.
+	timeout := time.After(5 * time.Second)
+	tick := time.Tick(500 * time.Millisecond)
+	for {
+		select {
+		case <-timeout:
+			return fmt.Errorf("websocket request timeout")
+		case <-tick:
+			return nil
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

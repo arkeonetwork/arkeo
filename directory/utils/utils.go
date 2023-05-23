@@ -53,7 +53,7 @@ func IsNearEqual(a, b, epsilon float64) bool {
 }
 
 // see arkeo-protocol/common/service.go
-var validServices = map[string]struct{}{"arkeo-mainnet-fullnode": {}, "btc-mainnet-fullnode": {}, "eth-mainnet-fullnode": {}, "gaia-mainnet-rpc-archive": {}, "swapi.dev": {}}
+var validServices = map[string]struct{}{"arkeo-mainnet-fullnode": {}, "btc-mainnet-fullnode": {}, "eth-mainnet-fullnode": {}, "gaia-mainnet-rpc-archive": {}, "mock": {}}
 
 func ValidateService(service string) (ok bool) {
 	_, ok = validServices[service]

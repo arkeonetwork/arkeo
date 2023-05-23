@@ -93,7 +93,7 @@ coverage-report: test-coverage
 	@go tool cover -html=coverage.txt
 
 tools:
-	go install ${BUILD_FLAGS} ./tools/signhere ./tools/curleo
+	go install ${BUILD_FLAGS} ./tools/signhere ./tools/curleo ./tools/mock-daemon
 
 test-coverage-sum:
 	@go run gotest.tools/gotestsum --junitfile report.xml --format testname -- ${TEST_BUILD_FLAGS} -v -coverprofile=coverage.txt -covermode count ${TEST_DIR}
@@ -124,6 +124,7 @@ test-regression-coverage:
 # internal target used in docker build
 _build-test-regression:
 	@go install -ldflags '$(ldflags)' -tags=testnet,regtest ${BINARIES}
+	@go install ${BUILD_FLAGS} ./tools/mock-daemon
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-arkeod ./cmd/arkeod
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-sentinel ./cmd/sentinel
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-api ./cmd/directory/directory-api

@@ -12,7 +12,7 @@ type: tx-open-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
-service: "swapi.dev"
+service: "mock"
 client: {{ pubkey_cat }}
 contract_type: "PAY_AS_YOU_GO"
 queries_per_minute: 1
@@ -69,7 +69,7 @@ asserts:
 ########################################################################################
 type: check
 description: check can make paid request
-endpoint: http://localhost:3636/swapi.dev/api/people/1
+endpoint: http://localhost:3636/mock/ping
 arkauth:
   signer: cat
   id: "1"
@@ -77,7 +77,7 @@ arkauth:
 assert_headers:
   Tier: "paid"
 asserts:
-  - .name == "Luke Skywalker"
+  - .ping == "pong"
 ---
 type: create-blocks
 count: 1
@@ -87,7 +87,7 @@ count: 1
 ########################################################################################
 type: check
 description: ensure contract shows up in active contracts
-endpoint: http://localhost:3636/active-contract/swapi.dev/{{ pubkey_cat }}
+endpoint: http://localhost:3636/active-contract/mock/{{ pubkey_cat }}
 asserts:
   - .contract.provider == "{{ pubkey_fox }}"
   - .contract.service == 1

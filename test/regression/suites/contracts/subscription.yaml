@@ -12,7 +12,7 @@ type: tx-open-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
-service: "swapi.dev"
+service: "mock"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 queries_per_minute: 1
@@ -57,7 +57,7 @@ asserts:
   - .rate.amount == "10"
   - .rate.denom == "uarkeo"
   - .provider == "{{ pubkey_fox }}"
-  - .service == "swapi.dev"
+  - .service == "mock"
 ---
 type: check
 description: cat account balance should decrease
@@ -71,9 +71,9 @@ asserts:
 ########################################################################################
 type: check
 description: check can make paid request
-endpoint: http://localhost:3636/api/people/1
+endpoint: http://localhost:3636/ping
 headers:
-  arkservice: swapi.dev
+  arkservice: mock
 arkauth:
   signer: cat
   id: "1"
@@ -82,7 +82,7 @@ arkauth:
 assert_headers:
   Tier: "paid"
 asserts:
-  - .name == "Luke Skywalker"
+  - .ping == "pong"
 ---
 ########################################################################################
 # check subscription settles okay
@@ -122,7 +122,7 @@ type: tx-open-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 provider: {{ pubkey_fox }}
-service: "swapi.dev"
+service: "mock"
 client: {{ pubkey_cat }}
 contract_type: "SUBSCRIPTION"
 queries_per_minute: 1
@@ -165,14 +165,14 @@ asserts:
 ########################################################################################
 type: check
 description: check can make paid request
-endpoint: http://localhost:3636/swapi.dev/api/people/1
+endpoint: http://localhost:3636/mock/ping
 arkauth:
   id: "2"
   nosig: "true"
 assert_headers:
   Tier: "paid"
 asserts:
-  - .name == "Luke Skywalker"
+  - .ping == "pong"
 ---
 ########################################################################################
 # cancel subscription with bad address

@@ -14,6 +14,8 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
+	"github.com/koding/websocketproxy"
 	"github.com/sirupsen/logrus"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -82,8 +84,8 @@ func loadProxies() map[string]*url.URL {
 			proxies[serviceName] = common.MustParseURL("http://gaia-daemon:9090")
 		case "gaia-mainnet-rpc":
 			proxies[serviceName] = common.MustParseURL("http://gaia-daemon:26657")
-		case "swapi.dev":
-			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("https://%s", serviceName))
+		case "mock":
+			proxies[serviceName] = common.MustParseURL("http://localhost:3765")
 		default:
 			proxies[serviceName] = common.MustParseURL(fmt.Sprintf("http://%s", serviceName))
 		}
@@ -125,6 +127,16 @@ func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) 
 	// ensure path always has "/" prefix
 	if len(r.URL.Path) > 1 && !strings.HasPrefix(r.URL.Path, "/") {
 		r.URL.Path = fmt.Sprintf("/%s", r.URL.Path)
+	}
+
+	// check for the WebSocket upgrade header
+	if websocket.IsWebSocketUpgrade(r) {
+		fmt.Println(">>>>>>> Entering websocket....")
+		wsProxyURL := *r.URL
+		wsProxyURL.Scheme = "ws" // use the WebSocket scheme
+		wsProxy := websocketproxy.NewProxy(&wsProxyURL)
+		wsProxy.ServeHTTP(w, r)
+		return
 	}
 
 	// Serve a reverse proxy for a given url
