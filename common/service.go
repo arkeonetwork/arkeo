@@ -11,15 +11,15 @@ type (
 )
 
 const (
-	EmptyService    Service = iota
-	StarWarsService Service = 1
-	BTCService      Service = 10
-	ETHService      Service = 20
+	EmptyService Service = iota
+	MockService  Service = 1
+	BTCService   Service = 10
+	ETHService   Service = 20
 )
 
 var ServiceLookup = map[string]int32{
 	"unknown":                      0,
-	"swapi.dev":                    1, // star wars API for development purposes
+	"mock":                         1, // mock service for development purposes
 	"arkeo-mainnet-fullnode":       2,
 	"avax-mainnet-fullnode":        3,
 	"avax-mainnet-archivenode":     4,
@@ -67,7 +67,7 @@ var ServiceLookup = map[string]int32{
 
 var ServiceReverseLookup = map[Service]string{
 	0:  "unknown",
-	1:  "swapi.dev",
+	1:  "mock",
 	2:  "arkeo-mainnet-fullnode",
 	3:  "avax-mainnet-fullnode",
 	4:  "avax-mainnet-archivenode",

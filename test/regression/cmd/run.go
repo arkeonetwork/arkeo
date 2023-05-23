@@ -309,6 +309,12 @@ func run(path string) error {
 			sigkill: syscall.SIGKILL,
 		},
 		{
+			name:    "mock",
+			cmd:     []string{"mock-daemon"},
+			ports:   []string{"3765"},
+			sigkill: syscall.SIGKILL,
+		},
+		{
 			name:  "directory-api",
 			cmd:   []string{"directory-api"},
 			ports: []string{"7777"},

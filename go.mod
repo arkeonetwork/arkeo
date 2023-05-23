@@ -156,6 +156,7 @@ require (
 	github.com/jpillora/sizestr v1.0.0 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
+	github.com/koding/websocketproxy v0.0.0-20181220232114-7ed82d81a28c // indirect
 	github.com/lib/pq v1.10.6 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect

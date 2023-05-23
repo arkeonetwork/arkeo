@@ -17,9 +17,16 @@ asserts:
 ########################################################################################
 type: check
 description: check tier header
-endpoint: http://localhost:3636/swapi.dev/api/people/1
+endpoint: http://localhost:3636/mock/ping
 headers:
   Tier: "free"
 status: 200
 asserts:
-  - .name == "Luke Skywalker"
+  - .ping == "pong"
+---
+########################################################################################
+# check websockets work
+########################################################################################
+type: check-websocket
+description: check websocket connection
+endpoint: ws://localhost:3636/mock/ws
