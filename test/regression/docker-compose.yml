@@ -9,6 +9,7 @@ services:
       dockerfile: ./test/regression/Dockerfile
     ports:
       - "1317:1317"
+      - "3636:3636"
       - "26656:26656"
       - "26657:26657"
     volumes:
