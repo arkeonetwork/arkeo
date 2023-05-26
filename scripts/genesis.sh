@@ -9,13 +9,16 @@ TOKEN="uarkeo"
 USER="ark"
 
 add_module() {
-	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" '.app_state.auth.accounts += [{
+	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" --arg NAME "$4" '.app_state.auth.accounts += [{
         "@type": "/cosmos.auth.v1beta1.ModuleAccount",
-        "address": $ADDRESS,
-        "pub_key": null,
-        "account_number": "0",
-        "sequence": "0"
-    }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
+        "base_account": {
+          "address": $ADDRESS,
+          "pub_key": null,
+          "sequence": "0"
+        },
+        "name": $NAME,
+        "permissions": []
+  }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 
 	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" '.app_state.bank.balances += [{
@@ -60,7 +63,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 100m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		add_module arkeo1dheycdevq39qlkxs2a6wuuzyn4aqxhves824w3 $TOKEN 10000000000000000 # reserve, 100m
+		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 100m
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)

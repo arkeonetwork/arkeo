@@ -44,7 +44,7 @@ func (a *IndexerApp) handleCloseContractEvent(evt types.CloseContractEvent) erro
 }
 
 func (a *IndexerApp) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
-	log.Infof("receieved contractSettlementEvent %#v", evt)
+	log.Infof("received contractSettlementEvent %#v", evt)
 	contract, err := a.db.FindContract(evt.ContractId)
 	if err != nil {
 		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.ProviderPubkey, evt.Service)
