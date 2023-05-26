@@ -157,6 +157,9 @@ containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
 proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 .PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format proto-swagger-gen
 
+protob:
+	@./scripts/protocgen.sh
+
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \

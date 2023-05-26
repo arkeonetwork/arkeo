@@ -1,0 +1,74 @@
+{
+  "Relayers": ["rly", "hermes"],
+  "ChainSets":
+    [
+      [
+        { "Name": "gaia", "Version": "latest" },
+        {
+          "NumValidators": 2,
+          "NumFullNodes": 1,
+          "Type": "cosmos",
+          "Name": "arkeo",
+          "ChainID": "arkeo-8877",
+          "Images":
+            [
+              {
+                "Repository": "arkeo",
+                "Version": "ibc-test",
+                "UidGid": "1025:1025",
+              },
+            ],
+          "Bin": "arkeod",
+          "Bech32Prefix": "arkeo",
+          "Denom": "uarko",
+          "GasPrices": "0.0uarko",
+          "GasAdjustment": 1.3,
+          "TrustingPeriod": "336h",
+        },
+      ],
+      [
+        {
+          "NumValidators": 2,
+          "NumFullNodes": 1,
+          "Type": "cosmos",
+          "Name": "osmosis",
+          "ChainID": "osmosis",
+          "Images":
+            [
+              {
+                "Repository": "ghcr.io/strangelove-ventures/heighliner/osmosis",
+                "Version": "v15.1.2-wasmvm1.1.2.0",
+                "UidGid": "1025:1025",
+              },
+            ],
+          "Bin": "osmosisd",
+          "Bech32Prefix": "osmo",
+          "Denom": "uarko",
+          "GasPrices": "0.0uosmo",
+          "GasAdjustment": 1.3,
+          "TrustingPeriod": "336h",
+        },
+        {
+          "NumValidators": 2,
+          "NumFullNodes": 1,
+          "Type": "cosmos",
+          "Name": "arkeo",
+          "ChainID": "arkeo-8877",
+          "Images":
+            [
+              {
+                "Repository": "arkeo",
+                "Version": "ibc-test",
+                "UidGid": "1025:1025",
+              },
+            ],
+          "Bin": "arkeod",
+          "Bech32Prefix": "arkeo",
+          "Denom": "uarko",
+          "GasPrices": "0.0uarko",
+          "GasAdjustment": 1.3,
+          "TrustingPeriod": "336h",
+        },
+      ],
+    ],
+}
