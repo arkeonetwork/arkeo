@@ -2,6 +2,7 @@ version: "3.6"
 services:
   arkeod:
     hostname: arkeod
+    image: arkeo
     build:
       dockerfile: ./Dockerfile
     ports:
@@ -57,19 +58,26 @@ services:
 
   directory-postgres:
     image: postgres:15.1-alpine
-    container_name: directory-postgres
+    hostname: directory-postgres
     restart: always
     environment:
       POSTGRES_DB: arkeo_directory
       POSTGRES_USER: arkeo
       POSTGRES_PASSWORD: arkeo123
     ports:
-      - 5432:5432
+      - "5432:5432"
+    healthcheck:
+      test: netstat -an | grep -q 5432
+      interval: 1s
+      start_period: 10s
+      retries: 5
+      timeout: 5s
 
   init-directory-db:
-    build:
-      dockerfile: Dockerfile
     image: arkeo
+    build:
+      dockerfile: ./Dockerfile
+    entrypoint: []
     command:
       - "tern"
       - "migrate"
@@ -78,33 +86,36 @@ services:
       - "-m"
       - "/directory/tern"
     env_file:
-      - docker-directory.env
+      - ./docker-directory.env
     volumes:
       - ./directory/tern:/directory/tern
     depends_on:
-      - directory-postgres
+      directory-postgres:
+        condition: service_healthy
 
   directory-indexer:
-    build:
-      dockerfile: Dockerfile
     image: arkeo
+    build:
+      dockerfile: ./Dockerfile
+    entrypoint: []
     command:
-      - "indexer"
+      - "directory-indexer"
     env_file:
-      - docker-directory.env
+      - ./docker-directory.env
     depends_on:
       init-directory-db:
         condition: service_completed_successfully
 
   directory-api:
-    build:
-      dockerfile: Dockerfile
     image: arkeo
-    command:
-      - "api"
+    build:
+      dockerfile: ./Dockerfile
+    entrypoint: []
+    command: /usr/bin/directory-api
     env_file:
-      - docker-directory.env
-    depends_on:
-      - directory-postgres
+      - ./docker-directory.env
     ports:
-      - 7777:7777
+      - "7777:7777"
+    depends_on:
+      directory-postgres:
+        condition: service_healthy
