@@ -5,21 +5,23 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/common/utils"
-	"github.com/arkeonetwork/arkeo/directory/db"
-	"github.com/arkeonetwork/arkeo/directory/types"
-	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/common/utils"
+	"github.com/arkeonetwork/arkeo/directory/db"
+	"github.com/arkeonetwork/arkeo/directory/types"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type attributes func() map[string]string
@@ -244,7 +246,9 @@ func (s *Service) consumeEvents() error {
 				continue
 			}
 			s.logger.WithField("height", data.Block.Height).Debug("received block")
-			s.gapFiller()
+			if err := s.gapFiller(); err != nil {
+				s.logger.WithError(err).Error("fail to create block gap")
+			}
 		}
 	}
 }
@@ -291,24 +295,15 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 
 	log := s.logger.WithField("height", block.Block.Height)
 	for _, transaction := range block.Block.Txs {
-		txInfo, err := s.tmClient.Tx(context.Background(), transaction.Hash(), false)
-		if err != nil {
-			log.Warnf("failed to get transaction data for %s", transaction.Hash())
-			continue
-		}
-
-		for _, event := range txInfo.TxResult.Events {
-			log.Debugf("received %s txevent", event.Type)
-			if err := s.handleAbciEvent(event, transaction, block.Block.Height); err != nil {
-				log.Errorf("error handling abci event %#v\n%+v", event, err)
-			}
+		if err := s.handleTransaction(block.Block.Height, transaction); err != nil {
+			log.WithError(err).Error("fail to handler transaction")
 		}
 	}
 
 	for _, event := range blockResults.EndBlockEvents {
 		log.Debugf("received %s endblock event", event.Type)
 		if err := s.handleAbciEvent(event, nil, block.Block.Height); err != nil {
-			log.Errorf("error handling abci event %#v\n%+v", event, err)
+			log.WithError(err).Errorf("error handling abci event %#v", event)
 		}
 	}
 
@@ -319,64 +314,74 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 	}
 	return r, nil
 }
-
+func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultRetrieveTransactionTimeout)
+	defer cancel()
+	txInfo, err := s.tmClient.Tx(ctx, transaction.Hash(), false)
+	if err != nil {
+		return fmt.Errorf("failed to get transaction data for %s,err:%w", transaction.Hash(), err)
+	}
+	for _, event := range txInfo.TxResult.Events {
+		s.logger.WithField("height", height).Debugf("received %s txevent", event.Type)
+		if err := s.handleAbciEvent(event, transaction, height); err != nil {
+			// move on
+			s.logger.WithError(err).Errorf("error handling abci event %#v", event)
+		}
+	}
+	return nil
+}
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
-	var err error
+	s.logger.WithField("height", height).
+		WithField("type", event.Type).Info("handle abci event")
 	switch event.Type {
 	case atypes.EventTypeBondProvider:
 		bondProviderEvent := types.BondProviderEvent{}
-		if err = convertEvent(tmAttributeSource(transaction, event, height), &bondProviderEvent); err != nil {
-			s.logger.WithError(err).Errorf("error converting %s", event.Type)
-			break
+		if err := convertEvent(tmAttributeSource(transaction, event, height), &bondProviderEvent); err != nil {
+			return err
 		}
-		if err = s.handleBondProviderEvent(bondProviderEvent); err != nil {
-			s.logger.Errorf("error handling %s event: %+v", event.Type, err)
+		if err := s.handleBondProviderEvent(bondProviderEvent); err != nil {
+			return err
 		}
 	case atypes.EventTypeModProvider:
 		modProviderEvent, err := parseEventToEventModProvider(event)
 		if err != nil {
-			s.logger.Errorf("error converting %s event: %+v", event.Type, err)
-			break
+			return err
 		}
-		if err = s.handleModProviderEvent(modProviderEvent); err != nil {
-			s.logger.Errorf("error handling %s event: %+v", event.Type, err)
+		if err := s.handleModProviderEvent(modProviderEvent); err != nil {
+			return err
 		}
 	case atypes.EventTypeOpenContract:
 		openContractEvent, err := parseEventToEventOpenContract(event)
 		if err != nil {
-			s.logger.Errorf("error converting %s event: %+v", event.Type, err)
-			break
+			return err
 		}
-		if err = s.handleOpenContractEvent(openContractEvent); err != nil {
-			s.logger.Errorf("error handling %s event: %+v", event.Type, err)
+		if err := s.handleOpenContractEvent(openContractEvent); err != nil {
+			return err
 		}
 	case atypes.EventTypeSettleContract:
 		contractSettlementEvent := types.ContractSettlementEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &contractSettlementEvent); err != nil {
-			s.logger.Errorf("error converting %s event: %+v", event.Type, err)
-			break
+			return err
 		}
 		if err := s.handleContractSettlementEvent(contractSettlementEvent); err != nil {
-			s.logger.Errorf("error handling %s event: %+v", event.Type, err)
+			return err
 		}
 	case atypes.EventTypeValidatorPayout:
 		validatorPayoutEvent := types.ValidatorPayoutEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &validatorPayoutEvent); err != nil {
-			s.logger.Errorf("error converting validatorPayoutEvent event: %+v", err)
-			break
+			return err
 		}
 		if err := s.handleValidatorPayoutEvent(validatorPayoutEvent); err != nil {
-			s.logger.Errorf("error handling claim contract income event: %+v", err)
+			return err
 		}
 	case atypes.EventTypeCloseContract:
 		s.logger.Debugf("received close_contract event")
 		closeContractEvent := types.CloseContractEvent{}
 		if err := convertEvent(tmAttributeSource(transaction, event, height), &closeContractEvent); err != nil {
-			s.logger.Errorf("error converting close_contract event: %+v", err)
-			break
+			return err
 		}
 		if err := s.handleCloseContractEvent(closeContractEvent); err != nil {
-			s.logger.Errorf("error handling close contract event: %+v", err)
+			return err
 		}
 	case "coin_spent", "coin_received", "transfer", "message", "tx":
 		// do nothing
@@ -388,7 +393,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 	return nil
 }
 
-// copy attributes of map given by attributeFunc() to target which must be a pointer (map/slice implicitly ptr)
+// convertEvent copy attributes of map given by attributeFunc() to target which must be a pointer (map/slice implicitly ptr)
 func convertEvent(attributeFunc attributes, target interface{}) error {
 	return mapstructure.WeakDecode(attributeFunc(), target)
 }

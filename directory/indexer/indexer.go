@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	defaultRetrieveBlockTimeout = time.Second * 5
+	defaultRetrieveBlockTimeout       = time.Second * 5
+	defaultRetrieveTransactionTimeout = time.Second
 )
 
 // ServiceParams hold all necessary parameters for indexer app to run
@@ -65,6 +66,7 @@ func NewIndexer(params ServiceParams) (*Service, error) {
 				"service": "indexer",
 			}),
 		tmClient:       client,
+		wg:             &sync.WaitGroup{},
 		blockFillQueue: make(chan db.BlockGap),
 	}, nil
 }
@@ -78,6 +80,8 @@ func (s *Service) Run() error {
 			s.logger.WithError(err).Error("fail to consume events")
 		}
 	}()
+	s.wg.Add(1)
+	go s.blockGapProcessor()
 	return nil
 }
 
@@ -105,7 +109,7 @@ func (s *Service) gapFiller() error {
 	s.logger.Infof("%d missed blocks from %d to current %d", latest.Block.Height-latestStored.Height, latestStored.Height, latest.Block.Height)
 	todo = db.BlockGap{Start: start, End: latest.Block.Height}
 	select {
-	case s.blockFillQueue <- todo: // blocking channel , can only push into this channel when it is free to pick up new blocks
+	case s.blockFillQueue <- todo: // blocking channel, can only push into this channel when it is free to pick up new blocks
 	case <-s.done:
 		return nil
 	default:
