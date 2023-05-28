@@ -115,8 +115,8 @@ var ServiceReverseLookup = map[Service]string{
 	46: "gaia-mainnet-grpc",
 }
 
-func (service Service) String() string {
-	if r, ok := ServiceReverseLookup[service]; ok {
+func (c Service) String() string {
+	if r, ok := ServiceReverseLookup[c]; ok {
 		return r
 	}
 	return "unknown"
@@ -137,6 +137,6 @@ func (c Service) Equals(c2 Service) bool {
 }
 
 // IsEmpty is to determinate whether the service is empty
-func (service Service) IsEmpty() bool {
-	return strings.TrimSpace(service.String()) == ""
+func (c Service) IsEmpty() bool {
+	return strings.TrimSpace(c.String()) == ""
 }

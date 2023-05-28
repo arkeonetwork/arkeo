@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -ex
 if [ -z "$1" ]; then
 	echo "No user supplied"
 	exit 1
@@ -24,9 +24,9 @@ BOND="$3"
 
 PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
-
+echo $PUBKEY
 ./"$PWD"/bond-provider.bash "$USER" "$SERVICE" "$BOND"
 
 sleep 5
 
-$BIN tx $BIN_TX mod-provider -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "http://localhost:3636/metadata.json" 1 1 10 100 10 10
+$BIN tx $BIN_TX mod-provider -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "http://localhost:3636/metadata.json" 1 1 10 100 10uarkeo 10uarkeo 10
