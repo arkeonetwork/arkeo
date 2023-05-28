@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/common/logging"
@@ -19,7 +20,7 @@ func main() {
 	log.Info("starting indexer")
 	cosmos.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
 	flag.Parse()
-	var c indexer.IndexerAppParams
+	var c indexer.ServiceParams
 	if err := utils.LoadFromEnv(&c, *envPath); err != nil {
 		log.Panicf("failed to load config from env: %+v", err)
 	}

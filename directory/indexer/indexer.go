@@ -18,8 +18,8 @@ import (
 
 var log = logging.WithoutFields()
 
-// IndexerAppParams hold all necessary parameters for indexer app to run
-type IndexerAppParams struct {
+// ServiceParams hold all necessary parameters for indexer app to run
+type ServiceParams struct {
 	ArkeoApi            string      `mapstructure:"arkeo_api" json:"arkeo_api"`
 	TendermintApi       string      `mapstructure:"tendermint_api" json:"tendermint_api"`
 	TendermintWs        string      `mapstructure:"tendermint_ws" json:"tendermint_ws"`
@@ -30,22 +30,22 @@ type IndexerAppParams struct {
 	DB                  db.DBConfig `mapstructure:"db" json:"db"`
 }
 
-// IndexerApp consume events from blockchain and persist it to  database
-type IndexerApp struct {
+// Service consume events from blockchain and persist it to  database
+type Service struct {
 	Height         int64
-	params         IndexerAppParams
+	params         ServiceParams
 	db             *db.DirectoryDB
 	done           chan struct{}
 	blockProcessor chan int64
 	blockMutex     sync.Mutex
 }
 
-func NewIndexer(params IndexerAppParams) *IndexerApp {
+func NewIndexer(params ServiceParams) *Service {
 	d, err := db.New(params.DB)
 	if err != nil {
 		panic(fmt.Sprintf("error connecting to the db: %+v", err))
 	}
-	return &IndexerApp{
+	return &Service{
 		params:         params,
 		db:             d,
 		blockProcessor: make(chan int64),
@@ -53,24 +53,24 @@ func NewIndexer(params IndexerAppParams) *IndexerApp {
 	}
 }
 
-func (a *IndexerApp) Run() (done <-chan struct{}, err error) {
+func (s *Service) Run() (done <-chan struct{}, err error) {
 	// initialize by reading all existing providers?
-	a.done = make(chan struct{})
-	a.realtime()
-	return a.done, nil
+	s.done = make(chan struct{})
+	s.realtime()
+	return s.done, nil
 }
 
-func (a *IndexerApp) gapFiller() {
-	a.blockMutex.Lock()
-	defer a.blockMutex.Unlock()
+func (s *Service) gapFiller() {
+	s.blockMutex.Lock()
+	defer s.blockMutex.Unlock()
 
 	var err error
-	tm, err := utils.NewTendermintClient(a.params.TendermintWs)
+	tm, err := utils.NewTendermintClient(s.params.TendermintWs)
 	if err != nil {
 		log.Panicf("error creating gapFiller client: %+v", err)
 	}
 
-	latestStored, err := a.db.FindLatestBlock()
+	latestStored, err := s.db.FindLatestBlock()
 	if err != nil {
 		log.Panicf("error finding latest stored block: %+v", err)
 	}
@@ -97,29 +97,29 @@ func (a *IndexerApp) gapFiller() {
 		todo = db.BlockGap{Start: latestStored.Height + 1, End: latest.Block.Height}
 	}
 
-	if err := a.fillGap(todo); err != nil {
+	if err := s.fillGap(todo); err != nil {
 		log.Errorf("error filling gap %s", todo)
 	}
 }
 
 // gaps filled inclusively
-func (a *IndexerApp) fillGap(gap db.BlockGap) error {
+func (s *Service) fillGap(gap db.BlockGap) error {
 	log.Infof("gap filling %s", gap)
-	tm, err := utils.NewTendermintClient(a.params.TendermintWs)
+	tm, err := utils.NewTendermintClient(s.params.TendermintWs)
 	if err != nil {
 		return errors.Wrapf(err, "error creating tm client: %+v", err)
 	}
 
 	for i := gap.Start; i <= gap.End; i++ {
 		log.Infof("processing %d", i)
-		// TODO: should pass in a db.Begin()/db.Commit() to ensure all or
+		// TODO: should pass in s db.Begin()/db.Commit() to ensure all or
 		// nothing gets written
-		block, err := a.consumeHistoricalBlock(tm, i)
+		block, err := s.consumeHistoricalBlock(tm, i)
 		if err != nil {
 			log.Errorf("error consuming block %d: %+v", i, err)
 			continue
 		}
-		if _, err = a.db.InsertBlock(block); err != nil {
+		if _, err = s.db.InsertBlock(block); err != nil {
 			log.Errorf("error inserting block %d with hash %s: %+v", block.Height, block.Hash, err)
 			time.Sleep(time.Second)
 		}
@@ -129,16 +129,16 @@ func (a *IndexerApp) fillGap(gap db.BlockGap) error {
 
 const numClients = 3
 
-func (a *IndexerApp) realtime() {
-	log.Infof("starting realtime indexing using /websocket at %s", a.params.TendermintWs)
+func (s *Service) realtime() {
+	log.Infof("starting realtime indexing using /websocket at %s", s.params.TendermintWs)
 	clients := make([]*tmclient.HTTP, numClients)
 	for i := 0; i < numClients; i++ {
-		client, err := utils.NewTendermintClient(a.params.TendermintWs)
+		client, err := utils.NewTendermintClient(s.params.TendermintWs)
 		if err != nil {
-			panic(fmt.Sprintf("error creating tm client for %s: %+v", a.params.TendermintWs, err))
+			panic(fmt.Sprintf("error creating tm client for %s: %+v", s.params.TendermintWs, err))
 		}
 		if err = client.Start(); err != nil {
-			panic(fmt.Sprintf("error starting ws client: %s: %+v", a.params.TendermintWs, err))
+			panic(fmt.Sprintf("error starting ws client: %s: %+v", s.params.TendermintWs, err))
 		}
 		defer func() {
 			if err := client.Stop(); err != nil {
@@ -148,8 +148,8 @@ func (a *IndexerApp) realtime() {
 		clients[i] = client
 	}
 
-	if err := a.consumeEvents(clients); err != nil {
+	if err := s.consumeEvents(clients); err != nil {
 		log.Errorf("error consuming events: %+v", err)
 	}
-	a.done <- struct{}{}
+	s.done <- struct{}{}
 }
