@@ -5,12 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"os"
-	"os/signal"
+	"github.com/arkeonetwork/arkeo/common/utils"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -25,10 +23,6 @@ import (
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
-
-// type attributeProvider interface {
-// 	attributes() map[string]string
-// }
 
 type attributes func() map[string]string
 
@@ -208,7 +202,7 @@ func tmAttributeSource(tx tmtypes.Tx, evt abcitypes.Event, height int64) func() 
 }
 
 func (s *Service) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) error {
-	log.Infof("receieved validatorPayoutEvent %#v", evt)
+	log.Infof("received validatorPayoutEvent %#v", evt)
 	if evt.Paid < 0 {
 		return fmt.Errorf("received negative paid amt: %d for tx %s", evt.Paid, evt.TxID)
 	}
@@ -222,12 +216,27 @@ func (s *Service) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) err
 	return nil
 }
 
-func (s *Service) consumeEvents(clients []*tmclient.HTTP) error {
-	// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
-	blockEvents := subscribe(clients[0], "tm.event = 'NewBlock'")
+// consumeEvents make connection to tendermint using websocket and then consume NewBlock event
+func (s *Service) consumeEvents() error {
+	log.Infof("starting realtime indexing using /websocket at %s", s.params.TendermintWs)
+	client, err := utils.NewTendermintClient(s.params.TendermintWs)
+	if err != nil {
+		return fmt.Errorf("fail to create tm client for %s, err: %w", s.params.TendermintWs, err)
+	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	if err = client.Start(); err != nil {
+		return fmt.Errorf("fail to start websocket client,endpoint:%s,err: %w", s.params.TendermintWs, err)
+	}
+	defer func() {
+		if err := client.Stop(); err != nil {
+			log.Errorf("error stopping client: %+v", err)
+		}
+	}()
+	// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
+	blockEvents, err := subscribe(context.Background(), client, "tm.event = 'NewBlock'")
+	if err != nil {
+		return err
+	}
 
 	log.Infof("beginning realtime event consumption")
 	for {
@@ -240,11 +249,7 @@ func (s *Service) consumeEvents(clients []*tmclient.HTTP) error {
 			}
 			log := log.WithField("height", strconv.FormatInt(data.Block.Height, 10))
 			log.Debugf("received block: %d", data.Block.Height)
-
 			s.gapFiller()
-		case <-quit:
-			log.Infof("received os quit signal")
-			return nil
 		}
 	}
 }
@@ -390,11 +395,10 @@ func convertEvent(attributeFunc attributes, target interface{}) error {
 	return mapstructure.WeakDecode(attributeFunc(), target)
 }
 
-func subscribe(client *tmclient.HTTP, query string) <-chan ctypes.ResultEvent {
-	out, err := client.Subscribe(context.Background(), "", query)
+func subscribe(ctx context.Context, client *tmclient.HTTP, query string) (<-chan ctypes.ResultEvent, error) {
+	out, err := client.Subscribe(ctx, "", query)
 	if err != nil {
-		log.Errorf("failed to subscribe to query", "err", err, "query", query)
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to subscribe to query,query:%s,err: %w", query, err)
 	}
-	return out
+	return out, nil
 }

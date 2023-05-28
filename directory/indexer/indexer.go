@@ -13,7 +13,6 @@ import (
 	// arkutils "github.com/arkeonetwork/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/pkg/errors"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 )
 
 var log = logging.WithoutFields()
@@ -38,6 +37,7 @@ type Service struct {
 	done           chan struct{}
 	blockProcessor chan int64
 	blockMutex     sync.Mutex
+	wg             *sync.WaitGroup
 }
 
 func NewIndexer(params ServiceParams) *Service {
@@ -50,14 +50,13 @@ func NewIndexer(params ServiceParams) *Service {
 		db:             d,
 		blockProcessor: make(chan int64),
 		blockMutex:     sync.Mutex{},
+		done:           make(chan struct{}),
 	}
 }
 
-func (s *Service) Run() (done <-chan struct{}, err error) {
+func (s *Service) Run() error {
 	// initialize by reading all existing providers?
-	s.done = make(chan struct{})
-	s.realtime()
-	return s.done, nil
+
 }
 
 func (s *Service) gapFiller() {
@@ -127,29 +126,13 @@ func (s *Service) fillGap(gap db.BlockGap) error {
 	return nil
 }
 
-const numClients = 3
-
 func (s *Service) realtime() {
-	log.Infof("starting realtime indexing using /websocket at %s", s.params.TendermintWs)
-	clients := make([]*tmclient.HTTP, numClients)
-	for i := 0; i < numClients; i++ {
-		client, err := utils.NewTendermintClient(s.params.TendermintWs)
-		if err != nil {
-			panic(fmt.Sprintf("error creating tm client for %s: %+v", s.params.TendermintWs, err))
-		}
-		if err = client.Start(); err != nil {
-			panic(fmt.Sprintf("error starting ws client: %s: %+v", s.params.TendermintWs, err))
-		}
-		defer func() {
-			if err := client.Stop(); err != nil {
-				log.Errorf("error stopping client: %+v", err)
-			}
-		}()
-		clients[i] = client
-	}
 
-	if err := s.consumeEvents(clients); err != nil {
+	if err := s.consumeEvents(client); err != nil {
 		log.Errorf("error consuming events: %+v", err)
 	}
-	s.done <- struct{}{}
+}
+func (s *Service) Close() error {
+	close(s.done)
+	return nil
 }

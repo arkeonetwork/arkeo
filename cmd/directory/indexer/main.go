@@ -3,6 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -24,6 +27,9 @@ func main() {
 	if err := utils.LoadFromEnv(&c, *envPath); err != nil {
 		log.Panicf("failed to load config from env: %+v", err)
 	}
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 	indexApp := indexer.NewIndexer(c)
 	done, err := indexApp.Run()
 	if err != nil {
