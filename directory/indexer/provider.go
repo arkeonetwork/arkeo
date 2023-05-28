@@ -21,7 +21,7 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Provider, evt.Service)
 	}
 
-	log := log.WithField("provider", strconv.FormatInt(provider.ID, 10))
+	log := s.logger.WithField("provider", strconv.FormatInt(provider.ID, 10))
 
 	isMetaDataUpdated := provider.MetadataNonce == 0 || provider.MetadataNonce < evt.MetadataNonce
 	provider.MetadataURI = evt.MetadataUri
@@ -98,7 +98,7 @@ func (s *Service) handleBondProviderEvent(evt types.BondProviderEvent) error {
 		}
 	}
 
-	log.Debugf("handled bond provider event for %s service %s", evt.Pubkey, evt.Service)
+	s.logger.Debugf("handled bond provider event for %s service %s", evt.Pubkey, evt.Service)
 	if _, err = s.db.InsertBondProviderEvent(provider.ID, evt); err != nil {
 		return errors.Wrapf(err, "error inserting BondProviderEvent for %s service %s", evt.Pubkey, evt.Service)
 	}
@@ -115,7 +115,7 @@ func (s *Service) createProvider(evt types.BondProviderEvent) (*db.ArkeoProvider
 	if entity == nil {
 		return nil, fmt.Errorf("nil entity after inserting provider")
 	}
-	log.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Service)
+	s.logger.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Service)
 	provider.Entity = *entity
 	return provider, nil
 }

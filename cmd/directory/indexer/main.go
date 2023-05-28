@@ -29,12 +29,17 @@ func main() {
 	}
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-	indexApp := indexer.NewIndexer(c)
-	done, err := indexApp.Run()
+	indexApp, err := indexer.NewIndexer(c)
 	if err != nil {
+		panic(err)
+	}
+	if err := indexApp.Run(); err != nil {
 		panic(fmt.Sprintf("error starting indexer: %+v", err))
 	}
-	<-done
-	log.Info("indexer complete")
+	<-quit
+	log.Info("receive signal to shutdown indexer")
+	if err := indexApp.Close(); err != nil {
+		panic(err)
+	}
+	log.Info("indexer shutdown successfully")
 }
