@@ -3,7 +3,6 @@ package indexer
 import (
 	"context"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
@@ -14,23 +13,24 @@ import (
 	// arkutils "github.com/arkeonetwork/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/pkg/errors"
-	tmlog "github.com/tendermint/tendermint/libs/log"
 	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 )
 
 var log = logging.WithoutFields()
 
+// IndexerAppParams hold all necessary parameters for indexer app to run
 type IndexerAppParams struct {
-	ArkeoApi            string
-	TendermintApi       string
-	TendermintWs        string
-	ChainID             string
-	Bech32PrefixAccAddr string
-	Bech32PrefixAccPub  string
-	IndexerID           int64
-	db.DBConfig
+	ArkeoApi            string      `mapstructure:"arkeo_api" json:"arkeo_api"`
+	TendermintApi       string      `mapstructure:"tendermint_api" json:"tendermint_api"`
+	TendermintWs        string      `mapstructure:"tendermint_ws" json:"tendermint_ws"`
+	ChainID             string      `mapstructure:"chain_id" json:"chain_id"`
+	Bech32PrefixAccAddr string      `mapstructure:"bech32_pref_acc_addr" json:"bech32_pref_acc_addr"`
+	Bech32PrefixAccPub  string      `mapstructure:"bech32_pref_acc_pub" json:"bech32_pref_acc_pub"`
+	IndexerID           int64       `json:"-"`
+	DB                  db.DBConfig `mapstructure:"db" json:"db"`
 }
 
+// IndexerApp consume events from blockchain and persist it to  database
 type IndexerApp struct {
 	Height         int64
 	params         IndexerAppParams
@@ -41,7 +41,7 @@ type IndexerApp struct {
 }
 
 func NewIndexer(params IndexerAppParams) *IndexerApp {
-	d, err := db.New(params.DBConfig)
+	d, err := db.New(params.DB)
 	if err != nil {
 		panic(fmt.Sprintf("error connecting to the db: %+v", err))
 	}
@@ -58,17 +58,6 @@ func (a *IndexerApp) Run() (done <-chan struct{}, err error) {
 	a.done = make(chan struct{})
 	a.realtime()
 	return a.done, nil
-}
-
-func NewTenderm1intClient(baseURL string) (*tmclient.HTTP, error) {
-	client, err := tmclient.New(baseURL, "/websocket")
-	if err != nil {
-		return nil, errors.Wrapf(err, "error creating websocket client")
-	}
-	logger := tmlog.NewTMLogger(tmlog.NewSyncWriter(os.Stdout))
-	client.SetLogger(logger)
-
-	return client, nil
 }
 
 func (a *IndexerApp) gapFiller() {
