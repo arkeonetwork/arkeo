@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -ex
 if [ -z "$1" ]; then
 	echo "No user supplied"
 	exit 1
@@ -32,7 +32,9 @@ PROVIDER="$2"
 SERVICE="$3"
 CTYPE="$4"
 DURATION="$5"
-RATE="10"
+RATE="15"
+QUERY_PER_MINUTE=10
+SETTLEMENT_DURATION=10
 
 PUBKEY_RAW=$($BIN keys show "$PROVIDER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
@@ -43,4 +45,4 @@ CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" |
 # nolint
 DEPOSIT=$((RATE * DURATION))
 
-$BIN tx $BIN_TX open-contract -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" $RATE
+$BIN tx $BIN_TX open-contract -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "$CLIENT_PUBKEY" "$CTYPE" "$DEPOSIT" "$DURATION" "$RATE""uarkeo" $QUERY_PER_MINUTE $SETTLEMENT_DURATION

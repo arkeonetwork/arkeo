@@ -5,11 +5,12 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/pkg/errors"
+
 	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/pkg/errors"
 )
 
 func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
