@@ -3,7 +3,6 @@ package indexer
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -16,13 +15,13 @@ import (
 func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	provider, err := s.db.FindProvider(evt.Provider.String(), evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
+		return fmt.Errorf("fail to find provider %s for service %s,err: %w", evt.Provider, evt.Service, err)
 	}
 	if provider == nil {
 		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Provider, evt.Service)
 	}
 
-	log := s.logger.WithField("provider", strconv.FormatInt(provider.ID, 10))
+	log := s.logger.WithField("provider", provider.ID)
 
 	isMetaDataUpdated := provider.MetadataNonce == 0 || provider.MetadataNonce < evt.MetadataNonce
 	provider.MetadataURI = evt.MetadataUri
@@ -35,7 +34,7 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	provider.SettlementDuration = evt.SettlementDuration
 
 	if _, err = s.db.UpdateProvider(provider); err != nil {
-		return errors.Wrapf(err, "error updating provider for mod event %s service %s", provider.Pubkey, provider.Service)
+		return fmt.Errorf("error updating provider for mod event %s service %s,err: %w", provider.Pubkey, provider.Service, err)
 	}
 	/*
 		// currently, we're not utilizing the inserts for mod provider events, so
@@ -60,12 +59,12 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 
 	log.Debugf("updating provider metadata for provider %s", provider.Pubkey)
 	if !validateMetadataURI(provider.MetadataURI) {
-		log.Warnf("updating provider metadata for provider %s failed due to bad MetadataURI %s", provider.Pubkey, provider.MetadataURI)
+		log.Errorf("updating provider metadata for provider %s failed due to bad MetadataURI %s", provider.Pubkey, provider.MetadataURI)
 		return nil
 	}
 	providerMetadata, err := utils.DownloadProviderMetadata(provider.MetadataURI, 5, 1e6)
 	if err != nil {
-		log.Warnf("updating provider metadata for provider %s failed %v", provider.Pubkey, err)
+		log.WithError(err).Errorf("updating provider metadata for provider %s failed", provider.Pubkey)
 		return nil
 	}
 
@@ -111,7 +110,7 @@ func (s *Service) createProvider(evt types.BondProviderEvent) (*db.ArkeoProvider
 	provider := &db.ArkeoProvider{Pubkey: evt.Pubkey, Service: evt.Service, Bond: evt.BondAbsolute}
 	entity, err := s.db.InsertProvider(provider)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error inserting provider %s %s", evt.Pubkey, evt.Service)
+		return nil, fmt.Errorf("fail to insert provider %s %s,err: %w", evt.Pubkey, evt.Service, err)
 	}
 	if entity == nil {
 		return nil, fmt.Errorf("nil entity after inserting provider")

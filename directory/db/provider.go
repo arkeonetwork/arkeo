@@ -8,14 +8,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/directory/types"
-	"github.com/arkeonetwork/arkeo/directory/utils"
-	"github.com/arkeonetwork/arkeo/sentinel"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/directory/types"
+	"github.com/arkeonetwork/arkeo/directory/utils"
+	"github.com/arkeonetwork/arkeo/sentinel"
 )
 
 type ArkeoProvider struct {

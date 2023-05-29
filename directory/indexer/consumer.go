@@ -316,6 +316,7 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 	}
 	return r, nil
 }
+
 func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultRetrieveTransactionTimeout)
 	defer cancel()
@@ -332,6 +333,7 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 	}
 	return nil
 }
+
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	s.logger.WithField("height", height).
 		WithField("type", event.Type).Info("handle abci event")

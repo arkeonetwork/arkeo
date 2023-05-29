@@ -53,6 +53,7 @@ func NewIndexer(params ServiceParams) (*Service, error) {
 	}, nil
 }
 
+// Run start the indexer service
 func (s *Service) Run() error {
 	s.logger.Info("start to indexer service")
 	s.wg.Add(1)
@@ -107,6 +108,9 @@ func (s *Service) gapFiller() error {
 	return nil
 }
 
+// blockGapProcessor will be run in a separate go routine, it populates blockgap task from blockFillQueue
+// and then process it block by block , it can only process one blockgap task at a time
+// it will only exit when the service receive a SIGTERM
 func (s *Service) blockGapProcessor() {
 	defer s.wg.Done()
 	for {
@@ -127,7 +131,7 @@ func (s *Service) blockGapProcessor() {
 	}
 }
 
-// gaps filled inclusively
+// fillGap will consume all the blocks from arkeo node, and index all the events in it
 func (s *Service) fillGap(gap db.BlockGap) error {
 	s.logger.Infof("gap filling %s", gap)
 
