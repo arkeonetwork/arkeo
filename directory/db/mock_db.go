@@ -16,60 +16,72 @@ type MockDataStorage struct {
 
 func (s *MockDataStorage) FindLatestBlock() (*Block, error) {
 	args := s.Called()
+	//nolint:forcetypeassert
 	return args.Get(0).(*Block), args.Error(1)
 }
 
 func (s *MockDataStorage) InsertBlock(b *Block) (*Entity, error) {
 	args := s.Called(b)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error) {
 	args := s.Called(evt)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
 	args := s.Called(pubkey, service)
+	//nolint:forcetypeassert
 	return args.Get(0).(*ArkeoProvider), args.Error(1)
 }
 
 func (s *MockDataStorage) UpsertContract(providerID int64, evt atypes.EventOpenContract) (*Entity, error) {
 	args := s.Called(providerID, evt)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) FindContract(contractId uint64) (*ArkeoContract, error) {
 	args := s.Called(contractId)
+	//nolint:forcetypeassert
 	return args.Get(0).(*ArkeoContract), args.Error(1)
 }
 
 func (s *MockDataStorage) CloseContract(contractID uint64, height int64) (*Entity, error) {
 	args := s.Called(contractID, height)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 	args := s.Called(provider)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) UpsertContractSettlementEvent(evt types.ContractSettlementEvent) (*Entity, error) {
 	args := s.Called(evt)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
 	args := s.Called(providerID, nonce, data)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) InsertBondProviderEvent(providerID int64, evt types.BondProviderEvent) (*Entity, error) {
 	args := s.Called(providerID, evt)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
 func (s *MockDataStorage) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
 	args := s.Called(provider)
+	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
