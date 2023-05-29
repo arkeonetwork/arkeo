@@ -15,21 +15,21 @@ import (
 
 type ApiService struct {
 	router *mux.Router
-	params ApiServiceParams
+	params ServiceParams
 	db     *db.DirectoryDB
 }
 
-type ApiServiceParams struct {
-	ListenAddr string
-	StaticDir  string
-	DBConfig   db.DBConfig
+type ServiceParams struct {
+	ListenAddr string      `mapstructure:"listen_addr" json:"listen_addr"`
+	StaticDir  string      `mapstructure:"static_dir" json:"static_dir"`
+	DBConfig   db.DBConfig `mapstructure:"db" json:"db"`
 }
 
 const DefaultListenAddress = "localhost:7777"
 
 var log = logging.WithoutFields()
 
-func NewApiService(params ApiServiceParams) *ApiService {
+func NewApiService(params ServiceParams) *ApiService {
 	if params.ListenAddr == "" {
 		params.ListenAddr = DefaultListenAddress
 	}

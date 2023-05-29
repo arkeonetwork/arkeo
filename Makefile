@@ -37,7 +37,7 @@ TEST_DIR?="./..."
 BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet -test.short=true
 GOBIN?=${GOPATH}/bin
-BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/directory-indexer ./cmd/directory/directory-api
+BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/indexer ./cmd/directory/api
 
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH
@@ -129,8 +129,8 @@ _build-test-regression:
 	@go install ${BUILD_FLAGS} ./tools/mock-daemon
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-arkeod ./cmd/arkeod
 	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-sentinel ./cmd/sentinel
-	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-api ./cmd/directory/directory-api
-	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-indexer ./cmd/directory/directory-indexer
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-api ./cmd/directory/api
+	@go build -ldflags '$(ldflags)' -cover -tags=testnet,regtest -o /regtest/cover-directory-indexer ./cmd/directory/indexer
 	@go build -ldflags '$(ldflags)' -tags testnet -o /regtest/regtest ./test/regression/cmd
 
 # internal target used in test run

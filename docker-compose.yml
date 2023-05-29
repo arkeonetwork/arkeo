@@ -99,7 +99,7 @@ services:
       dockerfile: ./Dockerfile
     entrypoint: []
     command:
-      - "directory-indexer"
+      - "indexer"
     env_file:
       - ./docker-directory.env
     depends_on:
@@ -111,7 +111,8 @@ services:
     build:
       dockerfile: ./Dockerfile
     entrypoint: []
-    command: /usr/bin/directory-api
+    command:
+      - "api"
     env_file:
       - ./docker-directory.env
     ports:

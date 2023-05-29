@@ -19,7 +19,6 @@ test/regression/mnt/coverage/
 
 ### macOS ###
 # General
-.DS_Store
 .AppleDouble
 .LSOverride
 
@@ -261,3 +260,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/macOs,vim,windows,python
 
+api
+indexer

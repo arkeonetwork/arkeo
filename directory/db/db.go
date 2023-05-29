@@ -11,14 +11,14 @@ import (
 )
 
 type DBConfig struct {
-	Host         string
-	Port         uint
-	User         string
-	Pass         string
-	DBName       string
-	PoolMaxConns int
-	PoolMinConns int
-	SSLMode      string
+	Host         string `mapstructure:"host" json:"host"`
+	Port         uint   `mapstructure:"port" json:"port"`
+	User         string `mapstructure:"user" json:"user"`
+	Pass         string `mapstructure:"pass" json:"pass"`
+	DBName       string `mapstructure:"name" json:"name"`
+	PoolMaxConns int    `mapstructure:"pool_max_conns" json:"pool_max_conns"`
+	PoolMinConns int    `mapstructure:"pool_min_conns" json:"pool_min_conns"`
+	SSLMode      string `mapstructure:"ssl_mode" json:"ssl_mode"`
 }
 
 type DirectoryDB struct {

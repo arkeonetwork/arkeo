@@ -207,7 +207,7 @@ func tmAttributeSource(tx tmtypes.Tx, evt abcitypes.Event, height int64) func() 
 	return func() map[string]string { return attribs }
 }
 
-func (a *IndexerApp) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) error {
+func (s *Service) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) error {
 	log.Infof("receieved validatorPayoutEvent %#v", evt)
 	if evt.Paid < 0 {
 		return fmt.Errorf("received negative paid amt: %d for tx %s", evt.Paid, evt.TxID)
@@ -216,13 +216,13 @@ func (a *IndexerApp) handleValidatorPayoutEvent(evt types.ValidatorPayoutEvent) 
 		return nil
 	}
 	log.Infof("upserting validator payout event for tx %s", evt.TxID)
-	if _, err := a.db.UpsertValidatorPayoutEvent(evt); err != nil {
+	if _, err := s.db.UpsertValidatorPayoutEvent(evt); err != nil {
 		return errors.Wrapf(err, "error upserting validator payout event")
 	}
 	return nil
 }
 
-func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
+func (s *Service) consumeEvents(clients []*tmclient.HTTP) error {
 	// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
 	blockEvents := subscribe(clients[0], "tm.event = 'NewBlock'")
 
@@ -241,7 +241,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 			log := log.WithField("height", strconv.FormatInt(data.Block.Height, 10))
 			log.Debugf("received block: %d", data.Block.Height)
 
-			a.gapFiller()
+			s.gapFiller()
 		case <-quit:
 			log.Infof("received os quit signal")
 			return nil
@@ -252,7 +252,7 @@ func (a *IndexerApp) consumeEvents(clients []*tmclient.HTTP) error {
 // TODO: this function should take in a height range instead of one
 // block at at time. The max range should be set to something like 1,000
 // blocks.
-func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64) (result *db.Block, err error) {
+func (s *Service) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64) (result *db.Block, err error) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
@@ -296,7 +296,7 @@ func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64
 
 		for _, event := range txInfo.TxResult.Events {
 			log.Debugf("received %s txevent", event.Type)
-			if err := a.handleAbciEvent(event, transaction, block.Block.Height); err != nil {
+			if err := s.handleAbciEvent(event, transaction, block.Block.Height); err != nil {
 				log.Errorf("error handling abci event %#v\n%+v", event, err)
 			}
 		}
@@ -304,7 +304,7 @@ func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64
 
 	for _, event := range blockResults.EndBlockEvents {
 		log.Debugf("received %s endblock event", event.Type)
-		if err := a.handleAbciEvent(event, nil, block.Block.Height); err != nil {
+		if err := s.handleAbciEvent(event, nil, block.Block.Height); err != nil {
 			log.Errorf("error handling abci event %#v\n%+v", event, err)
 		}
 	}
@@ -317,7 +317,7 @@ func (a *IndexerApp) consumeHistoricalBlock(client *tmclient.HTTP, bheight int64
 	return r, nil
 }
 
-func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
+func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	var err error
 	switch event.Type {
 	case atypes.EventTypeBondProvider:
@@ -326,7 +326,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleBondProviderEvent(bondProviderEvent); err != nil {
+		if err = s.handleBondProviderEvent(bondProviderEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case atypes.EventTypeModProvider:
@@ -335,7 +335,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleModProviderEvent(modProviderEvent); err != nil {
+		if err = s.handleModProviderEvent(modProviderEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case atypes.EventTypeOpenContract:
@@ -344,7 +344,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err = a.handleOpenContractEvent(openContractEvent); err != nil {
+		if err = s.handleOpenContractEvent(openContractEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case atypes.EventTypeSettleContract:
@@ -353,7 +353,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting %s event: %+v", event.Type, err)
 			break
 		}
-		if err := a.handleContractSettlementEvent(contractSettlementEvent); err != nil {
+		if err := s.handleContractSettlementEvent(contractSettlementEvent); err != nil {
 			log.Errorf("error handling %s event: %+v", event.Type, err)
 		}
 	case atypes.EventTypeValidatorPayout:
@@ -362,7 +362,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting validatorPayoutEvent event: %+v", err)
 			break
 		}
-		if err := a.handleValidatorPayoutEvent(validatorPayoutEvent); err != nil {
+		if err := s.handleValidatorPayoutEvent(validatorPayoutEvent); err != nil {
 			log.Errorf("error handling claim contract income event: %+v", err)
 		}
 	case atypes.EventTypeCloseContract:
@@ -372,7 +372,7 @@ func (a *IndexerApp) handleAbciEvent(event abcitypes.Event, transaction tmtypes.
 			log.Errorf("error converting close_contract event: %+v", err)
 			break
 		}
-		if err := a.handleCloseContractEvent(closeContractEvent); err != nil {
+		if err := s.handleCloseContractEvent(closeContractEvent); err != nil {
 			log.Errorf("error handling close contract event: %+v", err)
 		}
 	case "coin_spent", "coin_received", "transfer", "message", "tx":

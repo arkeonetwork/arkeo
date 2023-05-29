@@ -316,12 +316,12 @@ func run(path string) error {
 		},
 		{
 			name:  "directory-api",
-			cmd:   []string{"directory-api"},
+			cmd:   []string{"api"},
 			ports: []string{"7777"},
 			env: append(
 				[]string{
-					"API_LISTEN=0.0.0.0:7777",
-					"API_STATIC_DIR=/var/www/html",
+					"LISTEN_ADDR=0.0.0.0:7777",
+					"STATIC_DIR=/var/www/html",
 				},
 				sharedDirectoryEnv...,
 			),
@@ -329,7 +329,7 @@ func run(path string) error {
 		},
 		{
 			name:  "directory-indexer",
-			cmd:   []string{"directory-indexer"},
+			cmd:   []string{"indexer"},
 			ports: []string{},
 			env: append(
 				[]string{

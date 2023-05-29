@@ -3,89 +3,54 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"log"
-	"os"
+	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
 type DBConfig struct {
-	DBHost         string `mapstructure:"DB_HOST"`
-	DBPort         uint   `mapstructure:"DB_PORT"`
-	DBUser         string `mapstructure:"DB_USER"`
-	DBPass         string `mapstructure:"DB_PASS"`
-	DBName         string `mapstructure:"DB_NAME"`
-	DBSSLMode      string `mapstructure:"DB_SSL_MODE"`
-	DBPoolMaxConns int    `mapstructure:"DB_POOL_MAX_CONNS"`
-	DBPoolMinConns int    `mapstructure:"DB_POOL_MIN_CONNS"`
+	DBHost         string `mapstructure:"db_host"`
+	DBPort         uint   `mapstructure:"db_port"`
+	DBUser         string `mapstructure:"db_user"`
+	DBPass         string `mapstructure:"db_pass"`
+	DBName         string `mapstructure:"db_name"`
+	DBSSLMode      string `mapstructure:"db_ssl_mode"`
+	DBPoolMaxConns int    `mapstructure:"db_pool_max_conns"`
+	DBPoolMinConns int    `mapstructure:"db_pool_min_conns"`
 }
 
-var dbConfigNames = []string{
-	"DB_HOST",
-	"DB_PORT",
-	"DB_USER",
-	"DB_PASS",
-	"DB_NAME",
-	"DB_SSL_MODE",
-	"DB_POOL_MAX_CONNS",
-	"DB_POOL_MIN_CONNS",
-}
-
-func ReadDBConfig(envPath string) *DBConfig {
-	c := &DBConfig{}
-	if envPath == "" {
-		if err := LoadFromEnv(c, dbConfigNames...); err != nil {
-			log.Panicf("failed to load db config from env: %+v", err)
-		}
+// LoadFromEnv read config from environment variables
+func LoadFromEnv(config any, configFilePathName string) error {
+	if configFilePathName == "" {
+		viper.SetConfigType("json")
+		viper.SetConfigName("config")
+		viper.AddConfigPath(".") // looking for config file in working directory
 	} else {
-		if err := Load(envPath, c); err != nil {
-			log.Panicf("failed to load db config: %+v", err)
-		}
+		viper.SetConfigFile(configFilePathName)
 	}
-	return c
-}
-
-// Load reads in a file at the specified path and unmarshals the values into your config struct.
-func Load(path string, config interface{}) error {
-	viper.SetConfigFile(path)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+	viper.AllowEmptyEnv(true)
 	if err := viper.ReadInConfig(); err != nil {
-		return errors.Wrapf(err, "failed to read config from file path: %s", path)
-	}
-
-	if err := viper.Unmarshal(config); err != nil {
-		return errors.Wrap(err, "failed to unmarshal config")
-	}
-
-	return nil
-}
-
-// Load from env names given in keys
-func LoadFromEnv(config interface{}, keys ...string) error {
-	envVars := make(map[string]interface{})
-	for _, key := range keys {
-		val, ok := os.LookupEnv(key)
-		if !ok {
-			return errors.Errorf("%s environment variable not set", key)
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return fmt.Errorf("fail to read config file,%w", err)
 		}
-
-		envVars[key] = val
-	}
-
-	jsonStr, err := json.Marshal(envVars)
-	if err != nil {
-		return errors.Wrapf(err, "failed to marshal envVars: %v", envVars)
-	}
-
-	viper.SetConfigType("json")
-
-	if err := viper.ReadConfig(bytes.NewBuffer(jsonStr)); err != nil {
-		return errors.Wrapf(err, "failed to read json: %s", jsonStr)
+		// trying to populate all config from environment variables
+		// when the config file doesn't exist , then we feed all fields default value as empty
+		// allow environment variable to override it
+		buf, err := json.Marshal(config)
+		if err != nil {
+			return fmt.Errorf("fail to marshal default to json,err: %w", err)
+		}
+		if err := viper.ReadConfig(bytes.NewBuffer(buf)); err != nil {
+			return fmt.Errorf("fail to read config file,err:%w", err)
+		}
 	}
 
 	if err := viper.Unmarshal(config); err != nil {
 		return errors.Wrap(err, "failed to unmarshal config")
 	}
-
 	return nil
 }
