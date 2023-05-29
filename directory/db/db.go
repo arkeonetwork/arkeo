@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/common/logging"
+	"github.com/arkeonetwork/arkeo/directory/types"
+	"github.com/arkeonetwork/arkeo/sentinel"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type DBConfig struct {
@@ -20,6 +24,23 @@ type DBConfig struct {
 	PoolMinConns int    `mapstructure:"pool_min_conns" json:"pool_min_conns"`
 	SSLMode      string `mapstructure:"ssl_mode" json:"ssl_mode"`
 }
+
+type IDataStorage interface {
+	FindLatestBlock() (*Block, error)
+	InsertBlock(b *Block) (*Entity, error)
+	UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error)
+	FindProvider(pubkey, service string) (*ArkeoProvider, error)
+	UpsertContract(providerID int64, evt atypes.EventOpenContract) (*Entity, error)
+	FindContract(contractId uint64) (*ArkeoContract, error)
+	CloseContract(contractID uint64, height int64) (*Entity, error)
+	UpdateProvider(provider *ArkeoProvider) (*Entity, error)
+	UpsertContractSettlementEvent(evt types.ContractSettlementEvent) (*Entity, error)
+	UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error)
+	InsertBondProviderEvent(providerID int64, evt types.BondProviderEvent) (*Entity, error)
+	InsertProvider(provider *ArkeoProvider) (*Entity, error)
+}
+
+var _ IDataStorage = &DirectoryDB{}
 
 type DirectoryDB struct {
 	pool *pgxpool.Pool
