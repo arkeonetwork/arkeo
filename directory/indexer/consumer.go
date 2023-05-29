@@ -249,6 +249,8 @@ func (s *Service) consumeEvents() error {
 			if err := s.gapFiller(); err != nil {
 				s.logger.WithError(err).Error("fail to create block gap")
 			}
+		case <-s.done: // finished
+			return nil
 		}
 	}
 }

@@ -3,10 +3,10 @@ package indexer
 import (
 	"context"
 	"fmt"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 	"sync"
-	"sync/atomic"
 	"time"
+
+	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/common/utils"
@@ -42,7 +42,6 @@ type Service struct {
 	logger         logging.Logger
 	tmClient       *tmclient.HTTP
 	blockFillQueue chan db.BlockGap
-	gapFillerBusy  int32
 }
 
 // NewIndexer create a new instance of Indexer
@@ -109,7 +108,13 @@ func (s *Service) gapFiller() error {
 	s.logger.Infof("%d missed blocks from %d to current %d", latest.Block.Height-latestStored.Height, latestStored.Height, latest.Block.Height)
 	todo = db.BlockGap{Start: start, End: latest.Block.Height}
 	select {
-	case s.blockFillQueue <- todo: // blocking channel, can only push into this channel when it is free to pick up new blocks
+	// blockFillQueue is a blocking channel, only one gapfill task can be push into this channel when block gap processor is waiting on the other end
+	// this ensures the service is only indexing one block at a time
+	// the service should not index multiple blocks in parallel , it could cause data corrupt
+	// especially when indexer start from scratch , while arkeo blockchain already have thousands blocks already
+	// for example , contract opened on block 1 , and closed on block 10 , if the service process multiple blocks at the same time
+	// it might process block 10 first , and block 1 later, which might consider contract still open
+	case s.blockFillQueue <- todo:
 	case <-s.done:
 		return nil
 	default:
@@ -142,13 +147,6 @@ func (s *Service) blockGapProcessor() {
 // gaps filled inclusively
 func (s *Service) fillGap(gap db.BlockGap) error {
 	s.logger.Infof("gap filling %s", gap)
-	// this ensures the service is only indexing one block at a time
-	// the service should not index multiple blocks in parallel , it could cause data corrupt
-	// especially when indexer start from scratch , while arkeo blockchain already have thousands blocks already
-	// for example , contract opened on block 1 , and closed on block 10 , if the service process multiple blocks at the same time
-	// it might process block 10 first , and block 1 later, which might consider contract still open
-	atomic.AddInt32(&s.gapFillerBusy, 1)
-	defer atomic.AddInt32(&s.gapFillerBusy, -1)
 
 	for i := gap.Start; i <= gap.End; i++ {
 		s.logger.Infof("processing block: %d", i)
