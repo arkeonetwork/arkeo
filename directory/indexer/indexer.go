@@ -18,26 +18,11 @@ const (
 	defaultRetrieveTransactionTimeout = time.Second
 )
 
-// ServiceParams hold all necessary parameters for indexer app to run
-type ServiceParams struct {
-	ArkeoApi            string      `mapstructure:"arkeo_api" json:"arkeo_api"`
-	TendermintApi       string      `mapstructure:"tendermint_api" json:"tendermint_api"`
-	TendermintWs        string      `mapstructure:"tendermint_ws" json:"tendermint_ws"`
-	ChainID             string      `mapstructure:"chain_id" json:"chain_id"`
-	Bech32PrefixAccAddr string      `mapstructure:"bech32_pref_acc_addr" json:"bech32_pref_acc_addr"`
-	Bech32PrefixAccPub  string      `mapstructure:"bech32_pref_acc_pub" json:"bech32_pref_acc_pub"`
-	IndexerID           int64       `json:"-"`
-	DB                  db.DBConfig `mapstructure:"db" json:"db"`
-}
-
 // Service consume events from blockchain and persist it to a database
 type Service struct {
-	Height         int64
 	params         ServiceParams
-	db             *db.DirectoryDB
+	db             db.IDataStorage
 	done           chan struct{}
-	blockProcessor chan int64
-	blockMutex     sync.Mutex
 	wg             *sync.WaitGroup
 	logger         logging.Logger
 	tmClient       *tmclient.HTTP
@@ -55,11 +40,9 @@ func NewIndexer(params ServiceParams) (*Service, error) {
 		return nil, fmt.Errorf("fail to create connection to tendermint,err:%w", err)
 	}
 	return &Service{
-		params:         params,
-		db:             d,
-		blockProcessor: make(chan int64),
-		blockMutex:     sync.Mutex{},
-		done:           make(chan struct{}),
+		params: params,
+		db:     d,
+		done:   make(chan struct{}),
 		logger: logging.WithFields(
 			logging.Fields{
 				"service": "indexer",
@@ -70,6 +53,7 @@ func NewIndexer(params ServiceParams) (*Service, error) {
 	}, nil
 }
 
+// Run start the indexer service
 func (s *Service) Run() error {
 	s.logger.Info("start to indexer service")
 	s.wg.Add(1)
@@ -124,6 +108,9 @@ func (s *Service) gapFiller() error {
 	return nil
 }
 
+// blockGapProcessor will be run in a separate go routine, it populates blockgap task from blockFillQueue
+// and then process it block by block , it can only process one blockgap task at a time
+// it will only exit when the service receive a SIGTERM
 func (s *Service) blockGapProcessor() {
 	defer s.wg.Done()
 	for {
@@ -144,7 +131,7 @@ func (s *Service) blockGapProcessor() {
 	}
 }
 
-// gaps filled inclusively
+// fillGap will consume all the blocks from arkeo node, and index all the events in it
 func (s *Service) fillGap(gap db.BlockGap) error {
 	s.logger.Infof("gap filling %s", gap)
 
