@@ -40,10 +40,10 @@ func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, fmt.Errorf("nil provider")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	bond, err := strconv.ParseInt(provider.Bond, 10, 64)
 	if err != nil {
@@ -57,10 +57,10 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, fmt.Errorf("nil provider")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	ctx := context.Background()
 	tx, err := conn.Begin(ctx)
@@ -144,10 +144,10 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 
 func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 	provider := ArkeoProvider{}
 	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
@@ -222,10 +222,10 @@ const provSearchCols = `
 
 func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*ArkeoProvider, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	sb := sqlbuilder.NewSelectBuilder()
 
@@ -293,10 +293,10 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 
 func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, evt.Height, evt.Paid)
 }
@@ -309,20 +309,20 @@ func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt types.BondPr
 		return nil, fmt.Errorf("nil BondRelative")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return insert(conn, sqlInsertBondProviderEvent, providerID, evt.Height, evt.TxID, evt.BondRelative, evt.BondAbsolute)
 }
 
 func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProviderEvent) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return insert(conn, sqlInsertModProviderEvent, providerID, evt.Height, evt.TxID, evt.MetadataURI, evt.MetadataNonce, evt.Status,
 		evt.MinContractDuration, evt.MaxContractDuration, evt.SubscriptionRate, evt.PayAsYouGoRate)
@@ -330,10 +330,10 @@ func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProv
 
 func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	c := data.Configuration
 

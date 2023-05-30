@@ -21,19 +21,19 @@ func (d *DirectoryDB) InsertBlock(b *Block) (*Entity, error) {
 		return nil, fmt.Errorf("nil block")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 	return insert(conn, sqlInsertBlock, b.Height, b.Hash, b.BlockTime)
 }
 
 func (d *DirectoryDB) FindLatestBlock() (*Block, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	block := &Block{} // used to designate not found... need a better way!
 	if err = selectOne(conn, sqlFindLatestBlock, block); err != nil {
@@ -53,10 +53,10 @@ func (g BlockGap) String() string {
 
 func (d *DirectoryDB) FindBlockGaps() ([]*BlockGap, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	results := make([]*BlockGap, 0, 128)
 	if err = pgxscan.Select(context.Background(), conn, &results, sqlFindBlockGaps); err != nil {

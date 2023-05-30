@@ -24,3 +24,8 @@ func GetRandomPubKey() common.PubKey {
 	pk, _ := common.NewPubKey(bech32PubKey)
 	return pk
 }
+
+// GetRandomTxID create a random tx id for test purpose
+func GetRandomTxID() string {
+	return common.RandStringBytesMask(64)
+}

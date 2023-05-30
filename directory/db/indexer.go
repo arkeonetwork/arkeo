@@ -17,10 +17,10 @@ func (d *DirectoryDB) UpsertIndexerStatus(indexerStatus *IndexerStatus) (*Entity
 		return nil, fmt.Errorf("nil IndexerStatus")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return insert(conn, sqlUpsertIndexerStatus, indexerStatus.ID, indexerStatus.Height)
 }
@@ -30,10 +30,10 @@ func (d *DirectoryDB) UpdateIndexerStatus(indexerStatus *IndexerStatus) (*Entity
 		return nil, fmt.Errorf("nil IndexerStatus")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return update(conn,
 		sqlUpdateIndexerStatus,
@@ -44,10 +44,10 @@ func (d *DirectoryDB) UpdateIndexerStatus(indexerStatus *IndexerStatus) (*Entity
 
 func (d *DirectoryDB) FindIndexerStatus(id int64) (*IndexerStatus, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 	indexerStatus := IndexerStatus{Height: math.MaxUint64} // used to designate not found... need a better way!
 	if err = selectOne(conn, sqlFindIndexerStatus, &indexerStatus, id); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
