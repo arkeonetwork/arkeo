@@ -337,6 +337,11 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	s.logger.WithField("height", height).
 		WithField("type", event.Type).Info("handle abci event")
+	buf, err := json.Marshal(event)
+	if err != nil {
+		return fmt.Errorf("fail to marshal event,err: %w", err)
+	}
+	s.logger.Infof("event:%s", string(buf))
 	switch event.Type {
 	case atypes.EventTypeBondProvider:
 		bondProviderEvent := types.BondProviderEvent{}
