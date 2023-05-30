@@ -183,7 +183,8 @@ func parseEventToEventModProvider(event interface{}) (atypes.EventModProvider, e
 func tmAttributeSource(tx tmtypes.Tx, evt abcitypes.Event, height int64) func() map[string]string {
 	attribs := make(map[string]string, 0)
 	for _, attr := range evt.Attributes {
-		attribs[string(attr.Key)] = strings.Trim(string(attr.Value), `"`)
+		fmt.Println(string(attr.Key), " ", string(attr.Value))
+		attribs[string(attr.Key)] = string(attr.Value)
 	}
 
 	if tx != nil {
@@ -337,11 +338,7 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	s.logger.WithField("height", height).
 		WithField("type", event.Type).Info("handle abci event")
-	buf, err := json.Marshal(event)
-	if err != nil {
-		return fmt.Errorf("fail to marshal event,err: %w", err)
-	}
-	s.logger.Infof("event:%s", string(buf))
+	fmt.Printf("%+v", event)
 	switch event.Type {
 	case atypes.EventTypeBondProvider:
 		bondProviderEvent := types.BondProviderEvent{}
