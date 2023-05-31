@@ -159,6 +159,7 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
 	s.logger.WithField("height", height).
+		WithField("event", Stringfy(event)).
 		WithField("type", event.Type).Info("handle abci event")
 	var txID string
 	if transaction != nil {
