@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/arkeonetwork/arkeo/directory/types"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
@@ -31,26 +30,26 @@ func (s *Service) handleOpenContractEvent(evt atypes.EventOpenContract) error {
 	return nil
 }
 
-func (s *Service) handleCloseContractEvent(evt types.CloseContractEvent) error {
+func (s *Service) handleCloseContractEvent(evt atypes.EventCloseContract, height int64) error {
 	/*
 		if _, err = s.db.UpsertCloseContractEvent(contract.ID, evt); err != nil {
 			return errors.Wrapf(err, "error upserting close contract event")
 		}
 	*/
-	if _, err := s.db.CloseContract(evt.ContractId, evt.EventHeight); err != nil {
+	if _, err := s.db.CloseContract(evt.ContractId, height); err != nil {
 		return errors.Wrapf(err, "error closing contract %d", evt.ContractId)
 	}
 	return nil
 }
 
-func (s *Service) handleContractSettlementEvent(evt types.ContractSettlementEvent) error {
-	log.Infof("received contractSettlementEvent %#v", evt)
+func (s *Service) handleContractSettlementEvent(evt atypes.EventSettleContract) error {
+	s.logger.WithField("event", Stringfy(evt)).Info("received event settle contract")
 	contract, err := s.db.FindContract(evt.ContractId)
 	if err != nil {
-		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.ProviderPubkey, evt.Service)
+		return errors.Wrapf(err, "error finding contract provider %s service %s", evt.Provider, evt.Service)
 	}
 	if contract == nil {
-		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.ProviderPubkey, evt.Service, evt.GetDelegatePubkey(), evt.Height)
+		return fmt.Errorf("no contract found for provider %s:%s delegPub: %s height %d", evt.Provider, evt.Service, evt.Delegate, evt.Height)
 	}
 	if _, err = s.db.UpsertContractSettlementEvent(evt); err != nil {
 		return errors.Wrapf(err, "error upserting contract settlement event")

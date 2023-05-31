@@ -58,7 +58,7 @@ asserts:
   - .bond | tonumber == 100000
   - .metadata_uri == ""
   - .metadata_nonce | tonumber == 0
-  - .status == "Offline"
+  - .status == "OFFLINE"
   - .min_contract_duration | tonumber == -1
   - .max_contract_duration | tonumber == -1
 ---
@@ -186,5 +186,5 @@ endpoint: http://localhost:7777/provider/{{ pubkey_fox }}?service=btc-mainnet-fu
 asserts:
   - .pubkey == "{{ pubkey_fox }}"
   - .service == "btc-mainnet-fullnode"
-  - .bond | tonumber == 0
+  - .bond | tonumber == 100000
 ---

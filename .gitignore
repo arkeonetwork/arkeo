@@ -259,6 +259,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macOs,vim,windows,python
-
-api
-indexer
+/cmd/directory/api/api
+/cmd/directory/indexer/indexer
+c.out

@@ -8,14 +8,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/directory/types"
-	"github.com/arkeonetwork/arkeo/directory/utils"
-	"github.com/arkeonetwork/arkeo/sentinel"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/directory/types"
+	"github.com/arkeonetwork/arkeo/directory/utils"
+	"github.com/arkeonetwork/arkeo/sentinel"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type ArkeoProvider struct {
@@ -39,10 +41,10 @@ func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, fmt.Errorf("nil provider")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	bond, err := strconv.ParseInt(provider.Bond, 10, 64)
 	if err != nil {
@@ -56,10 +58,10 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		return nil, fmt.Errorf("nil provider")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	ctx := context.Background()
 	tx, err := conn.Begin(ctx)
@@ -87,30 +89,33 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		provider.SettlementDuration,
 	).Scan(&providerID, &created, &updated)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to update provider,err: %w", err)
 	}
 	entity := &Entity{ID: providerID, Created: created, Updated: updated}
 
 	// delete current subscription rate and pay-as-you-go rates before inserting new ones
 	_, err = tx.Exec(ctx, sqlDeleteSubscriptionRates, provider.Pubkey, provider.Service)
 	if err != nil {
-		return entity, err
+		return entity, fmt.Errorf("fail to delete subscriber rate: %w", err)
 	}
 	_, err = tx.Exec(ctx, sqlDeletePayAsYouGoRates, provider.Pubkey, provider.Service)
 	if err != nil {
-		return entity, err
+		return entity, fmt.Errorf("fail to delete PayAsYouGo rate: %w", err)
 	}
-
-	// insert new subscription and pay-as-you-go rates
-	query, args := d.getRateArgs(providerID, sqlInsertSubscriptionRates, provider.SubscriptionRate)
-	_, err = tx.Exec(ctx, query, args...)
-	if err != nil {
-		return entity, err
+	if provider.SubscriptionRate.Len() > 0 {
+		// insert new subscription and pay-as-you-go rates
+		query, args := d.getRateArgs(providerID, sqlInsertSubscriptionRates, provider.SubscriptionRate)
+		_, err = tx.Exec(ctx, query, args...)
+		if err != nil {
+			return entity, fmt.Errorf("fail to insert subscription rate: %w", err)
+		}
 	}
-	query, args = d.getRateArgs(providerID, sqlInsertPayAsYouGoRates, provider.PayAsYouGoRate)
-	_, err = tx.Exec(ctx, query, args...)
-	if err != nil {
-		return entity, err
+	if provider.PayAsYouGoRate.Len() > 0 {
+		query, args := d.getRateArgs(providerID, sqlInsertPayAsYouGoRates, provider.PayAsYouGoRate)
+		_, err = tx.Exec(ctx, query, args...)
+		if err != nil {
+			return entity, fmt.Errorf("fail to insert PayAsYouGo rate: %w", err)
+		}
 	}
 
 	// Commit the transaction
@@ -135,7 +140,6 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 			query += ","
 		}
 		query += "($1, $2, $3)"
-
 		args = append(args, row.ProviderID, row.TokenName, row.TokenAmount)
 	}
 	return query, args
@@ -143,10 +147,10 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 
 func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 	provider := ArkeoProvider{}
 	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
@@ -209,7 +213,7 @@ const provSearchCols = `
 	p.created,
 	p.pubkey,
 	p.service, 
-	coalesce(p.status,'Offline') as status,
+	coalesce(p.status,'OFFLINE') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
 	coalesce(p.subscription_rate,0) as subscription_rate,
@@ -221,10 +225,10 @@ const provSearchCols = `
 
 func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*ArkeoProvider, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	sb := sqlbuilder.NewSelectBuilder()
 
@@ -279,49 +283,49 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 		return nil, fmt.Errorf("not a valid sortKey %s", criteria.SortKey)
 	}
 
-	sql, params := sb.BuildWithFlavor(getFlavor())
-	log.Debugf("sql: %s\n%v", sql, params)
+	q, params := sb.BuildWithFlavor(getFlavor())
+	log.Debugf("sql: %s\n%v", q, params)
 
 	providers := make([]*ArkeoProvider, 0, 512)
-	if err := pgxscan.Select(context.Background(), conn, &providers, sql, params...); err != nil {
+	if err := pgxscan.Select(context.Background(), conn, &providers, q, params...); err != nil {
 		return nil, errors.Wrapf(err, "error selecting many")
 	}
 
 	return providers, nil
 }
 
-func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error) {
+func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
-	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, evt.Height, evt.Paid)
+	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, height, evt.Reward.Int64())
 }
 
-func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt types.BondProviderEvent) (*Entity, error) {
-	if evt.BondAbsolute == "" {
+func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
+	if evt.BondAbs.IsNil() {
 		return nil, fmt.Errorf("nil BondAbsolute")
 	}
-	if evt.BondRelative == "" {
+	if evt.BondRel.IsNil() {
 		return nil, fmt.Errorf("nil BondRelative")
 	}
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
-	return insert(conn, sqlInsertBondProviderEvent, providerID, evt.Height, evt.TxID, evt.BondRelative, evt.BondAbsolute)
+	return insert(conn, sqlInsertBondProviderEvent, providerID, height, txID, evt.BondRel.String(), evt.BondAbs.String())
 }
 
 func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProviderEvent) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	return insert(conn, sqlInsertModProviderEvent, providerID, evt.Height, evt.TxID, evt.MetadataURI, evt.MetadataNonce, evt.Status,
 		evt.MinContractDuration, evt.MaxContractDuration, evt.SubscriptionRate, evt.PayAsYouGoRate)
@@ -329,10 +333,10 @@ func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProv
 
 func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
 	conn, err := d.getConnection()
-	defer conn.Release()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
+	defer conn.Release()
 
 	c := data.Configuration
 

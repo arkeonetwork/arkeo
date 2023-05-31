@@ -2,154 +2,167 @@ package indexer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
+	tmclient "github.com/tendermint/tendermint/rpc/client/http"
+
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/common/utils"
-
-	// "github.com/arkeonetwork/common/logging"
-	// arkutils "github.com/arkeonetwork/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
-	"github.com/pkg/errors"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 )
 
-var log = logging.WithoutFields()
+const (
+	defaultRetrieveBlockTimeout       = time.Second * 5
+	defaultRetrieveTransactionTimeout = time.Second
+)
 
-// ServiceParams hold all necessary parameters for indexer app to run
-type ServiceParams struct {
-	ArkeoApi            string      `mapstructure:"arkeo_api" json:"arkeo_api"`
-	TendermintApi       string      `mapstructure:"tendermint_api" json:"tendermint_api"`
-	TendermintWs        string      `mapstructure:"tendermint_ws" json:"tendermint_ws"`
-	ChainID             string      `mapstructure:"chain_id" json:"chain_id"`
-	Bech32PrefixAccAddr string      `mapstructure:"bech32_pref_acc_addr" json:"bech32_pref_acc_addr"`
-	Bech32PrefixAccPub  string      `mapstructure:"bech32_pref_acc_pub" json:"bech32_pref_acc_pub"`
-	IndexerID           int64       `json:"-"`
-	DB                  db.DBConfig `mapstructure:"db" json:"db"`
-}
-
-// Service consume events from blockchain and persist it to  database
+// Service consume events from blockchain and persist it to a database
 type Service struct {
-	Height         int64
 	params         ServiceParams
-	db             *db.DirectoryDB
+	db             db.IDataStorage
 	done           chan struct{}
-	blockProcessor chan int64
-	blockMutex     sync.Mutex
+	wg             *sync.WaitGroup
+	logger         logging.Logger
+	tmClient       *tmclient.HTTP
+	blockFillQueue chan db.BlockGap
 }
 
-func NewIndexer(params ServiceParams) *Service {
+// NewIndexer create a new instance of Indexer
+func NewIndexer(params ServiceParams) (*Service, error) {
 	d, err := db.New(params.DB)
 	if err != nil {
-		panic(fmt.Sprintf("error connecting to the db: %+v", err))
+		return nil, fmt.Errorf("fail to connect to db,err: %w", err)
+	}
+	client, err := utils.NewTendermintClient(params.TendermintWs)
+	if err != nil {
+		return nil, fmt.Errorf("fail to create connection to tendermint,err:%w", err)
 	}
 	return &Service{
-		params:         params,
-		db:             d,
-		blockProcessor: make(chan int64),
-		blockMutex:     sync.Mutex{},
-	}
+		params: params,
+		db:     d,
+		done:   make(chan struct{}),
+		logger: logging.WithFields(
+			logging.Fields{
+				"service": "indexer",
+			}),
+		tmClient:       client,
+		wg:             &sync.WaitGroup{},
+		blockFillQueue: make(chan db.BlockGap),
+	}, nil
 }
 
-func (s *Service) Run() (done <-chan struct{}, err error) {
-	// initialize by reading all existing providers?
-	s.done = make(chan struct{})
-	s.realtime()
-	return s.done, nil
+// Run start the indexer service
+func (s *Service) Run() error {
+	s.logger.Info("start to indexer service")
+	s.wg.Add(1)
+	go func() {
+		defer s.wg.Done()
+		if err := s.consumeEvents(); err != nil {
+			s.logger.WithError(err).Error("fail to consume events")
+		}
+	}()
+	s.wg.Add(1)
+	go s.blockGapProcessor()
+	return nil
 }
 
-func (s *Service) gapFiller() {
-	s.blockMutex.Lock()
-	defer s.blockMutex.Unlock()
-
-	var err error
-	tm, err := utils.NewTendermintClient(s.params.TendermintWs)
-	if err != nil {
-		log.Panicf("error creating gapFiller client: %+v", err)
-	}
-
+func (s *Service) gapFiller() error {
 	latestStored, err := s.db.FindLatestBlock()
 	if err != nil {
-		log.Panicf("error finding latest stored block: %+v", err)
+		return fmt.Errorf("fail to find latest store block,err: %w", err)
 	}
-
-	ctx := context.Background()
-	latest, err := tm.Block(ctx, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultRetrieveBlockTimeout)
+	defer cancel()
+	latest, err := s.tmClient.Block(ctx, nil)
 	if err != nil {
-		log.Panicf("error finding latest block: %+v", err)
+		return fmt.Errorf("fail to find latest block,err: %w", err)
 	}
 	if latest.Block == nil {
-		log.Errorf("latest block is nil, skipping")
-		return
+		s.logger.Info("latest block is nil, skipping")
+		return nil
 	}
-
 	var todo db.BlockGap
-
 	if latest.Block.Height-latestStored.Height <= 0 {
-		return
-	}
-	if latestStored.Height == 0 {
-		todo = db.BlockGap{Start: 1, End: latest.Block.Height}
-	} else {
-		log.Infof("%d missed blocks from %d to current %d", latest.Block.Height-latestStored.Height, latestStored.Height, latest.Block.Height)
-		todo = db.BlockGap{Start: latestStored.Height + 1, End: latest.Block.Height}
+		return nil
 	}
 
-	if err := s.fillGap(todo); err != nil {
-		log.Errorf("error filling gap %s", todo)
+	start := latestStored.Height + 1
+	s.logger.Infof("%d missed blocks from %d to current %d", latest.Block.Height-latestStored.Height, latestStored.Height, latest.Block.Height)
+	todo = db.BlockGap{Start: start, End: latest.Block.Height}
+	select {
+	// blockFillQueue is a blocking channel, only one gapfill task can be push into this channel when block gap processor is waiting on the other end
+	// this ensures the service is only indexing one block at a time
+	// the service should not index multiple blocks in parallel , it could cause data corrupt
+	// especially when indexer start from scratch , while arkeo blockchain already have thousands blocks already
+	// for example , contract opened on block 1 , and closed on block 10 , if the service process multiple blocks at the same time
+	// it might process block 10 first , and block 1 later, which might consider contract still open
+	case s.blockFillQueue <- todo:
+	case <-s.done:
+		return nil
+	default:
+		s.logger.Info("still processing previous block,skip")
+	}
+
+	return nil
+}
+
+// blockGapProcessor will be run in a separate go routine, it populates blockgap task from blockFillQueue
+// and then process it block by block , it can only process one blockgap task at a time
+// it will only exit when the service receive a SIGTERM
+func (s *Service) blockGapProcessor() {
+	defer s.wg.Done()
+	for {
+		select {
+		case blockGap, more := <-s.blockFillQueue:
+			if !more {
+				return
+			}
+			if err := s.fillGap(blockGap); err != nil {
+				s.logger.WithError(err).
+					WithField("start", blockGap.Start).
+					WithField("end", blockGap.End).
+					Error("fail to process blockgap")
+			}
+		case <-s.done:
+			return
+		}
 	}
 }
 
-// gaps filled inclusively
+// fillGap will consume all the blocks from arkeo node, and index all the events in it
 func (s *Service) fillGap(gap db.BlockGap) error {
-	log.Infof("gap filling %s", gap)
-	tm, err := utils.NewTendermintClient(s.params.TendermintWs)
-	if err != nil {
-		return errors.Wrapf(err, "error creating tm client: %+v", err)
-	}
+	s.logger.Infof("gap filling %s", gap)
 
 	for i := gap.Start; i <= gap.End; i++ {
-		log.Infof("processing %d", i)
-		// TODO: should pass in s db.Begin()/db.Commit() to ensure all or
-		// nothing gets written
-		block, err := s.consumeHistoricalBlock(tm, i)
+		s.logger.Infof("processing block: %d", i)
+		block, err := s.consumeHistoricalBlock(i)
 		if err != nil {
-			log.Errorf("error consuming block %d: %+v", i, err)
+			s.logger.WithError(err).Errorf("err consuming block %d:", i)
 			continue
 		}
 		if _, err = s.db.InsertBlock(block); err != nil {
-			log.Errorf("error inserting block %d with hash %s: %+v", block.Height, block.Hash, err)
-			time.Sleep(time.Second)
+			s.logger.WithError(err).Errorf("error inserting block %d with hash %s", block.Height, block.Hash)
 		}
 	}
 	return nil
 }
 
-const numClients = 3
+// Close will be called when it is time to shut down the service
+// this allows the service to shut down itself gracefully
+func (s *Service) Close() error {
+	close(s.done)
+	close(s.blockFillQueue)
+	s.wg.Wait()
+	return nil
+}
 
-func (s *Service) realtime() {
-	log.Infof("starting realtime indexing using /websocket at %s", s.params.TendermintWs)
-	clients := make([]*tmclient.HTTP, numClients)
-	for i := 0; i < numClients; i++ {
-		client, err := utils.NewTendermintClient(s.params.TendermintWs)
-		if err != nil {
-			panic(fmt.Sprintf("error creating tm client for %s: %+v", s.params.TendermintWs, err))
-		}
-		if err = client.Start(); err != nil {
-			panic(fmt.Sprintf("error starting ws client: %s: %+v", s.params.TendermintWs, err))
-		}
-		defer func() {
-			if err := client.Stop(); err != nil {
-				log.Errorf("error stopping client: %+v", err)
-			}
-		}()
-		clients[i] = client
+func Stringfy(input any) string {
+	buf, err := json.Marshal(input)
+	if err != nil {
+		return fmt.Sprintf("fail to stringfy object,err: %s", err)
 	}
-
-	if err := s.consumeEvents(clients); err != nil {
-		log.Errorf("error consuming events: %+v", err)
-	}
-	s.done <- struct{}{}
+	return string(buf)
 }
