@@ -151,7 +151,7 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 		s.logger.WithField("height", height).Debugf("received %s txevent", event.Type)
 		if err := s.handleAbciEvent(event, transaction, height); err != nil {
 			// move on
-			s.logger.WithError(err).Errorf("error handling abci event %#v", event)
+			s.logger.WithError(err).WithField("event", Stringfy(event)).Errorf("error handling abci event")
 		}
 	}
 	return nil

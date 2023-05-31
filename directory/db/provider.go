@@ -89,30 +89,33 @@ func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
 		provider.SettlementDuration,
 	).Scan(&providerID, &created, &updated)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to update provider,err: %w", err)
 	}
 	entity := &Entity{ID: providerID, Created: created, Updated: updated}
 
 	// delete current subscription rate and pay-as-you-go rates before inserting new ones
 	_, err = tx.Exec(ctx, sqlDeleteSubscriptionRates, provider.Pubkey, provider.Service)
 	if err != nil {
-		return entity, err
+		return entity, fmt.Errorf("fail to delete subscriber rate: %w", err)
 	}
 	_, err = tx.Exec(ctx, sqlDeletePayAsYouGoRates, provider.Pubkey, provider.Service)
 	if err != nil {
-		return entity, err
+		return entity, fmt.Errorf("fail to delete PayAsYouGo rate: %w", err)
 	}
-
-	// insert new subscription and pay-as-you-go rates
-	query, args := d.getRateArgs(providerID, sqlInsertSubscriptionRates, provider.SubscriptionRate)
-	_, err = tx.Exec(ctx, query, args...)
-	if err != nil {
-		return entity, err
+	if provider.SubscriptionRate.Len() > 0 {
+		// insert new subscription and pay-as-you-go rates
+		query, args := d.getRateArgs(providerID, sqlInsertSubscriptionRates, provider.SubscriptionRate)
+		_, err = tx.Exec(ctx, query, args...)
+		if err != nil {
+			return entity, fmt.Errorf("fail to insert subscription rate: %w", err)
+		}
 	}
-	query, args = d.getRateArgs(providerID, sqlInsertPayAsYouGoRates, provider.PayAsYouGoRate)
-	_, err = tx.Exec(ctx, query, args...)
-	if err != nil {
-		return entity, err
+	if provider.PayAsYouGoRate.Len() > 0 {
+		query, args := d.getRateArgs(providerID, sqlInsertPayAsYouGoRates, provider.PayAsYouGoRate)
+		_, err = tx.Exec(ctx, query, args...)
+		if err != nil {
+			return entity, fmt.Errorf("fail to insert PayAsYouGo rate: %w", err)
+		}
 	}
 
 	// Commit the transaction
@@ -137,7 +140,6 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 			query += ","
 		}
 		query += "($1, $2, $3)"
-
 		args = append(args, row.ProviderID, row.TokenName, row.TokenAmount)
 	}
 	return query, args

@@ -160,7 +160,7 @@ func (s *Service) Close() error {
 }
 
 func Stringfy(input any) string {
-	buf, err := json.Marshal(any)
+	buf, err := json.Marshal(input)
 	if err != nil {
 		return fmt.Sprintf("fail to stringfy object,err: %s", err)
 	}

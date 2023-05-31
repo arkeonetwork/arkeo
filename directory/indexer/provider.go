@@ -93,7 +93,7 @@ func (s *Service) handleBondProviderEvent(evt atypes.EventBondProvider, txID str
 		if evt.BondAbs.IsNil() {
 			provider.Bond = evt.BondAbs.String()
 		}
-		s.logger.Infof("provider: %s", Stringfy(provider))
+		// TODO change this to just update bond , `UpdateProvider` does a lot other stuff
 		if _, err = s.db.UpdateProvider(provider); err != nil {
 			return errors.Wrapf(err, "error updating provider for bond event %s service %s", evt.Provider, evt.Service)
 		}
