@@ -146,14 +146,14 @@ func (d *DirectoryDB) CloseContract(contractID uint64, height int64) (*Entity, e
 	return update(conn, sqlCloseContract, height, contractID)
 }
 
-func (d *DirectoryDB) UpsertContractSettlementEvent(evt types.ContractSettlementEvent) (*Entity, error) {
+func (d *DirectoryDB) UpsertContractSettlementEvent(evt atypes.EventSettleContract) (*Entity, error) {
 	conn, err := d.getConnection()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid, evt.Reserve, evt.ContractId)
+	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId)
 }
 
 func (d *DirectoryDB) UpsertOpenContractEvent(contractID int64, evt atypes.EventOpenContract) (*Entity, error) {

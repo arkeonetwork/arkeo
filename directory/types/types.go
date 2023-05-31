@@ -25,44 +25,6 @@ var (
 	AuthTypeOpen   AuthType = "OPEN"
 )
 
-type BaseContractEvent struct {
-	ContractId     uint64 `mapstructure:"contract_id"`
-	ProviderPubkey string `mapstructure:"provider"`
-	Service        string `mapstructure:"service"`
-	ClientPubkey   string `mapstructure:"client"`
-	DelegatePubkey string `mapstructure:"delegate"` // see BaseContractEvent.GetDelegatePubkey()
-	TxID           string `mapstructure:"hash"`
-	Height         int64  `mapstructure:"height"`
-	EventHeight    int64  `mapstructure:"eventHeight"`
-}
-
-// get the delegate pubkey falling back to client pubkey if undefined
-func (b BaseContractEvent) GetDelegatePubkey() string {
-	if b.DelegatePubkey != "" {
-		return b.DelegatePubkey
-	}
-	return b.ClientPubkey
-}
-
-type OpenContractEvent struct {
-	BaseContractEvent  `mapstructure:",squash"`
-	Duration           int64        `mapstructure:"duration"`
-	ContractType       ContractType `mapstructure:"type"`
-	Rate               int64        `mapstructure:"-"` // TODO redo to cosmos.Coin
-	OpenCost           int64        `mapstructure:"open_cost"`
-	Deposit            string       `mapstructure:"deposit"`
-	SettlementDuration int64        `mapstructure:"settlement_duration"`
-	Authorization      string       `mapstructure:"authorization"`
-	QueriesPerMinute   int64        `mapstructure:"queries_per_minute"`
-}
-
-type ContractSettlementEvent struct {
-	BaseContractEvent `mapstructure:",squash"`
-	Nonce             string `mapstructure:"nonce"`
-	Paid              string `mapstructure:"paid"`
-	Reserve           string `mapstructure:"reserve"`
-}
-
 type CloseContractEvent struct {
 	ContractId     uint64 `mapstructure:"contract_id"`
 	ProviderPubkey string `mapstructure:"provider"`
@@ -80,17 +42,6 @@ func (c CloseContractEvent) GetDelegatePubkey() string {
 		return c.DelegatePubkey
 	}
 	return c.ClientPubkey
-}
-
-type ClaimContractIncomeEvent struct {
-	ContractSettlementEvent `mapstructure:",squash"`
-}
-
-type ValidatorPayoutEvent struct {
-	Validator string `mapstructure:"validator"`
-	Height    int64  `mapstructure:"height"`
-	TxID      string `mapstructure:"hash"`
-	Paid      int64  `mapstructure:"paid"`
 }
 
 type ProviderStatus string

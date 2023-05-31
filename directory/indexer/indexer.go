@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -156,4 +157,12 @@ func (s *Service) Close() error {
 	close(s.blockFillQueue)
 	s.wg.Wait()
 	return nil
+}
+
+func Stringfy(input any) string {
+	buf, err := json.Marshal(any)
+	if err != nil {
+		return fmt.Sprintf("fail to stringfy object,err: %s", err)
+	}
+	return string(buf)
 }

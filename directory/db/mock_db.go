@@ -3,7 +3,6 @@ package db
 import (
 	"github.com/stretchr/testify/mock"
 
-	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/sentinel"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
@@ -32,7 +31,7 @@ func (s *MockDataStorage) InsertBlock(b *Block) (*Entity, error) {
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
-func (s *MockDataStorage) UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error) {
+func (s *MockDataStorage) UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error) {
 	args := s.Called(evt)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -86,7 +85,7 @@ func (s *MockDataStorage) UpdateProvider(provider *ArkeoProvider) (*Entity, erro
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
-func (s *MockDataStorage) UpsertContractSettlementEvent(evt types.ContractSettlementEvent) (*Entity, error) {
+func (s *MockDataStorage) UpsertContractSettlementEvent(evt atypes.EventSettleContract) (*Entity, error) {
 	args := s.Called(evt)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -104,8 +103,8 @@ func (s *MockDataStorage) UpsertProviderMetadata(providerID, nonce int64, data s
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
-func (s *MockDataStorage) InsertBondProviderEvent(providerID int64, evt types.BondProviderEvent) (*Entity, error) {
-	args := s.Called(providerID, evt)
+func (s *MockDataStorage) InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
+	args := s.Called(providerID, evt, height, txID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

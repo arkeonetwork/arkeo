@@ -79,43 +79,48 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	return nil
 }
 
-func (s *Service) handleBondProviderEvent(evt types.BondProviderEvent) error {
-	provider, err := s.db.FindProvider(evt.Pubkey, evt.Service)
+func (s *Service) handleBondProviderEvent(evt atypes.EventBondProvider, txID string, height int64) error {
+	provider, err := s.db.FindProvider(evt.Provider.String(), evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Pubkey, evt.Service)
+		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
 	}
 	if provider == nil {
 		// new provider for service, insert
 		if provider, err = s.createProvider(evt); err != nil {
-			return errors.Wrapf(err, "error creating provider %s service %s", evt.Pubkey, evt.Service)
+			return errors.Wrapf(err, "error creating provider %s service %s", evt.Provider, evt.Service)
 		}
 	} else {
-		if evt.BondAbsolute != "" {
-			provider.Bond = evt.BondAbsolute
+		if evt.BondAbs.IsNil() {
+			provider.Bond = evt.BondAbs.String()
 		}
+		s.logger.Infof("provider: %s", Stringfy(provider))
 		if _, err = s.db.UpdateProvider(provider); err != nil {
-			return errors.Wrapf(err, "error updating provider for bond event %s service %s", evt.Pubkey, evt.Service)
+			return errors.Wrapf(err, "error updating provider for bond event %s service %s", evt.Provider, evt.Service)
 		}
 	}
 
-	s.logger.Debugf("handled bond provider event for %s service %s", evt.Pubkey, evt.Service)
-	if _, err = s.db.InsertBondProviderEvent(provider.ID, evt); err != nil {
-		return errors.Wrapf(err, "error inserting BondProviderEvent for %s service %s", evt.Pubkey, evt.Service)
+	s.logger.Debugf("handled bond provider event for %s service %s", evt.Provider, evt.Service)
+	if _, err = s.db.InsertBondProviderEvent(provider.ID, evt, height, txID); err != nil {
+		return errors.Wrapf(err, "error inserting BondProviderEvent for %s service %s", evt.Provider, evt.Service)
 	}
 	return nil
 }
 
-func (s *Service) createProvider(evt types.BondProviderEvent) (*db.ArkeoProvider, error) {
+func (s *Service) createProvider(evt atypes.EventBondProvider) (*db.ArkeoProvider, error) {
 	// new provider for service, insert
-	provider := &db.ArkeoProvider{Pubkey: evt.Pubkey, Service: evt.Service, Bond: evt.BondAbsolute}
+	provider := &db.ArkeoProvider{
+		Pubkey:  evt.Provider.String(),
+		Service: evt.Service,
+		Bond:    evt.BondAbs.String(),
+	}
 	entity, err := s.db.InsertProvider(provider)
 	if err != nil {
-		return nil, fmt.Errorf("fail to insert provider %s %s,err: %w", evt.Pubkey, evt.Service, err)
+		return nil, fmt.Errorf("fail to insert provider %s %s,err: %w", evt.Provider, evt.Service, err)
 	}
 	if entity == nil {
 		return nil, fmt.Errorf("nil entity after inserting provider")
 	}
-	s.logger.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Pubkey, evt.Service)
+	s.logger.Debugf("inserted provider record %d for %s %s", entity.ID, evt.Provider, evt.Service)
 	provider.Entity = *entity
 	return provider, nil
 }

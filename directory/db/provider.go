@@ -17,6 +17,7 @@ import (
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
 	"github.com/arkeonetwork/arkeo/sentinel"
+	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type ArkeoProvider struct {
@@ -291,21 +292,21 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 	return providers, nil
 }
 
-func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt types.ValidatorPayoutEvent) (*Entity, error) {
+func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error) {
 	conn, err := d.getConnection()
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, evt.Height, evt.Paid)
+	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, height, evt.Reward.Int64())
 }
 
-func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt types.BondProviderEvent) (*Entity, error) {
-	if evt.BondAbsolute == "" {
+func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
+	if evt.BondAbs.IsNil() {
 		return nil, fmt.Errorf("nil BondAbsolute")
 	}
-	if evt.BondRelative == "" {
+	if evt.BondRel.IsNil() {
 		return nil, fmt.Errorf("nil BondRelative")
 	}
 	conn, err := d.getConnection()
@@ -314,7 +315,7 @@ func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt types.BondPr
 	}
 	defer conn.Release()
 
-	return insert(conn, sqlInsertBondProviderEvent, providerID, evt.Height, evt.TxID, evt.BondRelative, evt.BondAbsolute)
+	return insert(conn, sqlInsertBondProviderEvent, providerID, height, txID, evt.BondRel.String(), evt.BondAbs.String())
 }
 
 func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProviderEvent) (*Entity, error) {
