@@ -213,7 +213,7 @@ const provSearchCols = `
 	p.created,
 	p.pubkey,
 	p.service, 
-	coalesce(p.status,'Offline') as status,
+	coalesce(p.status,'OFFLINE') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
 	coalesce(p.subscription_rate,0) as subscription_rate,
@@ -283,11 +283,11 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 		return nil, fmt.Errorf("not a valid sortKey %s", criteria.SortKey)
 	}
 
-	sql, params := sb.BuildWithFlavor(getFlavor())
-	log.Debugf("sql: %s\n%v", sql, params)
+	q, params := sb.BuildWithFlavor(getFlavor())
+	log.Debugf("sql: %s\n%v", q, params)
 
 	providers := make([]*ArkeoProvider, 0, 512)
-	if err := pgxscan.Select(context.Background(), conn, &providers, sql, params...); err != nil {
+	if err := pgxscan.Select(context.Background(), conn, &providers, q, params...); err != nil {
 		return nil, errors.Wrapf(err, "error selecting many")
 	}
 
