@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
@@ -41,6 +42,9 @@ type IDataStorage interface {
 
 var _ IDataStorage = &DirectoryDB{}
 
+// ErrNotFound indicate the record doesn't exist in DB
+var ErrNotFound = pgx.ErrNoRows
+
 type DirectoryDB struct {
 	pool *pgxpool.Pool
 }
@@ -67,7 +71,7 @@ func New(config DBConfig) (*DirectoryDB, error) {
 		return nil, errors.Wrapf(err, "error parsing url to config from: \"%s\"", url)
 	}
 
-	pool, err := pgxpool.ConnectConfig(context.Background(), poolConfig)
+	pool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error connecting to db")
 	}

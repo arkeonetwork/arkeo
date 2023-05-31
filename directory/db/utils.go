@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/georgysavva/scany/pgxscan"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 )
 
@@ -44,13 +44,9 @@ func update(conn *pgxpool.Conn, sql string, params ...interface{}) (*Entity, err
 }
 
 // if the query returns no rows, the passed target remains unchanged. target must be a pointer
-func selectOne(conn *pgxpool.Conn, sql string, target interface{}, params ...interface{}) error {
-	log.Debugf("sql: %s\nparams: %v", sql, params)
-	if err := pgxscan.Get(context.Background(), conn, target, sql, params...); err != nil {
-		unwrapped := errors.Unwrap(err)
-		if unwrapped != nil && unwrapped.Error() == "no rows in result set" {
-			return nil
-		}
+func selectOne(conn *pgxpool.Conn, query string, target interface{}, params ...interface{}) error {
+	log.Debugf("sql: %s\nparams: %v", query, params)
+	if err := pgxscan.Get(context.Background(), conn, target, query, params...); err != nil {
 		return errors.Wrapf(err, "error selecting with params: %v", params)
 	}
 	return nil

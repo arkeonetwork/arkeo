@@ -13,9 +13,7 @@ func (s *Service) handleOpenContractEvent(evt atypes.EventOpenContract) error {
 	if err != nil {
 		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider.String(), evt.Service)
 	}
-	if provider == nil {
-		return fmt.Errorf("no provider found: DNE %s %s", evt.Provider.String(), evt.Service)
-	}
+	
 	_, err = s.db.UpsertContract(provider.ID, evt)
 	if err != nil {
 		return errors.Wrapf(err, "error upserting contract")

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/georgysavva/scany/pgxscan"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -157,7 +157,7 @@ func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, erro
 	}
 	// not found
 	if provider.Pubkey == "" {
-		return nil, nil
+		return nil, ErrNotFound
 	}
 
 	// fetch subscription and pay-as-you-go rates
