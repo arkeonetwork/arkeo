@@ -24,7 +24,6 @@ import (
 )
 
 func (s *Service) handleValidatorPayoutEvent(evt atypes.EventValidatorPayout, txID string, height int64) error {
-	s.logger.Infof("received validatorPayoutEvent %#v", evt)
 	if evt.Reward.IsNegative() {
 		return fmt.Errorf("received negative paid amt: %d for tx %s", evt.Reward, txID)
 	}

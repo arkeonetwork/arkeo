@@ -8,6 +8,8 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -95,7 +97,7 @@ func TestHandleBondProviderEvent(t *testing.T) {
 
 	// when provider doesn't exist , it should try to create one
 	// if it fail to create , then it should return an error
-	mockFindProvider = mockDb.On("FindProvider", testPubKey.String(), "mock").Return(nil, nil)
+	mockFindProvider = mockDb.On("FindProvider", testPubKey.String(), "mock").Return(nil, errors.Wrapf(pgx.ErrNoRows, "whatever"))
 	mockInsertProvider := mockDb.On("InsertProvider", mock.Anything).Return(nil, fmt.Errorf("fail to create provider"))
 	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
 		Provider: testPubKey,
