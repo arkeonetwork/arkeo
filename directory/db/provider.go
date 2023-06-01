@@ -10,7 +10,6 @@ import (
 
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -173,7 +172,7 @@ func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, erro
 	return &provider, nil
 }
 
-func (d *DirectoryDB) findRates(conn *pgxpool.Conn, providerID int64, query string) (cosmos.Coins, error) {
+func (d *DirectoryDB) findRates(conn IConnection, providerID int64, query string) (cosmos.Coins, error) {
 	// Execute the query
 	ctx := context.Background()
 	rows, err := conn.Query(ctx, query, providerID)
