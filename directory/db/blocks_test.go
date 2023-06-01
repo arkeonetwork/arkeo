@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -41,34 +42,49 @@ func TestInsertBlock(t *testing.T) {
 	assert.Nil(t, m.ExpectationsWereMet())
 }
 
-// func TestFindLatestBlock(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+func TestFindLatestBlock(t *testing.T) {
+	m, err := pgxmock.NewPool()
+	assert.Nil(t, err)
+	defer m.Close()
+	mockDb := &MockDB{
+		pool: m,
+	}
+	db := DirectoryDB{
+		hijacker: func() (IConnection, error) {
+			return mockDb, nil
+		},
+	}
 
-// 	db, err := New(config)
-// 	if err != nil {
-// 		t.Errorf("error getting db: %+v", err)
-// 	}
-// 	b, err := db.FindLatestBlock()
-// 	if err != nil {
-// 		t.Fatalf("error: %+v", err)
-// 	}
-// 	log.Infof("found block b %v", b)
-// }
+	testTime := time.Now()
+	hash := arkeotypes.GetRandomTxID()
+	m.ExpectQuery(`select b.id, b.created, b.updated, b.height, b.hash, b.block_time from blocks b where*`).WillReturnRows(
+		pgxmock.NewRows([]string{
+			"id", "created", "updated", "height", "hash", "block_time",
+		}).AddRow(int64(1), testTime, testTime, int64(1024), hash, testTime),
+	)
+	b, err := db.FindLatestBlock()
+	assert.Nil(t, err)
+	assert.NotNil(t, b)
+	assert.Nil(t, m.ExpectationsWereMet())
+	assert.Equal(t, b.ID, int64(1))
+	assert.Equal(t, b.Height, int64(1024))
+	assert.Equal(t, b.Hash, hash)
+	assert.Equal(t, b.BlockTime, testTime)
+	assert.Equal(t, b.Created, testTime)
+	assert.Equal(t, b.Updated, testTime)
 
-// func TestFindBlockGaps(t *testing.T) {
-// 	if testing.Short() {
-// 		t.Skip("skipping integration test")
-// 	}
+	// when query fail , it should return nil block and err
+	m, err = pgxmock.NewPool()
+	assert.Nil(t, err)
+	defer m.Close()
+	mockDb = &MockDB{
+		pool: m,
+	}
 
-// 	db, err := New(config)
-// 	if err != nil {
-// 		t.Errorf("error getting db: %+v", err)
-// 	}
-// 	b, err := db.FindBlockGaps()
-// 	if err != nil {
-// 		log.Fatalf("error finding gaps: %+v", err)
-// 	}
-// 	log.Infof("gaps: %v", b)
-// }
+	m.ExpectQuery(`select.*from blocks b where*`).
+		WillReturnError(fmt.Errorf("fail to query latest block"))
+	b, err = db.FindLatestBlock()
+	assert.NotNil(t, err)
+	assert.Nil(t, b)
+	assert.Nil(t, m.ExpectationsWereMet())
+}

@@ -51,8 +51,8 @@ type Acquireable interface {
 var _ Acquireable = &pgxpool.Pool{}
 
 type IConnection interface {
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	pgxscan.Querier
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	Release()
 	Begin(ctx context.Context) (pgx.Tx, error)
 }

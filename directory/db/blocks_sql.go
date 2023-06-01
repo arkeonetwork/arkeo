@@ -15,13 +15,4 @@ const (
 		from blocks b
 		where b.height = (select max(height) from blocks)
 	`
-	sqlFindBlockGaps = `
-		select previousHeight + 1 as gap_start, height - 1 as gap_end
-		from (select lag(b.height, 1) over (partition by 1 order by b.height) as previousHeight,
-								b.height
-					from blocks b
-					order by b.height) as x
-		where x.height - x.previousHeight > 1
-		order by gap_start
-	`
 )

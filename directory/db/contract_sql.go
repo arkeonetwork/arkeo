@@ -27,26 +27,6 @@ const (
 
 const (
 	sqlFindContract = ` select ` + contractCols + `
-	-- id,
-	-- created,
-	-- updated,
-	-- provider_id,
-	-- delegate_pubkey,
-	-- client_pubkey,
-	-- height,
-	-- contract_type,
-	-- duration,
-	-- rate_asset,
-	-- rate_amount,
-	-- open_cost,
-	-- deposit,
-	-- auth,
-	-- queries_per_minute,
-	-- settlement_duration,
-	-- paid,
-	-- reserve_contrib_asset,
-	-- reserve_contrib_usd,
-	-- closed_height
 	from contracts c
 		where c.id = $1
 	`

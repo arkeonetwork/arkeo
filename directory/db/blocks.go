@@ -1,11 +1,9 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"time"
 
-	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/pkg/errors"
 )
 
@@ -49,19 +47,4 @@ type BlockGap struct {
 
 func (g BlockGap) String() string {
 	return fmt.Sprintf("[%d-%d]", g.Start, g.End)
-}
-
-func (d *DirectoryDB) FindBlockGaps() ([]*BlockGap, error) {
-	conn, err := d.getConnection()
-	if err != nil {
-		return nil, errors.Wrapf(err, "error obtaining db connection")
-	}
-	defer conn.Release()
-
-	results := make([]*BlockGap, 0, 128)
-	if err = pgxscan.Select(context.Background(), conn, &results, sqlFindBlockGaps); err != nil {
-		return nil, errors.Wrapf(err, "error scanning")
-	}
-
-	return results, nil
 }

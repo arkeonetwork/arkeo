@@ -18,28 +18,28 @@ import (
 // TODO: reserve contributions, both in asset and USD terms
 type ArkeoContract struct {
 	Entity
-	ContractID          int64              `json:"contract_id" db:"id"`
-	Provider            string             `json:"provider" db:"-"`
-	Service             string             `json:"service" db:"-"`
-	DelegatePubkey      string             `json:"delegate_pubkey" db:"delegate_pubkey"`
-	ClientPubkey        string             `json:"client_pubkey" db:"client_pubkey"`
-	Height              int64              `json:"height" db:"height"`
-	ContractType        types.ContractType `json:"contract_type" db:"contract_type"`
-	Duration            int64              `json:"duration" db:"duration"`
-	RateAsset           string             `json:"-" db:"rate_asset"`
-	RateAmount          int64              `json:"-" db:"rate_amount"`
-	Rate                cosmos.Coin        `json:"rate" db:"-"`
-	OpenCost            int64              `json:"open_cost" db:"open_cost"`
-	ClosedHeight        int64              `json:"closed_height" db:"closed_height"`
-	ProviderID          int64              `json:"-" db:"provider_id"`
-	Deposit             int64              `json:"deposit" db:"deposit"`
-	Authorization       types.AuthType     `json:"authorization" db:"auth"`
-	QueriesPerMinute    int64              `json:"queries_per_minute" db:"queries_per_minute"`
-	Nonce               int64              `json:"nonce" db:"nonce"`
-	Paid                int64              `json:"paid" db:"paid"`
-	SettlementDurtion   int64              `json:"settlement_duration" db:"settlement_duration"`
-	ReserveContribAsset int64              `json:"reserve_contrib_asset" db:"reserve_contrib_asset"`
-	ReserveContribUSD   int64              `json:"reserve_contrib_usd" db:"reserve_contrib_usd"`
+	ContractID          int64       `json:"contract_id" db:"id"`
+	Provider            string      `json:"provider" db:"-"`
+	Service             string      `json:"service" db:"-"`
+	DelegatePubkey      string      `json:"delegate_pubkey" db:"delegate_pubkey"`
+	ClientPubkey        string      `json:"client_pubkey" db:"client_pubkey"`
+	Height              int64       `json:"height" db:"height"`
+	ContractType        string      `json:"contract_type" db:"contract_type"`
+	Duration            int64       `json:"duration" db:"duration"`
+	RateAsset           string      `json:"-" db:"rate_asset"`
+	RateAmount          int64       `json:"-" db:"rate_amount"`
+	Rate                cosmos.Coin `json:"rate" db:"-"`
+	OpenCost            int64       `json:"open_cost" db:"open_cost"`
+	ClosedHeight        int64       `json:"closed_height" db:"closed_height"`
+	ProviderID          int64       `json:"-" db:"provider_id"`
+	Deposit             int64       `json:"deposit" db:"deposit"`
+	Authorization       string      `json:"authorization" db:"auth"`
+	QueriesPerMinute    int64       `json:"queries_per_minute" db:"queries_per_minute"`
+	Nonce               int64       `json:"nonce" db:"nonce"`
+	Paid                int64       `json:"paid" db:"paid"`
+	SettlementDurtion   int64       `json:"settlement_duration" db:"settlement_duration"`
+	ReserveContribAsset int64       `json:"reserve_contrib_asset" db:"reserve_contrib_asset"`
+	ReserveContribUSD   int64       `json:"reserve_contrib_usd" db:"reserve_contrib_usd"`
 }
 
 func (d *DirectoryDB) FindContract(contractId uint64) (*ArkeoContract, error) {
@@ -65,10 +65,6 @@ func (d *DirectoryDB) FindContract(contractId uint64) (*ArkeoContract, error) {
 		contract.Rate = cosmos.NewInt64Coin(contract.RateAsset, contract.RateAmount)
 	}
 
-	// not found
-	if contract.ClientPubkey == "" {
-		return nil, nil
-	}
 	return &contract, nil
 }
 
