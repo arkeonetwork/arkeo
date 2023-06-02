@@ -7,6 +7,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -51,7 +52,15 @@ func (a *ApiService) Start() (chan struct{}, error) {
 
 func (a *ApiService) start(doneChan chan struct{}) {
 	log.Infof("starting http service on %s", a.params.ListenAddr)
-	if err := http.ListenAndServe(a.params.ListenAddr, a.router); err != nil {
+	server := &http.Server{
+		Addr:              a.params.ListenAddr,
+		Handler:           a.router,
+		ReadTimeout:       5 * time.Second, // TODO: updated it to use config
+		ReadHeaderTimeout: time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimeout:       5 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Errorf("error from http listener: %+v", err)
 	}
 	doneChan <- struct{}{}
