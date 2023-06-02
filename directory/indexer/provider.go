@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/directory/db"
-	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
@@ -23,7 +22,7 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	isMetaDataUpdated := provider.MetadataNonce == 0 || provider.MetadataNonce < evt.MetadataNonce
 	provider.MetadataURI = evt.MetadataUri
 	provider.MetadataNonce = evt.MetadataNonce
-	provider.Status = types.ProviderStatus(evt.Status.String())
+	provider.Status = evt.Status.String()
 	provider.MinContractDuration = evt.MinContractDuration
 	provider.MaxContractDuration = evt.MaxContractDuration
 	provider.SubscriptionRate = evt.SubscriptionRate
