@@ -51,7 +51,7 @@ jobs:
 
       - name: Read VERSION file
         id: getversion
-        run: echo "::set-output name=version::$(cat version)"
+        run: echo "::set-output name=version::$(cat chain.version)"
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
