@@ -58,7 +58,7 @@ func (s *MockDataStorage) UpsertContract(providerID int64, evt atypes.EventOpenC
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
-func (s *MockDataStorage) FindContract(contractId uint64) (*ArkeoContract, error) {
+func (s *MockDataStorage) GetContract(contractId uint64) (*ArkeoContract, error) {
 	args := s.Called(contractId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

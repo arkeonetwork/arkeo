@@ -58,3 +58,18 @@ func (a AnyTime) Match(v interface{}) bool {
 	_, ok := v.(time.Time)
 	return ok
 }
+
+func getMockDirectoryDBForTest(t *testing.T) (pgxmock.PgxPoolIface, *DirectoryDB) {
+	m, err := pgxmock.NewPool()
+	assert.Nil(t, err)
+
+	mockDb := &MockDB{
+		pool: m,
+	}
+	db := &DirectoryDB{
+		hijacker: func() (IConnection, error) {
+			return mockDb, nil
+		},
+	}
+	return m, db
+}

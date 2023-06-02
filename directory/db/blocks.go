@@ -33,7 +33,7 @@ func (d *DirectoryDB) FindLatestBlock() (*Block, error) {
 	}
 	defer conn.Release()
 
-	block := &Block{} // used to designate not found... need a better way!
+	block := &Block{}
 	if err = selectOne(conn, sqlFindLatestBlock, block); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}

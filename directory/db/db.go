@@ -33,7 +33,7 @@ type IDataStorage interface {
 	UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error)
 	FindProvider(pubkey, service string) (*ArkeoProvider, error)
 	UpsertContract(providerID int64, evt atypes.EventOpenContract) (*Entity, error)
-	FindContract(contractId uint64) (*ArkeoContract, error)
+	GetContract(contractId uint64) (*ArkeoContract, error)
 	CloseContract(contractID uint64, height int64) (*Entity, error)
 	UpdateProvider(provider *ArkeoProvider) (*Entity, error)
 	UpsertContractSettlementEvent(evt atypes.EventSettleContract) (*Entity, error)

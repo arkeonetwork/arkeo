@@ -4,62 +4,149 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
+	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	pgxmock "github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFindContract(t *testing.T) {
-	m, err := pgxmock.NewPool()
-	assert.Nil(t, err)
+	m, db := getMockDirectoryDBForTest(t)
 	defer m.Close()
-	mockDb := &MockDB{
-		pool: m,
-	}
-	db := DirectoryDB{
-		hijacker: func() (IConnection, error) {
-			return mockDb, nil
-		},
-	}
 	testTime := time.Now()
 	testPubKey := arkeotypes.GetRandomPubKey()
 	m.ExpectQuery(`select .* from contracts c*`).
 		WithArgs(uint64(1)).
 		WillReturnRows(
 			pgxmock.NewRows([]string{
-				"id", "created", "updated", "provider_id", "delegate_pubkey", "client_pubkey", "height", "contract_type", "duration", "rate_asset",
+				"id", "created", "updated", "provider", "service", "delegate_pubkey", "client_pubkey", "height", "contract_type", "duration", "rate_asset",
 				"rate_amount", "open_cost", "deposit", "auth", "queries_per_minute", "settlement_duration", "paid", "reserve_contrib_asset",
-				"reserve_contrib_usd", "closed_height",
-			}).AddRow(int64(1), testTime, testTime, int64(1), testPubKey.String(), testPubKey.String(), int64(1024), "PayAsYouGo",
-				int64(10), "uarkeo", int64(10), int64(10), int64(100000), "STRICT", int64(10), int64(10), int64(1000), int64(100), int64(100), int64(2048)),
+				"reserve_contrib_usd", "closed_height", "provider_id",
+			}).AddRow(int64(1), testTime, testTime, testPubKey.String(), "mock", testPubKey.String(), testPubKey.String(), int64(1024), "PayAsYouGo",
+				int64(10), "uarkeo", int64(10), int64(10), int64(100000), "STRICT", int64(10), int64(10), int64(1000), int64(100), int64(100), int64(2048), int64(1)),
 		)
-	m.ExpectQuery(`SELECT .* FROM providers WHERE id*`).
-		WithArgs(int64(1)).
-		WillReturnRows(
-			pgxmock.NewRows([]string{"pubkey", "service"}).
-				AddRow(testPubKey.String(), "mock"))
-	contract, err := db.FindContract(1)
+	contract, err := db.GetContract(1)
 	assert.Nil(t, err)
 	assert.NotNil(t, contract)
-	assert.Equal(t, contract.ContractID, int64(1))
-	assert.Equal(t, contract.Provider, testPubKey.String())
-	assert.Equal(t, contract.Service, "mock")
-	assert.Equal(t, contract.DelegatePubkey, testPubKey.String())
-	assert.Equal(t, contract.ClientPubkey, testPubKey.String())
-	assert.Equal(t, contract.Height, int64(1024))
-	assert.Equal(t, contract.ContractType, "PayAsYouGo")
-	assert.Equal(t, contract.Duration, int64(10))
-	assert.Equal(t, contract.RateAsset, "uarkeo")
-	assert.Equal(t, contract.RateAmount, int64(10))
-	assert.Equal(t, contract.OpenCost, int64(10))
-	assert.Equal(t, contract.Deposit, int64(100000))
-	assert.Equal(t, contract.Authorization, "STRICT")
-	assert.Equal(t, contract.ClosedHeight, int64(2048))
-	assert.Equal(t, contract.ProviderID, int64(1))
-	assert.Equal(t, contract.QueriesPerMinute, int64(10))
-	assert.Equal(t, contract.Paid, int64(1000))
-	assert.Equal(t, contract.SettlementDurtion, int64(10))
-	assert.Equal(t, contract.ReserveContribAsset, int64(100))
-	assert.Equal(t, contract.ReserveContribUSD, int64(100))
+	assert.Equal(t, int64(1), contract.ContractID)
+	assert.Equal(t, testPubKey.String(), contract.Provider)
+	assert.Equal(t, "mock", contract.Service)
+	assert.Equal(t, testPubKey.String(), contract.DelegatePubkey)
+	assert.Equal(t, testPubKey.String(), contract.ClientPubkey)
+	assert.Equal(t, int64(1024), contract.Height)
+	assert.Equal(t, "PayAsYouGo", contract.ContractType)
+	assert.Equal(t, int64(10), contract.Duration)
+	assert.Equal(t, "uarkeo", contract.RateAsset)
+	assert.Equal(t, int64(10), contract.RateAmount)
+	assert.Equal(t, int64(10), contract.OpenCost)
+	assert.Equal(t, int64(100000), contract.Deposit)
+	assert.Equal(t, "STRICT", contract.Authorization)
+	assert.Equal(t, int64(2048), contract.ClosedHeight)
+	assert.Equal(t, int64(1), contract.ProviderID)
+	assert.Equal(t, int64(10), contract.QueriesPerMinute)
+	assert.Equal(t, int64(1000), contract.Paid)
+	assert.Equal(t, int64(10), contract.SettlementDurtion)
+	assert.Equal(t, int64(100), contract.ReserveContribAsset)
+	assert.Equal(t, int64(100), contract.ReserveContribUSD)
+	assert.Nil(t, m.ExpectationsWereMet())
+}
 
+func TestUpdateContract(t *testing.T) {
+	m, db := getMockDirectoryDBForTest(t)
+	defer m.Close()
+	testTime := time.Now()
+	testPubKey := arkeotypes.GetRandomPubKey()
+	evt := arkeotypes.EventOpenContract{
+		Provider:           testPubKey,
+		ContractId:         1,
+		Service:            "mock",
+		Client:             testPubKey,
+		Delegate:           testPubKey,
+		Type:               arkeotypes.ContractType_PAY_AS_YOU_GO,
+		Height:             1024,
+		Duration:           10,
+		Rate:               cosmostypes.NewCoin("uarkeo", cosmostypes.NewInt(10)),
+		OpenCost:           1000,
+		Deposit:            math.NewInt(10000),
+		SettlementDuration: 10,
+		Authorization:      arkeotypes.ContractAuthorization_STRICT,
+		QueriesPerMinute:   10,
+	}
+	m.ExpectQuery("insert into contracts.*").
+		WithArgs(int64(1), evt.Delegate, evt.Client,
+			evt.Type,
+			evt.Duration,
+			evt.Rate.Denom,
+			evt.Rate.Amount.Int64(),
+			evt.OpenCost,
+			evt.Height,
+			evt.Deposit.Int64(),
+			evt.SettlementDuration,
+			evt.Authorization,
+			evt.QueriesPerMinute,
+			evt.ContractId).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+	entity, err := db.UpsertContract(1, evt)
+	assert.Nil(t, err)
+	assert.NotNil(t, entity)
+	assert.Equal(t, int64(1), entity.ID)
+	assert.Equal(t, testTime, entity.Created)
+	assert.Equal(t, testTime, entity.Updated)
+	assert.Nil(t, m.ExpectationsWereMet())
+}
+
+func TestCloseContract(t *testing.T) {
+	m, db := getMockDirectoryDBForTest(t)
+	defer m.Close()
+	testTime := time.Now()
+	m.ExpectQuery("update contracts.*").
+		WithArgs(int64(1024), uint64(1)).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+	entity, err := db.CloseContract(1, 1024)
+	assert.Nil(t, err)
+	assert.NotNil(t, entity)
+	assert.Equal(t, int64(1), entity.ID)
+	assert.Equal(t, testTime, entity.Created)
+	assert.Equal(t, testTime, entity.Updated)
+	assert.Nil(t, m.ExpectationsWereMet())
+}
+
+func TestUpsertContractSettltementEvent(t *testing.T) {
+	m, db := getMockDirectoryDBForTest(t)
+	defer m.Close()
+	testTime := time.Now()
+
+	testPubKey := arkeotypes.GetRandomPubKey()
+	evt := arkeotypes.EventSettleContract{
+		Provider:   testPubKey,
+		ContractId: 1,
+		Service:    "mock",
+		Client:     testPubKey,
+		Delegate:   testPubKey,
+		Type:       arkeotypes.ContractType_PAY_AS_YOU_GO,
+		Nonce:      1,
+		Height:     1024,
+		Paid:       math.NewInt(1000),
+		Reserve:    math.NewInt(1000),
+	}
+	m.ExpectQuery("UPDATE contracts.*").
+		WithArgs(evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+	entity, err := db.UpsertContractSettlementEvent(evt)
+	assert.Nil(t, err)
+	assert.NotNil(t, entity)
+	assert.Equal(t, int64(1), entity.ID)
+	assert.Equal(t, testTime, entity.Created)
+	assert.Equal(t, testTime, entity.Updated)
+	assert.Nil(t, m.ExpectationsWereMet())
 }

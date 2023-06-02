@@ -55,7 +55,7 @@ func (a *ApiService) getContract(w http.ResponseWriter, r *http.Request) {
 
 // find a contract by contract id
 func (a *ApiService) findContract(id uint64) (*db.ArkeoContract, error) {
-	dbContract, err := a.db.FindContract(id)
+	dbContract, err := a.db.GetContract(id)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error finding contract with id %d", id)
 	}
