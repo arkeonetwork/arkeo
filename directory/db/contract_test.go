@@ -1,14 +1,16 @@
 package db
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"cosmossdk.io/math"
-	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
-	pgxmock "github.com/pashagolub/pgxmock/v2"
+	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
+
+	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func TestFindContract(t *testing.T) {
@@ -26,7 +28,8 @@ func TestFindContract(t *testing.T) {
 			}).AddRow(int64(1), testTime, testTime, testPubKey.String(), "mock", testPubKey.String(), testPubKey.String(), int64(1024), "PayAsYouGo",
 				int64(10), "uarkeo", int64(10), int64(10), int64(100000), "STRICT", int64(10), int64(10), int64(1000), int64(100), int64(100), int64(2048), int64(1)),
 		)
-	contract, err := db.GetContract(1)
+	ctx := context.Background()
+	contract, err := db.GetContract(ctx, 1)
 	assert.Nil(t, err)
 	assert.NotNil(t, contract)
 	assert.Equal(t, int64(1), contract.ContractID)
@@ -90,7 +93,7 @@ func TestUpdateContract(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.UpsertContract(1, evt)
+	entity, err := db.UpsertContract(context.Background(), 1, evt)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -109,7 +112,7 @@ func TestCloseContract(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.CloseContract(1, 1024)
+	entity, err := db.CloseContract(context.Background(), 1, 1024)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -142,7 +145,7 @@ func TestUpsertContractSettltementEvent(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.UpsertContractSettlementEvent(evt)
+	entity, err := db.UpsertContractSettlementEvent(context.Background(), evt)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)

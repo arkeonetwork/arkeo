@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func insert(conn IConnection, sql string, params ...interface{}) (*Entity, error) {
+func insert(ctx context.Context, conn IConnection, sql string, params ...interface{}) (*Entity, error) {
 	var (
 		id      int64
 		created time.Time
@@ -18,7 +18,7 @@ func insert(conn IConnection, sql string, params ...interface{}) (*Entity, error
 		err     error
 	)
 	log.Debugf("sql: %s\nparams: %v", sql, params)
-	row := conn.QueryRow(context.Background(), sql, params...)
+	row := conn.QueryRow(ctx, sql, params...)
 	if err = row.Scan(&id, &created, &updated); err != nil {
 		return nil, errors.Wrap(err, "fail to insert")
 	}
@@ -26,7 +26,7 @@ func insert(conn IConnection, sql string, params ...interface{}) (*Entity, error
 	return &Entity{ID: id, Created: created, Updated: updated}, nil
 }
 
-func update(conn IConnection, sql string, params ...interface{}) (*Entity, error) {
+func update(ctx context.Context, conn IConnection, sql string, params ...interface{}) (*Entity, error) {
 	var (
 		id      int64
 		created time.Time
@@ -34,7 +34,7 @@ func update(conn IConnection, sql string, params ...interface{}) (*Entity, error
 		err     error
 	)
 	log.Debugf("sql: %s", sql)
-	row := conn.QueryRow(context.Background(), sql, params...)
+	row := conn.QueryRow(ctx, sql, params...)
 	if err = row.Scan(&id, &created, &updated); err != nil {
 		return nil, errors.Wrap(err, "error inserting")
 	}
@@ -43,25 +43,25 @@ func update(conn IConnection, sql string, params ...interface{}) (*Entity, error
 }
 
 // if the query returns no rows, the passed target remains unchanged. target must be a pointer
-func selectOne(conn IConnection, query string, target interface{}, params ...interface{}) error {
+func selectOne(ctx context.Context, conn IConnection, query string, target interface{}, params ...interface{}) error {
 	log.Debugf("sql: %s\nparams: %v", query, params)
-	if err := pgxscan.Get(context.Background(), conn, target, query, params...); err != nil {
+	if err := pgxscan.Get(ctx, conn, target, query, params...); err != nil {
 		return errors.Wrapf(err, "error selecting with params: %v", params)
 	}
 	return nil
 }
 
 // nolint
-func selectMany(conn IConnection, sql string, params ...interface{}) ([]map[string]interface{}, error) {
-	results := make([]map[string]interface{}, 0, 512)
-	if err := pgxscan.Select(context.Background(), conn, &results, sql, params...); err != nil {
-		return nil, errors.Wrapf(err, "error selecting many")
-	}
-	return results, nil
-}
+//func selectMany(ctx context.Context, conn IConnection, sql string, params ...interface{}) ([]map[string]interface{}, error) {
+//	results := make([]map[string]interface{}, 0, 512)
+//	if err := pgxscan.Select(ctx, conn, &results, sql, params...); err != nil {
+//		return nil, errors.Wrapf(err, "error selecting many")
+//	}
+//	return results, nil
+//}
 
-func upsert(conn IConnection, sql string, params ...interface{}) (*Entity, error) {
-	row := conn.QueryRow(context.Background(), sql, params...)
+func upsert(ctx context.Context, conn IConnection, sql string, params ...interface{}) (*Entity, error) {
+	row := conn.QueryRow(ctx, sql, params...)
 
 	var (
 		id      int64

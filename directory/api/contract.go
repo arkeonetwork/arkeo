@@ -1,13 +1,15 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/directory/db"
 )
 
 // swagger:model ArkeoContract
@@ -43,7 +45,7 @@ func (a *ApiService) getContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contract, err := a.findContract(id)
+	contract, err := a.findContract(r.Context(), id)
 	if err != nil {
 		log.Errorf("error finding contract %d: %+v", id, err)
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error finding contract with id %d", id))
@@ -54,8 +56,8 @@ func (a *ApiService) getContract(w http.ResponseWriter, r *http.Request) {
 }
 
 // find a contract by contract id
-func (a *ApiService) findContract(id uint64) (*db.ArkeoContract, error) {
-	dbContract, err := a.db.GetContract(id)
+func (a *ApiService) findContract(ctx context.Context, id uint64) (*db.ArkeoContract, error) {
+	dbContract, err := a.db.GetContract(ctx, id)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error finding contract with id %d", id)
 	}

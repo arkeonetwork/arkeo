@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 
@@ -11,8 +12,8 @@ import (
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
-func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
-	provider, err := s.db.FindProvider(evt.Provider.String(), evt.Service)
+func (s *Service) handleModProviderEvent(ctx context.Context, evt atypes.EventModProvider) error {
+	provider, err := s.db.FindProvider(ctx, evt.Provider.String(), evt.Service)
 	if err != nil {
 		return fmt.Errorf("fail to find provider %s for service %s,err: %w", evt.Provider, evt.Service, err)
 	}
@@ -29,7 +30,7 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	provider.PayAsYouGoRate = evt.PayAsYouGoRate
 	provider.SettlementDuration = evt.SettlementDuration
 
-	if _, err = s.db.UpdateProvider(provider); err != nil {
+	if _, err = s.db.UpdateProvider(ctx, provider); err != nil {
 		return fmt.Errorf("error updating provider for mod event %s service %s,err: %w", provider.Pubkey, provider.Service, err)
 	}
 	/*
@@ -69,22 +70,22 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 		return nil
 	}
 
-	if _, err = s.db.UpsertProviderMetadata(provider.ID, int64(provider.MetadataNonce), *providerMetadata); err != nil {
+	if _, err = s.db.UpsertProviderMetadata(ctx, provider.ID, int64(provider.MetadataNonce), *providerMetadata); err != nil {
 		return errors.Wrapf(err, "error updating provider metadta for mod event %s service %s", provider.Pubkey, provider.Service)
 	}
 	return nil
 }
 
-func (s *Service) handleBondProviderEvent(evt atypes.EventBondProvider, txID string, height int64) error {
+func (s *Service) handleBondProviderEvent(ctx context.Context, evt atypes.EventBondProvider, txID string, height int64) error {
 	isNewProvider := false
-	provider, err := s.db.FindProvider(evt.Provider.String(), evt.Service)
+	provider, err := s.db.FindProvider(ctx, evt.Provider.String(), evt.Service)
 	if err != nil {
 		if !errors.Is(err, db.ErrNotFound) {
 			return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
 		}
 
 		// provider doesn't exist yet , create a new one
-		provider, err = s.createProvider(evt)
+		provider, err = s.createProvider(ctx, evt)
 		if err != nil {
 			return errors.Wrapf(err, "error creating provider %s service %s", evt.Provider, evt.Service)
 		}
@@ -96,26 +97,26 @@ func (s *Service) handleBondProviderEvent(evt atypes.EventBondProvider, txID str
 			provider.Bond = evt.BondAbs.String()
 		}
 		// TODO change this to just update bond , `UpdateProvider` does a lot other stuff
-		if _, err = s.db.UpdateProvider(provider); err != nil {
+		if _, err = s.db.UpdateProvider(ctx, provider); err != nil {
 			return errors.Wrapf(err, "error updating provider for bond event %s service %s", evt.Provider, evt.Service)
 		}
 	}
 
 	s.logger.Debugf("handled bond provider event for %s service %s", evt.Provider, evt.Service)
-	if _, err = s.db.InsertBondProviderEvent(provider.ID, evt, height, txID); err != nil {
+	if _, err = s.db.InsertBondProviderEvent(ctx, provider.ID, evt, height, txID); err != nil {
 		return errors.Wrapf(err, "error inserting BondProviderEvent for %s service %s", evt.Provider, evt.Service)
 	}
 	return nil
 }
 
-func (s *Service) createProvider(evt atypes.EventBondProvider) (*db.ArkeoProvider, error) {
+func (s *Service) createProvider(ctx context.Context, evt atypes.EventBondProvider) (*db.ArkeoProvider, error) {
 	// new provider for service, insert
 	provider := &db.ArkeoProvider{
 		Pubkey:  evt.Provider.String(),
 		Service: evt.Service,
 		Bond:    evt.BondAbs.String(),
 	}
-	entity, err := s.db.InsertProvider(provider)
+	entity, err := s.db.InsertProvider(ctx, provider)
 	if err != nil {
 		return nil, fmt.Errorf("fail to insert provider %s %s,err: %w", evt.Provider, evt.Service, err)
 	}

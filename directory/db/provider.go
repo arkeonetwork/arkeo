@@ -35,11 +35,11 @@ type ArkeoProvider struct {
 	PayAsYouGoRate      cosmos.Coins `json:"paygo_rates" db:"-"`
 }
 
-func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
+func (d *DirectoryDB) InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error) {
 	if provider == nil {
 		return nil, fmt.Errorf("nil provider")
 	}
-	conn, err := d.getConnection()
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
@@ -49,20 +49,19 @@ func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "error converting bond to int64 (%s)", provider.Bond)
 	}
-	return insert(conn, sqlInsertProvider, provider.Pubkey, provider.Service, bond)
+	return insert(ctx, conn, sqlInsertProvider, provider.Pubkey, provider.Service, bond)
 }
 
-func (d *DirectoryDB) UpdateProvider(provider *ArkeoProvider) (*Entity, error) {
+func (d *DirectoryDB) UpdateProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error) {
 	if provider == nil {
 		return nil, fmt.Errorf("nil provider")
 	}
-	conn, err := d.getConnection()
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	ctx := context.Background()
 	tx, err := conn.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("unable to begin transaction: %w", err)
@@ -144,14 +143,14 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 	return query, args
 }
 
-func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) FindProvider(ctx context.Context, pubkey, service string) (*ArkeoProvider, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 	provider := ArkeoProvider{}
-	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, service); err != nil {
+	if err = selectOne(ctx, conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 
@@ -218,8 +217,8 @@ const provSearchCols = `
 	coalesce(p.bond,0) as bond
 `
 
-func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*ArkeoProvider, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) SearchProviders(ctx context.Context, criteria types.ProviderSearchParams) ([]*ArkeoProvider, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
@@ -282,52 +281,52 @@ func (d *DirectoryDB) SearchProviders(criteria types.ProviderSearchParams) ([]*A
 	log.Debugf("sql: %s\n%v", q, params)
 
 	providers := make([]*ArkeoProvider, 0, 512)
-	if err := pgxscan.Select(context.Background(), conn, &providers, q, params...); err != nil {
+	if err := pgxscan.Select(ctx, conn, &providers, q, params...); err != nil {
 		return nil, errors.Wrapf(err, "error selecting many")
 	}
 
 	return providers, nil
 }
 
-func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) UpsertValidatorPayoutEvent(ctx context.Context, evt atypes.EventValidatorPayout, height int64) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator.String(), height, evt.Reward.Int64())
+	return upsert(ctx, conn, sqlUpsertValidatorPayoutEvent, evt.Validator.String(), height, evt.Reward.Int64())
 }
 
-func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
+func (d *DirectoryDB) InsertBondProviderEvent(ctx context.Context, providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
 	if evt.BondAbs.IsNil() {
 		return nil, fmt.Errorf("nil BondAbsolute")
 	}
 	if evt.BondRel.IsNil() {
 		return nil, fmt.Errorf("nil BondRelative")
 	}
-	conn, err := d.getConnection()
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return insert(conn, sqlInsertBondProviderEvent, providerID, height, txID, evt.BondRel.String(), evt.BondAbs.String())
+	return insert(ctx, conn, sqlInsertBondProviderEvent, providerID, height, txID, evt.BondRel.String(), evt.BondAbs.String())
 }
 
-func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProviderEvent) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return insert(conn, sqlInsertModProviderEvent, providerID, evt.Height, evt.TxID, evt.MetadataURI, evt.MetadataNonce, evt.Status,
+	return insert(ctx, conn, sqlInsertModProviderEvent, providerID, evt.Height, evt.TxID, evt.MetadataURI, evt.MetadataNonce, evt.Status,
 		evt.MinContractDuration, evt.MaxContractDuration)
 }
 
-func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) UpsertProviderMetadata(ctx context.Context, providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
@@ -345,5 +344,5 @@ func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data senti
 	}
 
 	// TODO - always insert instead of upsert, fail on dupe (or read and fail on exists). are there any restrictions on version string?
-	return insert(conn, sqlUpsertProviderMetadata, providerID, nonce, c.Moniker, c.Website, c.Description, location, c.FreeTierRateLimit)
+	return insert(ctx, conn, sqlUpsertProviderMetadata, providerID, nonce, c.Moniker, c.Website, c.Description, location, c.FreeTierRateLimit)
 }

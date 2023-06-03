@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -521,7 +522,7 @@ func tern(iter int64, providers []types.Provider) {
 			Service: provider.Service.String(),
 			Bond:    "0",
 		}
-		_, err = database.InsertProvider(&prov)
+		_, err = database.InsertProvider(context.Background(), &prov)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to save provider")
 		}

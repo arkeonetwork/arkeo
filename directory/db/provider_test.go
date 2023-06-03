@@ -1,19 +1,21 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"testing"
 	"time"
 
 	"cosmossdk.io/math"
+	cosmostypes "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pashagolub/pgxmock/v2"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/sentinel"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
-	cosmostypes "github.com/cosmos/cosmos-sdk/types"
-	pgxmock "github.com/pashagolub/pgxmock/v2"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestInsertProvider(t *testing.T) {
@@ -21,7 +23,7 @@ func TestInsertProvider(t *testing.T) {
 	defer m.Close()
 	testTime := time.Now()
 
-	entity, err := db.InsertProvider(nil)
+	entity, err := db.InsertProvider(context.Background(), nil)
 	assert.NotNil(t, err)
 	assert.Nil(t, entity)
 
@@ -49,7 +51,7 @@ func TestInsertProvider(t *testing.T) {
 		},
 	}
 	p.Bond = "whatever"
-	entity, err = db.InsertProvider(p)
+	entity, err = db.InsertProvider(context.Background(), p)
 	assert.NotNil(t, err)
 	assert.Nil(t, entity)
 
@@ -59,7 +61,7 @@ func TestInsertProvider(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err = db.InsertProvider(p)
+	entity, err = db.InsertProvider(context.Background(), p)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -72,7 +74,7 @@ func TestUpdateProvider(t *testing.T) {
 	m, db := getMockDirectoryDBForTest(t)
 	defer m.Close()
 	testTime := time.Now()
-	entity, err := db.UpdateProvider(nil)
+	entity, err := db.UpdateProvider(context.Background(), nil)
 	assert.NotNil(t, err)
 	assert.Nil(t, entity)
 
@@ -100,7 +102,7 @@ func TestUpdateProvider(t *testing.T) {
 		},
 	}
 	m.ExpectBegin().WillReturnError(fmt.Errorf("fail to begin tx"))
-	entity, err = db.UpdateProvider(p)
+	entity, err = db.UpdateProvider(context.Background(), p)
 	assert.NotNil(t, err)
 	assert.Nil(t, entity)
 	assert.Nil(t, m.ExpectationsWereMet())
@@ -127,7 +129,7 @@ func TestUpdateProvider(t *testing.T) {
 		WithArgs(int64(1), p.PayAsYouGoRate[0].Denom, p.PayAsYouGoRate[0].Amount.Int64()).
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 	m1.ExpectCommit()
-	entity, err = db1.UpdateProvider(p)
+	entity, err = db1.UpdateProvider(context.Background(), p)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Nil(t, m1.ExpectationsWereMet())
@@ -156,7 +158,7 @@ func TestFindProvider(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "provider_id", "token_name", "token_amount"}).
 				AddRow(int64(1), int64(1), "uarkeo", int64(100)),
 		)
-	p, err := db.FindProvider(testPubKey.String(), "mock")
+	p, err := db.FindProvider(context.Background(), testPubKey.String(), "mock")
 	assert.Nil(t, err)
 	assert.NotNil(t, p)
 	assert.Nil(t, m.ExpectationsWereMet())
@@ -177,7 +179,7 @@ func TestUpdateValidatorPayoutEvent(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime))
 
-	entity, err := db.UpsertValidatorPayoutEvent(evt, 1)
+	entity, err := db.UpsertValidatorPayoutEvent(context.Background(), evt, 1)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -197,7 +199,7 @@ func TestInsertBondProviderEvent(t *testing.T) {
 		WillReturnRows(
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime))
-	entity, err := db.InsertBondProviderEvent(int64(1), arkeotypes.EventBondProvider{
+	entity, err := db.InsertBondProviderEvent(context.Background(), int64(1), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1000),
@@ -241,7 +243,7 @@ func TestInsertModProviderEvent(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime))
 
-	entity, err := db.InsertModProviderEvent(int64(1), evt)
+	entity, err := db.InsertModProviderEvent(context.Background(), int64(1), evt)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -280,7 +282,7 @@ func TestUpsertProviderMetadata(t *testing.T) {
 		WillReturnRows(
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime))
-	entity, err := db.UpsertProviderMetadata(1, 1, metadata)
+	entity, err := db.UpsertProviderMetadata(context.Background(), 1, 1, metadata)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)

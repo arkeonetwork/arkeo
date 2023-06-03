@@ -1,12 +1,14 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/arkeonetwork/arkeo/directory/db"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/directory/db"
 )
 
 // swagger:model ArkeoProvider
@@ -56,7 +58,7 @@ func (a *ApiService) getProvider(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "service is required")
 		return
 	}
-	provider, err := a.findProvider(pubkey, service)
+	provider, err := a.findProvider(r.Context(), pubkey, service)
 	if err != nil {
 		log.Errorf("error finding provider for %s service %s: %+v", pubkey, service, err)
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error finding provider with pubkey %s", pubkey))
@@ -67,8 +69,8 @@ func (a *ApiService) getProvider(w http.ResponseWriter, r *http.Request) {
 }
 
 // find a provider by pubkey+service
-func (a *ApiService) findProvider(pubkey, service string) (*db.ArkeoProvider, error) {
-	dbProvider, err := a.db.FindProvider(pubkey, service)
+func (a *ApiService) findProvider(ctx context.Context, pubkey, service string) (*db.ArkeoProvider, error) {
+	dbProvider, err := a.db.FindProvider(ctx, pubkey, service)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error finding provider for %s %s", pubkey, service)
 	}

@@ -23,7 +23,7 @@ import (
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
-func (s *Service) handleValidatorPayoutEvent(evt atypes.EventValidatorPayout, txID string, height int64) error {
+func (s *Service) handleValidatorPayoutEvent(ctx context.Context, evt atypes.EventValidatorPayout, txID string, height int64) error {
 	if evt.Reward.IsNegative() {
 		return fmt.Errorf("received negative paid amt: %d for tx %s", evt.Reward.Int64(), txID)
 	}
@@ -31,7 +31,7 @@ func (s *Service) handleValidatorPayoutEvent(evt atypes.EventValidatorPayout, tx
 		return nil
 	}
 	s.logger.Infof("upserting validator payout event for tx %s", txID)
-	if _, err := s.db.UpsertValidatorPayoutEvent(evt, height); err != nil {
+	if _, err := s.db.UpsertValidatorPayoutEvent(ctx, evt, height); err != nil {
 		return errors.Wrapf(err, "error upserting validator payout event")
 	}
 	return nil
@@ -164,13 +164,15 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 	if transaction != nil {
 		txID = hex.EncodeToString(transaction.Hash())
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), defaultHandleEventTimeout)
+	defer cancel()
 	switch event.Type {
 	case atypes.EventTypeBondProvider:
 		bondProviderEvent, err := parseEventToConcreteType[atypes.EventBondProvider](event)
 		if err != nil {
 			return err
 		}
-		if err := s.handleBondProviderEvent(bondProviderEvent, txID, height); err != nil {
+		if err := s.handleBondProviderEvent(ctx, bondProviderEvent, txID, height); err != nil {
 			return err
 		}
 	case atypes.EventTypeModProvider:
@@ -178,7 +180,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleModProviderEvent(modProviderEvent); err != nil {
+		if err := s.handleModProviderEvent(ctx, modProviderEvent); err != nil {
 			return err
 		}
 	case atypes.EventTypeOpenContract:
@@ -186,7 +188,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleOpenContractEvent(contractOpenEvent); err != nil {
+		if err := s.handleOpenContractEvent(ctx, contractOpenEvent); err != nil {
 			return err
 		}
 
@@ -195,7 +197,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleContractSettlementEvent(eventSettleContract); err != nil {
+		if err := s.handleContractSettlementEvent(ctx, eventSettleContract); err != nil {
 			return err
 		}
 	case atypes.EventTypeValidatorPayout:
@@ -203,7 +205,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleValidatorPayoutEvent(eventValidatorPayout, txID, height); err != nil {
+		if err := s.handleValidatorPayoutEvent(ctx, eventValidatorPayout, txID, height); err != nil {
 			return err
 		}
 	case atypes.EventTypeCloseContract:
@@ -211,7 +213,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleCloseContractEvent(eventCloseContract, height); err != nil {
+		if err := s.handleCloseContractEvent(ctx, eventCloseContract, height); err != nil {
 			return err
 		}
 	case "coin_spent", "coin_received", "transfer", "message", "tx":
