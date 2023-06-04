@@ -144,7 +144,7 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 	defer cancel()
 	txInfo, err := s.tmClient.Tx(ctx, transaction.Hash(), false)
 	if err != nil {
-		return fmt.Errorf("failed to get transaction data for %s,err:%w", transaction.Hash(), err)
+		return fmt.Errorf("failed to get transaction data for %s,err:%w", string(transaction.Hash()), err)
 	}
 	for _, event := range txInfo.TxResult.Events {
 		s.logger.WithField("height", height).Debugf("received %s txevent", event.Type)
