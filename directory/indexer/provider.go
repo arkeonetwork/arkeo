@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/directory/db"
-	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/directory/utils"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
@@ -17,16 +16,13 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 	if err != nil {
 		return fmt.Errorf("fail to find provider %s for service %s,err: %w", evt.Provider, evt.Service, err)
 	}
-	if provider == nil {
-		return fmt.Errorf("cannot mod provider, DNE %s %s", evt.Provider, evt.Service)
-	}
 
 	log := s.logger.WithField("provider", provider.ID)
 
 	isMetaDataUpdated := provider.MetadataNonce == 0 || provider.MetadataNonce < evt.MetadataNonce
 	provider.MetadataURI = evt.MetadataUri
 	provider.MetadataNonce = evt.MetadataNonce
-	provider.Status = types.ProviderStatus(evt.Status.String())
+	provider.Status = evt.Status.String()
 	provider.MinContractDuration = evt.MinContractDuration
 	provider.MaxContractDuration = evt.MaxContractDuration
 	provider.SubscriptionRate = evt.SubscriptionRate
@@ -80,16 +76,22 @@ func (s *Service) handleModProviderEvent(evt atypes.EventModProvider) error {
 }
 
 func (s *Service) handleBondProviderEvent(evt atypes.EventBondProvider, txID string, height int64) error {
+	isNewProvider := false
 	provider, err := s.db.FindProvider(evt.Provider.String(), evt.Service)
 	if err != nil {
-		return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
-	}
-	if provider == nil {
-		// new provider for service, insert
-		if provider, err = s.createProvider(evt); err != nil {
+		if !errors.Is(err, db.ErrNotFound) {
+			return errors.Wrapf(err, "error finding provider %s for service %s", evt.Provider, evt.Service)
+		}
+
+		// provider doesn't exist yet , create a new one
+		provider, err = s.createProvider(evt)
+		if err != nil {
 			return errors.Wrapf(err, "error creating provider %s service %s", evt.Provider, evt.Service)
 		}
-	} else {
+		isNewProvider = true
+
+	}
+	if !isNewProvider {
 		if evt.BondAbs.IsNil() {
 			provider.Bond = evt.BondAbs.String()
 		}

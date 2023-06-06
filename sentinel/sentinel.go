@@ -11,6 +11,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -344,8 +345,15 @@ func (p Proxy) Run() {
 
 	// Add the Logrus middleware to the router
 	loggingRouter := p.logrusMiddleware(router)
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", p.Config.Port), loggingRouter); err != nil {
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%s", p.Config.Port),
+		Handler:           loggingRouter,
+		ReadTimeout:       5 * time.Second, // TODO: updated it to use config
+		ReadHeaderTimeout: time.Second,
+		WriteTimeout:      5 * time.Second,
+		IdleTimeout:       5 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }

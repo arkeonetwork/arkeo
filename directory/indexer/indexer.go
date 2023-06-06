@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -72,17 +73,17 @@ func (s *Service) Run() error {
 func (s *Service) gapFiller() error {
 	latestStored, err := s.db.FindLatestBlock()
 	if err != nil {
-		return fmt.Errorf("fail to find latest store block,err: %w", err)
+		if !errors.Is(err, db.ErrNotFound) {
+			return fmt.Errorf("fail to find latest store block,err: %w", err)
+		}
+		// start from zero
+		latestStored = &db.Block{}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), defaultRetrieveBlockTimeout)
 	defer cancel()
 	latest, err := s.tmClient.Block(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("fail to find latest block,err: %w", err)
-	}
-	if latest.Block == nil {
-		s.logger.Info("latest block is nil, skipping")
-		return nil
 	}
 	var todo db.BlockGap
 	if latest.Block.Height-latestStored.Height <= 0 {

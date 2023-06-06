@@ -38,24 +38,20 @@ var (
 		where p.pubkey = $1
 		  and p.service = $2
 	`
-	sqlInsertBondProviderEvent = `
-		insert into provider_bond_events(provider_id,height,txid,bond_rel,bond_abs)
-		values ($1,$2,$3,$4,$5)
+	sqlInsertBondProviderEvent = `insert into provider_bond_events(provider_id,height,txid,bond_rel,bond_abs) values ($1,$2,$3,$4,$5)
 		on conflict on constraint provider_bond_events_txid_unq
 		do update set updated = now()
 		where provider_bond_events.txid = $3
 		returning id, created, updated
 	`
-	sqlInsertModProviderEvent = `
-		insert into provider_mod_events(provider_id,height,txid,metadata_uri,metadata_nonce,status,min_contract_duration,max_contract_duration)
+	sqlInsertModProviderEvent = `insert into provider_mod_events(provider_id,height,txid,metadata_uri,metadata_nonce,status,min_contract_duration,max_contract_duration)
 		values ($1,$2,$3,$4,$5,$6,$7,$8)
 		on conflict on constraint provider_mod_events_txid_unq
 		do update set updated = now()
 		where provider_mod_events.txid = $3
 		returning id, created, updated
 	`
-	sqlUpsertProviderMetadata = `
-		insert into provider_metadata(provider_id,nonce,moniker,website,description,location,free_rate_limit)
+	sqlUpsertProviderMetadata = `insert into provider_metadata(provider_id,nonce,moniker,website,description,location,free_rate_limit)
 		values ($1,$2,$3,$4,$5,CAST(NULLIF($6, '') AS point),$7,$8)
 		on conflict on constraint prov_metanonce_uniq
 		do update set updated = now()
@@ -63,8 +59,7 @@ var (
 		  and provider_metadata.nonce = $2
 		returning id, created, updated
 	`
-	sqlUpsertValidatorPayoutEvent = `
-	insert into validator_payout_events(validator,height,paid)
+	sqlUpsertValidatorPayoutEvent = `insert into validator_payout_events(validator,height,paid)
 	values ($1,$2,$3)
 	on conflict on constraint validator_payout_evts_validator_height_key
 	do update set updated = now()

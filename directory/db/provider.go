@@ -8,9 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/georgysavva/scany/pgxscan"
+	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/huandu/go-sqlbuilder"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -25,15 +24,15 @@ type ArkeoProvider struct {
 	Pubkey  string `json:"pubkey" db:"pubkey"`
 	Service string `json:"service" db:"service"`
 	// this is a DECIMAL type in the db
-	Bond                string               `json:"bond" db:"bond"`
-	MetadataURI         string               `json:"metadata_uri" db:"metadata_uri"`
-	MetadataNonce       uint64               `json:"metadata_nonce" db:"metadata_nonce"`
-	Status              types.ProviderStatus `json:"status" db:"status,text"`
-	MinContractDuration int64                `json:"min_contract_duration" db:"min_contract_duration"`
-	MaxContractDuration int64                `json:"max_contract_duration" db:"max_contract_duration"`
-	SettlementDuration  int64                `json:"settlement_duration" db:"settlement_duration"`
-	SubscriptionRate    cosmos.Coins         `json:"subscription_rates" db:"-"`
-	PayAsYouGoRate      cosmos.Coins         `json:"paygo_rates" db:"-"`
+	Bond                string       `json:"bond" db:"bond"`
+	MetadataURI         string       `json:"metadata_uri" db:"metadata_uri"`
+	MetadataNonce       uint64       `json:"metadata_nonce" db:"metadata_nonce"`
+	Status              string       `json:"status" db:"status,text"`
+	MinContractDuration int64        `json:"min_contract_duration" db:"min_contract_duration"`
+	MaxContractDuration int64        `json:"max_contract_duration" db:"max_contract_duration"`
+	SettlementDuration  int64        `json:"settlement_duration" db:"settlement_duration"`
+	SubscriptionRate    cosmos.Coins `json:"subscription_rates" db:"-"`
+	PayAsYouGoRate      cosmos.Coins `json:"paygo_rates" db:"-"`
 }
 
 func (d *DirectoryDB) InsertProvider(provider *ArkeoProvider) (*Entity, error) {
@@ -155,10 +154,6 @@ func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, erro
 	if err = selectOne(conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
-	// not found
-	if provider.Pubkey == "" {
-		return nil, nil
-	}
 
 	// fetch subscription and pay-as-you-go rates
 	provider.SubscriptionRate, err = d.findRates(conn, provider.ID, sqlFindProviderSubscriptionRates)
@@ -173,7 +168,7 @@ func (d *DirectoryDB) FindProvider(pubkey, service string) (*ArkeoProvider, erro
 	return &provider, nil
 }
 
-func (d *DirectoryDB) findRates(conn *pgxpool.Conn, providerID int64, query string) (cosmos.Coins, error) {
+func (d *DirectoryDB) findRates(conn IConnection, providerID int64, query string) (cosmos.Coins, error) {
 	// Execute the query
 	ctx := context.Background()
 	rows, err := conn.Query(ctx, query, providerID)
@@ -301,7 +296,7 @@ func (d *DirectoryDB) UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout
 	}
 	defer conn.Release()
 
-	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator, height, evt.Reward.Int64())
+	return upsert(conn, sqlUpsertValidatorPayoutEvent, evt.Validator.String(), height, evt.Reward.Int64())
 }
 
 func (d *DirectoryDB) InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error) {
@@ -328,7 +323,7 @@ func (d *DirectoryDB) InsertModProviderEvent(providerID int64, evt types.ModProv
 	defer conn.Release()
 
 	return insert(conn, sqlInsertModProviderEvent, providerID, evt.Height, evt.TxID, evt.MetadataURI, evt.MetadataNonce, evt.Status,
-		evt.MinContractDuration, evt.MaxContractDuration, evt.SubscriptionRate, evt.PayAsYouGoRate)
+		evt.MinContractDuration, evt.MaxContractDuration)
 }
 
 func (d *DirectoryDB) UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error) {
