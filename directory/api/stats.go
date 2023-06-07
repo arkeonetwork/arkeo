@@ -3,8 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/gorilla/mux"
+
+	"github.com/arkeonetwork/arkeo/directory/types"
 )
 
 // swagger:route Get /stats getStatsArkeo
@@ -16,7 +17,7 @@ import (
 //	200: ArkeoStats
 //	500: InternalServerError
 func (a *ApiService) getStatsArkeo(w http.ResponseWriter, r *http.Request) {
-	arkeoStats, err := a.db.GetArkeoNetworkStats()
+	arkeoStats, err := a.db.GetArkeoNetworkStats(r.Context())
 	if err != nil {
 		log.Error("error finding stats for Arkeo Network")
 		respondWithError(w, http.StatusInternalServerError, "error finding stats for Arkeo Network")

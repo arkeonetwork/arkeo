@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -41,15 +42,15 @@ type ArkeoContract struct {
 }
 
 // GetContract query db to find contract that match the given contract id
-func (d *DirectoryDB) GetContract(contractId uint64) (*ArkeoContract, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) GetContract(ctx context.Context, contractId uint64) (*ArkeoContract, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to obtain db connection,err: %w", err)
 	}
 	defer conn.Release()
 
 	contract := ArkeoContract{}
-	if err = selectOne(conn, sqlGetContractByID, &contract, contractId); err != nil {
+	if err = selectOne(ctx, conn, sqlGetContractByID, &contract, contractId); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 
@@ -61,8 +62,8 @@ func (d *DirectoryDB) GetContract(contractId uint64) (*ArkeoContract, error) {
 }
 
 // UpsertContract update database with the given open contract event, if the contract doesn't exist , it will create a new one
-func (d *DirectoryDB) UpsertContract(providerID int64, evt atypes.EventOpenContract) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
@@ -72,7 +73,7 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt atypes.EventOpenContr
 		evt.Delegate = evt.Client
 	}
 
-	return upsert(
+	return upsert(ctx,
 		conn,
 		sqlUpsertContract,
 		providerID,
@@ -92,28 +93,28 @@ func (d *DirectoryDB) UpsertContract(providerID int64, evt atypes.EventOpenContr
 	)
 }
 
-func (d *DirectoryDB) CloseContract(contractID uint64, height int64) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) CloseContract(ctx context.Context, contractID uint64, height int64) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return update(conn, sqlCloseContract, height, contractID)
+	return update(ctx, conn, sqlCloseContract, height, contractID)
 }
 
-func (d *DirectoryDB) UpsertContractSettlementEvent(evt atypes.EventSettleContract) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
-	return upsert(conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId)
+	return upsert(ctx, conn, sqlUpsertContractSettlementEvent, evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId)
 }
 
-func (d *DirectoryDB) UpsertOpenContractEvent(contractID int64, evt atypes.EventOpenContract) (*Entity, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) UpsertOpenContractEvent(ctx context.Context, contractID int64, evt atypes.EventOpenContract) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}

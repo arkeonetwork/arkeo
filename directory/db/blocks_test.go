@@ -1,13 +1,15 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
 
-	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
-	pgxmock "github.com/pashagolub/pgxmock/v2"
+	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
+
+	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func TestInsertBlock(t *testing.T) {
@@ -22,7 +24,7 @@ func TestInsertBlock(t *testing.T) {
 			}, nil
 		},
 	}
-	result, err := db.InsertBlock(nil)
+	result, err := db.InsertBlock(context.Background(), nil)
 	assert.NotNil(t, err)
 	assert.Nil(t, result)
 	hash := arkeotypes.GetRandomTxID()
@@ -35,7 +37,7 @@ func TestInsertBlock(t *testing.T) {
 			AddRow(int64(1), returnTime, returnTime),
 	)
 
-	b, err := db.InsertBlock(&Block{Height: 1, Hash: hash, BlockTime: blockTime})
+	b, err := db.InsertBlock(context.Background(), &Block{Height: 1, Hash: hash, BlockTime: blockTime})
 	assert.Nil(t, err)
 	assert.NotNil(t, b)
 	assert.Equal(t, b.ID, int64(1))
@@ -62,7 +64,7 @@ func TestFindLatestBlock(t *testing.T) {
 			"id", "created", "updated", "height", "hash", "block_time",
 		}).AddRow(int64(1), testTime, testTime, int64(1024), hash, testTime),
 	)
-	b, err := db.FindLatestBlock()
+	b, err := db.FindLatestBlock(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, b)
 	assert.Nil(t, m.ExpectationsWereMet())
@@ -83,7 +85,7 @@ func TestFindLatestBlock(t *testing.T) {
 
 	m.ExpectQuery(`select.*from blocks b where*`).
 		WillReturnError(fmt.Errorf("fail to query latest block"))
-	b, err = db.FindLatestBlock()
+	b, err = db.FindLatestBlock(context.Background())
 	assert.NotNil(t, err)
 	assert.Nil(t, b)
 	assert.Nil(t, m.ExpectationsWereMet())

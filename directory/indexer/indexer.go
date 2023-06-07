@@ -18,6 +18,8 @@ import (
 const (
 	defaultRetrieveBlockTimeout       = time.Second * 5
 	defaultRetrieveTransactionTimeout = time.Second
+	defaultHandleEventTimeout         = time.Second * 5
+	defaultFindLastBlockTimeout       = time.Second
 )
 
 // Service consume events from blockchain and persist it to a database
@@ -71,7 +73,9 @@ func (s *Service) Run() error {
 }
 
 func (s *Service) gapFiller() error {
-	latestStored, err := s.db.FindLatestBlock()
+	ctxFindLastBlock, cancelFindLastBlock := context.WithTimeout(context.Background(), defaultFindLastBlockTimeout)
+	defer cancelFindLastBlock()
+	latestStored, err := s.db.FindLatestBlock(ctxFindLastBlock)
 	if err != nil {
 		if !errors.Is(err, db.ErrNotFound) {
 			return fmt.Errorf("fail to find latest store block,err: %w", err)
@@ -144,7 +148,7 @@ func (s *Service) fillGap(gap db.BlockGap) error {
 			s.logger.WithError(err).Errorf("err consuming block %d:", i)
 			continue
 		}
-		if _, err = s.db.InsertBlock(block); err != nil {
+		if _, err = s.db.InsertBlock(context.Background(), block); err != nil {
 			s.logger.WithError(err).Errorf("error inserting block %d with hash %s", block.Height, block.Hash)
 		}
 	}
@@ -160,6 +164,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
+// Stringfy marshal the given input into json
 func Stringfy(input any) string {
 	buf, err := json.Marshal(input)
 	if err != nil {

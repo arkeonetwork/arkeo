@@ -28,18 +28,18 @@ type DBConfig struct {
 }
 
 type IDataStorage interface {
-	FindLatestBlock() (*Block, error)
-	InsertBlock(b *Block) (*Entity, error)
-	UpsertValidatorPayoutEvent(evt atypes.EventValidatorPayout, height int64) (*Entity, error)
-	FindProvider(pubkey, service string) (*ArkeoProvider, error)
-	UpsertContract(providerID int64, evt atypes.EventOpenContract) (*Entity, error)
-	GetContract(contractId uint64) (*ArkeoContract, error)
-	CloseContract(contractID uint64, height int64) (*Entity, error)
-	UpdateProvider(provider *ArkeoProvider) (*Entity, error)
-	UpsertContractSettlementEvent(evt atypes.EventSettleContract) (*Entity, error)
-	UpsertProviderMetadata(providerID, nonce int64, data sentinel.Metadata) (*Entity, error)
-	InsertBondProviderEvent(providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error)
-	InsertProvider(provider *ArkeoProvider) (*Entity, error)
+	FindLatestBlock(ctx context.Context) (*Block, error)
+	InsertBlock(ctx context.Context, b *Block) (*Entity, error)
+	UpsertValidatorPayoutEvent(ctx context.Context, evt atypes.EventValidatorPayout, height int64) (*Entity, error)
+	FindProvider(ctx context.Context, pubkey, service string) (*ArkeoProvider, error)
+	UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract) (*Entity, error)
+	GetContract(ctx context.Context, contractId uint64) (*ArkeoContract, error)
+	CloseContract(ctx context.Context, contractID uint64, height int64) (*Entity, error)
+	UpdateProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error)
+	UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract) (*Entity, error)
+	UpsertProviderMetadata(ctx context.Context, providerID, nonce int64, data sentinel.Metadata) (*Entity, error)
+	InsertBondProviderEvent(ctx context.Context, providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error)
+	InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error)
 }
 
 var _ IDataStorage = &DirectoryDB{}
@@ -66,11 +66,11 @@ type (
 	connectionHijacker func() (IConnection, error)
 	DirectoryDB        struct {
 		pool     Acquireable
-		hijacker connectionHijacker // this is only used for test purpose
+		hijacker connectionHijacker // this is only used for test
 	}
 )
 
-// base entity for db types
+// Entity base entity for db types
 type Entity struct {
 	ID      int64     `db:"id"`
 	Created time.Time `db:"created"`
@@ -80,11 +80,11 @@ type Entity struct {
 var log = logging.WithoutFields()
 
 // obtain a db connection, callers must call conn.Release() when finished to return the conn to the pool
-func (d *DirectoryDB) getConnection() (IConnection, error) {
+func (d *DirectoryDB) getConnection(ctx context.Context) (IConnection, error) {
 	if d.hijacker != nil {
 		return d.hijacker()
 	}
-	return d.pool.Acquire(context.Background())
+	return d.pool.Acquire(ctx)
 }
 
 func New(config DBConfig) (*DirectoryDB, error) {

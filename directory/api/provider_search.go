@@ -200,7 +200,7 @@ func (a *ApiService) searchProviders(response http.ResponseWriter, request *http
 		searchParams.MinOpenContracts = minOpenContracts
 		searchParams.IsMinOpenContractsSet = true
 	}
-	results, err := a.db.SearchProviders(searchParams)
+	results, err := a.db.SearchProviders(request.Context(), searchParams)
 	if err != nil {
 		log.Errorf("error searching providers: %+v", err)
 		respondWithError(response, http.StatusInternalServerError, "error searching providers")

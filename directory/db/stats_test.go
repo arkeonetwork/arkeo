@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 
 	"github.com/pashagolub/pgxmock/v2"
@@ -17,7 +18,7 @@ func TestGetArkeoNetworkStats(t *testing.T) {
 				"median_open_contract_rate", "total_online_providers", "total_queries", "total_paid",
 			}).
 				AddRow(int64(1), int64(2), int64(3), int64(4), int64(5), int64(6), int64(7)))
-	state, err := db.GetArkeoNetworkStats()
+	state, err := db.GetArkeoNetworkStats(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, state)
 	assert.Equal(t, int64(1), state.ContractsOpen)

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -14,27 +15,27 @@ type Block struct {
 	BlockTime time.Time `db:"block_time"`
 }
 
-func (d *DirectoryDB) InsertBlock(b *Block) (*Entity, error) {
+func (d *DirectoryDB) InsertBlock(ctx context.Context, b *Block) (*Entity, error) {
 	if b == nil {
 		return nil, fmt.Errorf("nil block")
 	}
-	conn, err := d.getConnection()
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
-	return insert(conn, sqlInsertBlock, b.Height, b.Hash, b.BlockTime)
+	return insert(ctx, conn, sqlInsertBlock, b.Height, b.Hash, b.BlockTime)
 }
 
-func (d *DirectoryDB) FindLatestBlock() (*Block, error) {
-	conn, err := d.getConnection()
+func (d *DirectoryDB) FindLatestBlock(ctx context.Context) (*Block, error) {
+	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
 
 	block := &Block{}
-	if err = selectOne(conn, sqlFindLatestBlock, block); err != nil {
+	if err = selectOne(ctx, conn, sqlFindLatestBlock, block); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
 	}
 	return block, nil

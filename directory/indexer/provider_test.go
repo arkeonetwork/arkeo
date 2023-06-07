@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -31,8 +32,8 @@ func TestCreateProvider(t *testing.T) {
 	}
 
 	// fail to insert provider should result an error
-	failCreateProvider := mockDb.On("InsertProvider", mock.Anything).Return(nil, fmt.Errorf("fail to add provider"))
-	result, err := s.createProvider(arkeotypes.EventBondProvider{
+	failCreateProvider := mockDb.On("InsertProvider", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to add provider"))
+	result, err := s.createProvider(context.Background(), arkeotypes.EventBondProvider{
 		Provider: arkeotypes.GetRandomPubKey(),
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -43,8 +44,8 @@ func TestCreateProvider(t *testing.T) {
 	failCreateProvider.Unset()
 
 	// when insert provider fails which result in a nil entity, it should return an error
-	failCreateProvider = mockDb.On("InsertProvider", mock.Anything).Return(nil, nil)
-	result, err = s.createProvider(arkeotypes.EventBondProvider{
+	failCreateProvider = mockDb.On("InsertProvider", mock.Anything, mock.Anything).Return(nil, nil)
+	result, err = s.createProvider(context.Background(), arkeotypes.EventBondProvider{
 		Provider: arkeotypes.GetRandomPubKey(),
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -56,12 +57,12 @@ func TestCreateProvider(t *testing.T) {
 	// happy path
 	failCreateProvider.Unset()
 
-	mockDb.On("InsertProvider", mock.Anything).Return(&db.Entity{
+	mockDb.On("InsertProvider", mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	result, err = s.createProvider(arkeotypes.EventBondProvider{
+	result, err = s.createProvider(context.Background(), arkeotypes.EventBondProvider{
 		Provider: arkeotypes.GetRandomPubKey(),
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -85,8 +86,8 @@ func TestHandleBondProviderEvent(t *testing.T) {
 	testPubKey := arkeotypes.GetRandomPubKey()
 
 	// fail to find provider should result in an error
-	mockFindProvider := mockDb.On("FindProvider", testPubKey.String(), "mock").Return(nil, fmt.Errorf("fail to find provider"))
-	err := s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	mockFindProvider := mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(nil, fmt.Errorf("fail to find provider"))
+	err := s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -97,9 +98,9 @@ func TestHandleBondProviderEvent(t *testing.T) {
 
 	// when provider doesn't exist , it should try to create one
 	// if it fail to create , then it should return an error
-	mockFindProvider = mockDb.On("FindProvider", testPubKey.String(), "mock").Return(nil, errors.Wrapf(pgx.ErrNoRows, "whatever"))
-	mockInsertProvider := mockDb.On("InsertProvider", mock.Anything).Return(nil, fmt.Errorf("fail to create provider"))
-	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	mockFindProvider = mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(nil, errors.Wrapf(pgx.ErrNoRows, "whatever"))
+	mockInsertProvider := mockDb.On("InsertProvider", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to create provider"))
+	err = s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -110,14 +111,14 @@ func TestHandleBondProviderEvent(t *testing.T) {
 	mockInsertProvider.Unset()
 
 	// fail to insert bond provider event should result in an error
-	mockDb.On("InsertProvider", mock.Anything).Return(&db.Entity{
+	mockDb.On("InsertProvider", mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
 
-	mockInsertBondProviderEvent := mockDb.On("InsertBondProviderEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to insert bond provider"))
-	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	mockInsertBondProviderEvent := mockDb.On("InsertBondProviderEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to insert bond provider"))
+	err = s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -127,12 +128,12 @@ func TestHandleBondProviderEvent(t *testing.T) {
 	mockInsertBondProviderEvent.Unset()
 
 	// happy path
-	mockDb.On("InsertBondProviderEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&db.Entity{
+	mockDb.On("InsertBondProviderEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	err = s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -143,9 +144,9 @@ func TestHandleBondProviderEvent(t *testing.T) {
 	// when a bond provider already exists, it should update the provider
 	// when update provider fails, it should return an error
 	mockFindProvider.Unset()
-	mockDb.On("FindProvider", testPubKey.String(), "mock").Return(&db.ArkeoProvider{}, nil)
-	mockUpdateProvider := mockDb.On("UpdateProvider", mock.Anything).Return(nil, fmt.Errorf("fail to update provider"))
-	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(&db.ArkeoProvider{}, nil)
+	mockUpdateProvider := mockDb.On("UpdateProvider", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to update provider"))
+	err = s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -155,12 +156,12 @@ func TestHandleBondProviderEvent(t *testing.T) {
 
 	// happy path with update provider
 	mockUpdateProvider.Unset()
-	mockDb.On("UpdateProvider", mock.Anything).Return(&db.Entity{
+	mockDb.On("UpdateProvider", mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleBondProviderEvent(arkeotypes.EventBondProvider{
+	err = s.handleBondProviderEvent(context.Background(), arkeotypes.EventBondProvider{
 		Provider: testPubKey,
 		Service:  "mock",
 		BondRel:  math.NewInt(1),
@@ -183,8 +184,8 @@ func TestHandleModProviderEvent(t *testing.T) {
 	testPubKey := arkeotypes.GetRandomPubKey()
 
 	// fail to find provider should result in an error
-	mockFindProvider := mockDb.On("FindProvider", testPubKey.String(), "mock").Return(nil, fmt.Errorf("fail to find provider"))
-	err := s.handleModProviderEvent(arkeotypes.EventModProvider{
+	mockFindProvider := mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(nil, fmt.Errorf("fail to find provider"))
+	err := s.handleModProviderEvent(context.Background(), arkeotypes.EventModProvider{
 		Creator:             arkeotypes.GetRandomBech32Addr(),
 		Provider:            testPubKey,
 		Service:             "mock",
@@ -202,9 +203,9 @@ func TestHandleModProviderEvent(t *testing.T) {
 	mockFindProvider.Unset()
 
 	// fail to update provider cause an error
-	mockDb.On("FindProvider", testPubKey.String(), "mock").Return(&db.ArkeoProvider{}, nil)
-	mockUpdateProvider := mockDb.On("UpdateProvider", mock.Anything).Return(nil, fmt.Errorf("fail to update provider"))
-	err = s.handleModProviderEvent(arkeotypes.EventModProvider{
+	mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(&db.ArkeoProvider{}, nil)
+	mockUpdateProvider := mockDb.On("UpdateProvider", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to update provider"))
+	err = s.handleModProviderEvent(context.Background(), arkeotypes.EventModProvider{
 		Creator:             arkeotypes.GetRandomBech32Addr(),
 		Provider:            testPubKey,
 		Service:             "mock",
@@ -220,12 +221,12 @@ func TestHandleModProviderEvent(t *testing.T) {
 	})
 	assert.NotNil(t, err)
 	mockUpdateProvider.Unset()
-	mockDb.On("UpdateProvider", mock.Anything).Return(&db.Entity{
+	mockDb.On("UpdateProvider", mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleModProviderEvent(arkeotypes.EventModProvider{
+	err = s.handleModProviderEvent(context.Background(), arkeotypes.EventModProvider{
 		Creator:             arkeotypes.GetRandomBech32Addr(),
 		Provider:            testPubKey,
 		Service:             "mock",
