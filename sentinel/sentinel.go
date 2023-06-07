@@ -60,7 +60,7 @@ func loadProxies() map[string]*url.URL {
 	for serviceName := range common.ServiceLookup {
 		// if we have an override for a given service, parse that instead of
 		// the default below
-		env, envOk := os.LookupEnv(strings.ToUpper(serviceName))
+		env, envOk := os.LookupEnv(strings.ToUpper(strings.ReplaceAll(serviceName, "-", "_")))
 		if envOk {
 			proxies[serviceName] = common.MustParseURL(env)
 			continue
