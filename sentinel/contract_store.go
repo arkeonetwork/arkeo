@@ -25,9 +25,9 @@ type CORs struct {
 
 func NewCORs() CORs {
 	return CORs{
-		AllowOrigins: make([]string, 0),
-		AllowMethods: make([]string, 0),
-		AllowHeaders: make([]string, 0),
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"*"},
+		AllowHeaders: []string{"*"},
 	}
 }
 
