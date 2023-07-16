@@ -371,7 +371,7 @@ func (p *Proxy) getRouter() *mux.Router {
 				http.HandlerFunc(p.handleRequestAndRedirect),
 			),
 		),
-	).Methods(http.MethodGet, http.MethodPost)
+	)
 	return router
 }
 

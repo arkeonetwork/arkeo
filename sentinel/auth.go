@@ -169,6 +169,22 @@ func (p Proxy) fetchArkAuth(r *http.Request) (aa ArkAuth, err error) {
 
 func (p Proxy) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// since OPTIONS requests do not include query args, we cannot know
+		// which contract this query is intended for and therefore cannot know
+		// what the appropriate CORS is for this query. So, allow open CORS for
+		// an OPTIONS query to support CORS and the GET/POST request to apply
+		// actual contract specific CORs
+		if r.Method == http.MethodOptions {
+			// Set the necessary headers as per your server's requirement
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+			w.Header().Set("Access-Control-Max-Age", "3600")
+			// Finally, send a 200 status code for the OPTIONS request
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
 		aa, err := p.fetchArkAuth(r)
 		if err != nil {
 			p.logger.Error("failed to parse ark auth", "error", err)
