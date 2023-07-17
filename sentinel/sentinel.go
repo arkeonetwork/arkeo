@@ -1,6 +1,7 @@
 package sentinel
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -345,16 +346,55 @@ func (p Proxy) Run() {
 
 	// Add the Logrus middleware to the router
 	loggingRouter := p.logrusMiddleware(router)
-	server := &http.Server{
-		Addr:              fmt.Sprintf(":%s", p.Config.Port),
-		Handler:           loggingRouter,
-		ReadTimeout:       5 * time.Second, // TODO: updated it to use config
-		ReadHeaderTimeout: time.Second,
-		WriteTimeout:      5 * time.Second,
-		IdleTimeout:       5 * time.Second,
-	}
-	if err := server.ListenAndServe(); err != nil {
-		panic(err)
+
+	// Check if TLS certificates are configured
+	if p.Config.TLS.HasTLS() {
+		// Start a goroutine that listens on port 80 and redirects HTTP to HTTPS
+		go func() {
+			redirectServer := &http.Server{
+				Addr: fmt.Sprintf(":%s", p.Config.Port),
+				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
+				}),
+				ReadTimeout:  5 * time.Second,
+				WriteTimeout: 5 * time.Second,
+				IdleTimeout:  5 * time.Second,
+			}
+			if err := redirectServer.ListenAndServe(); err != nil {
+				panic(err)
+			}
+		}()
+
+		// Start HTTPS server on port 443
+		server := &http.Server{
+			Addr:              ":443",
+			Handler:           loggingRouter,
+			ReadTimeout:       5 * time.Second, // TODO: updated it to use config
+			ReadHeaderTimeout: time.Second,
+			WriteTimeout:      5 * time.Second,
+			IdleTimeout:       5 * time.Second,
+			TLSConfig: &tls.Config{
+				// Policies
+				MinVersion:               tls.VersionTLS13,
+				PreferServerCipherSuites: true,
+			},
+		}
+		if err := server.ListenAndServeTLS(p.Config.TLS.Cert, p.Config.TLS.Key); err != nil {
+			panic(err)
+		}
+	} else {
+		// Start HTTP server on the configured port
+		server := &http.Server{
+			Addr:              fmt.Sprintf(":%s", p.Config.Port),
+			Handler:           loggingRouter,
+			ReadTimeout:       5 * time.Second, // TODO: updated it to use config
+			ReadHeaderTimeout: time.Second,
+			WriteTimeout:      5 * time.Second,
+			IdleTimeout:       5 * time.Second,
+		}
+		if err := server.ListenAndServe(); err != nil {
+			panic(err)
+		}
 	}
 }
 
