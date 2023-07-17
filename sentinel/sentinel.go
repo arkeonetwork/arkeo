@@ -351,9 +351,18 @@ func (p Proxy) Run() {
 	if p.Config.TLS.HasTLS() {
 		// Start a goroutine that listens on port 80 and redirects HTTP to HTTPS
 		go func() {
-			http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
-			}))
+			redirectServer := &http.Server{
+				Addr: fmt.Sprintf(":%s", p.Config.Port),
+				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
+				}),
+				ReadTimeout:  5 * time.Second,
+				WriteTimeout: 5 * time.Second,
+				IdleTimeout:  5 * time.Second,
+			}
+			if err := redirectServer.ListenAndServe(); err != nil {
+				panic(err)
+			}
 		}()
 
 		// Start HTTPS server on port 443
@@ -364,8 +373,10 @@ func (p Proxy) Run() {
 			ReadHeaderTimeout: time.Second,
 			WriteTimeout:      5 * time.Second,
 			IdleTimeout:       5 * time.Second,
-			TLSConfig:         &tls.Config{
-				// Put any necessary TLS configuration here
+			TLSConfig: &tls.Config{
+				// Policies
+				MinVersion:               tls.VersionTLS13,
+				PreferServerCipherSuites: true,
 			},
 		}
 		if err := server.ListenAndServeTLS(p.Config.TLS.Cert, p.Config.TLS.Key); err != nil {
