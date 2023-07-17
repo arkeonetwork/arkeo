@@ -10,18 +10,24 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 )
 
+type TLSConfiguration struct {
+	Cert string `json:"tls_certificate"`
+	Key  string `json:"tls_key"`
+}
+
 type Configuration struct {
-	Moniker                     string        `json:"moniker"`
-	Website                     string        `json:"website"`
-	Description                 string        `json:"description"`
-	Location                    string        `json:"location"`
-	Port                        string        `json:"port"`
-	SourceChain                 string        `json:"source_chain"` // base url for arceo block chain
-	EventStreamHost             string        `json:"event_stream_host"`
-	ClaimStoreLocation          string        `json:"claim_store_location"`           // file location where claims are stored
-	ContractConfigStoreLocation string        `json:"contract_config_store_location"` // file location where contract configurations are stored
-	ProviderPubKey              common.PubKey `json:"provider_pubkey"`
-	FreeTierRateLimit           int           `json:"free_tier_rate_limit"`
+	Moniker                     string           `json:"moniker"`
+	Website                     string           `json:"website"`
+	Description                 string           `json:"description"`
+	Location                    string           `json:"location"`
+	Port                        string           `json:"port"`
+	SourceChain                 string           `json:"source_chain"` // base url for arceo block chain
+	EventStreamHost             string           `json:"event_stream_host"`
+	ClaimStoreLocation          string           `json:"claim_store_location"`           // file location where claims are stored
+	ContractConfigStoreLocation string           `json:"contract_config_store_location"` // file location where contract configurations are stored
+	ProviderPubKey              common.PubKey    `json:"provider_pubkey"`
+	FreeTierRateLimit           int              `json:"free_tier_rate_limit"`
+	TLS                         TLSConfiguration `json:"tls"`
 }
 
 // Simple helper function to read an environment or return a default value
@@ -64,6 +70,17 @@ func loadVarInt(key string) int {
 	return i
 }
 
+func NewTLSConfiguration() TLSConfiguration {
+	return TLSConfiguration{
+		Cert: getEnv("TLS_CERT", ""),
+		Key:  getEnv("TLS_KEY", ""),
+	}
+}
+
+func (c TLSConfiguration) HasTLS() bool {
+	return len(c.Cert) > 0 && len(c.Key) > 0
+}
+
 func NewConfiguration() Configuration {
 	return Configuration{
 		Moniker:                     loadVarString("MONIKER"),
@@ -77,6 +94,7 @@ func NewConfiguration() Configuration {
 		FreeTierRateLimit:           loadVarInt("FREE_RATE_LIMIT"),
 		ClaimStoreLocation:          loadVarString("CLAIM_STORE_LOCATION"),
 		ContractConfigStoreLocation: loadVarString("CONTRACT_CONFIG_STORE_LOCATION"),
+		TLS:                         NewTLSConfiguration(),
 	}
 }
 
@@ -87,6 +105,8 @@ func (c Configuration) Print() {
 	fmt.Fprintln(writer, "Description\t", c.Description)
 	fmt.Fprintln(writer, "Location\t", c.Location)
 	fmt.Fprintln(writer, "Port\t", c.Port)
+	fmt.Fprintln(writer, "TLS Certificate\t", c.TLS.Cert)
+	fmt.Fprintln(writer, "TLS Key\t", c.TLS.Key)
 	fmt.Fprintln(writer, "Source Chain\t", c.SourceChain)
 	fmt.Fprintln(writer, "Event Stream Host\t", c.EventStreamHost)
 	fmt.Fprintln(writer, "Provider PubKey\t", c.ProviderPubKey)
