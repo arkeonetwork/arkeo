@@ -67,8 +67,8 @@ make proto-gen install
 
 ```bash
 [binary] keys add <key-name>
-[binary] config chain-id [chain-id]
-[binary] init <your_custom_moniker> --chain-id [chain-id]
+[binary] config chain-id arkeo
+[binary] init <your_custom_moniker> --chain-id arkeo
 curl [insert link to raw version of genesis.json] > ~/.arkeo/config/genesis.json
 sudo ufw allow 26656
 ```
@@ -85,7 +85,7 @@ indexer = "null"
 Configure also the app.toml:
 
 ```toml
-minimum-gas-prices = 0.001[denom]
+minimum-gas-prices = 0.001uarkeo
 pruning: "custom"
 pruning-keep-recent = "100"
 pruning-keep-every = "0"
@@ -101,12 +101,14 @@ sudo tee /etc/systemd/system/arkeod.service > /dev/null <<EOF
 [Unit]
 Description=Arkeo Daemon
 After=network-online.target
+
 [Service]
 User=$USER
 ExecStart=$(which arkeod) start
 Restart=always
 RestartSec=3
 LimitNOFILE=65535
+
 [Install]
 WantedBy=multi-user.target
 EOF
