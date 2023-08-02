@@ -57,8 +57,7 @@ Install the Arkeo binary
 ```bash
 git clone [https://github.com/arkeonetwork/arkeo](https://github.com/arkeonetwork/arkeo)
 cd arkeo
-git checkout <version hash, found at
-https://github.com/arkeonetwork/infra/blob/master/arkeo-stack/mainnet.yaml#L3>
+git checkout ab05b124336ace257baa2cac07f7d1bfeed9ac02
 make proto-gen install
 [binary] version
 ```
@@ -67,9 +66,9 @@ make proto-gen install
 
 ```bash
 [binary] keys add <key-name>
-[binary] config chain-id [chain-id]
-[binary] init <your_custom_moniker> --chain-id [chain-id]
-curl [insert link to raw version of genesis.json] > ~/.arkeo/config/genesis.json
+[binary] config chain-id arkeo
+[binary] init <your_custom_moniker> --chain-id arkeo
+curl http://seed.arkeo.network:26657/genesis > ~/.arkeo/config/genesis.json
 sudo ufw allow 26656
 ```
 
@@ -85,7 +84,7 @@ indexer = "null"
 Configure also the app.toml:
 
 ```toml
-minimum-gas-prices = 0.001[denom]
+minimum-gas-prices = 0.001uarkeo
 pruning: "custom"
 pruning-keep-recent = "100"
 pruning-keep-every = "0"
@@ -101,12 +100,14 @@ sudo tee /etc/systemd/system/arkeod.service > /dev/null <<EOF
 [Unit]
 Description=Arkeo Daemon
 After=network-online.target
+
 [Service]
 User=$USER
 ExecStart=$(which arkeod) start
 Restart=always
 RestartSec=3
 LimitNOFILE=65535
+
 [Install]
 WantedBy=multi-user.target
 EOF
