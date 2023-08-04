@@ -55,7 +55,7 @@ This should return something like "go version go1.18.1 linux/amd64"
 Install the Arkeo binary
 
 ```bash
-git clone [https://github.com/arkeonetwork/arkeo](https://github.com/arkeonetwork/arkeo)
+git clone https://github.com/arkeonetwork/arkeo
 cd arkeo
 git checkout ab05b124336ace257baa2cac07f7d1bfeed9ac02
 make proto-gen install
@@ -68,7 +68,7 @@ make proto-gen install
 [binary] keys add <key-name>
 [binary] config chain-id arkeo
 [binary] init <your_custom_moniker> --chain-id arkeo
-curl http://seed.arkeo.network:26657/genesis > ~/.arkeo/config/genesis.json
+curl -s http://seed.arkeo.network:26657/genesis | jq '.result.genesis' > ~/.arkeo/config/genesis.json
 sudo ufw allow 26656
 ```
 
