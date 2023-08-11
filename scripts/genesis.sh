@@ -3,7 +3,7 @@
 set -o pipefail
 set -ex
 
-CHAIN_ID="arkeo"
+CHAIN_ID="arkeo-testnet-v2"
 STAKE="50000000000000000uarkeo"
 TOKEN="uarkeo"
 USER="ark"
