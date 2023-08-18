@@ -62,13 +62,19 @@ build:
 install:
 	go install ${BUILD_FLAGS} ${BINARIES}
 
+
 # ------------------------------ Docker Build ------------------------------
 
 docker-build: proto-gen
 	@docker build . --file Dockerfile -t ${IMAGE}:${TAG}
 
-docker-run:
+localnet: docker-build
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
+
+# ------------------------------    Testnet   ------------------------------
+
+testnet-fullnode:
+	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ${IMAGE}:${TAG} 
 
 # ------------------------------ Housekeeping ------------------------------
 
