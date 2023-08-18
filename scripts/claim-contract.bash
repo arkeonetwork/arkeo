@@ -31,4 +31,4 @@ CLIENT_PUBKEY=$($BIN debug pubkey-raw "$CLIENT_PUBKEY_RAW" | grep "Bech32 Acc" |
 
 SIGNATURE=$(signhere -u "$USER" -m "$CONTRACT_ID:$CLIENT_PUBKEY:$NONCE")
 
-$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$CONTRACT_ID" "$CLIENT_PUBKEY" "$NONCE" "$SIGNATURE"
+$BIN tx $BIN_TX claim-contract-income -y -b block --from "$USER" --keyring-backend test -- "$CONTRACT_ID" "$CLIENT_PUBKEY" "$NONCE" "$SIGNATURE"

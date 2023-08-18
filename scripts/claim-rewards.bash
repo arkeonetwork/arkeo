@@ -26,5 +26,5 @@ for raw_claim in $raw_claims; do
 	nonce=$(echo "$raw_claims" | jq -r '.nonce')
 	signature=$(echo "$raw_claims" | jq -r '.signature')
 
-	$BIN tx $BIN_TX claim-contract-income -y --from "$USER" --keyring-backend test -- "$id" "$nonce" "$signature"
+	$BIN tx $BIN_TX claim-contract-income -y -b block --from "$USER" --keyring-backend test -- "$id" "$nonce" "$signature"
 done
