@@ -24,4 +24,4 @@ BOND="$3"
 PUBKEY_RAW=$($BIN keys show "$USER" -p --keyring-backend test | jq -r .key)
 PUBKEY=$($BIN debug pubkey-raw "$PUBKEY_RAW" | grep "Bech32 Acc" | awk '{ print $NF }')
 
-$BIN tx $BIN_TX bond-provider -y --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "$BOND"
+$BIN tx $BIN_TX bond-provider -y -b block --from "$USER" --keyring-backend test -- "$PUBKEY" "$SERVICE" "$BOND"
