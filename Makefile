@@ -74,7 +74,7 @@ localnet: docker-build
 # ------------------------------    Testnet   ------------------------------
 
 testnet-fullnode:
-	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ${IMAGE}:${TAG} 
+	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ghcr.io/arkeonetwork/arkeo:latest
 
 # ------------------------------ Housekeeping ------------------------------
 
