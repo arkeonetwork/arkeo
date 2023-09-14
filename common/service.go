@@ -63,6 +63,10 @@ var ServiceLookup = map[string]int32{
 	"thorchain-mainnet-unchained":  44,
 	"optimism-mainnet-unchained":   45,
 	"gaia-mainnet-grpc":            46,
+	"btc-mainnet-blockbook":        47,
+	"ltc-mainnet-blockbook":        48,
+	"bch-mainnet-blockbook":        49,
+	"doge-mainnet-blockbook":       50,
 }
 
 var ServiceReverseLookup = map[Service]string{
@@ -113,6 +117,10 @@ var ServiceReverseLookup = map[Service]string{
 	44: "thorchain-mainnet-unchained",
 	45: "optimism-mainnet-unchained",
 	46: "gaia-mainnet-grpc",
+	47: "btc-mainnet-blockbook",
+	48: "ltc-mainnet-blockbook",
+	49: "bch-mainnet-blockbook",
+	50: "doge-mainnet-blockbook",
 }
 
 func (c Service) String() string {
