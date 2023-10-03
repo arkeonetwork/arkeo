@@ -44,9 +44,6 @@ var funcMap = template.FuncMap{
 	"addr_module_distribution": func() string {
 		return ModuleAddrDistribution
 	},
-	"addr_module_mint": func() string {
-		return ModuleAddrMint
-	},
 	"addr_module_fee_collector": func() string {
 		return ModuleAddrFeeCollector
 	},

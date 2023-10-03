@@ -22,7 +22,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
-	"github.com/ignite/modules/x/mint"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
@@ -33,7 +32,6 @@ var ModuleBasics = module.NewBasicManager(
 	bank.AppModuleBasic{},
 	capability.AppModuleBasic{},
 	staking.AppModuleBasic{},
-	mint.AppModuleBasic{},
 	distribution.AppModuleBasic{},
 	/*
 		gov.NewAppModuleBasic(
