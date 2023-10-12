@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 )
 
 // The genesis state of the blockchain is represented here as a map of raw json
@@ -17,5 +19,17 @@ type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
 func NewDefaultGenesisState(cdc codec.JSONCodec) GenesisState {
-	return ModuleBasics.DefaultGenesis(cdc)
+	defaultGenesis := ModuleBasics.DefaultGenesis(cdc)
+
+	// here we override wasm config to make it permissioned by default
+	mintGen := minttypes.GenesisState{
+		Params: minttypes.Params{
+			MintDenom:           "uarkeo",
+			InflationRateChange: types.NewDec(0),
+			InflationMax:        types.NewDec(0),
+			InflationMin:        types.NewDec(0),
+		},
+	}
+	defaultGenesis[minttypes.ModuleName] = cdc.MustMarshalJSON(&mintGen)
+	return defaultGenesis
 }
