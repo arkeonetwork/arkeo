@@ -21,13 +21,15 @@ type GenesisState map[string]json.RawMessage
 func NewDefaultGenesisState(cdc codec.JSONCodec) GenesisState {
 	defaultGenesis := ModuleBasics.DefaultGenesis(cdc)
 
-	// here we override wasm config to make it permissioned by default
+	// set mint module params for genesis state
 	mintGen := minttypes.GenesisState{
 		Params: minttypes.Params{
 			MintDenom:           "uarkeo",
 			InflationRateChange: types.NewDec(0),
 			InflationMax:        types.NewDec(0),
 			InflationMin:        types.NewDec(0),
+			GoalBonded:          types.NewDec(670000000000000000),
+			BlocksPerYear:       6311520,
 		},
 	}
 	defaultGenesis[minttypes.ModuleName] = cdc.MustMarshalJSON(&mintGen)
