@@ -30,7 +30,7 @@ RUN make install
 #
 # Main
 #
-FROM ubuntu:kinetic
+FROM ubuntu:lunar
 
 # hadolint ignore=DL3008,DL4006
 RUN apt-get update -y && \
