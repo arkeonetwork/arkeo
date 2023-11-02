@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 set -o pipefail
@@ -26,17 +27,17 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	fi
 
 	# wait for peer
-	until curl -s "$PEER:$PORT_RPC" 1>/dev/null 2>&1; do
-		echo "Waiting for peer: $PEER:$PORT_RPC"
+	until curl -s "$PEER" 1>/dev/null 2>&1; do
+		echo "Waiting for peer: $PEER"
 		sleep 3
 	done
 
 	# fetch genesis file from seed node
-	curl -sL "$PEER:$PORT_RPC/genesis" | jq '.result.genesis' > ~/.arkeo/config/genesis.json
+	curl -sL "$PEER/genesis" | jq '.result.genesis' > ~/.arkeo/config/genesis.json
 
 	# fetch node id
-	SEED_ID=$(curl -s "$PEER:$PORT_RPC/status" | jq -r .result.node_info.id)
-	SEEDS="$SEED_ID@$PEER:$PORT_P2P"
+	SEED_ID=$(curl -s "$PEER/status" | jq -r .result.node_info.id)
+	SEEDS="$SEED_ID@$SEED"
 
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
     sed -i "s/seeds = \"\"/seeds = \"$PEER_ID@$SEED\"/g" ~/.arkeo/config/config.toml
