@@ -28,7 +28,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	done
 
 	# fetch genesis file from seed node
-	curl -sL "$RPC/genesis" | jq '.result.genesis' >~/.arkeo/config/genesis.json
+	curl -sL "$GENESIS/genesis" | jq '.result.genesis' >~/.arkeo/config/genesis.json
 
 	# fetch node id
 	SEED_ID=$(curl -sL "$RPC/status" | jq -r .result.node_info.id)
