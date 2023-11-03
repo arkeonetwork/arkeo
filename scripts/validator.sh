@@ -8,9 +8,6 @@ RPC="${RPC:=seed.arkeo.network:26657}"
 SEED="${SEED:=seed.arkeo.network:26656}"
 PEER_ID=$(curl -sL http://$RPC/status | jq -r '.result.node_info.id')
 
-# delete empty file (ie an empty genesis.json file if exists)
-find ~/.arkeo/config -size 0 -print -delete
-
 if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	echo "setting validator node"
 
