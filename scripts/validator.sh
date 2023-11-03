@@ -4,13 +4,11 @@ set -o pipefail
 set -ex
 
 CHAIN_ID="arkeo"
-PORT_RPC=${PORT_RPC:=26657}
-PORT_P2P=${PORT_P2P:=26656}
 RPC="${RPC:=seed.arkeo.network:26657}"
 SEED="${SEED:=seed.arkeo.network:26656}"
-PEER="${PEER:=none}" # the hostname of a seed node set as tendermint persistent peer
-PEER_ID=$(curl -s http://$RPC/status | jq -r '.result.node_info.id')
+PEER_ID=$(curl -sL http://$RPC/status | jq -r '.result.node_info.id')
 
+# delete empty file (ie an empty genesis.json file if exists)
 find ~/.arkeo/config -size 0 -print -delete
 
 if [ ! -f ~/.arkeo/config/genesis.json ]; then
@@ -20,22 +18,22 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	rm -rf ~/.arkeo/config/genesis.json
 
-	if [ "$PEER" = "none" ]; then
+	if [ "$RPC" = "none" ]; then
 		echo "Missing PEER"
 		exit 1
 	fi
 
 	# wait for peer
-	until curl -s "$PEER" 1>/dev/null 2>&1; do
-		echo "Waiting for peer: $PEER"
+	until curl -s "$RPC" 1>/dev/null 2>&1; do
+		echo "Waiting for peer: $RPC"
 		sleep 3
 	done
 
 	# fetch genesis file from seed node
-	curl -sL "$PEER/genesis" | jq '.result.genesis' > ~/.arkeo/config/genesis.json
+	curl -sL "$RPC/genesis" | jq '.result.genesis' > ~/.arkeo/config/genesis.json
 
 	# fetch node id
-	SEED_ID=$(curl -s "$PEER/status" | jq -r .result.node_info.id)
+	SEED_ID=$(curl -sL "$RPC/status" | jq -r .result.node_info.id)
 	SEEDS="$SEED_ID@$SEED"
 
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
