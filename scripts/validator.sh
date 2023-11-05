@@ -35,6 +35,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	SEEDS="$SEED_ID@$SEED"
 
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
+	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 	sed -i "s/seeds = \"\"/seeds = \"$PEER_ID@$SEED\"/g" ~/.arkeo/config/config.toml
 	# TODO: create this one as a validator
 	# arkeod tx staking create-validator --amount=100000000000uarkeo --pubkey=$(arkeod tendermint show-validator) --moniker="validator 1" --from=bob --keyring-backend test --commission-rate="0.10" --commission-max-rate="0.20" --commission-max-change-rate="0.01" --min-self-delegation="1"
