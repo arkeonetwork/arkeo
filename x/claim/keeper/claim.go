@@ -89,7 +89,7 @@ func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) 
 	claimRecord := types.ClaimRecord{}
 	err := k.cdc.Unmarshal(bz, &claimRecord)
 	if err != nil {
-		return types.ClaimRecord{}, err
+		return types.ClaimRecord{Chain: chain}, err
 	}
 
 	return claimRecord, nil
