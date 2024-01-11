@@ -82,7 +82,7 @@ func (k Keeper) GetClaimRecord(ctx sdk.Context, addr string, chain types.Chain) 
 	prefixStore := prefix.NewStore(store, chainToStorePrefix(chain))
 	addrBytes := []byte(strings.ToLower(addr))
 	if !prefixStore.Has(addrBytes) {
-		return types.ClaimRecord{}, nil
+		return types.ClaimRecord{Chain: chain}, nil
 	}
 	bz := prefixStore.Get(addrBytes)
 
