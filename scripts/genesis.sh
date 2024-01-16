@@ -45,6 +45,18 @@ add_account() {
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
+add_claim_records() {
+	jq --arg CHAIN "$1" --arg ADDRESS "$2" --arg AMOUNTCLAIM "$3" --arg AMOUNTVOTE "$4" --arg AMOUNTDELEGATE "$5" --arg ISTRANSFERABLE "$6" '.app_state.claimarkeo.claim_records += [{
+        "chain": $CHAIN,
+		"address": $ADDRESS,
+        "amount_claim": { "denom": "uarkeo", "amount": $AMOUNTCLAIM },
+        "amount_vote": { "denom": "uarkeo", "amount": $AMOUNTVOTE },
+        "amount_delegate": { "denom": "uarkeo", "amount": $AMOUNTDELEGATE },
+        "is_transferable": true,
+    }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
+	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+}
+
 if [ ! -f ~/.arkeo/config/priv_validator_key.json ]; then
 	# remove the original generate genesis file, as below will init chain again
 	rm -rf ~/.arkeo/config/genesis.json
@@ -72,6 +84,9 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		echo "clog swear steak glide artwork glory solution short company borrow aerobic idle corn climb believe wink forum destroy miracle oak cover solid valve make" | arkeod keys add bob --keyring-backend test --recover
 		BOB=$(arkeod keys show bob -a --keyring-backend test)
 		add_account "$BOB" $TOKEN 1000000000000000 # bob, 10m
+
+		add_claim_records "ARKEO" "$BOB" 1000000000000000 1000000000000000 1000000000000000 true
+		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 5000000000000000 1000000000000000 1000000000000000 true
 	fi
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
