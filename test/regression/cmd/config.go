@@ -135,7 +135,6 @@ var httpClient = &http.Client{
 // Module Addresses
 ////////////////////////////////////////////////////////////////////////////////////////
 
-// trunk-ignore-all(golangci-lint/gosec)
 // trunk-ignore-all(gitleaks/generic-api-key)
 
 const (

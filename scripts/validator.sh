@@ -32,7 +32,6 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	# fetch node id
 	SEED_ID=$(curl -sL "$RPC/status" | jq -r .result.node_info.id)
-	SEEDS="$SEED_ID@$SEED"
 
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
 	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
