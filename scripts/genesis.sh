@@ -87,6 +87,10 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 		add_claim_records "ARKEO" "$BOB" 1000000000000000 1000000000000000 1000000000000000 true
 		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 5000000000000000 1000000000000000 1000000000000000 true
+
+		# enable CORs on testnet/localnet
+		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
+
 	fi
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
