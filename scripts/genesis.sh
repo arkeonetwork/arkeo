@@ -76,6 +76,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 100m
+		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 10000000000000000 'claimarkeo' # reserve, 100m
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test --recover
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)
@@ -85,8 +86,9 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		BOB=$(arkeod keys show bob -a --keyring-backend test)
 		add_account "$BOB" $TOKEN 1000000000000000 # bob, 10m
 
-		add_claim_records "ARKEO" "$BOB" 1000000000000000 1000000000000000 1000000000000000 true
-		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 5000000000000000 1000000000000000 1000000000000000 true
+		add_claim_records "ARKEO" "tarkeo19rhn0qgk227zxv8475arky0fhhhy9n9dh6nrj9" 500000 500000 500000 true
+		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
+		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 500000 500000 true
 
 		# enable CORs on testnet/localnet
 		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml

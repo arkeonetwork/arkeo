@@ -184,6 +184,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		claimmoduletypes.ModuleName:    {authtypes.Minter},
 		arkeomoduletypes.ModuleName:    {},
 		arkeomoduletypes.ReserveName:   {},
 		arkeomoduletypes.ProviderName:  {},
