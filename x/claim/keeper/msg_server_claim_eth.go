@@ -133,10 +133,9 @@ func IsValidClaimSignature(ethAddress, arkeoAdddress, amount, signature string) 
 		return false, fmt.Errorf("invalid signature length: %d", len(sigHex))
 	}
 
-	// if sigHex[crypto.RecoveryIDOffset] != 27 && sigHex[crypto.RecoveryIDOffset] != 28 {
-	// 	return false, fmt.Errorf("invalid recovery id: %d", sigHex[64])
-	// }
-	// sigHex[64] -= 27
+	if sigHex[crypto.RecoveryIDOffset] == 27 || sigHex[crypto.RecoveryIDOffset] == 28 {
+		sigHex[crypto.RecoveryIDOffset] -= 27 // Transform yellow paper V from 27/28 to 0/1
+	}
 
 	pubKeyRaw, err := crypto.Ecrecover(rawDataHash.Bytes(), sigHex)
 	if err != nil {
