@@ -93,9 +93,6 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_claim_records "ARKEO" "tarkeo1xrz7z3zwtpc45xm72tpnevuf3wn53re8q4u4nr" 500000 500000 500000 true
 		add_account "tarkeo1xrz7z3zwtpc45xm72tpnevuf3wn53re8q4u4nr" $TOKEN 1000000000000000 
 		
-		add_account "tarkeo1xfpnvwphxyeyydfjxu652veegyuygsjpxppnqsesxsu5xv2px3pngveegserg33saudhje" $TOKEN 1000000000000000 
-		add_claim_records "ARKEO" "tarkeo1xfpnvwphxyeyydfjxu652veegyuygsjpxppnqsesxsu5xv2px3pngveegserg33saudhje" 500000 500000 500000 true
-
 		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 600000 700000 true
 
 		# enable CORs on testnet/localnet
