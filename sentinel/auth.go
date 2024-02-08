@@ -242,7 +242,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 			}
 			ser, err := common.NewService(serviceName)
 			if err != nil || ser != contract.Service {
-				http.Error(w, fmt.Sprintf("contract service doesn't match the serivce name in the path: (%d/%d)", ser, contract.Service), http.StatusUnauthorized)
+				http.Error(w, fmt.Sprintf("contract service doesn't match the service name in the path: (%d/%d)", ser, contract.Service), http.StatusUnauthorized)
 				return
 			}
 
@@ -338,7 +338,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	if ok := p.isRateLimited(contract.Id, key, int(contract.QueriesPerMinute)); ok {
-		return http.StatusTooManyRequests, fmt.Errorf("client is ratelimited," + http.StatusText(429))
+		return http.StatusTooManyRequests, fmt.Errorf("client is rate limited," + http.StatusText(429))
 	}
 
 	claim.Nonce = aa.Nonce

@@ -56,5 +56,5 @@ func TestClaimRecord(t *testing.T) {
 		Chain:   types.ETHEREUM,
 	}
 	resp, _ = keepers.ClaimKeeper.ClaimRecord(ctx, &req)
-	require.Equal(t, *resp.ClaimRecord, types.ClaimRecord{})
+	require.Equal(t, *resp.ClaimRecord, types.ClaimRecord{Chain: types.ETHEREUM})
 }

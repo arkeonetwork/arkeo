@@ -827,12 +827,8 @@ paths:
           type: string
         - name: chain
           in: query
-          required: false
-          type: string
-          enum:
-            - ARKEO
-            - ETHEREUM
-          default: ARKEO
+          required: true
+          type: integer
       tags:
         - Query
   /arkeo/claim/params:
