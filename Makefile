@@ -86,6 +86,11 @@ lint:
 	@go build ${BINARIES}
 	@./scripts/trunk check --no-fix --upstream origin/master
 
+lint-fix:
+	@./scripts/lint.sh
+	@go build ${BINARIES}
+	@./scripts/trunk check --upstream origin/master
+
 lint-ci:
 	@./scripts/lint.sh
 	@go build ${BINARIES}

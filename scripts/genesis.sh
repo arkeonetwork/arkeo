@@ -89,7 +89,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 		# add_claim_records "ARKEO" "{YOUR ARKEO ADDRESS}" 500000 500000 500000 true
 		# add_account "{YOUR ARKEO ADDRESS}" $TOKEN 1000000000000000
-		
+
 		# add_claim_records "ETHEREUM" "{YOUR ETH ADDRESS}" 500000 600000 700000 true
 
 		# enable CORs on testnet/localnet
