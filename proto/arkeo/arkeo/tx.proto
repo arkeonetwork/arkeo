@@ -21,8 +21,8 @@ service Msg {
   rpc SetVersion (MsgSetVersion) returns (MsgSetVersionResponse);
 }
 message MsgBondProvider {
-  bytes  creator  = 1 [(gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"] ;
-  bytes  provider = 2 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string  creator  = 1;
+  string  provider = 2;
   string service  = 3;
   string bond     = 4 [(cosmos_proto.scalar) = "cosmos.Int"                                   , (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
@@ -30,8 +30,8 @@ message MsgBondProvider {
 message MsgBondProviderResponse {}
 
 message MsgModProvider {
-           bytes                    creator               =  1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-           bytes                    provider              =  2 [(gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey"  ];
+           string                    creator               =  1;
+           string                    provider              =  2;
            string                   service               =  3;
            string                   metadata_uri          =  4;
            uint64                   metadata_nonce        =  5;
@@ -46,11 +46,11 @@ message MsgModProvider {
 message MsgModProviderResponse {}
 
 message MsgOpenContract {
-  bytes                    creator             =  1 [(gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"] ;
-  bytes                    provider            =  2 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string                    creator             =  1;
+  string                    provider            =  2;
   string                   service             =  3;
-  bytes                    client              =  4 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
-  bytes                    delegate            =  5 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string                    client              =  4;
+  string                    delegate            =  5;
   ContractType             contract_type       =  6;
   int64                    duration            =  7;
   cosmos.base.v1beta1.Coin rate                =  8 [(gogoproto.nullable)  = false                                          ] ;
@@ -63,14 +63,14 @@ message MsgOpenContract {
 message MsgOpenContractResponse {}
 
 message MsgCloseContract {
-  bytes  creator     = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string  creator     = 1;
   uint64 contract_id = 2;
 }
 
 message MsgCloseContractResponse {}
 
 message MsgClaimContractIncome {
-  bytes  creator     = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string  creator     = 1;
   uint64 contract_id = 2;
   bytes  signature   = 4;
   int64  nonce       = 5;
@@ -81,7 +81,7 @@ message MsgClaimContractIncomeResponse {}
 
 // this line is used by starport scaffolding # proto/tx/message
 message MsgSetVersion {
-  bytes creator = 1 [(gogoproto.casttype)  = "github.com/cosmos/cosmos-sdk/types.AccAddress"] ;
+  string creator = 1;
   int64 version = 2;
 }
 

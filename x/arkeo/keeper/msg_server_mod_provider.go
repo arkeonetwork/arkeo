@@ -63,7 +63,8 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, service)
+	pk, _ := common.NewPubKey(msg.Provider)
+	provider, err := k.GetProvider(ctx, pk, service)
 	if err != nil {
 		return err
 	}
@@ -79,7 +80,8 @@ func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvid
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, service)
+	pk, _ := common.NewPubKey(msg.Provider)
+	provider, err := k.GetProvider(ctx, pk, service)
 	if err != nil {
 		return err
 	}

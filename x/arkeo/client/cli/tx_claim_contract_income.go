@@ -37,7 +37,7 @@ func CmdClaimContractIncome() *cobra.Command {
 				return err
 			}
 			msg := types.NewMsgClaimContractIncome(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 				argContractId,
 				argNonce,
 				signature,

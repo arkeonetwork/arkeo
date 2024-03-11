@@ -10,13 +10,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgOpenContract = "open_contract"
 
 var _ sdk.Msg = &MsgOpenContract{}
 
-func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization, qpm int64) *MsgOpenContract {
+func NewMsgOpenContract(creator, provider, service, client, delegate string, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization, qpm int64) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator,
 		Provider:           provider,
@@ -42,11 +43,12 @@ func (msg *MsgOpenContract) Type() string {
 }
 
 func (msg *MsgOpenContract) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.MustGetSigner()}
 }
 
 func (msg *MsgOpenContract) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return addr
 }
 
 func (msg *MsgOpenContract) GetSignBytes() []byte {
@@ -55,19 +57,23 @@ func (msg *MsgOpenContract) GetSignBytes() []byte {
 }
 
 func (msg *MsgOpenContract) GetSpender() common.PubKey {
-	if !msg.Delegate.IsEmpty() {
-		return msg.Delegate
+	if len(msg.Delegate) > 0 {
+		pk, _ := common.NewPubKey(msg.Delegate)
+		return pk
 	}
-	return msg.Client
+	pk, _ := common.NewPubKey(msg.Client)
+	return pk
 }
 
 func (msg *MsgOpenContract) ValidateBasic() error {
 	// verify pubkey
-	_, err := common.NewPubKey(msg.Provider.String())
+	_, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
-
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	// verify service
 	_, err = common.NewService(msg.Service)
 	if err != nil {
@@ -75,13 +81,13 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 	}
 
 	// verify client
-	_, err = common.NewPubKey(msg.Client.String())
+	pk, err := common.NewPubKey(msg.Client)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
 	signer := msg.MustGetSigner()
-	client, err := msg.Client.GetMyAddress()
+	client, err := pk.GetMyAddress()
 	if err != nil {
 		return err
 	}

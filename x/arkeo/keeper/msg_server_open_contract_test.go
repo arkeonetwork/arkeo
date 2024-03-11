@@ -47,10 +47,10 @@ func TestOpenContractValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		Provider:         providerPubkey,
+		Provider:         providerPubkey.String(),
 		Service:          service.String(),
-		Client:           clientPubKey,
-		Creator:          acc,
+		Client:           clientPubKey.String(),
+		Creator:          acc.String(),
 		ContractType:     types.ContractType_SUBSCRIPTION,
 		Duration:         100,
 		Rate:             sRates[0],
@@ -117,10 +117,10 @@ func TestOpenContractHandle(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:         pubkey,
+		Provider:         pubkey.String(),
 		Service:          service.String(),
-		Creator:          acc,
-		Client:           pubkey,
+		Creator:          acc.String(),
+		Client:           pubkey.String(),
 		ContractType:     types.ContractType_PAY_AS_YOU_GO,
 		Duration:         100,
 		Rate:             cosmos.NewInt64Coin("uarkeo", 15),
@@ -176,7 +176,7 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
-		Provider:            provider.PubKey,
+		Provider:            provider.PubKey.String(),
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -190,10 +190,10 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
-		Creator:      providerAddress,
-		Client:       providerPubKey,
+		Creator:      providerAddress.String(),
+		Client:       providerPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
@@ -213,10 +213,10 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	msg = types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
-		Creator:      clientAddress,
-		Client:       clientPubKey,
+		Creator:      clientAddress.String(),
+		Client:       clientPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
@@ -236,7 +236,7 @@ func TestOpenContract(t *testing.T) {
 
 	// confirm that the client can open a contract with a deleagate
 	delegatePubKey := types.GetRandomPubKey()
-	msg.Delegate = delegatePubKey
+	msg.Delegate = delegatePubKey.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -263,7 +263,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
-		Provider:            provider.PubKey,
+		Provider:            provider.PubKey.String(),
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -294,10 +294,10 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
-		Creator:      clientAddress,
-		Client:       clientPubKey,
+		Creator:      clientAddress.String(),
+		Client:       clientPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
@@ -335,7 +335,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	// settlement period.
 	claimMsg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    clientAddress,
+		Creator:    clientAddress.String(),
 		Nonce:      20,
 	}
 	message := claimMsg.GetBytesToSign()

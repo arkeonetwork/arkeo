@@ -35,7 +35,7 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgClaimContractIncome{
-		Creator:    acct,
+		Creator:    acct.String(),
 		ContractId: 1,
 		Nonce:      24,
 	}
@@ -61,7 +61,7 @@ func TestValidateSignature(t *testing.T) {
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	msg := MsgClaimContractIncome{
-		Creator:    acct,
+		Creator:    acct.String(),
 		Nonce:      48,
 		ContractId: 500,
 	}

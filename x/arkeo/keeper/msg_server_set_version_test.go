@@ -20,7 +20,7 @@ func TestValidateSetVersion(t *testing.T) {
 	acct, err := providerPubKey.GetMyAddress()
 	require.NoError(t, err)
 
-	msg := types.NewMsgSetVersion(acct, 15)
+	msg := types.NewMsgSetVersion(acct.String(), 15)
 	require.NoError(t, msg.ValidateBasic())
 	require.NoError(t, s.SetVersionValidate(ctx, msg))
 
@@ -41,7 +41,7 @@ func TestHandleSetVersion(t *testing.T) {
 	acct, err := providerPubKey.GetMyAddress()
 	require.NoError(t, err)
 
-	msg := types.NewMsgSetVersion(acct, 15)
+	msg := types.NewMsgSetVersion(acct.String(), 15)
 	require.NoError(t, msg.ValidateBasic())
 	require.NoError(t, s.SetVersionHandle(ctx, msg))
 

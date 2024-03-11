@@ -49,7 +49,7 @@ func runCloseContractCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	msg := types.NewMsgCloseContract(
-		clientCtx.GetFromAddress(),
+		clientCtx.GetFromAddress().String(),
 		contract.Id,
 	)
 	if err := msg.ValidateBasic(); err != nil {

@@ -5,15 +5,15 @@ import (
 
 	"cosmossdk.io/errors"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator cosmos.AccAddress, contractId uint64, nonce int64, sig []byte) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator string, contractId uint64, nonce int64, sig []byte) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
 		Creator:    creator,
 		ContractId: contractId,
@@ -31,11 +31,12 @@ func (msg *MsgClaimContractIncome) Type() string {
 }
 
 func (msg *MsgClaimContractIncome) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.MustGetSigner()}
 }
 
 func (msg *MsgClaimContractIncome) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return addr
 }
 
 func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
@@ -53,7 +54,9 @@ func GetBytesToSign(contractId uint64, nonce int64) []byte {
 
 func (msg *MsgClaimContractIncome) ValidateBasic() error {
 	// anyone can make the claim on a contract, but of course the payout would only happen to the provider
-
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	if len(msg.Signature) > 100 {
 		return errors.Wrap(ErrClaimContractIncomeInvalidSignature, "too long")
 	}

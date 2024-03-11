@@ -53,7 +53,8 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, service)
+	pk, _ := common.NewPubKey(msg.Provider)
+	provider, err := k.GetProvider(ctx, pk, service)
 	if err != nil {
 		return err
 	}
@@ -104,7 +105,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, service)
+	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), pk, service)
 	if err != nil {
 		return err
 	}
@@ -133,13 +134,16 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
+	provider, _ := common.NewPubKey(msg.Provider)
+	client, _ := common.NewPubKey(msg.Client)
+	delegate, _ := common.NewPubKey(msg.Delegate)
 	contract := types.Contract{
-		Provider:           msg.Provider,
+		Provider:           provider,
 		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
 		Service:            service,
 		Type:               msg.ContractType,
-		Client:             msg.Client,
-		Delegate:           msg.Delegate,
+		Client:             client,
+		Delegate:           delegate,
 		Duration:           msg.Duration,
 		Rate:               msg.Rate,
 		Deposit:            msg.Deposit,

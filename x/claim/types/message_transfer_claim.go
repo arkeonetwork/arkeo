@@ -1,15 +1,16 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgTransferClaim = "transfer_claim"
 
 var _ sdk.Msg = &MsgTransferClaim{}
 
-func NewMsgTransferClaim(creator, toAddress cosmos.AccAddress) *MsgTransferClaim {
+func NewMsgTransferClaim(creator, toAddress string) *MsgTransferClaim {
 	return &MsgTransferClaim{
 		Creator:   creator,
 		ToAddress: toAddress,
@@ -25,7 +26,8 @@ func (msg *MsgTransferClaim) Type() string {
 }
 
 func (msg *MsgTransferClaim) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return []sdk.AccAddress{addr}
 }
 
 func (msg *MsgTransferClaim) GetSignBytes() []byte {
@@ -34,5 +36,8 @@ func (msg *MsgTransferClaim) GetSignBytes() []byte {
 }
 
 func (msg *MsgTransferClaim) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	return nil
 }

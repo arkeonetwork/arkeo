@@ -39,8 +39,8 @@ func CmdBondProvider() *cobra.Command {
 			}
 
 			msg := types.NewMsgBondProvider(
-				clientCtx.GetFromAddress(),
-				pubkey,
+				clientCtx.GetFromAddress().String(),
+				pubkey.String(),
 				argService,
 				bond,
 			)

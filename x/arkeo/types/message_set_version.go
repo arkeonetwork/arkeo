@@ -1,15 +1,16 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgSetVersion = "set_version"
 
 var _ sdk.Msg = &MsgSetVersion{}
 
-func NewMsgSetVersion(creator cosmos.AccAddress, version int64) *MsgSetVersion {
+func NewMsgSetVersion(creator string, version int64) *MsgSetVersion {
 	return &MsgSetVersion{
 		Creator: creator,
 		Version: version,
@@ -25,7 +26,8 @@ func (msg *MsgSetVersion) Type() string {
 }
 
 func (msg *MsgSetVersion) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return []sdk.AccAddress{addr}
 }
 
 func (msg *MsgSetVersion) GetSignBytes() []byte {
@@ -34,6 +36,9 @@ func (msg *MsgSetVersion) GetSignBytes() []byte {
 }
 
 func (msg *MsgSetVersion) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	if msg.Version <= 0 {
 		return ErrInvalidVersion
 	}

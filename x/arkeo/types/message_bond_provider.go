@@ -3,6 +3,7 @@ package types
 import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -12,7 +13,7 @@ const TypeMsgBondProvider = "bond_provider"
 
 var _ sdk.Msg = &MsgBondProvider{}
 
-func NewMsgBondProvider(creator cosmos.AccAddress, provider common.PubKey, service string, bond cosmos.Int) *MsgBondProvider {
+func NewMsgBondProvider(creator, provider, service string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
 		Creator:  creator,
 		Provider: provider,
@@ -30,11 +31,12 @@ func (msg *MsgBondProvider) Type() string {
 }
 
 func (msg *MsgBondProvider) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.MustGetSigner()}
 }
 
 func (msg *MsgBondProvider) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return addr
 }
 
 func (msg *MsgBondProvider) GetSignBytes() []byte {
@@ -44,13 +46,15 @@ func (msg *MsgBondProvider) GetSignBytes() []byte {
 
 func (msg *MsgBondProvider) ValidateBasic() error {
 	// verify pubkey
-	_, err := common.NewPubKey(msg.Provider.String())
+	pk, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.Provider, err)
 	}
-
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	signer := msg.MustGetSigner()
-	provider, err := msg.Provider.GetMyAddress()
+	provider, err := pk.GetMyAddress()
 	if err != nil {
 		return err
 	}

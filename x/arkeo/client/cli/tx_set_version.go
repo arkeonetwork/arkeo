@@ -30,7 +30,7 @@ func CmdSetVersion() *cobra.Command {
 			}
 
 			msg := types.NewMsgSetVersion(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 				argVersion,
 			)
 			if err := msg.ValidateBasic(); err != nil {

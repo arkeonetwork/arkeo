@@ -20,7 +20,7 @@ func CmdClaimArkeo() *cobra.Command {
 			}
 
 			msg := types.NewMsgClaimArkeo(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

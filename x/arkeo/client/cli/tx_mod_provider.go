@@ -62,8 +62,8 @@ func CmdModProvider() *cobra.Command {
 			}
 
 			msg := types.NewMsgModProvider(
-				clientCtx.GetFromAddress(),
-				pubkey,
+				clientCtx.GetFromAddress().String(),
+				pubkey.String(),
 				argService,
 				argMetatadataURI,
 				argMetadataNonce,

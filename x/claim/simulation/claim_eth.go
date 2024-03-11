@@ -19,7 +19,7 @@ func SimulateMsgClaimEth(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgClaimEth{
-			Creator: simAccount.Address,
+			Creator: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the ClaimEth simulation

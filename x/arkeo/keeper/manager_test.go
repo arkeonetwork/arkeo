@@ -160,7 +160,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
-		Provider:            provider.PubKey,
+		Provider:            provider.PubKey.String(),
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -181,10 +181,10 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      common.BTCService.String(),
-		Creator:      user1Address,
-		Client:       user1PubKey,
+		Creator:      user1Address.String(),
+		Client:       user1PubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         rates[0],
@@ -195,7 +195,7 @@ func TestContractEndBlock(t *testing.T) {
 
 	// have user1 open a contract for a delegate.
 	delegatePubKey := types.GetRandomPubKey()
-	msg.Delegate = delegatePubKey
+	msg.Delegate = delegatePubKey.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -205,9 +205,9 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, k.MintAndSendToAccount(ctx, user2Address, getCoin(common.Tokens(20))))
-	msg.Delegate = common.EmptyPubKey
-	msg.Client = user2PubKey
-	msg.Creator = user2Address
+	msg.Delegate = common.EmptyPubKey.String()
+	msg.Client = user2PubKey.String()
+	msg.Creator = user2Address.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -279,7 +279,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
-		Provider:            provider.PubKey,
+		Provider:            provider.PubKey.String(),
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -302,10 +302,10 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:           providerPubKey,
+		Provider:           providerPubKey.String(),
 		Service:            common.BTCService.String(),
-		Creator:            user1Address,
-		Client:             user1PubKey,
+		Creator:            user1Address.String(),
+		Client:             user1PubKey.String(),
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
 		Duration:           100,
 		Rate:               rates[0],

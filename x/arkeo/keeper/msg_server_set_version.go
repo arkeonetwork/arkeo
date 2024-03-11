@@ -40,7 +40,8 @@ func (k msgServer) SetVersionValidate(ctx cosmos.Context, msg *types.MsgSetVersi
 		return errors.Wrapf(types.ErrDisabledHandler, "set version")
 	}
 
-	valAddr := cosmos.ValAddress(msg.Creator)
+	acct, _ := sdk.AccAddressFromBech32(msg.Creator)
+	valAddr := cosmos.ValAddress(acct)
 	currentVersion := k.GetVersionForAddress(ctx, valAddr)
 	if currentVersion > msg.Version {
 		return fmt.Errorf("cannot downgrade version: (%d/%d)", msg.Version, currentVersion)
@@ -53,7 +54,8 @@ func (k msgServer) SetVersionValidate(ctx cosmos.Context, msg *types.MsgSetVersi
 }
 
 func (k msgServer) SetVersionHandle(ctx cosmos.Context, msg *types.MsgSetVersion) error {
-	valAddr := cosmos.ValAddress(msg.Creator)
+	acct, _ := sdk.AccAddressFromBech32(msg.Creator)
+	valAddr := cosmos.ValAddress(acct)
 	k.SetVersionForAddress(ctx, valAddr, msg.Version)
 	return nil
 }

@@ -8,13 +8,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgModProvider = "mod_provider"
 
 var _ sdk.Msg = &MsgModProvider{}
 
-func NewMsgModProvider(creator cosmos.AccAddress, provider common.PubKey, service, metadataUri string,
+func NewMsgModProvider(creator, provider, service, metadataUri string,
 	metadataNonce uint64, status ProviderStatus, minContractDuration,
 	maxContractDuration int64, subscriptionRate, payAsYouGoRate types.Coins, settlementDuration int64,
 ) *MsgModProvider {
@@ -42,11 +43,12 @@ func (msg *MsgModProvider) Type() string {
 }
 
 func (msg *MsgModProvider) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.MustGetSigner()}
 }
 
 func (msg *MsgModProvider) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return addr
 }
 
 func (msg *MsgModProvider) GetSignBytes() []byte {
@@ -56,11 +58,13 @@ func (msg *MsgModProvider) GetSignBytes() []byte {
 
 func (msg *MsgModProvider) ValidateBasic() error {
 	// verify pubkey
-	_, err := common.NewPubKey(msg.Provider.String())
+	pk, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid provider pubkey (%s): %s", msg.Provider, err)
 	}
-
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	// verify service
 	_, err = common.NewService(msg.Service)
 	if err != nil {
@@ -68,7 +72,7 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	signer := msg.MustGetSigner()
-	provider, err := msg.Provider.GetMyAddress()
+	provider, err := pk.GetMyAddress()
 	if err != nil {
 		return err
 	}

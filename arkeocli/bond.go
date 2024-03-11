@@ -79,8 +79,8 @@ func runBondProviderCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 	msg := types.NewMsgBondProvider(
-		clientCtx.GetFromAddress(),
-		pubkey,
+		clientCtx.GetFromAddress().String(),
+		pubkey.String(),
 		argService,
 		bond,
 	)

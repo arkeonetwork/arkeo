@@ -86,11 +86,11 @@ func CmdOpenContract() *cobra.Command {
 			}
 
 			msg := types.NewMsgOpenContract(
-				clientCtx.GetFromAddress(),
-				pubkey,
+				clientCtx.GetFromAddress().String(),
+				pubkey.String(),
 				argService,
-				cl,
-				delegate,
+				cl.String(),
+				delegate.String(),
 				types.ContractType(argContractType),
 				argDuration,
 				argSettlementDuration,

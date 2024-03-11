@@ -23,7 +23,7 @@ func CmdClaimEth() *cobra.Command {
 			}
 
 			msg := types.NewMsgClaimEth(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 				argEthAdress,
 				argSignature,
 			)

@@ -23,7 +23,7 @@ func TestModProviderValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgModProvider{
-		Provider:            provider.PubKey,
+		Provider:            provider.PubKey.String(),
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
 		MaxContractDuration: 500,
@@ -63,8 +63,8 @@ func TestModProviderHandle(t *testing.T) {
 
 	// happy path
 	msg := types.MsgModProvider{
-		Creator:             acct,
-		Provider:            pubkey,
+		Creator:             acct.String(),
+		Provider:            pubkey.String(),
 		Service:             common.BTCService.String(),
 		MetadataUri:         "foobar",
 		MetadataNonce:       3,
@@ -76,7 +76,7 @@ func TestModProviderHandle(t *testing.T) {
 	}
 	require.NoError(t, s.ModProviderHandle(ctx, &msg))
 
-	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCService)
+	provider, err = k.GetProvider(ctx, pubkey, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.MetadataUri, "foobar")
 	require.Equal(t, provider.MetadataNonce, uint64(3))

@@ -17,8 +17,8 @@ func TestMsgTransferClaim_ValidateBasic(t *testing.T) {
 		{
 			name: "valid create address and valid to address",
 			msg: MsgTransferClaim{
-				Creator:   sample.AccAddress(),
-				ToAddress: sample.AccAddress(),
+				Creator:   sample.AccAddress().String(),
+				ToAddress: sample.AccAddress().String(),
 			},
 		},
 	}

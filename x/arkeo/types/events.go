@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
@@ -58,8 +59,9 @@ func NewCloseContractEvent(contract *Contract) EventCloseContract {
 }
 
 func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) EventBondProvider {
+	provider, _ := common.NewPubKey(msg.Provider)
 	return EventBondProvider{
-		Provider: msg.Provider,
+		Provider: provider,
 		Service:  msg.Service,
 		BondRel:  msg.Bond,
 		BondAbs:  bond,

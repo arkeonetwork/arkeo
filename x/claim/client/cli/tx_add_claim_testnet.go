@@ -38,7 +38,7 @@ func CmdAddClaim() *cobra.Command {
 			}
 
 			msg := types.NewMsgAddClaim(
-				clientCtx.GetFromAddress(),
+				clientCtx.GetFromAddress().String(),
 				chain,
 				argAddress,
 				argAmount,

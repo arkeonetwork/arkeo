@@ -28,8 +28,8 @@ func CmdTransferClaim() *cobra.Command {
 			}
 
 			msg := types.NewMsgTransferClaim(
-				clientCtx.GetFromAddress(),
-				toAddress,
+				clientCtx.GetFromAddress().String(),
+				toAddress.String(),
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

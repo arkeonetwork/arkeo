@@ -85,7 +85,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	msg := types.NewMsgClaimContractIncome(
-		creatorAddr,
+		creatorAddr.String(),
 		contract.Id,
 		nonce,
 		signature,

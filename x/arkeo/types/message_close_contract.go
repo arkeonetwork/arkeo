@@ -1,15 +1,16 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 const TypeMsgCloseContract = "close_contract"
 
 var _ sdk.Msg = &MsgCloseContract{}
 
-func NewMsgCloseContract(creator cosmos.AccAddress, contractId uint64) *MsgCloseContract {
+func NewMsgCloseContract(creator string, contractId uint64) *MsgCloseContract {
 	return &MsgCloseContract{
 		Creator:    creator,
 		ContractId: contractId,
@@ -25,11 +26,12 @@ func (msg *MsgCloseContract) Type() string {
 }
 
 func (msg *MsgCloseContract) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{msg.MustGetSigner()}
 }
 
 func (msg *MsgCloseContract) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	addr, _ := sdk.AccAddressFromBech32(msg.Creator)
+	return addr
 }
 
 func (msg *MsgCloseContract) GetSignBytes() []byte {
@@ -38,5 +40,8 @@ func (msg *MsgCloseContract) GetSignBytes() []byte {
 }
 
 func (msg *MsgCloseContract) ValidateBasic() error {
+	if _, err := sdk.AccAddressFromBech32(msg.Creator); err != nil {
+		return errors.Wrap(sdkerrors.ErrInvalidAddress, "invalid creator")
+	}
 	return nil
 }

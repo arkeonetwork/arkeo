@@ -1,14 +1,16 @@
 package keeper
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) error {
+	pk, _ := common.NewPubKey(msg.Provider)
 	return ctx.EventManager().EmitTypedEvent(
 		&types.EventBondProvider{
-			Provider: msg.Provider,
+			Provider: pk,
 			Service:  msg.Service,
 			BondRel:  msg.Bond,
 			BondAbs:  bond,
@@ -29,9 +31,10 @@ func (k msgServer) EmitCloseContractEvent(ctx cosmos.Context, contract *types.Co
 }
 
 func (k msgServer) EmitModProviderEvent(ctx cosmos.Context, msg *types.MsgModProvider, provider *types.Provider) error {
+	addr, _ := cosmos.AccAddressFromBech32(msg.Creator)
 	return ctx.EventManager().EmitTypedEvent(
 		&types.EventModProvider{
-			Creator:             msg.Creator,
+			Creator:             addr,
 			Provider:            provider.PubKey,
 			Service:             provider.Service.String(),
 			MetadataUri:         provider.MetadataUri,
