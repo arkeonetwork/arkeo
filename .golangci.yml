@@ -33,3 +33,5 @@ linters-settings:
 run:
   skip-files:
     - ".*\\.pb\\.go$"
+  ski-dirs:
+    - ".lego"

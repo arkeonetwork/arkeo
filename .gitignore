@@ -1,4 +1,5 @@
 *.pb.go
+.lego/
 generated
 /arkeod
 .arkeo/
