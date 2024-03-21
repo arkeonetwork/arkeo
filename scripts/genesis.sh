@@ -87,6 +87,10 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_account "$BOB" $TOKEN 1000000000000000 # bob, 10m
 		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
 
+		# Thorchain derived test addresses
+		add_account "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" $TOKEN 1000000000000000 # bob, 10m
+		add_claim_records "ARKEO" "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" 1000 1000 1000 true
+
 		# add_claim_records "ARKEO" "{YOUR ARKEO ADDRESS}" 500000 500000 500000 true
 		# add_account "{YOUR ARKEO ADDRESS}" $TOKEN 1000000000000000
 

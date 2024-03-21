@@ -25,6 +25,7 @@ message MsgClaimEthResponse {}
 message MsgClaimArkeo {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  string thor_tx = 2; // the tx hash of the thorchain tx that delegates the arkeo claim
 }
 
 message MsgClaimArkeoResponse {}
