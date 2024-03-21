@@ -4,18 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
+	"io"
+	"log"
+	"net/http"
+	"strings"
 )
 
 type ThorTxData struct {
 	ObservedTx struct {
 		Tx struct {
 			FromAddress string `json:"from_address"`
+			Memo        string `json:"memo"`
 		} `json:"tx"`
 	} `json:"observed_tx"`
 }
@@ -23,7 +25,7 @@ type ThorTxData struct {
 func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (*types.MsgClaimArkeoResponse, error) {
 	log.Println("WHAT")
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	arkeoClaim, err := k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
+	arkeoClaimRecord, err := k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
@@ -52,6 +54,7 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 			return nil, fmt.Errorf("error unmarshalling transaction data: %w", err)
 		}
 		thorAddress := txData.ObservedTx.Tx.FromAddress
+		memo := txData.ObservedTx.Tx.Memo
 
 		thorAddressBytes, err := sdk.GetFromBech32(thorAddress, "thor")
 		if err != nil {
@@ -66,19 +69,43 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 			return nil, fmt.Errorf("failed to encode address bytes with new prefix: %w", err)
 		}
 
-		thorClaim, err := k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
+		thorClaimRecord, err := k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get claim record for %s", thorDerivedArkeoAddress)
 		}
-		if thorClaim.IsEmpty() || thorClaim.AmountClaim.IsZero() {
+		if thorClaimRecord.IsEmpty() || thorClaimRecord.AmountClaim.IsZero() {
 			return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", thorDerivedArkeoAddress)
 		}
-		log.Println("Thor Claim: ", thorClaim)
+		parts := strings.Split(memo, ":")
+		if len(parts) != 3 || parts[0] != "delegate" || parts[1] != "arkeo" {
+			return nil, fmt.Errorf("invalid memo: %s", memo)
+		}
 
-		// TODO: Update claim record for arkeo address and remove claim for thor address
+		combinedClaimRecord := types.ClaimRecord{
+			Chain:          types.ARKEO,
+			Address:        msg.Creator.String(),
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, arkeoClaimRecord.AmountClaim.Amount.Int64()+thorClaimRecord.AmountClaim.Amount.Int64()),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, arkeoClaimRecord.AmountVote.Amount.Int64()+thorClaimRecord.AmountVote.Amount.Int64()),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, arkeoClaimRecord.AmountDelegate.Amount.Int64()+thorClaimRecord.AmountDelegate.Amount.Int64()),
+		}
+		emptyClaimRecord := types.ClaimRecord{
+			Chain:          types.ARKEO,
+			Address:        thorDerivedArkeoAddress,
+			AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+			AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+			AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+		}
+		k.SetClaimRecord(ctx, emptyClaimRecord)
+		k.SetClaimRecord(ctx, combinedClaimRecord)
+
+		thorClaimRecord, _ = k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
+		arkeoClaimRecord, err = k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
+		}
 	}
-
-	if arkeoClaim.IsEmpty() || arkeoClaim.AmountClaim.IsZero() {
+	log.Println("Arkeo Claim: ", arkeoClaimRecord)
+	if arkeoClaimRecord.IsEmpty() || arkeoClaimRecord.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
 

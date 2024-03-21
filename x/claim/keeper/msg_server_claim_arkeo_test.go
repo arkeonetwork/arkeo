@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/stretchr/testify/require"
-	"log"
 	"testing"
 )
 
@@ -16,7 +15,6 @@ func TestClaimArkeo(t *testing.T) {
 	cosmos.GetConfig().SetBech32PrefixForAccount("tarkeo", "tarkeopub")
 
 	addrArkeo := utils.GetRandomArkeoAddress()
-	log.Println("Arkeo Address: ", addrArkeo.String())
 	claimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
 		Address:        addrArkeo.String(),
@@ -44,7 +42,6 @@ func TestClaimArkeo(t *testing.T) {
 	// get balance of arkeo address before claim
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
-	log.Println("CLAIM ARKEO: 1")
 	claimMessage := types.MsgClaimArkeo{
 		Creator: addrArkeo,
 		ThorTx:  "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174",
@@ -73,7 +70,6 @@ func TestClaimArkeo(t *testing.T) {
 
 	// ensure claim Arkeo fails from address with no claim record
 	addrArkeo2 := utils.GetRandomArkeoAddress()
-	log.Println("CLAIM ARKEO: 2")
 	claimMessage2 := types.MsgClaimArkeo{
 		Creator: addrArkeo2,
 	}
