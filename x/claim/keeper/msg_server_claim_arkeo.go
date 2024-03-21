@@ -84,8 +84,14 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
 	}
-	k.SetClaimRecord(ctx, emptyClaimRecord)
+	err = k.SetClaimRecord(ctx, emptyClaimRecord)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("failed to set empty claim record for %s: %w", thorDerivedArkeoAddress, err)
+	}
 	k.SetClaimRecord(ctx, combinedClaimRecord)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("failed to set combined claim record for %s: %w", creator, err)
+	}
 
 	newClaimRecord, err := k.GetClaimRecord(ctx, creator, types.ARKEO)
 	if err != nil {
