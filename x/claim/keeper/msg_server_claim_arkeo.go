@@ -8,7 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -23,7 +22,6 @@ type ThorTxData struct {
 }
 
 func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (*types.MsgClaimArkeoResponse, error) {
-	log.Println("WHAT")
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	arkeoClaimRecord, err := k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
 	if err != nil {
@@ -31,7 +29,6 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 	}
 
 	if msg.ThorTx != "" {
-		log.Println("Thor Tx: ", msg.ThorTx)
 		url := fmt.Sprintf("https://thornode.ninerealms.com/thorchain/tx/%s", msg.ThorTx)
 
 		resp, err := http.Get(url)
@@ -97,14 +94,8 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 		}
 		k.SetClaimRecord(ctx, emptyClaimRecord)
 		k.SetClaimRecord(ctx, combinedClaimRecord)
-
-		thorClaimRecord, _ = k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
-		arkeoClaimRecord, err = k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
-		}
 	}
-	log.Println("Arkeo Claim: ", arkeoClaimRecord)
+
 	if arkeoClaimRecord.IsEmpty() || arkeoClaimRecord.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
