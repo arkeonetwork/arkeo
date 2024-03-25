@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +11,6 @@ import (
 func TestClaimThorchainArkeo(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	cosmos.GetConfig().SetBech32PrefixForAccount("tarkeo", "tarkeopub")
 
 	addrArkeo := utils.GetRandomArkeoAddress()
 	claimRecord := types.ClaimRecord{
@@ -25,8 +23,7 @@ func TestClaimThorchainArkeo(t *testing.T) {
 	err := keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)
 
-	thorClaimAddress := "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7"
-
+	thorClaimAddress := "cosmos1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6wy5w8c"
 	thorClaimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
 		Address:        thorClaimAddress, // arkeo address derived from sender of thorchain tx "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174"
@@ -86,7 +83,6 @@ func TestClaimThorchainArkeo(t *testing.T) {
 func TestClaimThorchainEth(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	cosmos.GetConfig().SetBech32PrefixForAccount("tarkeo", "tarkeopub")
 
 	// create valid eth claimrecords
 	addrArkeo := utils.GetRandomArkeoAddress()
@@ -113,7 +109,7 @@ func TestClaimThorchainEth(t *testing.T) {
 	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
 	require.NoError(t, err)
 
-	thorClaimAddress := "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7"
+	thorClaimAddress := "cosmos1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6wy5w8c"
 	thorClaimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
 		Address:        thorClaimAddress, // arkeo address derived from sender of thorchain tx "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174"
