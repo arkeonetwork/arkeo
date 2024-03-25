@@ -83,7 +83,6 @@ func TestClaimThorchainArkeo(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
 }
 
-
 func TestClaimThorchainEth(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
@@ -126,7 +125,7 @@ func TestClaimThorchainEth(t *testing.T) {
 		Creator:    addrArkeo,
 		EthAddress: addrEth,
 		Signature:  sigString,
-		ThorTx:  "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174",
+		ThorTx:     "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174",
 	}
 	_, err = msgServer.ClaimEth(ctx, &claimMessage)
 	require.NoError(t, err)

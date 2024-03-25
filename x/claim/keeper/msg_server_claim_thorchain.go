@@ -24,7 +24,12 @@ type ThorTxData struct {
 func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx string, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
 	url := fmt.Sprintf("https://thornode.ninerealms.com/thorchain/tx/%s", thorTx)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return types.ClaimRecord{}, errors.Wrapf(err, "failed to build request %s", req.RequestURI)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return types.ClaimRecord{}, errors.Wrapf(err, "failed to get thorchain tx for %s", thorTx)
 	}
@@ -88,7 +93,7 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("failed to set empty claim record for %s: %w", thorDerivedArkeoAddress, err)
 	}
-	k.SetClaimRecord(ctx, combinedClaimRecord)
+	err = k.SetClaimRecord(ctx, combinedClaimRecord)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("failed to set combined claim record for %s: %w", creator, err)
 	}
