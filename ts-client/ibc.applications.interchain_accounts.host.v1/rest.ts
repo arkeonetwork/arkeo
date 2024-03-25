@@ -9,6 +9,18 @@
  * ---------------------------------------------------------------
  */
 
+/**
+* Params defines the set of on-chain interchain accounts parameters.
+The following parameters may be used to disable the host submodule.
+*/
+export interface Hostv1Params {
+  /** host_enabled enables or disables the host submodule. */
+  host_enabled?: boolean;
+
+  /** allow_messages defines a list of sdk message typeURLs allowed to be executed on a host chain. */
+  allow_messages?: string[];
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -21,23 +33,11 @@ export interface RpcStatus {
 }
 
 /**
-* Params defines the set of on-chain interchain accounts parameters.
-The following parameters may be used to disable the host submodule.
-*/
-export interface V1Params {
-  /** host_enabled enables or disables the host submodule. */
-  host_enabled?: boolean;
-
-  /** allow_messages defines a list of sdk message typeURLs allowed to be executed on a host chain. */
-  allow_messages?: string[];
-}
-
-/**
  * QueryParamsResponse is the response type for the Query/Params RPC method.
  */
 export interface V1QueryParamsResponse {
   /** params defines the parameters of the module. */
-  params?: V1Params;
+  params?: Hostv1Params;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";

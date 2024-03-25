@@ -18,6 +18,8 @@ export interface MsgClaimEthResponse {
 
 export interface MsgClaimArkeo {
   creator: Uint8Array;
+  /** the tx hash of the thorchain tx that delegates the arkeo claim */
+  thorTx: string;
 }
 
 export interface MsgClaimArkeoResponse {
@@ -149,13 +151,16 @@ export const MsgClaimEthResponse = {
 };
 
 function createBaseMsgClaimArkeo(): MsgClaimArkeo {
-  return { creator: new Uint8Array() };
+  return { creator: new Uint8Array(), thorTx: "" };
 }
 
 export const MsgClaimArkeo = {
   encode(message: MsgClaimArkeo, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.creator.length !== 0) {
       writer.uint32(10).bytes(message.creator);
+    }
+    if (message.thorTx !== "") {
+      writer.uint32(18).string(message.thorTx);
     }
     return writer;
   },
@@ -170,6 +175,9 @@ export const MsgClaimArkeo = {
         case 1:
           message.creator = reader.bytes();
           break;
+        case 2:
+          message.thorTx = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -179,19 +187,24 @@ export const MsgClaimArkeo = {
   },
 
   fromJSON(object: any): MsgClaimArkeo {
-    return { creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array() };
+    return {
+      creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
+      thorTx: isSet(object.thorTx) ? String(object.thorTx) : "",
+    };
   },
 
   toJSON(message: MsgClaimArkeo): unknown {
     const obj: any = {};
     message.creator !== undefined
       && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
+    message.thorTx !== undefined && (obj.thorTx = message.thorTx);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgClaimArkeo>, I>>(object: I): MsgClaimArkeo {
     const message = createBaseMsgClaimArkeo();
     message.creator = object.creator ?? new Uint8Array();
+    message.thorTx = object.thorTx ?? "";
     return message;
   },
 };

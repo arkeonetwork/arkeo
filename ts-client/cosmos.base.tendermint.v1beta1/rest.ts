@@ -168,7 +168,7 @@ export interface RpcStatus {
 }
 
 export interface TenderminttypesBlock {
-  /** Header defines the structure of a Tendermint block header. */
+  /** Header defines the structure of a block header. */
   header?: TenderminttypesHeader;
   data?: TypesData;
   evidence?: TypesEvidenceList;
@@ -178,7 +178,7 @@ export interface TenderminttypesBlock {
 }
 
 /**
- * Header defines the structure of a Tendermint block header.
+ * Header defines the structure of a block header.
  */
 export interface TenderminttypesHeader {
   /**
@@ -587,7 +587,7 @@ export interface TypesPartSetHeader {
 }
 
 export interface TypesSignedHeader {
-  /** Header defines the structure of a Tendermint block header. */
+  /** Header defines the structure of a block header. */
   header?: TenderminttypesHeader;
 
   /** Commit contains the evidence that a block was committed by a set of validators. */

@@ -10,6 +10,89 @@
  */
 
 /**
+* Deposit defines an amount deposited by an account address to an active
+proposal.
+*/
+export interface Govv1Deposit {
+  /** @format uint64 */
+  proposal_id?: string;
+  depositor?: string;
+  amount?: V1Beta1Coin[];
+}
+
+/**
+ * Proposal defines the core field members of a governance proposal.
+ */
+export interface Govv1Proposal {
+  /** @format uint64 */
+  id?: string;
+  messages?: ProtobufAny[];
+
+  /**
+   * ProposalStatus enumerates the valid statuses of a proposal.
+   *
+   *  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
+   *  - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
+   * period.
+   *  - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
+   *  - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
+   * passed.
+   *  - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
+   * been rejected.
+   *  - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
+   * failed.
+   */
+  status?: V1ProposalStatus;
+
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
+  final_tally_result?: Govv1TallyResult;
+
+  /** @format date-time */
+  submit_time?: string;
+
+  /** @format date-time */
+  deposit_end_time?: string;
+  total_deposit?: V1Beta1Coin[];
+
+  /** @format date-time */
+  voting_start_time?: string;
+
+  /** @format date-time */
+  voting_end_time?: string;
+
+  /** metadata is any arbitrary metadata attached to the proposal. */
+  metadata?: string;
+}
+
+/**
+ * TallyResult defines a standard tally for a governance proposal.
+ */
+export interface Govv1TallyResult {
+  yes_count?: string;
+  abstain_count?: string;
+  no_count?: string;
+  no_with_veto_count?: string;
+}
+
+/**
+* Vote defines a vote on a governance proposal.
+A Vote consists of a proposal ID, the voter, and the vote option.
+*/
+export interface Govv1Vote {
+  /** @format uint64 */
+  proposal_id?: string;
+  voter?: string;
+  options?: V1WeightedVoteOption[];
+
+  /** metadata is any  arbitrary metadata to attached to the vote. */
+  metadata?: string;
+}
+
+/**
 * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
 
@@ -131,17 +214,6 @@ export interface RpcStatus {
 }
 
 /**
-* Deposit defines an amount deposited by an account address to an active
-proposal.
-*/
-export interface V1Deposit {
-  /** @format uint64 */
-  proposal_id?: string;
-  depositor?: string;
-  amount?: V1Beta1Coin[];
-}
-
-/**
  * DepositParams defines the params for deposits on governance proposals.
  */
 export interface V1DepositParams {
@@ -184,54 +256,6 @@ export type V1MsgVoteResponse = object;
 export type V1MsgVoteWeightedResponse = object;
 
 /**
- * Proposal defines the core field members of a governance proposal.
- */
-export interface V1Proposal {
-  /** @format uint64 */
-  id?: string;
-  messages?: ProtobufAny[];
-
-  /**
-   * ProposalStatus enumerates the valid statuses of a proposal.
-   *
-   *  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
-   *  - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
-   * period.
-   *  - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
-   *  - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
-   * passed.
-   *  - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
-   * been rejected.
-   *  - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
-   * failed.
-   */
-  status?: V1ProposalStatus;
-
-  /**
-   * final_tally_result is the final tally result of the proposal. When
-   * querying a proposal via gRPC, this field is not populated until the
-   * proposal's voting period has ended.
-   */
-  final_tally_result?: V1TallyResult;
-
-  /** @format date-time */
-  submit_time?: string;
-
-  /** @format date-time */
-  deposit_end_time?: string;
-  total_deposit?: V1Beta1Coin[];
-
-  /** @format date-time */
-  voting_start_time?: string;
-
-  /** @format date-time */
-  voting_end_time?: string;
-
-  /** metadata is any arbitrary metadata attached to the proposal. */
-  metadata?: string;
-}
-
-/**
 * ProposalStatus enumerates the valid statuses of a proposal.
 
  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
@@ -260,14 +284,14 @@ export enum V1ProposalStatus {
  */
 export interface V1QueryDepositResponse {
   /** deposit defines the requested deposit. */
-  deposit?: V1Deposit;
+  deposit?: Govv1Deposit;
 }
 
 /**
  * QueryDepositsResponse is the response type for the Query/Deposits RPC method.
  */
 export interface V1QueryDepositsResponse {
-  deposits?: V1Deposit[];
+  deposits?: Govv1Deposit[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -292,7 +316,7 @@ export interface V1QueryParamsResponse {
  */
 export interface V1QueryProposalResponse {
   /** Proposal defines the core field members of a governance proposal. */
-  proposal?: V1Proposal;
+  proposal?: Govv1Proposal;
 }
 
 /**
@@ -300,7 +324,7 @@ export interface V1QueryProposalResponse {
 method.
 */
 export interface V1QueryProposalsResponse {
-  proposals?: V1Proposal[];
+  proposals?: Govv1Proposal[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -311,7 +335,7 @@ export interface V1QueryProposalsResponse {
  */
 export interface V1QueryTallyResultResponse {
   /** tally defines the requested tally. */
-  tally?: V1TallyResult;
+  tally?: Govv1TallyResult;
 }
 
 /**
@@ -319,7 +343,7 @@ export interface V1QueryTallyResultResponse {
  */
 export interface V1QueryVoteResponse {
   /** vote defined the queried vote. */
-  vote?: V1Vote;
+  vote?: Govv1Vote;
 }
 
 /**
@@ -327,7 +351,7 @@ export interface V1QueryVoteResponse {
  */
 export interface V1QueryVotesResponse {
   /** votes defined the queried votes. */
-  votes?: V1Vote[];
+  votes?: Govv1Vote[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -351,30 +375,6 @@ export interface V1TallyParams {
    *  vetoed. Default value: 1/3.
    */
   veto_threshold?: string;
-}
-
-/**
- * TallyResult defines a standard tally for a governance proposal.
- */
-export interface V1TallyResult {
-  yes_count?: string;
-  abstain_count?: string;
-  no_count?: string;
-  no_with_veto_count?: string;
-}
-
-/**
-* Vote defines a vote on a governance proposal.
-A Vote consists of a proposal ID, the voter, and the vote option.
-*/
-export interface V1Vote {
-  /** @format uint64 */
-  proposal_id?: string;
-  voter?: string;
-  options?: V1WeightedVoteOption[];
-
-  /** metadata is any  arbitrary metadata to attached to the vote. */
-  metadata?: string;
 }
 
 /**

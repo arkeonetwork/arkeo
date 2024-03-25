@@ -81,7 +81,7 @@ export interface MsgClaimContractIncomeResponse {
 
 /** this line is used by starport scaffolding # proto/tx/message */
 export interface MsgSetVersion {
-  creator: string;
+  creator: Uint8Array;
   version: number;
 }
 
@@ -829,16 +829,16 @@ export const MsgClaimContractIncomeResponse = {
 };
 
 function createBaseMsgSetVersion(): MsgSetVersion {
-  return { creator: "", version: 0 };
+  return { creator: new Uint8Array(), version: 0 };
 }
 
 export const MsgSetVersion = {
   encode(message: MsgSetVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+    if (message.creator.length !== 0) {
+      writer.uint32(10).bytes(message.creator);
     }
     if (message.version !== 0) {
-      writer.uint32(16).int32(message.version);
+      writer.uint32(16).int64(message.version);
     }
     return writer;
   },
@@ -851,10 +851,10 @@ export const MsgSetVersion = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.creator = reader.bytes();
           break;
         case 2:
-          message.version = reader.int32();
+          message.version = longToNumber(reader.int64() as Long);
           break;
         default:
           reader.skipType(tag & 7);
@@ -866,21 +866,22 @@ export const MsgSetVersion = {
 
   fromJSON(object: any): MsgSetVersion {
     return {
-      creator: isSet(object.creator) ? String(object.creator) : "",
+      creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
       version: isSet(object.version) ? Number(object.version) : 0,
     };
   },
 
   toJSON(message: MsgSetVersion): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
+    message.creator !== undefined
+      && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
     message.version !== undefined && (obj.version = Math.round(message.version));
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgSetVersion>, I>>(object: I): MsgSetVersion {
     const message = createBaseMsgSetVersion();
-    message.creator = object.creator ?? "";
+    message.creator = object.creator ?? new Uint8Array();
     message.version = object.version ?? 0;
     return message;
   },

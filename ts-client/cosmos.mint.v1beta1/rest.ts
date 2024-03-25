@@ -9,21 +9,10 @@
  * ---------------------------------------------------------------
  */
 
-export interface ProtobufAny {
-  "@type"?: string;
-}
-
-export interface RpcStatus {
-  /** @format int32 */
-  code?: number;
-  message?: string;
-  details?: ProtobufAny[];
-}
-
 /**
  * Params holds parameters for the mint module.
  */
-export interface V1Beta1Params {
+export interface Mintv1Beta1Params {
   /** type of coin to mint */
   mint_denom?: string;
 
@@ -44,6 +33,17 @@ export interface V1Beta1Params {
    * @format uint64
    */
   blocks_per_year?: string;
+}
+
+export interface ProtobufAny {
+  "@type"?: string;
+}
+
+export interface RpcStatus {
+  /** @format int32 */
+  code?: number;
+  message?: string;
+  details?: ProtobufAny[];
 }
 
 /**
@@ -75,7 +75,7 @@ export interface V1Beta1QueryInflationResponse {
  */
 export interface V1Beta1QueryParamsResponse {
   /** params defines the parameters of the module. */
-  params?: V1Beta1Params;
+  params?: Mintv1Beta1Params;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";

@@ -10,6 +10,151 @@
  */
 
 /**
+* Deposit defines an amount deposited by an account address to an active
+proposal.
+*/
+export interface Govv1Beta1Deposit {
+  /** @format uint64 */
+  proposal_id?: string;
+  depositor?: string;
+  amount?: V1Beta1Coin[];
+}
+
+/**
+ * Proposal defines the core field members of a governance proposal.
+ */
+export interface Govv1Beta1Proposal {
+  /** @format uint64 */
+  proposal_id?: string;
+
+  /**
+   * `Any` contains an arbitrary serialized protocol buffer message along with a
+   * URL that describes the type of the serialized message.
+   *
+   * Protobuf library provides support to pack/unpack Any values in the form
+   * of utility functions or additional generated methods of the Any type.
+   * Example 1: Pack and unpack a message in C++.
+   *     Foo foo = ...;
+   *     Any any;
+   *     any.PackFrom(foo);
+   *     ...
+   *     if (any.UnpackTo(&foo)) {
+   *       ...
+   *     }
+   * Example 2: Pack and unpack a message in Java.
+   *     Any any = Any.pack(foo);
+   *     if (any.is(Foo.class)) {
+   *       foo = any.unpack(Foo.class);
+   *  Example 3: Pack and unpack a message in Python.
+   *     foo = Foo(...)
+   *     any = Any()
+   *     any.Pack(foo)
+   *     if any.Is(Foo.DESCRIPTOR):
+   *       any.Unpack(foo)
+   *  Example 4: Pack and unpack a message in Go
+   *      foo := &pb.Foo{...}
+   *      any, err := anypb.New(foo)
+   *      if err != nil {
+   *        ...
+   *      }
+   *      ...
+   *      foo := &pb.Foo{}
+   *      if err := any.UnmarshalTo(foo); err != nil {
+   * The pack methods provided by protobuf library will by default use
+   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
+   * methods only use the fully qualified type name after the last '/'
+   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
+   * name "y.z".
+   * JSON
+   * ====
+   * The JSON representation of an `Any` value uses the regular
+   * representation of the deserialized, embedded message, with an
+   * additional field `@type` which contains the type URL. Example:
+   *     package google.profile;
+   *     message Person {
+   *       string first_name = 1;
+   *       string last_name = 2;
+   *     {
+   *       "@type": "type.googleapis.com/google.profile.Person",
+   *       "firstName": <string>,
+   *       "lastName": <string>
+   * If the embedded message type is well-known and has a custom JSON
+   * representation, that representation will be embedded adding a field
+   * `value` which holds the custom JSON in addition to the `@type`
+   * field. Example (for message [google.protobuf.Duration][]):
+   *       "@type": "type.googleapis.com/google.protobuf.Duration",
+   *       "value": "1.212s"
+   */
+  content?: ProtobufAny;
+
+  /**
+   * ProposalStatus enumerates the valid statuses of a proposal.
+   *
+   *  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
+   *  - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
+   * period.
+   *  - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
+   *  - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
+   * passed.
+   *  - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
+   * been rejected.
+   *  - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
+   * failed.
+   */
+  status?: V1Beta1ProposalStatus;
+
+  /**
+   * final_tally_result is the final tally result of the proposal. When
+   * querying a proposal via gRPC, this field is not populated until the
+   * proposal's voting period has ended.
+   */
+  final_tally_result?: Govv1Beta1TallyResult;
+
+  /** @format date-time */
+  submit_time?: string;
+
+  /** @format date-time */
+  deposit_end_time?: string;
+  total_deposit?: V1Beta1Coin[];
+
+  /** @format date-time */
+  voting_start_time?: string;
+
+  /** @format date-time */
+  voting_end_time?: string;
+}
+
+/**
+ * TallyResult defines a standard tally for a governance proposal.
+ */
+export interface Govv1Beta1TallyResult {
+  yes?: string;
+  abstain?: string;
+  no?: string;
+  no_with_veto?: string;
+}
+
+/**
+* Vote defines a vote on a governance proposal.
+A Vote consists of a proposal ID, the voter, and the vote option.
+*/
+export interface Govv1Beta1Vote {
+  /** @format uint64 */
+  proposal_id?: string;
+  voter?: string;
+
+  /**
+   * Deprecated: Prefer to use `options` instead. This field is set in queries
+   * if and only if `len(options) == 1` and that option has weight 1. In all
+   * other cases, this field will default to VOTE_OPTION_UNSPECIFIED.
+   */
+  option?: V1Beta1VoteOption;
+
+  /** Since: cosmos-sdk 0.43 */
+  options?: V1Beta1WeightedVoteOption[];
+}
+
+/**
 * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
 
@@ -142,17 +287,6 @@ export interface V1Beta1Coin {
 }
 
 /**
-* Deposit defines an amount deposited by an account address to an active
-proposal.
-*/
-export interface V1Beta1Deposit {
-  /** @format uint64 */
-  proposal_id?: string;
-  depositor?: string;
-  amount?: V1Beta1Coin[];
-}
-
-/**
  * DepositParams defines the params for deposits on governance proposals.
  */
 export interface V1Beta1DepositParams {
@@ -264,110 +398,6 @@ export interface V1Beta1PageResponse {
 }
 
 /**
- * Proposal defines the core field members of a governance proposal.
- */
-export interface V1Beta1Proposal {
-  /** @format uint64 */
-  proposal_id?: string;
-
-  /**
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   * Example 1: Pack and unpack a message in C++.
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   * Example 2: Pack and unpack a message in Java.
-   *     Any any = Any.pack(foo);
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *  Example 3: Pack and unpack a message in Python.
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *  Example 4: Pack and unpack a message in Go
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   */
-  content?: ProtobufAny;
-
-  /**
-   * ProposalStatus enumerates the valid statuses of a proposal.
-   *
-   *  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
-   *  - PROPOSAL_STATUS_DEPOSIT_PERIOD: PROPOSAL_STATUS_DEPOSIT_PERIOD defines a proposal status during the deposit
-   * period.
-   *  - PROPOSAL_STATUS_VOTING_PERIOD: PROPOSAL_STATUS_VOTING_PERIOD defines a proposal status during the voting
-   *  - PROPOSAL_STATUS_PASSED: PROPOSAL_STATUS_PASSED defines a proposal status of a proposal that has
-   * passed.
-   *  - PROPOSAL_STATUS_REJECTED: PROPOSAL_STATUS_REJECTED defines a proposal status of a proposal that has
-   * been rejected.
-   *  - PROPOSAL_STATUS_FAILED: PROPOSAL_STATUS_FAILED defines a proposal status of a proposal that has
-   * failed.
-   */
-  status?: V1Beta1ProposalStatus;
-
-  /**
-   * final_tally_result is the final tally result of the proposal. When
-   * querying a proposal via gRPC, this field is not populated until the
-   * proposal's voting period has ended.
-   */
-  final_tally_result?: V1Beta1TallyResult;
-
-  /** @format date-time */
-  submit_time?: string;
-
-  /** @format date-time */
-  deposit_end_time?: string;
-  total_deposit?: V1Beta1Coin[];
-
-  /** @format date-time */
-  voting_start_time?: string;
-
-  /** @format date-time */
-  voting_end_time?: string;
-}
-
-/**
 * ProposalStatus enumerates the valid statuses of a proposal.
 
  - PROPOSAL_STATUS_UNSPECIFIED: PROPOSAL_STATUS_UNSPECIFIED defines the default proposal status.
@@ -396,14 +426,14 @@ export enum V1Beta1ProposalStatus {
  */
 export interface V1Beta1QueryDepositResponse {
   /** deposit defines the requested deposit. */
-  deposit?: V1Beta1Deposit;
+  deposit?: Govv1Beta1Deposit;
 }
 
 /**
  * QueryDepositsResponse is the response type for the Query/Deposits RPC method.
  */
 export interface V1Beta1QueryDepositsResponse {
-  deposits?: V1Beta1Deposit[];
+  deposits?: Govv1Beta1Deposit[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -428,7 +458,7 @@ export interface V1Beta1QueryParamsResponse {
  */
 export interface V1Beta1QueryProposalResponse {
   /** Proposal defines the core field members of a governance proposal. */
-  proposal?: V1Beta1Proposal;
+  proposal?: Govv1Beta1Proposal;
 }
 
 /**
@@ -436,7 +466,7 @@ export interface V1Beta1QueryProposalResponse {
 method.
 */
 export interface V1Beta1QueryProposalsResponse {
-  proposals?: V1Beta1Proposal[];
+  proposals?: Govv1Beta1Proposal[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -447,7 +477,7 @@ export interface V1Beta1QueryProposalsResponse {
  */
 export interface V1Beta1QueryTallyResultResponse {
   /** tally defines the requested tally. */
-  tally?: V1Beta1TallyResult;
+  tally?: Govv1Beta1TallyResult;
 }
 
 /**
@@ -455,7 +485,7 @@ export interface V1Beta1QueryTallyResultResponse {
  */
 export interface V1Beta1QueryVoteResponse {
   /** vote defined the queried vote. */
-  vote?: V1Beta1Vote;
+  vote?: Govv1Beta1Vote;
 }
 
 /**
@@ -463,7 +493,7 @@ export interface V1Beta1QueryVoteResponse {
  */
 export interface V1Beta1QueryVotesResponse {
   /** votes defined the queried votes. */
-  votes?: V1Beta1Vote[];
+  votes?: Govv1Beta1Vote[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;
@@ -492,36 +522,6 @@ export interface V1Beta1TallyParams {
    * @format byte
    */
   veto_threshold?: string;
-}
-
-/**
- * TallyResult defines a standard tally for a governance proposal.
- */
-export interface V1Beta1TallyResult {
-  yes?: string;
-  abstain?: string;
-  no?: string;
-  no_with_veto?: string;
-}
-
-/**
-* Vote defines a vote on a governance proposal.
-A Vote consists of a proposal ID, the voter, and the vote option.
-*/
-export interface V1Beta1Vote {
-  /** @format uint64 */
-  proposal_id?: string;
-  voter?: string;
-
-  /**
-   * Deprecated: Prefer to use `options` instead. This field is set in queries
-   * if and only if `len(options) == 1` and that option has weight 1. In all
-   * other cases, this field will default to VOTE_OPTION_UNSPECIFIED.
-   */
-  option?: V1Beta1VoteOption;
-
-  /** Since: cosmos-sdk 0.43 */
-  options?: V1Beta1WeightedVoteOption[];
 }
 
 /**

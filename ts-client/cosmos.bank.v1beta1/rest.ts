@@ -9,6 +9,14 @@
  * ---------------------------------------------------------------
  */
 
+/**
+ * Params defines the parameters for the bank module.
+ */
+export interface Bankv1Beta1Params {
+  send_enabled?: V1Beta1SendEnabled[];
+  default_send_enabled?: boolean;
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -216,14 +224,6 @@ export interface V1Beta1PageResponse {
 }
 
 /**
- * Params defines the parameters for the bank module.
- */
-export interface V1Beta1Params {
-  send_enabled?: V1Beta1SendEnabled[];
-  default_send_enabled?: boolean;
-}
-
-/**
 * QueryAllBalancesResponse is the response type for the Query/AllBalances RPC
 method.
 */
@@ -281,7 +281,7 @@ export interface V1Beta1QueryDenomsMetadataResponse {
  */
 export interface V1Beta1QueryParamsResponse {
   /** Params defines the parameters for the bank module. */
-  params?: V1Beta1Params;
+  params?: Bankv1Beta1Params;
 }
 
 /**

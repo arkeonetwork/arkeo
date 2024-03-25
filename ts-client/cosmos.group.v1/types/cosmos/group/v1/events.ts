@@ -1,7 +1,15 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { ProposalExecutorResult, proposalExecutorResultFromJSON, proposalExecutorResultToJSON } from "./types";
+import {
+  ProposalExecutorResult,
+  proposalExecutorResultFromJSON,
+  proposalExecutorResultToJSON,
+  ProposalStatus,
+  proposalStatusFromJSON,
+  proposalStatusToJSON,
+  TallyResult,
+} from "./types";
 
 export const protobufPackage = "cosmos.group.v1";
 
@@ -65,6 +73,16 @@ export interface EventLeaveGroup {
   groupId: number;
   /** address is the account address of the group member. */
   address: string;
+}
+
+/** EventProposalPruned is an event emitted when a proposal is pruned. */
+export interface EventProposalPruned {
+  /** proposal_id is the unique ID of the proposal. */
+  proposalId: number;
+  /** status is the proposal status (UNSPECIFIED, SUBMITTED, ACCEPTED, REJECTED, ABORTED, WITHDRAWN). */
+  status: ProposalStatus;
+  /** tally_result is the proposal tally result (when applicable). */
+  tallyResult: TallyResult | undefined;
 }
 
 function createBaseEventCreateGroup(): EventCreateGroup {
@@ -517,6 +535,76 @@ export const EventLeaveGroup = {
     const message = createBaseEventLeaveGroup();
     message.groupId = object.groupId ?? 0;
     message.address = object.address ?? "";
+    return message;
+  },
+};
+
+function createBaseEventProposalPruned(): EventProposalPruned {
+  return { proposalId: 0, status: 0, tallyResult: undefined };
+}
+
+export const EventProposalPruned = {
+  encode(message: EventProposalPruned, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.proposalId !== 0) {
+      writer.uint32(8).uint64(message.proposalId);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    if (message.tallyResult !== undefined) {
+      TallyResult.encode(message.tallyResult, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EventProposalPruned {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEventProposalPruned();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.proposalId = longToNumber(reader.uint64() as Long);
+          break;
+        case 2:
+          message.status = reader.int32() as any;
+          break;
+        case 3:
+          message.tallyResult = TallyResult.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EventProposalPruned {
+    return {
+      proposalId: isSet(object.proposalId) ? Number(object.proposalId) : 0,
+      status: isSet(object.status) ? proposalStatusFromJSON(object.status) : 0,
+      tallyResult: isSet(object.tallyResult) ? TallyResult.fromJSON(object.tallyResult) : undefined,
+    };
+  },
+
+  toJSON(message: EventProposalPruned): unknown {
+    const obj: any = {};
+    message.proposalId !== undefined && (obj.proposalId = Math.round(message.proposalId));
+    message.status !== undefined && (obj.status = proposalStatusToJSON(message.status));
+    message.tallyResult !== undefined
+      && (obj.tallyResult = message.tallyResult ? TallyResult.toJSON(message.tallyResult) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<EventProposalPruned>, I>>(object: I): EventProposalPruned {
+    const message = createBaseEventProposalPruned();
+    message.proposalId = object.proposalId ?? 0;
+    message.status = object.status ?? 0;
+    message.tallyResult = (object.tallyResult !== undefined && object.tallyResult !== null)
+      ? TallyResult.fromPartial(object.tallyResult)
+      : undefined;
     return message;
   },
 };
