@@ -81,6 +81,13 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
 	}
 
+	if msg.ThorTx != "" {
+		arkeoClaim, err = k.updateThorClaimRecord(ctx, msg.Creator.String(), msg.ThorTx, arkeoClaim)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ThorTx)
+		}
+	}
+
 	// call claim on arkeo to claim arkeo (note: this could CLAIM for all tokens that are now merged)
 	_, err = k.ClaimCoinsForAction(ctx, msg.Creator.String(), types.ACTION_CLAIM)
 	if err != nil {

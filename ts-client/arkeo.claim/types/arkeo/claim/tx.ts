@@ -11,6 +11,8 @@ export interface MsgClaimEth {
   ethAddress: string;
   /** EIP712 signature that has to be signed by ethAddress */
   signature: string;
+  /** the tx hash of the thorchain tx that delegates the arkeo claim */
+  thorTx: string;
 }
 
 export interface MsgClaimEthResponse {
@@ -44,7 +46,7 @@ export interface MsgAddClaimResponse {
 }
 
 function createBaseMsgClaimEth(): MsgClaimEth {
-  return { creator: new Uint8Array(), ethAddress: "", signature: "" };
+  return { creator: new Uint8Array(), ethAddress: "", signature: "", thorTx: "" };
 }
 
 export const MsgClaimEth = {
@@ -57,6 +59,9 @@ export const MsgClaimEth = {
     }
     if (message.signature !== "") {
       writer.uint32(26).string(message.signature);
+    }
+    if (message.thorTx !== "") {
+      writer.uint32(34).string(message.thorTx);
     }
     return writer;
   },
@@ -77,6 +82,9 @@ export const MsgClaimEth = {
         case 3:
           message.signature = reader.string();
           break;
+        case 4:
+          message.thorTx = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -90,6 +98,7 @@ export const MsgClaimEth = {
       creator: isSet(object.creator) ? bytesFromBase64(object.creator) : new Uint8Array(),
       ethAddress: isSet(object.ethAddress) ? String(object.ethAddress) : "",
       signature: isSet(object.signature) ? String(object.signature) : "",
+      thorTx: isSet(object.thorTx) ? String(object.thorTx) : "",
     };
   },
 
@@ -99,6 +108,7 @@ export const MsgClaimEth = {
       && (obj.creator = base64FromBytes(message.creator !== undefined ? message.creator : new Uint8Array()));
     message.ethAddress !== undefined && (obj.ethAddress = message.ethAddress);
     message.signature !== undefined && (obj.signature = message.signature);
+    message.thorTx !== undefined && (obj.thorTx = message.thorTx);
     return obj;
   },
 
@@ -107,6 +117,7 @@ export const MsgClaimEth = {
     message.creator = object.creator ?? new Uint8Array();
     message.ethAddress = object.ethAddress ?? "";
     message.signature = object.signature ?? "";
+    message.thorTx = object.thorTx ?? "";
     return message;
   },
 };
