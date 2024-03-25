@@ -93,6 +93,16 @@ func TestClaimThorchainEth(t *testing.T) {
 	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "300")
 	require.NoError(t, err)
 
+	arkeoClaimRecord := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        addrArkeo.String(),
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, arkeoClaimRecord)
+	require.NoError(t, err)
+
 	claimRecord := types.ClaimRecord{
 		Chain:          types.ETHEREUM,
 		Address:        addrEth,
@@ -135,18 +145,22 @@ func TestClaimThorchainEth(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, claimRecord.IsEmpty())
 
+	thorClaimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, thorClaimAddress, types.ARKEO)
+	require.NoError(t, err)
+	require.True(t, thorClaimRecord.IsEmpty())
+
 	// confirm we have a claimrecord for arkeo
 	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
 	require.NoError(t, err)
 	require.Equal(t, claimRecord.Address, addrArkeo.String())
 	require.Equal(t, claimRecord.Chain, types.ARKEO)
 	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
-	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 600))
-	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 600))
+	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
+	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
 
 	// confirm balance increased by expected amount.
 	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
-	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 600))
+	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
 
 	// attempt to claim again to ensure it fails.
 	_, err = msgServer.ClaimEth(ctx, &claimMessage)
