@@ -20,24 +20,6 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
-/**
- * Params represents the parameters used for by the slashing module.
- */
-export interface Slashingv1Beta1Params {
-  /** @format int64 */
-  signed_blocks_window?: string;
-
-  /** @format byte */
-  min_signed_per_window?: string;
-  downtime_jail_duration?: string;
-
-  /** @format byte */
-  slash_fraction_double_sign?: string;
-
-  /** @format byte */
-  slash_fraction_downtime?: string;
-}
-
 export type V1Beta1MsgUnjailResponse = object;
 
 /**
@@ -112,9 +94,27 @@ export interface V1Beta1PageResponse {
   total?: string;
 }
 
+/**
+ * Params represents the parameters used for by the slashing module.
+ */
+export interface V1Beta1Params {
+  /** @format int64 */
+  signed_blocks_window?: string;
+
+  /** @format byte */
+  min_signed_per_window?: string;
+  downtime_jail_duration?: string;
+
+  /** @format byte */
+  slash_fraction_double_sign?: string;
+
+  /** @format byte */
+  slash_fraction_downtime?: string;
+}
+
 export interface V1Beta1QueryParamsResponse {
   /** Params represents the parameters used for by the slashing module. */
-  params?: Slashingv1Beta1Params;
+  params?: V1Beta1Params;
 }
 
 export interface V1Beta1QuerySigningInfoResponse {

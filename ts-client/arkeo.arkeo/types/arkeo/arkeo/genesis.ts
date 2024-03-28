@@ -13,9 +13,8 @@ export interface GenesisState {
   contracts: Contract[];
   nextContractId: number;
   contractExpirationSets: ContractExpirationSet[];
-  userContractSets: UserContractSet[];
   /** this line is used by starport scaffolding # genesis/proto/state */
-  version: number;
+  userContractSets: UserContractSet[];
 }
 
 function createBaseGenesisState(): GenesisState {
@@ -26,7 +25,6 @@ function createBaseGenesisState(): GenesisState {
     nextContractId: 0,
     contractExpirationSets: [],
     userContractSets: [],
-    version: 0,
   };
 }
 
@@ -49,9 +47,6 @@ export const GenesisState = {
     }
     for (const v of message.userContractSets) {
       UserContractSet.encode(v!, writer.uint32(50).fork()).ldelim();
-    }
-    if (message.version !== 0) {
-      writer.uint32(56).int64(message.version);
     }
     return writer;
   },
@@ -81,9 +76,6 @@ export const GenesisState = {
         case 6:
           message.userContractSets.push(UserContractSet.decode(reader, reader.uint32()));
           break;
-        case 7:
-          message.version = longToNumber(reader.int64() as Long);
-          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -104,7 +96,6 @@ export const GenesisState = {
       userContractSets: Array.isArray(object?.userContractSets)
         ? object.userContractSets.map((e: any) => UserContractSet.fromJSON(e))
         : [],
-      version: isSet(object.version) ? Number(object.version) : 0,
     };
   },
 
@@ -134,7 +125,6 @@ export const GenesisState = {
     } else {
       obj.userContractSets = [];
     }
-    message.version !== undefined && (obj.version = Math.round(message.version));
     return obj;
   },
 
@@ -149,7 +139,6 @@ export const GenesisState = {
     message.contractExpirationSets = object.contractExpirationSets?.map((e) => ContractExpirationSet.fromPartial(e))
       || [];
     message.userContractSets = object.userContractSets?.map((e) => UserContractSet.fromPartial(e)) || [];
-    message.version = object.version ?? 0;
     return message;
   },
 };

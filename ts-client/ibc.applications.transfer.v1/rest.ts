@@ -154,7 +154,7 @@ export interface RpcStatus {
 * DenomTrace contains the base denomination for ICS20 fungible tokens and the
 source tracing information path.
 */
-export interface Transferv1DenomTrace {
+export interface V1DenomTrace {
   /**
    * path defines the chain of port/channel identifiers used for tracing the
    * source of the fungible token.
@@ -207,7 +207,7 @@ method.
 */
 export interface V1QueryDenomTraceResponse {
   /** denom_trace returns the requested denomination trace information. */
-  denom_trace?: Transferv1DenomTrace;
+  denom_trace?: V1DenomTrace;
 }
 
 /**
@@ -216,7 +216,7 @@ method.
 */
 export interface V1QueryDenomTracesResponse {
   /** denom_traces returns all denominations trace information. */
-  denom_traces?: Transferv1DenomTrace[];
+  denom_traces?: V1DenomTrace[];
 
   /** pagination defines the pagination in the response. */
   pagination?: V1Beta1PageResponse;

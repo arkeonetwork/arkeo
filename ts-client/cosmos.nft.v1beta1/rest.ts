@@ -10,168 +10,6 @@
  */
 
 /**
- * Class defines the class of the nft type.
- */
-export interface Nftv1Beta1Class {
-  /** id defines the unique identifier of the NFT classification, similar to the contract address of ERC721 */
-  id?: string;
-
-  /** name defines the human-readable name of the NFT classification. Optional */
-  name?: string;
-
-  /** symbol is an abbreviated name for nft classification. Optional */
-  symbol?: string;
-
-  /** description is a brief description of nft classification. Optional */
-  description?: string;
-
-  /** uri for the class metadata stored off chain. It can define schema for Class and NFT `Data` attributes. Optional */
-  uri?: string;
-
-  /** uri_hash is a hash of the document pointed by uri. Optional */
-  uri_hash?: string;
-
-  /**
-   * data is the app specific metadata of the NFT class. Optional
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   * Example 1: Pack and unpack a message in C++.
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   * Example 2: Pack and unpack a message in Java.
-   *     Any any = Any.pack(foo);
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *  Example 3: Pack and unpack a message in Python.
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *  Example 4: Pack and unpack a message in Go
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   */
-  data?: ProtobufAny;
-}
-
-/**
- * NFT defines the NFT.
- */
-export interface Nftv1Beta1NFT {
-  /** class_id associated with the NFT, similar to the contract address of ERC721 */
-  class_id?: string;
-
-  /** id is a unique identifier of the NFT */
-  id?: string;
-
-  /** uri for the NFT metadata stored off chain */
-  uri?: string;
-
-  /** uri_hash is a hash of the document pointed by uri */
-  uri_hash?: string;
-
-  /**
-   * data is an app specific data of the NFT. Optional
-   * `Any` contains an arbitrary serialized protocol buffer message along with a
-   * URL that describes the type of the serialized message.
-   *
-   * Protobuf library provides support to pack/unpack Any values in the form
-   * of utility functions or additional generated methods of the Any type.
-   * Example 1: Pack and unpack a message in C++.
-   *     Foo foo = ...;
-   *     Any any;
-   *     any.PackFrom(foo);
-   *     ...
-   *     if (any.UnpackTo(&foo)) {
-   *       ...
-   *     }
-   * Example 2: Pack and unpack a message in Java.
-   *     Any any = Any.pack(foo);
-   *     if (any.is(Foo.class)) {
-   *       foo = any.unpack(Foo.class);
-   *  Example 3: Pack and unpack a message in Python.
-   *     foo = Foo(...)
-   *     any = Any()
-   *     any.Pack(foo)
-   *     if any.Is(Foo.DESCRIPTOR):
-   *       any.Unpack(foo)
-   *  Example 4: Pack and unpack a message in Go
-   *      foo := &pb.Foo{...}
-   *      any, err := anypb.New(foo)
-   *      if err != nil {
-   *        ...
-   *      }
-   *      ...
-   *      foo := &pb.Foo{}
-   *      if err := any.UnmarshalTo(foo); err != nil {
-   * The pack methods provided by protobuf library will by default use
-   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
-   * methods only use the fully qualified type name after the last '/'
-   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
-   * name "y.z".
-   * JSON
-   * ====
-   * The JSON representation of an `Any` value uses the regular
-   * representation of the deserialized, embedded message, with an
-   * additional field `@type` which contains the type URL. Example:
-   *     package google.profile;
-   *     message Person {
-   *       string first_name = 1;
-   *       string last_name = 2;
-   *     {
-   *       "@type": "type.googleapis.com/google.profile.Person",
-   *       "firstName": <string>,
-   *       "lastName": <string>
-   * If the embedded message type is well-known and has a custom JSON
-   * representation, that representation will be embedded adding a field
-   * `value` which holds the custom JSON in addition to the `@type`
-   * field. Example (for message [google.protobuf.Duration][]):
-   *       "@type": "type.googleapis.com/google.protobuf.Duration",
-   *       "value": "1.212s"
-   */
-  data?: ProtobufAny;
-}
-
-/**
 * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
 
@@ -293,9 +131,171 @@ export interface RpcStatus {
 }
 
 /**
+ * Class defines the class of the nft type.
+ */
+export interface V1Beta1Class {
+  /** id defines the unique identifier of the NFT classification, similar to the contract address of ERC721 */
+  id?: string;
+
+  /** name defines the human-readable name of the NFT classification. Optional */
+  name?: string;
+
+  /** symbol is an abbreviated name for nft classification. Optional */
+  symbol?: string;
+
+  /** description is a brief description of nft classification. Optional */
+  description?: string;
+
+  /** uri for the class metadata stored off chain. It can define schema for Class and NFT `Data` attributes. Optional */
+  uri?: string;
+
+  /** uri_hash is a hash of the document pointed by uri. Optional */
+  uri_hash?: string;
+
+  /**
+   * data is the app specific metadata of the NFT class. Optional
+   * `Any` contains an arbitrary serialized protocol buffer message along with a
+   * URL that describes the type of the serialized message.
+   *
+   * Protobuf library provides support to pack/unpack Any values in the form
+   * of utility functions or additional generated methods of the Any type.
+   * Example 1: Pack and unpack a message in C++.
+   *     Foo foo = ...;
+   *     Any any;
+   *     any.PackFrom(foo);
+   *     ...
+   *     if (any.UnpackTo(&foo)) {
+   *       ...
+   *     }
+   * Example 2: Pack and unpack a message in Java.
+   *     Any any = Any.pack(foo);
+   *     if (any.is(Foo.class)) {
+   *       foo = any.unpack(Foo.class);
+   *  Example 3: Pack and unpack a message in Python.
+   *     foo = Foo(...)
+   *     any = Any()
+   *     any.Pack(foo)
+   *     if any.Is(Foo.DESCRIPTOR):
+   *       any.Unpack(foo)
+   *  Example 4: Pack and unpack a message in Go
+   *      foo := &pb.Foo{...}
+   *      any, err := anypb.New(foo)
+   *      if err != nil {
+   *        ...
+   *      }
+   *      ...
+   *      foo := &pb.Foo{}
+   *      if err := any.UnmarshalTo(foo); err != nil {
+   * The pack methods provided by protobuf library will by default use
+   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
+   * methods only use the fully qualified type name after the last '/'
+   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
+   * name "y.z".
+   * JSON
+   * ====
+   * The JSON representation of an `Any` value uses the regular
+   * representation of the deserialized, embedded message, with an
+   * additional field `@type` which contains the type URL. Example:
+   *     package google.profile;
+   *     message Person {
+   *       string first_name = 1;
+   *       string last_name = 2;
+   *     {
+   *       "@type": "type.googleapis.com/google.profile.Person",
+   *       "firstName": <string>,
+   *       "lastName": <string>
+   * If the embedded message type is well-known and has a custom JSON
+   * representation, that representation will be embedded adding a field
+   * `value` which holds the custom JSON in addition to the `@type`
+   * field. Example (for message [google.protobuf.Duration][]):
+   *       "@type": "type.googleapis.com/google.protobuf.Duration",
+   *       "value": "1.212s"
+   */
+  data?: ProtobufAny;
+}
+
+/**
  * MsgSendResponse defines the Msg/Send response type.
  */
 export type V1Beta1MsgSendResponse = object;
+
+/**
+ * NFT defines the NFT.
+ */
+export interface V1Beta1NFT {
+  /** class_id associated with the NFT, similar to the contract address of ERC721 */
+  class_id?: string;
+
+  /** id is a unique identifier of the NFT */
+  id?: string;
+
+  /** uri for the NFT metadata stored off chain */
+  uri?: string;
+
+  /** uri_hash is a hash of the document pointed by uri */
+  uri_hash?: string;
+
+  /**
+   * data is an app specific data of the NFT. Optional
+   * `Any` contains an arbitrary serialized protocol buffer message along with a
+   * URL that describes the type of the serialized message.
+   *
+   * Protobuf library provides support to pack/unpack Any values in the form
+   * of utility functions or additional generated methods of the Any type.
+   * Example 1: Pack and unpack a message in C++.
+   *     Foo foo = ...;
+   *     Any any;
+   *     any.PackFrom(foo);
+   *     ...
+   *     if (any.UnpackTo(&foo)) {
+   *       ...
+   *     }
+   * Example 2: Pack and unpack a message in Java.
+   *     Any any = Any.pack(foo);
+   *     if (any.is(Foo.class)) {
+   *       foo = any.unpack(Foo.class);
+   *  Example 3: Pack and unpack a message in Python.
+   *     foo = Foo(...)
+   *     any = Any()
+   *     any.Pack(foo)
+   *     if any.Is(Foo.DESCRIPTOR):
+   *       any.Unpack(foo)
+   *  Example 4: Pack and unpack a message in Go
+   *      foo := &pb.Foo{...}
+   *      any, err := anypb.New(foo)
+   *      if err != nil {
+   *        ...
+   *      }
+   *      ...
+   *      foo := &pb.Foo{}
+   *      if err := any.UnmarshalTo(foo); err != nil {
+   * The pack methods provided by protobuf library will by default use
+   * 'type.googleapis.com/full.type.name' as the type URL and the unpack
+   * methods only use the fully qualified type name after the last '/'
+   * in the type URL, for example "foo.bar.com/x/y.z" will yield type
+   * name "y.z".
+   * JSON
+   * ====
+   * The JSON representation of an `Any` value uses the regular
+   * representation of the deserialized, embedded message, with an
+   * additional field `@type` which contains the type URL. Example:
+   *     package google.profile;
+   *     message Person {
+   *       string first_name = 1;
+   *       string last_name = 2;
+   *     {
+   *       "@type": "type.googleapis.com/google.profile.Person",
+   *       "firstName": <string>,
+   *       "lastName": <string>
+   * If the embedded message type is well-known and has a custom JSON
+   * representation, that representation will be embedded adding a field
+   * `value` which holds the custom JSON in addition to the `@type`
+   * field. Example (for message [google.protobuf.Duration][]):
+   *       "@type": "type.googleapis.com/google.protobuf.Duration",
+   *       "value": "1.212s"
+   */
+  data?: ProtobufAny;
+}
 
 /**
 * message SomeRequest {
@@ -376,11 +376,11 @@ export interface V1Beta1QueryBalanceResponse {
 
 export interface V1Beta1QueryClassResponse {
   /** Class defines the class of the nft type. */
-  class?: Nftv1Beta1Class;
+  class?: V1Beta1Class;
 }
 
 export interface V1Beta1QueryClassesResponse {
-  classes?: Nftv1Beta1Class[];
+  classes?: V1Beta1Class[];
 
   /**
    * PageResponse is to be embedded in gRPC response messages where the
@@ -396,11 +396,11 @@ export interface V1Beta1QueryClassesResponse {
 
 export interface V1Beta1QueryNFTResponse {
   /** NFT defines the NFT. */
-  nft?: Nftv1Beta1NFT;
+  nft?: V1Beta1NFT;
 }
 
 export interface V1Beta1QueryNFTsResponse {
-  nfts?: Nftv1Beta1NFT[];
+  nfts?: V1Beta1NFT[];
 
   /**
    * PageResponse is to be embedded in gRPC response messages where the

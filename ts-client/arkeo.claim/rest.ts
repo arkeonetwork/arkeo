@@ -9,7 +9,12 @@
  * ---------------------------------------------------------------
  */
 
-export interface ArkeoclaimClaimRecord {
+export enum ClaimChain {
+  ARKEO = "ARKEO",
+  ETHEREUM = "ETHEREUM",
+}
+
+export interface ClaimClaimRecord {
   chain?: ClaimChain;
 
   /** arkeo address of claim user */
@@ -43,10 +48,18 @@ export interface ArkeoclaimClaimRecord {
   is_transferable?: boolean;
 }
 
+export type ClaimMsgAddClaimResponse = object;
+
+export type ClaimMsgClaimArkeoResponse = object;
+
+export type ClaimMsgClaimEthResponse = object;
+
+export type ClaimMsgTransferClaimResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
-export interface ArkeoclaimParams {
+export interface ClaimParams {
   /** @format date-time */
   airdrop_start_time?: string;
   duration_until_decay?: string;
@@ -65,21 +78,8 @@ export interface ArkeoclaimParams {
   initial_gas_amount?: V1Beta1Coin;
 }
 
-export enum ClaimChain {
-  ARKEO = "ARKEO",
-  ETHEREUM = "ETHEREUM",
-}
-
-export type ClaimMsgAddClaimResponse = object;
-
-export type ClaimMsgClaimArkeoResponse = object;
-
-export type ClaimMsgClaimEthResponse = object;
-
-export type ClaimMsgTransferClaimResponse = object;
-
 export interface ClaimQueryClaimRecordResponse {
-  claim_record?: ArkeoclaimClaimRecord;
+  claim_record?: ClaimClaimRecord;
 }
 
 /**
@@ -87,7 +87,7 @@ export interface ClaimQueryClaimRecordResponse {
  */
 export interface ClaimQueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params?: ArkeoclaimParams;
+  params?: ClaimParams;
 }
 
 export interface ProtobufAny {

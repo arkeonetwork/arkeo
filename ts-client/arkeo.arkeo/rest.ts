@@ -78,6 +78,11 @@ export type ArkeoMsgOpenContractResponse = object;
 
 export type ArkeoMsgSetVersionResponse = object;
 
+/**
+ * Params defines the parameters for the module.
+ */
+export type ArkeoParams = object;
+
 export interface ArkeoProvider {
   /** @format byte */
   pub_key?: string;
@@ -158,13 +163,8 @@ export interface ArkeoQueryFetchProviderResponse {
  */
 export interface ArkeoQueryParamsResponse {
   /** params holds all the parameters of this module. */
-  params?: ArkeoarkeoParams;
+  params?: ArkeoParams;
 }
-
-/**
- * Params defines the parameters for the module.
- */
-export type ArkeoarkeoParams = object;
 
 export interface ProtobufAny {
   "@type"?: string;

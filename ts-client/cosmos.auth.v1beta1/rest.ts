@@ -10,26 +10,6 @@
  */
 
 /**
- * Params defines the parameters for the auth module.
- */
-export interface Authv1Beta1Params {
-  /** @format uint64 */
-  max_memo_characters?: string;
-
-  /** @format uint64 */
-  tx_sig_limit?: string;
-
-  /** @format uint64 */
-  tx_size_cost_per_byte?: string;
-
-  /** @format uint64 */
-  sig_verify_cost_ed25519?: string;
-
-  /** @format uint64 */
-  sig_verify_cost_secp256k1?: string;
-}
-
-/**
 * `Any` contains an arbitrary serialized protocol buffer message along with a
 URL that describes the type of the serialized message.
 
@@ -251,6 +231,26 @@ export interface V1Beta1PageResponse {
 }
 
 /**
+ * Params defines the parameters for the auth module.
+ */
+export interface V1Beta1Params {
+  /** @format uint64 */
+  max_memo_characters?: string;
+
+  /** @format uint64 */
+  tx_sig_limit?: string;
+
+  /** @format uint64 */
+  tx_size_cost_per_byte?: string;
+
+  /** @format uint64 */
+  sig_verify_cost_ed25519?: string;
+
+  /** @format uint64 */
+  sig_verify_cost_secp256k1?: string;
+}
+
+/**
  * Since: cosmos-sdk 0.46.2
  */
 export interface V1Beta1QueryAccountAddressByIDResponse {
@@ -357,7 +357,7 @@ export interface V1Beta1QueryModuleAccountsResponse {
  */
 export interface V1Beta1QueryParamsResponse {
   /** params defines the parameters of the module. */
-  params?: Authv1Beta1Params;
+  params?: V1Beta1Params;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
