@@ -44,25 +44,62 @@ func (p Proxy) EventListener(host string) {
 	}
 	defer client.Stop() // nolint
 
-	// receive height changes
-	newBlockOut := subscribe(client, logger, "tm.event = 'NewBlockHeader'")
-	openContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'")
-	closeContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'")
-	claimContractOut := subscribe(client, logger, "tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'")
+	// create a unified channel for recieving events
+
+	eventChan := make(chan tmCoreTypes.ResultEvent, 1000)
+
+	subscribeToEvents := func(queries ...string) {
+		for _, query := range queries {
+			out := subscribe(client, logger, query)
+
+			go func(out <-chan tmCoreTypes.ResultEvent) {
+				for {
+					select {
+					case result := <-out:
+						eventChan <- result
+
+					case <-client.Quit():
+						return
+					}
+				}
+			}(out)
+		}
+	}
+
+	// subscribe to events
+	go subscribeToEvents(
+		"tm.event = 'NewBlockHeader'",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'",
+	)
+
+	dispatchEvents := func(result tmCoreTypes.ResultEvent) {
+		switch {
+		case strings.Contains(result.Query, "NewBlockHeader"):
+			p.handleNewBlockHeaderEvent(result)
+
+		case strings.Contains(result.Query, "MsgOpenContract"):
+			p.handleOpenContractEvent(result)
+
+		case strings.Contains(result.Query, "MsgCloseContract"):
+			p.handleCloseContractEvent(result)
+
+		case strings.Contains(result.Query, "MsgClaimContractIncome"):
+			p.handleContractSettlementEvent(result)
+
+		default:
+			logger.Error("Unkown Event Type", "Query", result.Query)
+		}
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	for {
 		select {
-		case result := <-newBlockOut:
-			p.handleNewBlockHeaderEvent(result)
-		case result := <-openContractOut:
-			p.handleOpenContractEvent(result)
-		case result := <-closeContractOut:
-			p.handleCloseContractEvent(result)
-		case result := <-claimContractOut: // MsgClaimContractIncome emits a contract settlement event
-			p.handleContractSettlementEvent(result)
+		case result := <-eventChan:
+			dispatchEvents(result)
 		case <-quit:
 			return
 		}
