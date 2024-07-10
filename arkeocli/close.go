@@ -1,6 +1,7 @@
 package arkeocli
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -20,6 +21,7 @@ func newCloseContractCmd() *cobra.Command {
 	closeContractCmd.Flags().Uint64("contract-id", 0, "id of contract")
 	closeContractCmd.Flags().String("provider-pubkey", "", "provider pubkey")
 	closeContractCmd.Flags().String("client-pubkey", "", "client pubkey")
+	closeContractCmd.Flags().String("delegate-pubkey", "", "delegate pubkey")
 	closeContractCmd.Flags().String("service", "", "service name")
 	return closeContractCmd
 }
@@ -48,9 +50,27 @@ func runCloseContractCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
+	argClientPubkey, _ := cmd.Flags().GetString("client-pubkey")
+	if argClientPubkey == "" {
+		argClientPubkey, err = toPubkey(cmd, addr)
+		if err != nil {
+			return err
+		}
+	}
+
+	argDelegatePubkey, _ := cmd.Flags().GetString("delegate-pubkey")
+	if argDelegatePubkey == "" {
+		argDelegatePubkey, err = promptForArg(cmd, "Specify delegate pubkey (leave blank to use client key): ")
+		if err != nil {
+			return err
+		}
+	}
+
 	msg := types.NewMsgCloseContract(
 		clientCtx.GetFromAddress(),
 		contract.Id,
+		common.PubKey(argClientPubkey),
+		common.PubKey(argDelegatePubkey),
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

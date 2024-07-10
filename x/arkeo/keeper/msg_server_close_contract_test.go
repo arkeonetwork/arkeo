@@ -34,6 +34,7 @@ func TestCloseContractValidate(t *testing.T) {
 	msg := types.MsgCloseContract{
 		Creator:    clientAcct,
 		ContractId: contract.Id,
+		Client:     clientPubKey,
 	}
 	require.NoError(t, s.CloseContractValidate(ctx, &msg))
 
@@ -89,6 +90,7 @@ func TestCloseContractHandle(t *testing.T) {
 	msg := types.MsgCloseContract{
 		Creator:    clientAccount,
 		ContractId: contract.Id,
+		Client:     clientPubKey,
 	}
 	require.NoError(t, s.CloseContractHandle(ctx, &msg))
 
@@ -169,6 +171,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	closeContractMsg := types.MsgCloseContract{
 		Creator:    user2Address,
 		ContractId: contract.Id,
+		Client:     contract.Client,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
@@ -269,6 +272,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	closeContractMsg := types.MsgCloseContract{
 		Creator:    user2Address,
 		ContractId: contract.Id,
+		Client:     contract.Client,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)

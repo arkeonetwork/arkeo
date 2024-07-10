@@ -65,6 +65,8 @@ message MsgOpenContractResponse {}
 message MsgCloseContract {
   bytes  creator     = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
   uint64 contract_id = 2;
+  bytes  client      = 3 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  bytes  delegate    = 4 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
 }
 
 message MsgCloseContractResponse {}
