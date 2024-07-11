@@ -48,12 +48,14 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return errors.Wrapf(types.ErrContractNotFound, "id: %d", msg.ContractId)
 	}
 
-	clientAccountAddress, err := msg.Client.GetMyAddress()
+	contractClientAddress, err := contract.Client.GetMyAddress()
 	if err != nil {
-		return err
+		return errors.Wrapf(types.ErrInvalidPubKey, "Cleint: %s", contract.Client.String())
 	}
 
-	if !msg.Creator.Equals(clientAccountAddress) {
+	signerAddreess := msg.MustGetSigner()
+
+	if !contractClientAddress.Equals(signerAddreess) {
 		return errors.Wrap(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
 
@@ -76,12 +78,14 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 		return err
 	}
 
-	clientAccountAddress, err := msg.Client.GetMyAddress()
+	contractClientAddress, err := contract.Client.GetMyAddress()
 	if err != nil {
-		return err
+		return errors.Wrapf(types.ErrInvalidPubKey, "Cleint: %s", contract.Client.String())
 	}
 
-	if !msg.Creator.Equals(clientAccountAddress) {
+	signerAddreess := msg.MustGetSigner()
+
+	if !contractClientAddress.Equals(signerAddreess) {
 		return errors.Wrap(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
 

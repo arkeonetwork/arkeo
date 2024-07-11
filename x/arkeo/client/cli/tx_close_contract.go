@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -26,9 +27,26 @@ func CmdCloseContract() *cobra.Command {
 				return err
 			}
 
+			argClient := args[1]
+
+			cl, err := common.NewPubKey(argClient)
+			if err != nil {
+				return err
+			}
+
+			delegate := common.EmptyPubKey
+			if len(args) > 2 {
+				delegate, err = common.NewPubKey(args[2])
+				if err != nil {
+					return err
+				}
+			}
+
 			msg := types.NewMsgCloseContract(
 				clientCtx.GetFromAddress(),
 				argContractId,
+				cl,
+				delegate,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
