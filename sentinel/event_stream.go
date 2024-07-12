@@ -44,7 +44,7 @@ func (p Proxy) EventListener(host string) {
 	}
 	defer client.Stop() // nolint
 
-	// create a unified channel for recieving events
+	// create a unified channel for receiving events
 
 	eventChan := make(chan tmCoreTypes.ResultEvent, 1000)
 
@@ -89,7 +89,7 @@ func (p Proxy) EventListener(host string) {
 			p.handleContractSettlementEvent(result)
 
 		default:
-			logger.Error("Unkown Event Type", "Query", result.Query)
+			logger.Error("Unknown Event Type", "Query", result.Query)
 		}
 	}
 
