@@ -15,6 +15,8 @@ func NewMsgCloseContract(creator cosmos.AccAddress, contractId uint64, client co
 	return &MsgCloseContract{
 		Creator:    creator,
 		ContractId: contractId,
+		Client:     client,
+		Delegate:   delegate,
 	}
 }
 
@@ -51,7 +53,7 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 		return errors.Wrap(ErrContractNotFound, "invalid contract id")
 	}
 
-	if msg.Client != nil {
+	if msg.Client == nil {
 		return errors.Wrap(ErrCloseContractUnauthorized, "client id cannot be empty")
 	}
 

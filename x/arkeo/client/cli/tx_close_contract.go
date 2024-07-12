@@ -13,9 +13,9 @@ import (
 
 func CmdCloseContract() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "close-contract [contract-id]",
+		Use:   "close-contract [contract-id] [client-pubkey] [delegate-optional]",
 		Short: "Broadcast message closeContract",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MinimumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argContractId, err := cast.ToUint64E(args[0])
 			if err != nil {
