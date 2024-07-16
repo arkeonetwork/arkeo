@@ -111,6 +111,7 @@ type: tx-close-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 contract_id: 1
+client: {{ pubkey_cat }}
 ---
 type: create-blocks
 count: 1

@@ -21,13 +21,8 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 	)
 
 	cacheCtx, commit := ctx.CacheContext()
-	if err := k.ClaimContractIncomeValidate(cacheCtx, msg); err != nil {
-		ctx.Logger().Error("failed claim contract validation", "err", err)
-		return nil, err
-	}
-
-	if err := k.ClaimContractIncomeHandle(ctx, msg); err != nil {
-		ctx.Logger().Error("failed claim contract handler", "err", err)
+	if err := k.HandlerClaimContractIncome(cacheCtx, msg); err != nil {
+		ctx.Logger().Error("failed to handle claim contract income", "err", err)
 		return nil, err
 	}
 	commit()
@@ -35,12 +30,15 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 	return &types.MsgClaimContractIncomeResponse{}, nil
 }
 
-func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
+func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
+
+	// validate contract
 	if k.FetchConfig(ctx, configs.HandlerClaimContractIncome) > 0 {
-		return errors.Wrapf(types.ErrDisabledHandler, "close contract")
+		return errors.Wrapf(types.ErrDisabledHandler, "Claim Contract Income")
 	}
 
 	contract, err := k.GetContract(ctx, msg.ContractId)
+
 	if err != nil {
 		return err
 	}
@@ -54,27 +52,22 @@ func (k msgServer) ClaimContractIncomeValidate(ctx cosmos.Context, msg *types.Ms
 	}
 
 	// open subscription contracts do NOT need to verify the signature
-	if contract.IsSubscription() && contract.IsOpenAuthorization() {
-		return nil
+	if !(contract.IsSubscription() && contract.IsOpenAuthorization()) {
+		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
+		if err != nil {
+			return err
+		}
+		if !pk.VerifySignature(msg.GetBytesToSign(), msg.Signature) {
+			return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "signature mismatch")
+		}
 	}
 
-	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
-	if err != nil {
-		return err
-	}
-	if !pk.VerifySignature(msg.GetBytesToSign(), msg.Signature) {
-		return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "")
-	}
-
-	return nil
-}
-
-func (k msgServer) ClaimContractIncomeHandle(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
-	contract, err := k.GetContract(ctx, msg.ContractId)
-	if err != nil {
-		return err
-	}
+	// excute settlement
 
 	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

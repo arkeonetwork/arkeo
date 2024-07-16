@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -49,24 +48,25 @@ func (k msgServer) CloseContractValidate(ctx cosmos.Context, msg *types.MsgClose
 		return errors.Wrapf(types.ErrContractNotFound, "id: %d", msg.ContractId)
 	}
 
-	signerAccountAddress := msg.MustGetSigner()
-
-	clientPublicKey, err := common.NewPubKey(contract.Client.String())
+	contractClientAddress, err := contract.Client.GetMyAddress()
 	if err != nil {
-		return err
+		return errors.Wrapf(types.ErrInvalidPubKey, "Cleint: %s", contract.Client.String())
 	}
 
-	clientAccountAddress, err := clientPublicKey.GetMyAddress()
-	if err != nil {
-		return err
-	}
+	signerAddreess := msg.MustGetSigner()
 
-	if !signerAccountAddress.Equals(clientAccountAddress) {
-		return errors.Wrapf(types.ErrCloseContractUnauthorized, "only the client can close the contract")
+	if !contractClientAddress.Equals(signerAddreess) {
+		return errors.Wrap(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
 
 	if contract.IsExpired(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrCloseContractAlreadyClosed, "closed %d", contract.Expiration())
+	}
+
+	if msg.Delegate != nil {
+		if !msg.Delegate.Equals(contract.Delegate) {
+			return errors.Wrapf(types.ErrCloseContractUnauthorized, "incorrect delegate specified")
+		}
 	}
 
 	return nil
@@ -76,6 +76,17 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 	contract, err := k.GetContract(ctx, msg.ContractId)
 	if err != nil {
 		return err
+	}
+
+	contractClientAddress, err := contract.Client.GetMyAddress()
+	if err != nil {
+		return errors.Wrapf(types.ErrInvalidPubKey, "Cleint: %s", contract.Client.String())
+	}
+
+	signerAddreess := msg.MustGetSigner()
+
+	if !contractClientAddress.Equals(signerAddreess) {
+		return errors.Wrap(types.ErrCloseContractUnauthorized, "only the client can close the contract")
 	}
 
 	if contract.IsPayAsYouGo() {

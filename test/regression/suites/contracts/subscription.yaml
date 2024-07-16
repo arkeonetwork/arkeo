@@ -181,6 +181,7 @@ type: tx-close-contract
 signer: {{ addr_dog }}
 creator: {{ addr_dog }}
 contract_id: 2
+client: {{ pubkey_dog }}
 ---
 type: create-blocks
 count: 1
@@ -198,6 +199,7 @@ type: tx-close-contract
 signer: {{ addr_cat }}
 creator: {{ addr_cat }}
 contract_id: 2
+client: {{ pubkey_cat }}
 ---
 type: create-blocks
 count: 1
