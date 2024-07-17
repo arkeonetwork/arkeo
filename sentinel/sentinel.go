@@ -97,6 +97,11 @@ func loadProxies() map[string]*url.URL {
 
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
+
+	// Limit the Size of incoming requests
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // TODO: Check
+
 	// remove arkauth query arg
 	values := r.URL.Query()
 	values.Del(QueryArkAuth)
@@ -370,14 +375,20 @@ func (p Proxy) Run() {
 			Addr:              ":443",
 			Handler:           loggingRouter,
 			ReadTimeout:       5 * time.Second, // TODO: updated it to use config
-			ReadHeaderTimeout: time.Second,
+			ReadHeaderTimeout: 5 * time.Second,
 			WriteTimeout:      5 * time.Second,
-			IdleTimeout:       5 * time.Second,
+			IdleTimeout:       120 * time.Second,
 			TLSConfig: &tls.Config{
 				// Policies
 				MinVersion:               tls.VersionTLS13,
 				PreferServerCipherSuites: true,
+				CipherSuites: []uint16{
+					tls.TLS_AES_128_GCM_SHA256,
+					tls.TLS_AES_256_GCM_SHA384,
+					tls.TLS_CHACHA20_POLY1305_SHA256,
+				},
 			},
+			MaxHeaderBytes: 1 << 20,
 		}
 		if err := server.ListenAndServeTLS(p.Config.TLS.Cert, p.Config.TLS.Key); err != nil {
 			panic(err)
@@ -388,9 +399,10 @@ func (p Proxy) Run() {
 			Addr:              fmt.Sprintf(":%s", p.Config.Port),
 			Handler:           loggingRouter,
 			ReadTimeout:       5 * time.Second, // TODO: updated it to use config
-			ReadHeaderTimeout: time.Second,
+			ReadHeaderTimeout: 5 * time.Second,
 			WriteTimeout:      5 * time.Second,
-			IdleTimeout:       5 * time.Second,
+			IdleTimeout:       120 * time.Second,
+			MaxHeaderBytes:    1 << 20,
 		}
 		if err := server.ListenAndServe(); err != nil {
 			panic(err)

@@ -15,6 +15,7 @@ func TestCloseContractValidateBasic(t *testing.T) {
 	msg := MsgCloseContract{
 		Creator:    acct,
 		ContractId: 50,
+		Client:     pubkey,
 	}
 	err = msg.ValidateBasic()
 	require.NoError(t, err)

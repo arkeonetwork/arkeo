@@ -34,6 +34,7 @@ func TestCloseContractValidate(t *testing.T) {
 	msg := types.MsgCloseContract{
 		Creator:    clientAcct,
 		ContractId: contract.Id,
+		Client:     clientPubKey,
 	}
 	require.NoError(t, s.CloseContractValidate(ctx, &msg))
 
@@ -89,6 +90,7 @@ func TestCloseContractHandle(t *testing.T) {
 	msg := types.MsgCloseContract{
 		Creator:    clientAccount,
 		ContractId: contract.Id,
+		Client:     clientPubKey,
 	}
 	require.NoError(t, s.CloseContractHandle(ctx, &msg))
 
@@ -169,6 +171,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	closeContractMsg := types.MsgCloseContract{
 		Creator:    user2Address,
 		ContractId: contract.Id,
+		Client:     contract.Client,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
@@ -269,6 +272,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	closeContractMsg := types.MsgCloseContract{
 		Creator:    user2Address,
 		ContractId: contract.Id,
+		Client:     contract.Client,
 	}
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
@@ -293,4 +297,114 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	k.RemoveProvider(ctx, providerPubKey, service)
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
+}
+
+func TestCloseContractUnauthorizedClient(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+
+	ctx = ctx.WithBlockHeight(14)
+
+	s := newMsgServer(k, sk)
+
+	// setup
+
+	providerPubKey := types.GetRandomPubKey()
+
+	clientPubKey := types.GetRandomPubKey()
+
+	_, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+	serivce := common.BTCService
+
+	contract := types.NewContract(providerPubKey, serivce, clientPubKey)
+
+	contract.Duration = 100
+	contract.Height = 10
+	contract.Id = 1
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	unauthorizedClientPubKey := types.GetRandomPubKey()
+	unauthorizedClientAddress, err := unauthorizedClientPubKey.GetMyAddress()
+
+	require.NoError(t, err)
+	msg := types.MsgCloseContract{
+		Creator:    unauthorizedClientAddress,
+		ContractId: contract.Id,
+		Client:     unauthorizedClientPubKey,
+	}
+
+	err = s.CloseContractValidate(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
+}
+
+func TestCloseContractWithIncorrectDelegate(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+
+	ctx = ctx.WithBlockHeight(14)
+
+	s := newMsgServer(k, sk)
+
+	// setup
+
+	providerPubKey := types.GetRandomPubKey()
+
+	clientPubKey := types.GetRandomPubKey()
+
+	clientAcct, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+	serivce := common.BTCService
+
+	contract := types.NewContract(providerPubKey, serivce, clientPubKey)
+
+	contract.Duration = 100
+	contract.Height = 10
+	contract.Id = 1
+	contract.Delegate = types.GetRandomPubKey()
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	require.NoError(t, err)
+	msg := types.MsgCloseContract{
+		Creator:    clientAcct,
+		ContractId: contract.Id,
+		Client:     clientPubKey,
+		Delegate:   types.GetRandomPubKey(),
+	}
+
+	err = s.CloseContractValidate(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
+}
+
+func TestCloseContractWithNoClient(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+
+	ctx = ctx.WithBlockHeight(14)
+
+	s := newMsgServer(k, sk)
+
+	// setup
+
+	providerPubKey := types.GetRandomPubKey()
+	clientPubKey := types.GetRandomPubKey()
+
+	_, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+	serivce := common.BTCService
+
+	contract := types.NewContract(providerPubKey, serivce, clientPubKey)
+	contract.Duration = 100
+	contract.Height = 10
+	contract.Id = 1
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	unauthorizedClientPubKey := types.GetRandomPubKey()
+	unauthorizedClientAddress, err := unauthorizedClientPubKey.GetMyAddress()
+
+	require.NoError(t, err)
+	msg := types.MsgCloseContract{
+		Creator:    unauthorizedClientAddress,
+		ContractId: contract.Id,
+	}
+
+	err = s.CloseContractValidate(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 }
