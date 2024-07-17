@@ -16,6 +16,7 @@ func OffChain() *cobra.Command {
 
 	cmd.AddCommand(
 		CmdThorChainTxFetachOffline(),
+		CmdSignMessage(),
 	)
 
 	flags.AddTxFlagsToCmd(cmd)
@@ -43,8 +44,26 @@ func CmdThorChainTxFetachOffline() *cobra.Command {
 
 		},
 	}
-	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 
+}
+
+func CmdSignMessage() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sign [data]",
+		Short: "Sign Off chain Data ",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+
+			data := args[0]
+			signMessage(data)
+
+			return nil
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }
