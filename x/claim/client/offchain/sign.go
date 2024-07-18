@@ -1,12 +1,25 @@
 package offchain
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"encoding/hex"
 
-func signMessage(data string) error {
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+)
 
-	fmt.Println(data)
+func signData(data string, privateKey string) ([]byte, error) {
 
-	// TODO: Implement This
+	privKeyBytes, err := hex.DecodeString(privateKey)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil
+	privKey := secp256k1.PrivKey{Key: privKeyBytes}
+	hash := sha256.Sum256([]byte(data))
+	signature, err := privKey.Sign(hash[:])
+	if err != nil {
+		return nil, err
+	}
+
+	return signature, nil
 }

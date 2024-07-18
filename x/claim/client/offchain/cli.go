@@ -1,8 +1,10 @@
 package offchain
 
 import (
+	"encoding/hex"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +40,7 @@ func CmdThorChainTxFetachOffline() *cobra.Command {
 				return err
 			}
 
-			fmt.Println(string(data))
+			fmt.Println(data)
 
 			return nil
 
@@ -51,13 +53,23 @@ func CmdThorChainTxFetachOffline() *cobra.Command {
 
 func CmdSignMessage() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "sign [data]",
+		Use:   "sign [data] [private-key]",
 		Short: "Sign Off chain Data ",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			clientCtx := client.GetClientContextFromCmd(cmd)
+			fmt.Println(clientCtx)
+
 			data := args[0]
-			signMessage(data)
+			privateKey := args[1]
+			signature, err := signData(data, privateKey)
+
+			if err != nil {
+				return err
+			}
+
+			fmt.Println(hex.EncodeToString(signature))
 
 			return nil
 		},
