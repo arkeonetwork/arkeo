@@ -2,7 +2,7 @@ package offchain
 
 import (
 	"crypto/sha512"
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -46,8 +46,8 @@ func fetchThorChainTxData(hash string) (string, error) {
 	}
 
 	txDataHash := sha512.Sum512(resultBytes)
-	txHashBase64 := base64.StdEncoding.EncodeToString(txDataHash[:])
-	txDataBase64 := base64.StdEncoding.EncodeToString(resultBytes)
+	txHashBase64 := hex.EncodeToString(txDataHash[:])
+	txDataBase64 := hex.EncodeToString(resultBytes)
 
 	txData := types.ThorTxData{
 		Hash:   txHashBase64,
@@ -59,5 +59,5 @@ func fetchThorChainTxData(hash string) (string, error) {
 		return "", fmt.Errorf("error marshalling txData: %w", err)
 	}
 
-	return base64.RawURLEncoding.EncodeToString(txDataBytes), nil
+	return hex.EncodeToString(txDataBytes), nil
 }

@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"encoding/base64"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -15,26 +15,32 @@ import (
 // Verify and update the claim record based on the memo of the thorchain tx
 func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTxMsg *types.MsgThorTxData, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
 
-	thorDataDecoded, err := base64.StdEncoding.DecodeString(thorTxMsg.ThorData)
+	thorDataDecoded, err := hex.DecodeString(thorTxMsg.ThorData)
 	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error base64 decoding faild: %w", err)
+		return types.ClaimRecord{}, fmt.Errorf("error hex decoding faild: %w", err)
 	}
 	var thorData *types.ThorTxData
 	if err := json.Unmarshal(thorDataDecoded, &thorData); err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
 	}
 
+	hexDecodeTxData, err := hex.DecodeString(thorData.TxData)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error hex decoding failed: %w", err)
+	}
+
 	var thorTxData *types.ThorChainTxData
-	if err := json.Unmarshal([]byte(thorData.TxData), &thorTxData); err != nil {
+	if err := json.Unmarshal(hexDecodeTxData, &thorTxData); err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
 	}
 
-	marshalledtxBytes, err := json.Marshal(thorData)
+	marshalledtxBytes, err := json.Marshal(thorTxData)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error marshalling tx data: %w", err)
 	}
 
-	verifyTxData := base64.StdEncoding.EncodeToString(marshalledtxBytes)
+	txDataHash := sha512.Sum512(marshalledtxBytes)
+	verifyTxData := hex.EncodeToString(txDataHash[:])
 
 	if verifyTxData != thorData.Hash {
 		return types.ClaimRecord{}, fmt.Errorf("transaction data cehcksum failed")
@@ -65,8 +71,10 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 		return types.ClaimRecord{}, fmt.Errorf("invalid thorchain address: %w", err)
 	}
 
+	// TODO FIX ME
+
 	if proofAddress != thorDerivedArkeoAddress {
-		return types.ClaimRecord{}, fmt.Errorf("address validation failed: %w", err)
+		return types.ClaimRecord{}, fmt.Errorf("address validation failed: %s , %s", proofAddress, thorDerivedArkeoAddress)
 	}
 
 	thorClaimRecord, err := k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
