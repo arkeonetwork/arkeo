@@ -1,55 +1,47 @@
 package keeper
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
-	"io"
-	"net/http"
-	"strings"
 )
 
-type ThorTxData struct {
-	ObservedTx struct {
-		Tx struct {
-			FromAddress string `json:"from_address"`
-			Memo        string `json:"memo"`
-		} `json:"tx"`
-	} `json:"observed_tx"`
-}
-
 // Verify and update the claim record based on the memo of the thorchain tx
-func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx string, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
-	url := fmt.Sprintf("https://thornode.ninerealms.com/thorchain/tx/%s", thorTx)
+func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTxMsg *types.MsgThorTxData, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	thorDataDecoded, err := base64.StdEncoding.DecodeString(thorTxMsg.ThorData)
 	if err != nil {
-		return types.ClaimRecord{}, errors.Wrapf(err, "failed to build request %s", req.RequestURI)
+		return types.ClaimRecord{}, fmt.Errorf("error base64 decoding faild: %w", err)
 	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return types.ClaimRecord{}, errors.Wrapf(err, "failed to get thorchain tx for %s", thorTx)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return types.ClaimRecord{}, fmt.Errorf("received non-OK HTTP status: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error reading response body: %w", err)
-	}
-
-	var txData ThorTxData
-	if err := json.Unmarshal(body, &txData); err != nil {
+	var thorData *types.ThorTxData
+	if err := json.Unmarshal(thorDataDecoded, &thorData); err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
 	}
-	thorAddress := txData.ObservedTx.Tx.FromAddress
-	memo := txData.ObservedTx.Tx.Memo
+
+	var thorTxData *types.ThorChainTxData
+	if err := json.Unmarshal([]byte(thorData.TxData), &thorTxData); err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
+	}
+
+	marshalledtxBytes, err := json.Marshal(thorData)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error marshalling tx data: %w", err)
+	}
+
+	verifyTxData := base64.StdEncoding.EncodeToString(marshalledtxBytes)
+
+	if verifyTxData != thorData.Hash {
+		return types.ClaimRecord{}, fmt.Errorf("transaction data cehcksum failed")
+	}
+
+	thorAddress := thorTxData.ObservedTx.Tx.FromAddress
+	memo := thorTxData.ObservedTx.Tx.Memo
 
 	thorAddressBytes, err := sdk.GetFromBech32(thorAddress, "thor")
 	if err != nil {
@@ -61,6 +53,20 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 	thorDerivedArkeoAddress, err := sdk.Bech32ifyAddressBytes(prefix, thorAddressBytes)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("failed to encode address bytes with new prefix: %w", err)
+	}
+
+	decodedPubKey, err := hex.DecodeString(thorTxMsg.ProofPubkey)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error in decoding pubkey: %w", err)
+	}
+
+	proofAddress, err := sdk.Bech32ifyAddressBytes(prefix, decodedPubKey)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("invalid thorchain address: %w", err)
+	}
+
+	if proofAddress != thorDerivedArkeoAddress {
+		return types.ClaimRecord{}, fmt.Errorf("address validation failed: %w", err)
 	}
 
 	thorClaimRecord, err := k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)

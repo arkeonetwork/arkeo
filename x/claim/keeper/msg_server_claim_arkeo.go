@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
@@ -14,10 +15,10 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
 
-	if msg.ThorTx != "" {
-		arkeoClaimRecord, err = k.updateThorClaimRecord(ctx, msg.Creator.String(), msg.ThorTx, arkeoClaimRecord)
+	if msg.ThorTxData != nil {
+		arkeoClaimRecord, err = k.updateThorClaimRecord(ctx, msg.Creator.String(), msg.ThorTxData, arkeoClaimRecord)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ThorTx)
+			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ThorTxData)
 		}
 	}
 

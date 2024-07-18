@@ -13,20 +13,30 @@ service Msg {
   rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
   // this line is used by starport scaffolding # proto/tx/rpc
 }
+
+
+message MsgThorTxData {
+  string thor_data = 1;
+  string proof_signature = 2;
+  string proof_pubkey = 3;
+}
+
+
 message MsgClaimEth {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
   string eth_address = 2; // the adress the claim is for
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
-  string thor_tx = 4; // the tx hash of the thorchain tx that delegates the arkeo claim
+  MsgThorTxData thor_tx = 4; // the tx hash of the thorchain tx that delegates the arkeo claim
 }
 
 message MsgClaimEthResponse {}
 
+
 message MsgClaimArkeo {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
-  string thor_tx = 2; // the tx hash of the thorchain tx that delegates the arkeo claim
+  MsgThorTxData thor_tx_data = 2;
 }
 
 message MsgClaimArkeoResponse {}

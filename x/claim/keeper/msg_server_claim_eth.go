@@ -81,7 +81,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to set claim record for %s", msg.Creator)
 	}
 
-	if msg.ThorTx != "" {
+	if msg.ThorTx != nil {
 		arkeoClaim, err = k.updateThorClaimRecord(ctx, msg.Creator.String(), msg.ThorTx, arkeoClaim)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ThorTx)
