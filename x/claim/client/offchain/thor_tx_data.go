@@ -46,12 +46,12 @@ func fetchThorChainTxData(hash string) (string, error) {
 	}
 
 	txDataHash := sha512.Sum512(resultBytes)
-	txHashBase64 := hex.EncodeToString(txDataHash[:])
-	txDataBase64 := hex.EncodeToString(resultBytes)
+	txHashHex := hex.EncodeToString(txDataHash[:])
+	txDataHex := hex.EncodeToString(resultBytes)
 
 	txData := types.ThorTxData{
-		Hash:   txHashBase64,
-		TxData: txDataBase64,
+		Hash:   txHashHex,
+		TxData: txDataHex,
 	}
 
 	txDataBytes, err := json.Marshal(txData)

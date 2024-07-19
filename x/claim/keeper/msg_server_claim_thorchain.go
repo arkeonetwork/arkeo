@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -8,46 +9,92 @@ import (
 	"strings"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
+	crypto "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/pkg/errors"
 )
 
 // Verify and update the claim record based on the memo of the thorchain tx
 func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTxMsg *types.MsgThorTxData, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
 
-	thorDataDecoded, err := hex.DecodeString(thorTxMsg.ThorData)
+	// decode thorTxMessage
+	thorTxMsgDecoded, err := hex.DecodeString(thorTxMsg.ThorData)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error hex decoding faild: %w", err)
 	}
-	var thorData *types.ThorTxData
-	if err := json.Unmarshal(thorDataDecoded, &thorData); err != nil {
+
+	// unmarshall encoded data
+	var thorTxEncodedData *types.ThorTxData
+	if err := json.Unmarshal(thorTxMsgDecoded, &thorTxEncodedData); err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
 	}
 
-	hexDecodeTxData, err := hex.DecodeString(thorData.TxData)
+	// decode tx data
+	thorTxDataDecoded, err := hex.DecodeString(thorTxEncodedData.TxData)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error hex decoding failed: %w", err)
 	}
 
-	var thorTxData *types.ThorChainTxData
-	if err := json.Unmarshal(hexDecodeTxData, &thorTxData); err != nil {
+	// unmarshall thor tx
+	var thorTxChainData *types.ThorChainTxData
+	if err := json.Unmarshal(thorTxDataDecoded, &thorTxChainData); err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
 	}
 
-	marshalledtxBytes, err := json.Marshal(thorTxData)
+	// For Reverification of Hash
+	thorTxChainDataBytes, err := json.Marshal(thorTxChainData)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("error marshalling tx data: %w", err)
 	}
 
-	txDataHash := sha512.Sum512(marshalledtxBytes)
-	verifyTxData := hex.EncodeToString(txDataHash[:])
+	txDataHash := sha512.Sum512(thorTxChainDataBytes)
+	verifyTxDataHash := hex.EncodeToString(txDataHash[:])
+	txDataHex := hex.EncodeToString(thorTxChainDataBytes)
 
-	if verifyTxData != thorData.Hash {
+	// Verify Data Check Sum
+	if verifyTxDataHash != thorTxEncodedData.Hash {
 		return types.ClaimRecord{}, fmt.Errorf("transaction data cehcksum failed")
 	}
 
-	thorAddress := thorTxData.ObservedTx.Tx.FromAddress
-	memo := thorTxData.ObservedTx.Tx.Memo
+	txData := types.ThorTxData{
+		Hash:   verifyTxDataHash,
+		TxData: txDataHex,
+	}
+
+	txDataBytes, err := json.Marshal(txData)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error marshalling txData: %w", err)
+	}
+
+	txDataHashForVerification := hex.EncodeToString(txDataBytes)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("error hex decoding faild: %w", err)
+	}
+
+	// verify the tx signature
+	proofPubKeyDecoded, err := hex.DecodeString(thorTxMsg.ProofPubkey)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("failed to decode pub key: %w", err)
+	}
+	pubkey := crypto.PubKey{}
+	pubkey.Key = proofPubKeyDecoded
+
+	proofSignatureDecoded, err := hex.DecodeString(thorTxMsg.ProofSignature)
+	if err != nil {
+		return types.ClaimRecord{}, fmt.Errorf("failed to decode signature key: %w", err)
+	}
+
+	// create data to verify
+
+	hash := sha256.Sum256([]byte(txDataHashForVerification))
+
+	if !pubkey.VerifySignature(hash[:], proofSignatureDecoded[:]) {
+		return types.ClaimRecord{}, fmt.Errorf("message verification failed")
+	}
+
+	thorAddress := thorTxChainData.ObservedTx.Tx.FromAddress
+	memo := thorTxChainData.ObservedTx.Tx.Memo
 
 	thorAddressBytes, err := sdk.GetFromBech32(thorAddress, "thor")
 	if err != nil {
@@ -59,22 +106,6 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 	thorDerivedArkeoAddress, err := sdk.Bech32ifyAddressBytes(prefix, thorAddressBytes)
 	if err != nil {
 		return types.ClaimRecord{}, fmt.Errorf("failed to encode address bytes with new prefix: %w", err)
-	}
-
-	decodedPubKey, err := hex.DecodeString(thorTxMsg.ProofPubkey)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error in decoding pubkey: %w", err)
-	}
-
-	proofAddress, err := sdk.Bech32ifyAddressBytes(prefix, decodedPubKey)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("invalid thorchain address: %w", err)
-	}
-
-	// TODO FIX ME
-
-	if proofAddress != thorDerivedArkeoAddress {
-		return types.ClaimRecord{}, fmt.Errorf("address validation failed: %s , %s", proofAddress, thorDerivedArkeoAddress)
 	}
 
 	thorClaimRecord, err := k.GetClaimRecord(ctx, thorDerivedArkeoAddress, types.ARKEO)
