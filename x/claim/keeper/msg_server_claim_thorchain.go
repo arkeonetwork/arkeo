@@ -166,7 +166,7 @@ func verifySignature(thorTxMsg *types.MsgThorTxData, verifyTxDataHash, txDataHex
 	// create data to verify
 	hash := sha512.Sum512([]byte(txDataHashForVerification))
 
-	if !pubkey.VerifySignature(hash[:], proofSignatureDecoded[:]) {
+	if !pubkey.VerifySignature(hash[:], proofSignatureDecoded) {
 		return fmt.Errorf("message verification failed")
 	}
 
