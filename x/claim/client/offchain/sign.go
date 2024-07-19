@@ -1,7 +1,7 @@
 package offchain
 
 import (
-	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -22,7 +22,7 @@ func (s *SignedData) sign(data string, privateKey string) error {
 	}
 
 	privKey := secp256k1.PrivKey{Key: privKeyBytes}
-	hash := sha256.Sum256([]byte(data))
+	hash := sha512.Sum512([]byte(data))
 	signature, err := privKey.Sign(hash[:])
 	if err != nil {
 		return err

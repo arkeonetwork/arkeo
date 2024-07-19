@@ -60,7 +60,10 @@ func CmdSignMessage() *cobra.Command {
 			privateKey := args[1]
 			signedData := &SignedData{}
 
-			signedData.sign(data, privateKey)
+			err := signedData.sign(data, privateKey)
+			if err != nil {
+				return err
+			}
 
 			signedDataString, err := signedData.getSignedDataString()
 			if err != nil {

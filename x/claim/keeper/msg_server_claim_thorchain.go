@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -18,79 +17,20 @@ import (
 // Verify and update the claim record based on the memo of the thorchain tx
 func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTxMsg *types.MsgThorTxData, arkeoClaimRecord types.ClaimRecord) (types.ClaimRecord, error) {
 
-	// decode thorTxMessage
-	thorTxMsgDecoded, err := hex.DecodeString(thorTxMsg.ThorData)
+	thorTxChainData, thorTxEncodedData, err := decodeAndUnmarshallThorTxMsg(thorTxMsg)
 	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error hex decoding faild: %w", err)
+		return types.ClaimRecord{}, err
 	}
 
-	// unmarshall encoded data
-	var thorTxEncodedData *types.ThorTxData
-	if err := json.Unmarshal(thorTxMsgDecoded, &thorTxEncodedData); err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
-	}
-
-	// decode tx data
-	thorTxDataDecoded, err := hex.DecodeString(thorTxEncodedData.TxData)
+	verifyTxDataHash, txDataHex, err := verifyTxDataCheckSum(thorTxChainData, thorTxEncodedData)
 	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error hex decoding failed: %w", err)
+		return types.ClaimRecord{}, err
 	}
 
-	// unmarshall thor tx
-	var thorTxChainData *types.ThorChainTxData
-	if err := json.Unmarshal(thorTxDataDecoded, &thorTxChainData); err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error unmarshalling transaction data: %w", err)
-	}
+	err = verifySignature(thorTxMsg, verifyTxDataHash, txDataHex)
 
-	// For Reverification of Hash
-	thorTxChainDataBytes, err := json.Marshal(thorTxChainData)
 	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error marshalling tx data: %w", err)
-	}
-
-	txDataHash := sha512.Sum512(thorTxChainDataBytes)
-	verifyTxDataHash := hex.EncodeToString(txDataHash[:])
-	txDataHex := hex.EncodeToString(thorTxChainDataBytes)
-
-	// Verify Data Check Sum
-	if verifyTxDataHash != thorTxEncodedData.Hash {
-		return types.ClaimRecord{}, fmt.Errorf("transaction data cehcksum failed")
-	}
-
-	txData := types.ThorTxData{
-		Hash:   verifyTxDataHash,
-		TxData: txDataHex,
-	}
-
-	txDataBytes, err := json.Marshal(txData)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error marshalling txData: %w", err)
-	}
-
-	txDataHashForVerification := hex.EncodeToString(txDataBytes)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("error hex decoding faild: %w", err)
-	}
-
-	// verify the tx signature
-	proofPubKeyDecoded, err := hex.DecodeString(thorTxMsg.ProofPubkey)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("failed to decode pub key: %w", err)
-	}
-	pubkey := crypto.PubKey{}
-	pubkey.Key = proofPubKeyDecoded
-
-	proofSignatureDecoded, err := hex.DecodeString(thorTxMsg.ProofSignature)
-	if err != nil {
-		return types.ClaimRecord{}, fmt.Errorf("failed to decode signature key: %w", err)
-	}
-
-	// create data to verify
-
-	hash := sha256.Sum256([]byte(txDataHashForVerification))
-
-	if !pubkey.VerifySignature(hash[:], proofSignatureDecoded[:]) {
-		return types.ClaimRecord{}, fmt.Errorf("message verification failed")
+		return types.ClaimRecord{}, err
 	}
 
 	thorAddress := thorTxChainData.ObservedTx.Tx.FromAddress
@@ -148,4 +88,87 @@ func (k msgServer) updateThorClaimRecord(ctx sdk.Context, creator string, thorTx
 		return types.ClaimRecord{}, errors.Wrapf(err, "failed to get claim record for %s", creator)
 	}
 	return newClaimRecord, nil
+}
+
+func decodeAndUnmarshallThorTxMsg(thorTxMsg *types.MsgThorTxData) (*types.ThorChainTxData, *types.ThorTxData, error) {
+	// decode thorTxMessage
+	thorTxMsgDecoded, err := hex.DecodeString(thorTxMsg.ThorData)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error hex decoding faild: %w", err)
+	}
+
+	// unmarshall encoded data
+	var thorTxEncodedData *types.ThorTxData
+	if err := json.Unmarshal(thorTxMsgDecoded, &thorTxEncodedData); err != nil {
+		return nil, nil, fmt.Errorf("error unmarshalling transaction data: %w", err)
+	}
+
+	// decode tx data
+	thorTxDataDecoded, err := hex.DecodeString(thorTxEncodedData.TxData)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error hex decoding failed: %w", err)
+	}
+
+	// unmarshall thor tx
+	var thorTxChainData *types.ThorChainTxData
+	if err := json.Unmarshal(thorTxDataDecoded, &thorTxChainData); err != nil {
+		return nil, nil, fmt.Errorf("error unmarshalling transaction data: %w", err)
+	}
+
+	return thorTxChainData, thorTxEncodedData, nil
+}
+
+func verifyTxDataCheckSum(thorTxChainData *types.ThorChainTxData, thorTxEncodedData *types.ThorTxData) (string, string, error) {
+	thorTxChainDataBytes, err := json.Marshal(thorTxChainData)
+	if err != nil {
+		return "", "", fmt.Errorf("error marshalling tx data: %w", err)
+	}
+
+	txDataHash := sha512.Sum512(thorTxChainDataBytes)
+	verifyTxDataHash := hex.EncodeToString(txDataHash[:])
+	txDataHex := hex.EncodeToString(thorTxChainDataBytes)
+
+	// Verify Data Check Sum
+	if verifyTxDataHash != thorTxEncodedData.Hash {
+		return "", "", fmt.Errorf("transaction data cehcksum failed")
+	}
+
+	return verifyTxDataHash, txDataHex, nil
+
+}
+
+func verifySignature(thorTxMsg *types.MsgThorTxData, verifyTxDataHash, txDataHex string) error {
+	txData := types.ThorTxData{
+		Hash:   verifyTxDataHash,
+		TxData: txDataHex,
+	}
+
+	txDataBytes, err := json.Marshal(txData)
+	if err != nil {
+		return fmt.Errorf("error marshalling txData: %w", err)
+	}
+
+	txDataHashForVerification := hex.EncodeToString(txDataBytes)
+
+	// verify the tx signature
+	proofPubKeyDecoded, err := hex.DecodeString(thorTxMsg.ProofPubkey)
+	if err != nil {
+		return fmt.Errorf("failed to decode pub key: %w", err)
+	}
+	pubkey := crypto.PubKey{}
+	pubkey.Key = proofPubKeyDecoded
+
+	proofSignatureDecoded, err := hex.DecodeString(thorTxMsg.ProofSignature)
+	if err != nil {
+		return fmt.Errorf("failed to decode signature key: %w", err)
+	}
+
+	// create data to verify
+	hash := sha512.Sum512([]byte(txDataHashForVerification))
+
+	if !pubkey.VerifySignature(hash[:], proofSignatureDecoded[:]) {
+		return fmt.Errorf("message verification failed")
+	}
+
+	return nil
 }
