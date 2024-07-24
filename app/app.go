@@ -118,8 +118,19 @@ import (
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
-const (
-	Name = "arkeo"
+const AppName = "Arkeo"
+
+var (
+	Bech32Prefix = "arkeo"
+)
+
+var (
+	Bech32PrefixAccAddr  = Bech32Prefix
+	Bech32PrefixAccPub   = Bech32Prefix + sdk.PrefixPublic
+	Bech32PrefixValAddr  = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
+	Bech32PrefixValPub   = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+	Bech32PrefixConsAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	Bech32PrefixConsPub  = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
 )
 
 // this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
