@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -57,7 +58,7 @@ func (k Keeper) AfterProposalVote(ctx sdk.Context, proposalID uint64, voterAddr 
 	}
 }
 
-func (k Keeper) AfterDelegationModified(ctx sdk.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
+func (k Keeper) AfterDelegationModified(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
 	_, err := k.ClaimCoinsForAction(ctx, delAddr.String(), types.ACTION_DELEGATE)
 	if err != nil {
 		k.Logger(ctx).Error("failed to claim coins for delegate", "error", err.Error())

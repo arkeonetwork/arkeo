@@ -17,7 +17,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	tmhttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -38,7 +37,7 @@ const (
 )
 
 var (
-	encodingConfig cosmoscmd.EncodingConfig
+	encodingConfig EncodingConfig
 	clientCtx      client.Context
 	txFactory      tx.Factory
 	keyRing        keyring.Keyring
@@ -51,7 +50,7 @@ func init() {
 	config.Seal()
 
 	// initialize the codec
-	encodingConfig = cosmoscmd.MakeEncodingConfig(app.ModuleBasics)
+	encodingConfig = MakeEncodingConfig(app.ModuleBasics)
 
 	// create new rpc client
 	rpcClient, err := tmhttp.New("http://localhost:26657", "/websocket")

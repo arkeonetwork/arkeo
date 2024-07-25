@@ -10,12 +10,11 @@ import (
 	"github.com/arkeonetwork/arkeo/arkeocli"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/ignite/cli/ignite/pkg/xstrings"
 )
 
 func main() {
-	rootCmd, _ := cosmoscmd.NewRootCmd(
+	rootCmd, _ := NewRootCmd(
 		app.Name,
 		app.AccountAddressPrefix,
 		app.DefaultNodeHome,

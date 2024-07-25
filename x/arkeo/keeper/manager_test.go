@@ -9,7 +9,6 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
@@ -17,7 +16,7 @@ import (
 func TestValidatorPayout(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 
-	pks := simapp.CreateTestPubKeys(3)
+	pks := CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
 	require.NoError(t, err)
 	acc1, err := pk1.GetMyAddress()
@@ -31,7 +30,7 @@ func TestValidatorPayout(t *testing.T) {
 	acc3, err := pk3.GetMyAddress()
 	require.NoError(t, err)
 
-	valAddrs := simapp.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
+	valAddrs := ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
 
 	val1, err := stakingtypes.NewValidator(valAddrs[0], pks[0], stakingtypes.Description{})
 	require.NoError(t, err)

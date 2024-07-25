@@ -9,9 +9,8 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -45,7 +44,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := simappparams.MakeTestEncodingConfig()
+	encodingConfig := MakeTestEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino
@@ -111,7 +110,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := simappparams.MakeTestEncodingConfig()
+	encodingConfig := MakeTestEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino

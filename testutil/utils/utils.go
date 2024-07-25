@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"cosmossdk.io/x/evidence"
+	"cosmossdk.io/x/upgrade"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -13,17 +16,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/cosmos-sdk/x/capability"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/evidence"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/upgrade"
-	"github.com/ignite/modules/x/mint"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/cosmos/ibc-go/modules/capability"
 )
 
 // ModuleBasics is a mock module basic manager for testing
@@ -33,7 +32,7 @@ var ModuleBasics = module.NewBasicManager(
 	bank.AppModuleBasic{},
 	capability.AppModuleBasic{},
 	staking.AppModuleBasic{},
-	mint.AppModuleBasic{},
+	// mint.AppModuleBasic{},
 	distribution.AppModuleBasic{},
 	/*
 		gov.NewAppModuleBasic(

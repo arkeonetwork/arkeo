@@ -8,10 +8,12 @@ import (
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmdb "github.com/cosmos/cosmos-db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -21,9 +23,6 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
 )
 
 type (
@@ -53,7 +52,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := simappparams.MakeTestEncodingConfig()
+	encodingConfig := MakeTestEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino
