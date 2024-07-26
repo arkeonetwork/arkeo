@@ -11,13 +11,13 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/gogo/protobuf/proto"
 
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/cometbft/cometbft/libs/log"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	tmclient "github.com/cometbft/cometbft/rpc/client/http"
+	tmCoreTypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
-	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tmCoreTypes.ResultEvent {
@@ -217,16 +217,16 @@ func (p Proxy) handleOpenContractEvent(result tmCoreTypes.ResultEvent) {
 }
 
 func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
-	data, ok := result.Data.(tmtypes.EventDataNewBlockHeader)
+	data, ok := result.Data.(tmtypes.EventDataNewBlock)
 	if !ok {
 		p.logger.Error("failed cast data")
 		return
 	}
-	height := data.Header.Height
+	height := data.Block.Header.Height
 	p.logger.Info("New height detected", "height", height)
 	p.MemStore.SetHeight(height)
 
-	for _, evt := range data.ResultEndBlock.Events {
+	for _, evt := range data.ResultFinalizeBlock.Events {
 		if evt.Type == types.EventTypeSettleContract {
 			input := make(map[string]string)
 			for _, attr := range evt.Attributes {

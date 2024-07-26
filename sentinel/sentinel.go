@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/koding/websocketproxy"
 	"github.com/sirupsen/logrus"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"

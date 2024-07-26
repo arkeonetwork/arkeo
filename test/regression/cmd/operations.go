@@ -629,13 +629,11 @@ func (op *OpTxClaimContract) Execute(_ *os.Process, logs chan string) error {
 
 func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan string) error {
 	// check that message is valid
-	err := msg.ValidateBasic()
-	if err != nil {
-		enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
-		enc.SetIndent("", "  ")
-		_ = enc.Encode(op)
-		log.Fatal().Err(err).Msg("failed to validate basic")
-	}
+
+	enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
+	enc.SetIndent("", "  ")
+	err := enc.Encode(op)
+	log.Fatal().Err(err).Msg("failed to validate basic")
 
 	// custom client context
 	buf := bytes.NewBuffer(nil)

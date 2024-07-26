@@ -11,14 +11,15 @@ import (
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
+	tmhttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	tmhttp "github.com/tendermint/tendermint/rpc/client/http"
 
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -37,7 +38,7 @@ const (
 )
 
 var (
-	encodingConfig EncodingConfig
+	encodingConfig arekoappParams.EncodingConfig
 	clientCtx      client.Context
 	txFactory      tx.Factory
 	keyRing        keyring.Keyring
@@ -50,7 +51,7 @@ func init() {
 	config.Seal()
 
 	// initialize the codec
-	encodingConfig = MakeEncodingConfig(app.ModuleBasics)
+	encodingConfig = app.MakeEncodingConfig()
 
 	// create new rpc client
 	rpcClient, err := tmhttp.New("http://localhost:26657", "/websocket")

@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
