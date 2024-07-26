@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+	abci "github.com/cometbft/cometbft/abci/types"
+	cmptm "github.com/cometbft/cometbft/proto/tendermint/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -25,7 +26,7 @@ func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
 	}
 }
 
-func (mgr *Manager) BeginBlock(ctx cosmos.Context, req abci.RequestBeginBlock) error {
+func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	// if local version is behind the consensus version, panic and don't try to
 	// create a new block
 	ver := mgr.keeper.GetComputedVersion(ctx)
@@ -39,7 +40,20 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context, req abci.RequestBeginBlock) e
 	}
 	mgr.keeper.SetVersion(ctx, ver) // update stored version
 
-	if err := mgr.ValidatorPayout(ctx, req.LastCommitInfo.GetVotes()); err != nil {
+	var votes = []abci.VoteInfo{}
+	for i := 0; i <= ctx.CometInfo().GetLastCommit().Votes().Len(); i++ {
+		vote := ctx.CometInfo().GetLastCommit().Votes().Get(0)
+		abciVote := abci.VoteInfo{
+			Validator: abci.Validator{
+				Address: vote.Validator().Address(),
+				Power:   vote.Validator().Power(),
+			},
+			BlockIdFlag: cmptm.BlockIDFlag(vote.GetBlockIDFlag()),
+		}
+		votes = append(votes, abciVote)
+
+	}
+	if err := mgr.ValidatorPayout(ctx, votes); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
 	}
 	return nil
@@ -193,8 +207,8 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 		// sum tokens
 		total := cosmos.ZeroInt()
 		for _, vote := range votes {
-			val := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
-			if val == nil {
+			val, err := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
+			if err != nil {
 				ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
 				continue
 			}
@@ -208,22 +222,28 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 		}
 
 		for _, vote := range votes {
-			if !vote.SignedLastBlock {
-				ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
-				continue
-			}
 
-			val := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
-			if val == nil {
+			// if !vote.SignedLastBlock {
+			// 	ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
+			// 	continue
+			// }
+
+			val, err := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
+			if err != nil {
 				ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
 				continue
 			}
 			if !val.IsBonded() || val.IsJailed() {
-				ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator().String())
+				ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator())
 				continue
 			}
 
-			valVersion := mgr.keeper.GetVersionForAddress(ctx, val.GetOperator())
+			valBz, err := mgr.sk.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+			if err != nil {
+				panic(err)
+			}
+
+			valVersion := mgr.keeper.GetVersionForAddress(ctx, valBz)
 			curVersion := mgr.keeper.GetVersion(ctx)
 			if valVersion < curVersion {
 				continue
@@ -234,7 +254,11 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 			validatorReward := cosmos.ZeroInt()
 			rateBasisPts := val.GetCommission().MulInt64(100).RoundInt()
 
-			delegates := mgr.sk.GetValidatorDelegations(ctx, val.GetOperator())
+			delegates, err := mgr.sk.GetValidatorDelegations(ctx, valBz)
+			if err != nil {
+				panic(err)
+			}
+
 			for _, delegate := range delegates {
 				delegateAcc, err := cosmos.AccAddressFromBech32(delegate.DelegatorAddress)
 				if err != nil {
@@ -255,7 +279,7 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 
 			if !validatorReward.IsZero() {
 				if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, cosmos.NewCoins(cosmos.NewCoin(bal.Denom, validatorReward))); err != nil {
-					ctx.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator().String(), "error", err)
+					ctx.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator(), "error", err)
 					continue
 				}
 				ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)

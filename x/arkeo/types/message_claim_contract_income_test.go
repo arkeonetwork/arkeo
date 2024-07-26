@@ -16,6 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
@@ -41,7 +42,7 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	err = msg.ValidateBasic()
 	require.NoError(t, err)
@@ -75,7 +76,7 @@ func TestValidateSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	message := []byte(fmt.Sprintf("%d:%d", msg.ContractId, msg.Nonce))
-	msg.Signature, pub, err = kb.Sign("whatever", message)
+	msg.Signature, pub, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.True(t, pub.VerifySignature(message, msg.Signature))

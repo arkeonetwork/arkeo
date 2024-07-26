@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
+	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,7 +16,6 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -55,7 +55,7 @@ type Keeper interface {
 	// passthrough funcs
 	SendCoins(ctx cosmos.Context, from, to cosmos.AccAddress, coins cosmos.Coins) error
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
-	GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator
+	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params)
 
@@ -168,9 +168,13 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
+// TODO: Check Thi Again
 func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
-	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	validators, err := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		k.Logger(ctx).Error(err.Error())
+	}
 
 	// if there is only one validator, no need for consensus. Just return the
 	// validator's current version. This also helps makes
@@ -187,7 +191,12 @@ func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 		if !val.IsBonded() {
 			continue
 		}
-		ver := k.GetVersionForAddress(ctx, val.GetOperator())
+
+		valBz, err := k.stakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		if err != nil {
+			k.Logger(ctx).Error(err.Error())
+		}
+		ver := k.GetVersionForAddress(ctx, valBz)
 		if _, ok := versions[ver]; !ok {
 			versions[ver] = 0
 		}
@@ -334,7 +343,7 @@ func (k KVStore) GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.A
 	return k.accountKeeper.GetAccount(ctx, addr)
 }
 
-func (k KVStore) GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator {
+func (k KVStore) GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error) {
 	return k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 }
 

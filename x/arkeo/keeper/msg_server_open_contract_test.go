@@ -13,6 +13,7 @@ import (
 	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/stretchr/testify/require"
 )
 
@@ -339,7 +340,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 		Nonce:      20,
 	}
 	message := claimMsg.GetBytesToSign()
-	claimMsg.Signature, _, err = kb.Sign("whatever", message)
+	claimMsg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	_, err = s.ClaimContractIncome(ctx, &claimMsg)
 	require.NoError(t, err)

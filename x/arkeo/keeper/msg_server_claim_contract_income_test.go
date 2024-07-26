@@ -13,6 +13,7 @@ import (
 	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,7 +65,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
 
@@ -125,7 +126,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -141,7 +142,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	}
 
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// repeat the same thing and ensure we don't pay providers twice
@@ -155,7 +156,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	// update signature for message
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -172,7 +173,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	// update signature for message
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -307,7 +308,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -320,7 +321,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	msg.Nonce = 0
 
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// handle claim with bad nonce

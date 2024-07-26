@@ -3,39 +3,43 @@ package keeper
 import (
 	"testing"
 
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/stretchr/testify/require"
 
+	"cosmossdk.io/log"
 	"cosmossdk.io/store"
 	storetypes "cosmossdk.io/store/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmdb "github.com/cosmos/cosmos-db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
 )
 
 func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
 	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
 	keyParams := cosmos.NewKVStoreKey(typesparams.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
-
+	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	stateStore := store.NewCommitMultiStore(db, logger, nil)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
@@ -44,7 +48,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := MakeTestEncodingConfig()
+	encodingConfig := arekoappParams.MakeEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino
@@ -58,21 +62,45 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
-	pk := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
-	ak := authkeeper.NewAccountKeeper(cdc, keyAcc, pk.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
-		types.ReserveName:              {},
-		types.ProviderName:             {},
-		types.ContractName:             {},
-	}, sdk.Bech32PrefixAccAddr)
-	ak.SetParams(ctx, authtypes.DefaultParams())
+	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	ak := authkeeper.NewAccountKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyAcc),
+		authtypes.ProtoBaseAccount,
+		map[string][]string{
+			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+			types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+			types.ReserveName:              {},
+			types.ProviderName:             {},
+			types.ContractName:             {},
+		},
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
+		sdk.Bech32PrefixAccAddr,
+		govModuleAddr,
+	)
 
-	bk := bankkeeper.NewBaseKeeper(cdc, keyBank, ak, pk.Subspace(banktypes.ModuleName), nil)
+	bk := bankkeeper.NewBaseKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyBank),
+		ak,
+		nil,
+		govModuleAddr,
+		logger,
+	)
 	bk.SetParams(ctx, banktypes.DefaultParams())
 
-	sk := stakingkeeper.NewKeeper(cdc, keyStake, ak, bk, pk.Subspace(stakingtypes.ModuleName))
+	sk := stakingkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyStake),
+		ak,
+		bk,
+		govModuleAddr,
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
+	)
+
 	k := NewKVStore(
 		cdc,
 		storeKey,
@@ -80,7 +108,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		paramsSubspace,
 		bk,
 		ak,
-		sk,
+		*sk,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 
@@ -91,7 +119,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 }
 
 func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper.Keeper) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
 	keyBank := cosmos.NewKVStoreKey(banktypes.StoreKey)
 	keyStake := cosmos.NewKVStoreKey(stakingtypes.StoreKey)
@@ -99,8 +127,9 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
+	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	stateStore := store.NewCommitMultiStore(db, logger, nil)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
@@ -110,7 +139,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := MakeTestEncodingConfig()
+	encodingConfig := arekoappParams.MakeEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino
@@ -124,22 +153,44 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
-	pk := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
-	ak := authkeeper.NewAccountKeeper(cdc, keyAcc, pk.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		types.ModuleName:               {authtypes.Minter, authtypes.Burner},
-		types.ReserveName:              {},
-		types.ProviderName:             {},
-		types.ContractName:             {},
-	}, sdk.Bech32PrefixAccAddr)
-	ak.SetParams(ctx, authtypes.DefaultParams())
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
+	ak := authkeeper.NewAccountKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyAcc),
+		authtypes.ProtoBaseAccount,
+		map[string][]string{
+			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+			types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+			types.ReserveName:              {},
+			types.ProviderName:             {},
+			types.ContractName:             {},
+		},
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
+		sdk.Bech32PrefixAccAddr,
+		govModuleAddr,
+	)
 
-	bk := bankkeeper.NewBaseKeeper(cdc, keyBank, ak, pk.Subspace(banktypes.ModuleName), nil)
+	bk := bankkeeper.NewBaseKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyBank),
+		ak,
+		nil,
+		govModuleAddr,
+		logger,
+	)
 	bk.SetParams(ctx, banktypes.DefaultParams())
 
-	sk := stakingkeeper.NewKeeper(cdc, keyStake, ak, bk, pk.Subspace(stakingtypes.ModuleName))
-	sk.SetParams(ctx, stakingtypes.DefaultParams())
+	sk := stakingkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyStake),
+		ak,
+		bk,
+		govModuleAddr,
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
+	)
 
 	k := NewKVStore(
 		cdc,
@@ -148,12 +199,12 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		paramsSubspace,
 		bk,
 		ak,
-		sk,
+		*sk,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
 
-	return ctx, *k, sk
+	return ctx, *k, *sk
 }

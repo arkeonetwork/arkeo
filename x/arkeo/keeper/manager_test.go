@@ -9,14 +9,15 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestValidatorPayout(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 
-	pks := CreateTestPubKeys(3)
+	pks := simtestutil.CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
 	require.NoError(t, err)
 	acc1, err := pk1.GetMyAddress()
@@ -30,23 +31,23 @@ func TestValidatorPayout(t *testing.T) {
 	acc3, err := pk3.GetMyAddress()
 	require.NoError(t, err)
 
-	valAddrs := ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
+	valAddrs := simtestutil.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
 
-	val1, err := stakingtypes.NewValidator(valAddrs[0], pks[0], stakingtypes.Description{})
+	val1, err := stakingtypes.NewValidator(valAddrs[0].String(), pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	val1.Tokens = cosmos.NewInt(100)
 	val1.DelegatorShares = cosmos.NewDec(100 + 10 + 20)
 	val1.Status = stakingtypes.Bonded
 	val1.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(1, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val2, err := stakingtypes.NewValidator(valAddrs[1], pks[1], stakingtypes.Description{})
+	val2, err := stakingtypes.NewValidator(valAddrs[1].String(), pks[1], stakingtypes.Description{})
 	require.NoError(t, err)
 	val2.Tokens = cosmos.NewInt(200)
 	val2.DelegatorShares = cosmos.NewDec(200 + 20)
 	val2.Status = stakingtypes.Bonded
 	val2.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(2, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val3, err := stakingtypes.NewValidator(valAddrs[2], pks[2], stakingtypes.Description{})
+	val3, err := stakingtypes.NewValidator(valAddrs[2].String(), pks[2], stakingtypes.Description{})
 	require.NoError(t, err)
 	val3.Tokens = cosmos.NewInt(500)
 	val3.DelegatorShares = cosmos.NewDec(500)
@@ -64,13 +65,13 @@ func TestValidatorPayout(t *testing.T) {
 	delAcc2 := types.GetRandomBech32Addr()
 	delAcc3 := types.GetRandomBech32Addr()
 
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1, valAddrs[0], cosmos.NewDec(100)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2, valAddrs[1], cosmos.NewDec(200)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3, valAddrs[2], cosmos.NewDec(500)))
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100)))
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200)))
+	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500)))
 
-	del1 := stakingtypes.NewDelegation(delAcc1, valAddrs[0], cosmos.NewDec(10))
-	del2 := stakingtypes.NewDelegation(delAcc2, valAddrs[1], cosmos.NewDec(20))
-	del3 := stakingtypes.NewDelegation(delAcc3, valAddrs[2], cosmos.NewDec(20))
+	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
+	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
+	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
 	sk.SetDelegation(ctx, del1)
 	sk.SetDelegation(ctx, del2)
 	sk.SetDelegation(ctx, del3)
@@ -92,10 +93,9 @@ func TestValidatorPayout(t *testing.T) {
 		require.NoError(t, err)
 		votes[i] = abci.VoteInfo{
 			Validator: abci.Validator{
-				Address: consAddr.Bytes(),
+				Address: consAddr,
 				Power:   val.Tokens.Int64(),
 			},
-			SignedLastBlock: true,
 		}
 	}
 
