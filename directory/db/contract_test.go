@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
@@ -69,7 +70,7 @@ func TestUpdateContract(t *testing.T) {
 		Type:               arkeotypes.ContractType_PAY_AS_YOU_GO,
 		Height:             1024,
 		Duration:           10,
-		Rate:               cosmostypes.NewCoin("uarkeo", cosmostypes.NewInt(10)),
+		Rate:               cosmostypes.NewCoin("uarkeo", cosmos.NewInt(10)),
 		OpenCost:           1000,
 		Deposit:            math.NewInt(10000),
 		SettlementDuration: 10,
