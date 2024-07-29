@@ -110,6 +110,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 		bankKeeper,
 		memStoreKey,
 		paramsSubspace,
+		logger,
 	)
 
 	// Initialize params

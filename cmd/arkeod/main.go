@@ -10,19 +10,20 @@ import (
 	"github.com/arkeonetwork/arkeo/arkeocli"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/ignite/cli/ignite/pkg/xstrings"
 )
 
 func main() {
-	rootCmd, _ := NewRootCmd(
-		app.Name,
-		app.AccountAddressPrefix,
-		app.DefaultNodeHome,
-		xstrings.NoDash(app.Name),
-		app.ModuleBasics,
-		app.New,
-		// this line is used by starport scaffolding # root/arguments
-	)
+
+	rootCmd, _ := NewRootCmd()
+	// rootCmd, _ := NewRootCmd(
+	// 	app.Name,
+	// 	app.AccountAddressPrefix,
+	// 	app.DefaultNodeHome,
+	// 	xstrings.NoDash(app.Name),
+	// 	app.ModuleBasics,
+	// 	app.New,
+	// 	// this line is used by starport scaffolding # root/arguments
+	// )
 	// add in arkeo specific utilities
 	rootCmd.AddCommand(arkeocli.GetArkeoCmd())
 	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {
