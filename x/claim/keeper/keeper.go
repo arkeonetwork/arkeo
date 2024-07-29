@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"cosmossdk.io/log"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
@@ -21,6 +21,7 @@ type (
 		paramstore    paramtypes.Subspace
 		accountKeeper types.AccountKeeper
 		bankKeeper    types.BankKeeper
+		logger        log.Logger
 	}
 )
 
@@ -31,6 +32,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
+	logger log.Logger,
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -44,22 +46,26 @@ func NewKeeper(
 		bankKeeper:    bankKeeper,
 		memKey:        memKey,
 		paramstore:    ps,
+		logger:        logger.With("module", fmt.Sprintf("x/%s", types.ModuleName)),
 	}
 }
 
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+func (k Keeper) Logger(ctx context.Context) log.Logger {
+	return k.logger
 }
 
-func (k Keeper) AfterProposalVote(ctx sdk.Context, proposalID uint64, voterAddr sdk.AccAddress) {
-	_, err := k.ClaimCoinsForAction(ctx, voterAddr.String(), types.ACTION_VOTE)
+func (k Keeper) AfterProposalVote(ctx context.Context, proposalID uint64, voterAddr sdk.AccAddress) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	_, err := k.ClaimCoinsForAction(sdkCtx, voterAddr.String(), types.ACTION_VOTE)
 	if err != nil {
 		k.Logger(ctx).Error("failed to claim coins for vote", "error", err.Error())
 	}
 }
 
 func (k Keeper) AfterDelegationModified(ctx context.Context, delAddr sdk.AccAddress, valAddr sdk.ValAddress) error {
-	_, err := k.ClaimCoinsForAction(ctx, delAddr.String(), types.ACTION_DELEGATE)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	_, err := k.ClaimCoinsForAction(sdkCtx, delAddr.String(), types.ACTION_DELEGATE)
 	if err != nil {
 		k.Logger(ctx).Error("failed to claim coins for delegate", "error", err.Error())
 	}
