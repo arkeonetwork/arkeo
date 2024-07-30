@@ -9,6 +9,7 @@ option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 service Msg {
   rpc ClaimEth(MsgClaimEth) returns (MsgClaimEthResponse);
   rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
+  rpc ClaimThorchain(MsgClaimThorchain) returns (MsgClaimThorchainResponse);
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
   rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
   // this line is used by starport scaffolding # proto/tx/rpc
@@ -16,9 +17,8 @@ service Msg {
 message MsgClaimEth {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
-  string eth_address = 2; // the adress the claim is for
+  string eth_address = 2; // the address the claim is for
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
-  string thor_tx = 4; // the tx hash of the thorchain tx that delegates the arkeo claim
 }
 
 message MsgClaimEthResponse {}
@@ -26,10 +26,18 @@ message MsgClaimEthResponse {}
 message MsgClaimArkeo {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
-  string thor_tx = 2; // the tx hash of the thorchain tx that delegates the arkeo claim
 }
 
 message MsgClaimArkeoResponse {}
+
+message MsgClaimThorchain {
+  bytes creator = 1 [ (gogoproto.casttype) =
+                          "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
+  string fromAddress = 2; // the address that is delegating the claim
+  string toAddress = 3; // the address to delegate the claim to
+}
+
+message MsgClaimThorchainResponse {}
 
 message MsgTransferClaim {
   bytes creator = 1 [ (gogoproto.casttype) =

@@ -14,13 +14,6 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
 
-	if msg.ThorTx != "" {
-		arkeoClaimRecord, err = k.updateThorClaimRecord(ctx, msg.Creator.String(), msg.ThorTx, arkeoClaimRecord)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ThorTx)
-		}
-	}
-
 	if arkeoClaimRecord.IsEmpty() || arkeoClaimRecord.AmountClaim.IsZero() {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
