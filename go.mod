@@ -25,7 +25,7 @@ require (
 	github.com/ethereum/go-ethereum v1.10.17
 	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/go-resty/resty/v2 v2.13.1
-	github.com/gogo/protobuf v1.3.3
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/gorilla/handlers v1.5.2

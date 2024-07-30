@@ -150,7 +150,6 @@ func txCommand(moduleBasics module.BasicManager) *cobra.Command {
 		authcmd.GetDecodeCommand(),
 	)
 
-	moduleBasics.AddTxCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
