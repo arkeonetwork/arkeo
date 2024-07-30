@@ -63,12 +63,12 @@ if [ ! -f ~/.arkeo/config/priv_validator_key.json ]; then
 fi
 
 if [ ! -f ~/.arkeo/config/genesis.json ]; then
-	arkeod init local --staking-bond-denom $TOKEN --chain-id "$CHAIN_ID"
+	arkeod init local --default-denom $TOKEN --chain-id "$CHAIN_ID"
 	arkeod keys add $USER --keyring-backend test
-	arkeod add-genesis-account $USER $STAKE --keyring-backend test
+	arkeod genesis add-genesis-account $USER $STAKE --keyring-backend test
 	arkeod keys list --keyring-backend test
-	arkeod gentx $USER $STAKE --chain-id $CHAIN_ID --keyring-backend test
-	arkeod collect-gentxs
+	arkeod genesis gentx $USER $STAKE --chain-id $CHAIN_ID --keyring-backend test
+	arkeod genesis collect-gentxs
 
 	arkeod keys add faucet --keyring-backend test
 	FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
