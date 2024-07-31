@@ -129,7 +129,6 @@ import (
 	"github.com/spf13/cast"
 
 	// "github.com/ignite/cli/ignite/pkg/cosmoscmd"
-	"github.com/ignite/cli/ignite/pkg/openapiconsole"
 
 	arkeomodule "github.com/arkeonetwork/arkeo/x/arkeo"
 	arkeomodulekeeper "github.com/arkeonetwork/arkeo/x/arkeo/keeper"
@@ -146,7 +145,7 @@ const (
 
 const (
 	NodeDir      = ".arkeo"
-	Bech32Prefix = "arkeo"
+	Bech32Prefix = AccountAddressPrefix
 )
 
 var (
@@ -608,6 +607,8 @@ func NewArkeoApp(
 		app.BankKeeper,
 		app.AccountKeeper,
 		*app.StakingKeeper,
+		govModuleAddr,
+		logger,
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper)
 
@@ -936,7 +937,7 @@ func (app *ArkeoApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIC
 
 	// register app's OpenAPI routes.
 	apiSvr.Router.Handle("/static/openapi.yml", http.FileServer(http.FS(docs.Docs)))
-	apiSvr.Router.HandleFunc("/", openapiconsole.Handler(AppName, "/static/openapi.yml"))
+	// apiSvr.Router.HandleFunc("/", openapiconsole.Handler(AppName, "/static/openapi.yml"))
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.

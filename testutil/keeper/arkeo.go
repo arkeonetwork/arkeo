@@ -106,6 +106,8 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		bk,
 		ak,
 		*sk,
+		govModuleAddr,
+		logger,
 	)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 

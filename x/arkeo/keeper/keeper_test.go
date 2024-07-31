@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	storemetrics "cosmossdk.io/store/metrics"
 	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -39,7 +40,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db, logger, nil)
+	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
@@ -109,6 +110,8 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		bk,
 		ak,
 		*sk,
+		govModuleAddr,
+		logger,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 
@@ -129,7 +132,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db, logger, nil)
+	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(keyBank, storetypes.StoreTypeIAVL, db)
@@ -166,6 +169,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 			types.ReserveName:              {},
 			types.ProviderName:             {},
 			types.ContractName:             {},
+			govtypes.ModuleName:            {authtypes.Minter, authtypes.Burner},
 		},
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
 		sdk.Bech32PrefixAccAddr,
@@ -200,6 +204,8 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		bk,
 		ak,
 		*sk,
+		govModuleAddr,
+		logger,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 

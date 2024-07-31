@@ -117,6 +117,8 @@ type KVStore struct {
 	coinKeeper    bankkeeper.Keeper
 	accountKeeper authkeeper.AccountKeeper
 	stakingKeeper stakingkeeper.Keeper
+	authority     string
+	logger        log.Logger
 }
 
 func NewKVStore(
@@ -127,6 +129,8 @@ func NewKVStore(
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
 	stakingKeeper stakingkeeper.Keeper,
+	authority string,
+	logger log.Logger,
 ) *KVStore {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -141,11 +145,13 @@ func NewKVStore(
 		coinKeeper:    coinKeeper,
 		accountKeeper: accountKeeper,
 		stakingKeeper: stakingKeeper,
+		authority:     authority,
+		logger:        logger,
 	}
 }
 
 func (k KVStore) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+	return k.logger.With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // GetKey return a key that can be used to store into key value store
@@ -349,4 +355,8 @@ func (k KVStore) GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validat
 
 func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) {
 	k.stakingKeeper.SetParams(ctx, params)
+}
+
+func (k KVStore) GetAuthority() string {
+	return k.authority
 }
