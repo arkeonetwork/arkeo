@@ -11,20 +11,10 @@ import (
 	"github.com/arkeonetwork/arkeo/app"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	// "github.com/ignite/cli/ignite/pkg/cosmoscmd"
-	// "github.com/ignite/cli/ignite/pkg/xstrings"
 )
 
 func main() {
-	rootCmd, _ := NewRootCmd(
-		app.Name,
-		app.AccountAddressPrefix,
-		app.DefaultNodeHome,
-		// xstrings.NoDash(app.Name),
-		app.ModuleBasics,
-		app.New,
-		// this line is used by starport scaffolding # root/arguments
-	)
+	rootCmd, _ := NewRootCmd()
 
 	// for coverage data we need to exit main without allowing the server to call os.Exit
 
