@@ -54,7 +54,7 @@ message MsgOpenContract {
   ContractType             contract_type       =  6;
   int64                    duration            =  7;
   cosmos.base.v1beta1.Coin rate                =  8 [(gogoproto.nullable)  = false                                          ] ;
-  string                   deposit             =  9 [(cosmos_proto.scalar) = "cosmos.Int"                                   , (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string                   deposit             =  9 [(cosmos_proto.scalar) = "cosmos.Int",(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
   int64                    settlement_duration = 10;
   ContractAuthorization    authorization       = 11;
   int64                    queries_per_minute  = 12;

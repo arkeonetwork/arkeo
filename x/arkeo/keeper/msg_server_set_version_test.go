@@ -33,9 +33,6 @@ func TestHandleSetVersion(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	s := newMsgServer(k, sk)
 
-	cosmos.GetConfig().SetBech32PrefixForAccount("arkeo", "arkeopub")
-	cosmos.GetConfig().SetBech32PrefixForValidator("varkeo", "varkeopub")
-
 	// setup
 	providerPubKey := types.GetRandomPubKey()
 	acct, err := providerPubKey.GetMyAddress()

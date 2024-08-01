@@ -20,4 +20,4 @@ lint:
     - PACKAGE_DIRECTORY_MATCH
   
   ignore:
-    - cosmos_proto
+    - tendermint

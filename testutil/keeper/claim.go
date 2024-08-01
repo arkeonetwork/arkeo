@@ -11,6 +11,7 @@ import (
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 
 	"cosmossdk.io/store"
+	storemetrics "cosmossdk.io/store/metrics"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/arkeonetwork/arkeo/app"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -48,7 +49,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db, logger, nil)
+	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)

@@ -30,6 +30,20 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
+const (
+	bech32Prefix = "arkeo"
+)
+
+var (
+	//Bech32PrefixAccAddr
+	Bech32PrefixAccAddr  = bech32Prefix
+	Bech32PrefixAccPub   = bech32Prefix + sdk.PrefixPublic
+	Bech32PrefixValAddr  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
+	Bech32PrefixValPub   = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+	Bech32PrefixConsAddr = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	Bech32PrefixConsPub  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+)
+
 func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
 	keyAcc := cosmos.NewKVStoreKey(authtypes.StoreKey)
@@ -38,6 +52,13 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	keyParams := cosmos.NewKVStoreKey(typesparams.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+
+	cfg := sdk.GetConfig()
+
+	cfg.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	cfg.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	cfg.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
@@ -130,6 +151,12 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
+	cfg := sdk.GetConfig()
+
+	cfg.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	cfg.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	cfg.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
@@ -156,7 +183,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
-	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	govModuleAddr := "arkeo12jurap3ypfmwzghj9d0t4wanc9gne2cktxh2y2"
 	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	ak := authkeeper.NewAccountKeeper(
 		cdc,

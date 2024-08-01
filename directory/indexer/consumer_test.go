@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 	"github.com/stretchr/testify/assert"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"

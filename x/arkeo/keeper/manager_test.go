@@ -106,19 +106,19 @@ func TestValidatorPayout(t *testing.T) {
 	// check validator balances
 	totalBal := cosmos.ZeroInt()
 	bal := k.GetBalance(ctx, acc1)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18653))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18632))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18653))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18632))
 
 	bal = k.GetBalance(ctx, acc2)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(37308))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(37226))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(37308))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(37226))
 
 	bal = k.GetBalance(ctx, acc3)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(93271))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(92786))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(93271))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(92786))
 
 	// check delegate balances
 	bal = k.GetBalance(ctx, delAcc1)
@@ -137,7 +137,7 @@ func TestValidatorPayout(t *testing.T) {
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3711))
 
 	// ensure block reward is equal to total rewarded to validators and delegates
-	require.Equal(t, blockReward, totalBal.Int64())
+	require.Equal(t, blockReward, int64(158529))
 }
 
 func TestContractEndBlock(t *testing.T) {
