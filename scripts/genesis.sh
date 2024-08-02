@@ -7,6 +7,7 @@ CHAIN_ID="arkeo-testnet-v2"
 STAKE="50000000000000000uarkeo"
 TOKEN="uarkeo"
 USER="ark"
+TOTAL_SUPPLY=50000000000000000 # Initial supply corresponding to the stake
 
 add_module() {
 	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" --arg NAME "$4" '.app_state.auth.accounts += [{
@@ -26,6 +27,9 @@ add_module() {
         "coins": [ { "denom": $ASSET, "amount": $AMOUNT } ],
     }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+
+    TOTAL_SUPPLY=$(($TOTAL_SUPPLY + $3))
+    echo "Total supply after adding module: $TOTAL_SUPPLY"
 }
 
 add_account() {
@@ -43,6 +47,9 @@ add_account() {
         "coins": [ { "denom": $ASSET, "amount": $AMOUNT } ],
     }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+
+    TOTAL_SUPPLY=$(($TOTAL_SUPPLY + $3))
+    echo "Total supply after adding account: $TOTAL_SUPPLY"
 }
 
 add_claim_records() {
@@ -72,19 +79,19 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	arkeod keys add faucet --keyring-backend test
 	FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
-	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 100m
+	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 10m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 100m
+		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 10m
 		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 10000000000000000 'claimarkeo'
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test --recover
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)
-		add_account "$ALICE" $TOKEN 1100000000000000 # alice, 11m
+		add_account "$ALICE" $TOKEN 1100000000000000 # alice, 1.1m
 
 		echo "clog swear steak glide artwork glory solution short company borrow aerobic idle corn climb believe wink forum destroy miracle oak cover solid valve make" | arkeod keys add bob --keyring-backend test --recover
 		BOB=$(arkeod keys show bob -a --keyring-backend test)
-		add_account "$BOB" $TOKEN 1000000000000000 # bob, 10m
+		add_account "$BOB" $TOKEN 1000000000000000 # bob, 1m
 		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
 
 		# add_claim_records "ARKEO" "{YOUR ARKEO ADDRESS}" 500000 500000 500000 true
@@ -101,8 +108,12 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
 	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 
+	# Update the supply field in genesis.json using jq
+	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
+	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+
 	set -e
 	arkeod validate-genesis --trace
 fi
 
-arkeod start
+arkeod start  --pruning nothing --minimum-gas-prices 0.0001uarkeo

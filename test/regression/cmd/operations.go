@@ -633,7 +633,9 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 	enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
 	enc.SetIndent("", "  ")
 	err := enc.Encode(op)
-	log.Fatal().Err(err).Msg("failed to validate basic")
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to validate basic")
+	}
 
 	// custom client context
 	buf := bytes.NewBuffer(nil)

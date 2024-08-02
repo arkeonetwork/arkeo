@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/arkeonetwork/arkeo/app"
@@ -26,7 +27,8 @@ func main() {
 	// )
 	// add in arkeo specific utilities
 	rootCmd.AddCommand(arkeocli.GetArkeoCmd())
-	if err := svrcmd.Execute(rootCmd, "", app.DefaultNodeHome); err != nil {
+	if err := svrcmd.Execute(rootCmd, "ARKEO", app.DefaultNodeHome); err != nil {
+		fmt.Println(rootCmd.OutOrStderr(), err)
 		os.Exit(1)
 	}
 }

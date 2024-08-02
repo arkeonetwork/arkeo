@@ -62,18 +62,18 @@ func run(path string) error {
 	}
 
 	// init chain with dog mnemonic
-	log.Debug().Msg("Initializing chain")
-	cmd := exec.Command("arkeod", "init", "local", "--chain-id", "arkeo", "--staking-bond-denom", "uarkeo", "--recover")
+	log.Debug().Msg("Initializing chain with recovery")
+	cmd := exec.Command("arkeod", "init", "local", "--chain-id", "arkeo", "--default-denom", "uarkeo", "--recover")
 	cmd.Stdin = bytes.NewBufferString(dogMnemonic + "\n")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(out))
-		log.Fatal().Err(err).Msg("failed to initialize chain")
+		log.Fatal().Err(err).Msg("failed to initialize chain with recovery")
 	}
 
-	// init chain
+	// init chain without recovery
 	log.Debug().Msg("Initializing chain")
-	cmd = exec.Command("arkeod", "init", "local", "--chain-id", "arkeo", "--staking-bond-denom", "uarkeo", "-o")
+	cmd = exec.Command("arkeod", "init", "local", "--chain-id", "arkeo", "--default-denom", "uarkeo", "-o")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(out))
