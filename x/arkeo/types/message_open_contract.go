@@ -18,7 +18,7 @@ var _ sdk.Msg = &MsgOpenContract{}
 
 func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization, qpm int64) *MsgOpenContract {
 	return &MsgOpenContract{
-		Creator:            creator,
+		Creator:            creator.String(),
 		Provider:           provider,
 		Service:            service,
 		ContractType:       contractType,
@@ -42,11 +42,11 @@ func (msg *MsgOpenContract) Type() string {
 }
 
 func (msg *MsgOpenContract) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgOpenContract) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	return sdk.MustAccAddressFromBech32(msg.Creator)
 }
 
 func (msg *MsgOpenContract) GetSignBytes() []byte {

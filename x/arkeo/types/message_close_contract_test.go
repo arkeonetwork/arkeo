@@ -13,7 +13,7 @@ func TestCloseContractValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgCloseContract{
-		Creator:    acct,
+		Creator:    acct.String(),
 		ContractId: 50,
 		Client:     pubkey,
 	}

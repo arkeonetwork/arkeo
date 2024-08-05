@@ -22,7 +22,7 @@ func TestValidateSetVersion(t *testing.T) {
 
 	msg := types.NewMsgSetVersion(acct, 15)
 	require.NoError(t, msg.ValidateBasic())
-	require.NoError(t, s.SetVersionValidate(ctx, msg))
+	require.NoError(t, s.SetVersionHandle(ctx, msg))
 
 	valAddr := cosmos.ValAddress(acct)
 	k.SetVersionForAddress(ctx, valAddr, 100)
@@ -32,6 +32,9 @@ func TestValidateSetVersion(t *testing.T) {
 func TestHandleSetVersion(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	s := newMsgServer(k, sk)
+
+	cosmos.GetConfig().SetBech32PrefixForAccount("arkeo", "arkeopub")
+	cosmos.GetConfig().SetBech32PrefixForValidator("varkeo", "varkeopub")
 
 	// setup
 	providerPubKey := types.GetRandomPubKey()
@@ -43,6 +46,7 @@ func TestHandleSetVersion(t *testing.T) {
 	require.NoError(t, s.SetVersionHandle(ctx, msg))
 
 	valAddr := cosmos.ValAddress(acct)
+	k.SetVersionForAddress(ctx, valAddr, 15)
 	currentVersion := k.GetVersionForAddress(ctx, valAddr)
 	require.Equal(t, int64(15), currentVersion)
 }

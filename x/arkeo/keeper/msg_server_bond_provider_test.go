@@ -23,7 +23,7 @@ func TestHandle(t *testing.T) {
 
 	// Add to bond
 	msg := types.MsgBondProvider{
-		Creator:  acct,
+		Creator:  acct.String(),
 		Provider: providerPubKey,
 		Service:  common.BTCService.String(),
 		Bond:     cosmos.NewInt(common.Tokens(8)),

@@ -15,7 +15,7 @@ func TestValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgBondProvider{
-		Creator:  acct,
+		Creator:  acct.String(),
 		Provider: pubkey,
 	}
 	err = msg.ValidateBasic()

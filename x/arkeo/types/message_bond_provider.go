@@ -14,7 +14,7 @@ var _ sdk.Msg = &MsgBondProvider{}
 
 func NewMsgBondProvider(creator cosmos.AccAddress, provider common.PubKey, service string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
-		Creator:  creator,
+		Creator:  creator.String(),
 		Provider: provider,
 		Service:  service,
 		Bond:     bond,
@@ -30,11 +30,11 @@ func (msg *MsgBondProvider) Type() string {
 }
 
 func (msg *MsgBondProvider) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgBondProvider) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	return sdk.MustAccAddressFromBech32(msg.Creator)
 }
 
 func (msg *MsgBondProvider) GetSignBytes() []byte {

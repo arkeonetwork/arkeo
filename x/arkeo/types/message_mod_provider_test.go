@@ -19,7 +19,7 @@ func TestModProviderValidateBasic(t *testing.T) {
 
 	// happy path
 	msg := MsgModProvider{
-		Creator:             acct,
+		Creator:             acct.String(),
 		Provider:            pubkey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 12,

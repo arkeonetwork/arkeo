@@ -145,6 +145,7 @@ func TestContractEndBlock(t *testing.T) {
 	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
+	creatorAddress := types.GetRandomBech32Addr()
 
 	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
@@ -159,6 +160,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
@@ -182,7 +184,7 @@ func TestContractEndBlock(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      common.BTCService.String(),
-		Creator:      user1Address,
+		Creator:      user1Address.String(),
 		Client:       user1PubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -206,7 +208,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user2Address, getCoin(common.Tokens(20))))
 	msg.Delegate = common.EmptyPubKey
 	msg.Client = user2PubKey
-	msg.Creator = user2Address
+	msg.Creator = user2Address.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -264,6 +266,8 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
 
+	creatorAddress := types.GetRandomBech32Addr()
+
 	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
 	provider := types.NewProvider(providerPubKey, common.BTCService)
@@ -278,6 +282,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
@@ -303,7 +308,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:           providerPubKey,
 		Service:            common.BTCService.String(),
-		Creator:            user1Address,
+		Creator:            user1Address.String(),
 		Client:             user1PubKey,
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
 		Duration:           100,

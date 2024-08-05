@@ -60,7 +60,7 @@ func TestValidate(t *testing.T) {
 
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
@@ -73,7 +73,7 @@ func TestValidate(t *testing.T) {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + contract.Duration)
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 	err = s.HandlerClaimContractIncome(ctx, &msg)
@@ -121,7 +121,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
@@ -137,7 +137,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 
@@ -216,7 +216,7 @@ func TestHandleSubscription(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -227,7 +227,7 @@ func TestHandleSubscription(t *testing.T) {
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 	// repeat the same thing and ensure we don't pay providers twice
@@ -303,7 +303,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
@@ -370,7 +370,7 @@ func TestClaimContractIncomeHandlerSignatureVerification(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 

@@ -18,7 +18,7 @@ func TestBondProviderValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgOpenContract{
-		Creator:          acct,
+		Creator:          acct.String(),
 		Provider:         pubkey,
 		Client:           pubkey,
 		Service:          common.BTCService.String(),

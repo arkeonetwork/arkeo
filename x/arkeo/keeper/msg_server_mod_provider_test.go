@@ -63,7 +63,7 @@ func TestModProviderHandle(t *testing.T) {
 
 	// happy path
 	msg := types.MsgModProvider{
-		Creator:             acct,
+		Creator:             acct.String(),
 		Provider:            pubkey,
 		Service:             common.BTCService.String(),
 		MetadataUri:         "foobar",

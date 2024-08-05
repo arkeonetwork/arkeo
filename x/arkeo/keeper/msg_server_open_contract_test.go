@@ -51,7 +51,7 @@ func TestOpenContractValidate(t *testing.T) {
 		Provider:         providerPubkey,
 		Service:          service.String(),
 		Client:           clientPubKey,
-		Creator:          acc,
+		Creator:          acc.String(),
 		ContractType:     types.ContractType_SUBSCRIPTION,
 		Duration:         100,
 		Rate:             sRates[0],
@@ -120,7 +120,7 @@ func TestOpenContractHandle(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:         pubkey,
 		Service:          service.String(),
-		Creator:          acc,
+		Creator:          acc.String(),
 		Client:           pubkey,
 		ContractType:     types.ContractType_PAY_AS_YOU_GO,
 		Duration:         100,
@@ -176,7 +176,9 @@ func TestOpenContract(t *testing.T) {
 	rates, err := cosmos.ParseCoins("15uarkeo")
 	require.NoError(t, err)
 
+	creatorAddress := types.GetRandomBech32Addr()
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
@@ -193,7 +195,7 @@ func TestOpenContract(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      providerAddress,
+		Creator:      providerAddress.String(),
 		Client:       providerPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -216,7 +218,7 @@ func TestOpenContract(t *testing.T) {
 	msg = types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      clientAddress,
+		Creator:      clientAddress.String(),
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -262,8 +264,10 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 
 	rates, err := cosmos.ParseCoins("15uarkeo")
 	require.NoError(t, err)
+	creatorAddress := types.GetRandomBech32Addr()
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
@@ -297,7 +301,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	msg := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      clientAddress,
+		Creator:      clientAddress.String(),
 		Client:       clientPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -336,7 +340,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	// settlement period.
 	claimMsg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    clientAddress,
+		Creator:    clientAddress.String(),
 		Nonce:      20,
 	}
 	message := claimMsg.GetBytesToSign()

@@ -32,7 +32,7 @@ func TestCloseContractValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    clientAcct,
+		Creator:    clientAcct.String(),
 		ContractId: contract.Id,
 		Client:     clientPubKey,
 	}
@@ -63,7 +63,7 @@ func TestCloseContractHandle(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Creator:      clientAccount,
+		Creator:      clientAccount.String(),
 		Client:       clientPubKey,
 		Service:      service.String(),
 		Provider:     providerPubKey,
@@ -88,7 +88,7 @@ func TestCloseContractHandle(t *testing.T) {
 
 	// happy path
 	msg := types.MsgCloseContract{
-		Creator:    clientAccount,
+		Creator:    clientAccount.String(),
 		ContractId: contract.Id,
 		Client:     clientPubKey,
 	}
@@ -112,6 +112,8 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 
+	creatroAddress := types.GetRandomBech32Addr()
+
 	// set up provider
 	providerPubKey := types.GetRandomPubKey()
 	providerAddress, err := providerPubKey.GetMyAddress()
@@ -125,6 +127,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatroAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
@@ -146,7 +149,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:         providerPubKey,
 		Service:          service.String(),
-		Creator:          providerAddress,
+		Creator:          providerAddress.String(),
 		Client:           userPubKey,
 		ContractType:     types.ContractType_SUBSCRIPTION,
 		Duration:         100,
@@ -169,7 +172,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	closeContractMsg := types.MsgCloseContract{
-		Creator:    user2Address,
+		Creator:    user2Address.String(),
 		ContractId: contract.Id,
 		Client:     contract.Client,
 	}
@@ -177,7 +180,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// confirm that the contract can be closed by the client
-	closeContractMsg.Creator = userAddress
+	closeContractMsg.Creator = userAddress.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
 	contract, err = s.GetActiveContractForUser(ctx, userPubKey, providerPubKey, service)
@@ -201,12 +204,12 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.Len(t, user2ContractSet.ContractSet.ContractIds, 1)
 
 	// confirm that the contract cannot be closed by the delegate
-	closeContractMsg.Creator = user2Address
+	closeContractMsg.Creator = user2Address.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// but can be closed by the client
-	closeContractMsg.Creator = userAddress
+	closeContractMsg.Creator = userAddress.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
 }
@@ -229,7 +232,10 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	rates, err := cosmos.ParseCoins("15uarkeo")
 	require.NoError(t, err)
 
+	creatorAddress := types.GetRandomBech32Addr()
+
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             provider.Service.String(),
 		MinContractDuration: 10,
@@ -251,7 +257,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	openContractMessage := types.MsgOpenContract{
 		Provider:     providerPubKey,
 		Service:      service.String(),
-		Creator:      providerAddress,
+		Creator:      providerAddress.String(),
 		Client:       userPubKey,
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
@@ -270,7 +276,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.NoError(t, err)
 
 	closeContractMsg := types.MsgCloseContract{
-		Creator:    user2Address,
+		Creator:    user2Address.String(),
 		ContractId: contract.Id,
 		Client:     contract.Client,
 	}
@@ -288,12 +294,12 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	closeContractMsg.ContractId = contract.Id
 
 	// confirm that the contract cannot be closed by the delegate
-	closeContractMsg.Creator = user2Address
+	closeContractMsg.Creator = user2Address.String()
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// unbond provider , unbond 100% will remove the provider
-	closeContractMsg.Creator = userAddress
+	closeContractMsg.Creator = userAddress.String()
 	k.RemoveProvider(ctx, providerPubKey, service)
 	_, err = s.CloseContract(ctx, &closeContractMsg)
 	require.NoError(t, err)
@@ -328,7 +334,7 @@ func TestCloseContractUnauthorizedClient(t *testing.T) {
 
 	require.NoError(t, err)
 	msg := types.MsgCloseContract{
-		Creator:    unauthorizedClientAddress,
+		Creator:    unauthorizedClientAddress.String(),
 		ContractId: contract.Id,
 		Client:     unauthorizedClientPubKey,
 	}
@@ -364,7 +370,7 @@ func TestCloseContractWithIncorrectDelegate(t *testing.T) {
 
 	require.NoError(t, err)
 	msg := types.MsgCloseContract{
-		Creator:    clientAcct,
+		Creator:    clientAcct.String(),
 		ContractId: contract.Id,
 		Client:     clientPubKey,
 		Delegate:   types.GetRandomPubKey(),
@@ -401,7 +407,7 @@ func TestCloseContractWithNoClient(t *testing.T) {
 
 	require.NoError(t, err)
 	msg := types.MsgCloseContract{
-		Creator:    unauthorizedClientAddress,
+		Creator:    unauthorizedClientAddress.String(),
 		ContractId: contract.Id,
 	}
 

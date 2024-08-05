@@ -15,7 +15,7 @@ var _ sdk.Msg = &MsgClaimContractIncome{}
 
 func NewMsgClaimContractIncome(creator cosmos.AccAddress, contractId uint64, nonce int64, sig []byte) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
-		Creator:    creator,
+		Creator:    creator.String(),
 		ContractId: contractId,
 		Nonce:      nonce,
 		Signature:  sig,
@@ -31,11 +31,11 @@ func (msg *MsgClaimContractIncome) Type() string {
 }
 
 func (msg *MsgClaimContractIncome) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgClaimContractIncome) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	return sdk.MustAccAddressFromBech32(msg.Creator)
 }
 
 func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
