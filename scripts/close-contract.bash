@@ -15,4 +15,4 @@ BIN_TX="arkeo"
 USER="$1"
 ID="$2"
 
-$BIN tx $BIN_TX close-contract -y -b block --from "$USER" --keyring-backend test -- "$ID"
+$BIN tx $BIN_TX close-contract -y -b sync --from "$USER" --keyring-backend test -- "$ID"

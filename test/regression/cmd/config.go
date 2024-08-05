@@ -84,6 +84,7 @@ func init() {
 	txFactory = txFactory.WithChainID(clientCtx.ChainID)
 	txFactory = txFactory.WithGas(1e8)
 	txFactory = txFactory.WithSignMode(signing.SignMode_SIGN_MODE_DIRECT)
+	txFactory = txFactory.WithTxConfig(clientCtx.TxConfig)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

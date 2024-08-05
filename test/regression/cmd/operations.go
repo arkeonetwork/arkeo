@@ -643,6 +643,8 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 	ctx = ctx.WithFromName(addressToName[signer.String()])
 	ctx = ctx.WithOutput(buf)
 
+	ctx = ctx.WithBroadcastMode("sync")
+
 	// override the sequence if provided
 	txf := txFactory
 	if seq != nil {
@@ -650,7 +652,7 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 	}
 
 	// send message
-	err = tx.GenerateOrBroadcastTxWithFactory(ctx, txf, msg)
+	err = tx.BroadcastTx(ctx, txf, msg)
 	if err != nil {
 		fmt.Println(ColorPurple + "\nOperation:" + ColorReset)
 		enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
@@ -661,7 +663,7 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 		return err
 	}
 
-	// extract txhash from output json
+	// // extract txhash from output json
 	var txRes sdk.TxResponse
 	err = encodingConfig.Marshaler.UnmarshalJSON(buf.Bytes(), &txRes)
 	if err != nil {
