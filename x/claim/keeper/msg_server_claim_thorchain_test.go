@@ -8,161 +8,76 @@ import (
 	"testing"
 )
 
-func TestClaimThorchainArkeo(t *testing.T) {
+func TestClaimThorchain(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	
+	config := sdk.GetConfig()
+    config.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
+    config.Seal()
 
-	addrArkeo := utils.GetRandomArkeoAddress()
-	claimRecord := types.ClaimRecord{
-		Chain:          types.ARKEO,
-		Address:        addrArkeo.String(),
-		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-	}
-	err := keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1z02ke8639m47g9dfrheegr2u9zecegt5qvtj00")
 	require.NoError(t, err)
 
-	thorClaimAddress := "cosmos1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6wy5w8c"
-	thorClaimRecord := types.ClaimRecord{
+	fromAddr := utils.GetRandomArkeoAddress()
+	toAddr := utils.GetRandomArkeoAddress()
+
+	claimRecordFrom := types.ClaimRecord{
 		Chain:          types.ARKEO,
-		Address:        thorClaimAddress, // arkeo address derived from sender of thorchain tx "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174"
+		Address:        fromAddr.String(),
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 	}
-	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, thorClaimRecord)
+	claimRecordTo := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        toAddr.String(),
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordFrom)
+	require.NoError(t, err)
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordTo)
 	require.NoError(t, err)
 
 	// mint coins to module account
 	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
 	require.NoError(t, err)
 
-	// get balance of arkeo address before claim
-	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
-
-	claimMessage := types.MsgClaimArkeo{
-		Creator: addrArkeo,
-		ThorTx:  "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174",
+	invalidClaimMessage := types.MsgClaimThorchain{
+		Creator:     fromAddr,
+		FromAddress: fromAddr.String(),
+		ToAddress:   toAddr.String(),
 	}
-	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
+	_, err = msgServer.ClaimThorchain(ctx, &invalidClaimMessage)
+	require.ErrorIs(t, types.ErrInvalidCreator, err)
+
+
+	claimMessage := types.MsgClaimThorchain{
+		Creator:     arkeoServerAddress,
+		FromAddress: fromAddr.String(),
+		ToAddress:   toAddr.String(),
+	}
+	_, err = msgServer.ClaimThorchain(ctx, &claimMessage)
 	require.NoError(t, err)
 
 	// check if claimrecord is updated
-	thorClaimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, thorClaimAddress, types.ARKEO)
+	claimRecordFrom, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, fromAddr.String(), types.ARKEO)
 	require.NoError(t, err)
-	require.True(t, thorClaimRecord.IsEmpty())
+	require.True(t, claimRecordFrom.IsEmpty())
 
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
+	claimRecordTo, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, toAddr.String(), types.ARKEO)
 	require.NoError(t, err)
-	require.True(t, !claimRecord.IsEmpty())
+	require.True(t, !claimRecordTo.IsEmpty())
 
-	require.Equal(t, claimRecord.Address, addrArkeo.String())
-	require.Equal(t, claimRecord.Chain, types.ARKEO)
-	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
-	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
-	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
-
-	// confirm balance increased by expected amount.
-	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
-	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+	require.Equal(t, claimRecordTo.Address, toAddr.String())
+	require.Equal(t, claimRecordTo.Chain, types.ARKEO)
+	require.Equal(t, claimRecordTo.AmountClaim, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+	require.Equal(t, claimRecordTo.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
+	require.Equal(t, claimRecordTo.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 200))
 
 	// attempt to claim again to ensure it fails.
-	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
+	_, err = msgServer.ClaimThorchain(ctx, &claimMessage)
 	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
-
-	// ensure claim Arkeo fails from address with no claim record
-	addrArkeo2 := utils.GetRandomArkeoAddress()
-	claimMessage2 := types.MsgClaimArkeo{
-		Creator: addrArkeo2,
-	}
-	_, err = msgServer.ClaimArkeo(ctx, &claimMessage2)
-	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
-}
-
-func TestClaimThorchainEth(t *testing.T) {
-	msgServer, keepers, ctx := setupMsgServer(t)
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	// create valid eth claimrecords
-	addrArkeo := utils.GetRandomArkeoAddress()
-	addrEth, sigString, err := generateSignedEthClaim(addrArkeo.String(), "300")
-	require.NoError(t, err)
-
-	arkeoClaimRecord := types.ClaimRecord{
-		Chain:          types.ARKEO,
-		Address:        addrArkeo.String(),
-		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
-		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
-		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 50),
-	}
-	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, arkeoClaimRecord)
-	require.NoError(t, err)
-
-	claimRecord := types.ClaimRecord{
-		Chain:          types.ETHEREUM,
-		Address:        addrEth,
-		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
-	}
-	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecord)
-	require.NoError(t, err)
-
-	thorClaimAddress := "cosmos1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6wy5w8c"
-	thorClaimRecord := types.ClaimRecord{
-		Chain:          types.ARKEO,
-		Address:        thorClaimAddress, // arkeo address derived from sender of thorchain tx "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174"
-		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 500),
-		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 500),
-		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 500),
-	}
-	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, thorClaimRecord)
-	require.NoError(t, err)
-
-	// mint coins to module account
-	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(sdk.NewInt64Coin(types.DefaultClaimDenom, 10000)))
-	require.NoError(t, err)
-
-	// get balance of arkeo address before claim
-	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
-
-	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo,
-		EthAddress: addrEth,
-		Signature:  sigString,
-		ThorTx:     "FA2768AEB52AE0A378372B48B10C5B374B25E8B2005C702AAD441B813ED2F174",
-	}
-	_, err = msgServer.ClaimEth(ctx, &claimMessage)
-	require.NoError(t, err)
-
-	// check if claimrecord is updated
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
-	require.NoError(t, err)
-	require.True(t, claimRecord.IsEmpty())
-
-	thorClaimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, thorClaimAddress, types.ARKEO)
-	require.NoError(t, err)
-	require.True(t, thorClaimRecord.IsEmpty())
-
-	// confirm we have a claimrecord for arkeo
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
-	require.NoError(t, err)
-	require.Equal(t, claimRecord.Address, addrArkeo.String())
-	require.Equal(t, claimRecord.Chain, types.ARKEO)
-	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
-	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
-	require.Equal(t, claimRecord.AmountDelegate, sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
-
-	// confirm balance increased by expected amount.
-	balanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
-	require.Equal(t, balanceAfter.Sub(balanceBefore), sdk.NewInt64Coin(types.DefaultClaimDenom, 650))
-
-	// attempt to claim again to ensure it fails.
-	_, err = msgServer.ClaimEth(ctx, &claimMessage)
-	require.Error(t, err)
-
-	// attempt to claim from arkeo should also fail!
-	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
-	require.Error(t, err)
 }
