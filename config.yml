@@ -16,7 +16,6 @@ accounts:
 - name: reserve
   coins:
   - 2000000000000000uarkeo
-  address: tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t
 - name: alice
   coins:
   - 200000000000000uarkeo
