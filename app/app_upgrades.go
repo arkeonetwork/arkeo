@@ -21,12 +21,12 @@ func (app *ArkeoApp) RegisterUpgradeHandlers() {
 }
 
 func (app *ArkeoApp) setUpgradeStoreLoaders() {
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	upgradeInfo, err := app.Keepers.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
 		panic(fmt.Sprintf("faild to read upgrade infro from disk %s", err))
 	}
 
-	if app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+	if app.Keepers.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
 		return
 	}
 
@@ -39,9 +39,9 @@ func (app *ArkeoApp) setUpgradeStoreLoaders() {
 
 func (app *ArkeoApp) setUpgradeHandlers() {
 	for _, u := range Upgrades {
-		app.UpgradeKeeper.SetUpgradeHandler(
+		app.Keepers.UpgradeKeeper.SetUpgradeHandler(
 			u.UpgradeName,
-			u.CreateUpgradeHandler(app.mm, app.configurator),
+			u.CreateUpgradeHandler(app.mm, app.configurator, app.Keepers),
 		)
 	}
 }

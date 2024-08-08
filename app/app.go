@@ -7,16 +7,19 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
 	clienthelpers "cosmossdk.io/client/v2/helpers"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/cosmos/cosmos-sdk/std"
+	"github.com/cosmos/gogoproto/proto"
 
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
 	storetypes "cosmossdk.io/store/types"
+	"github.com/arkeonetwork/arkeo/app/keepers"
 	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	"github.com/arkeonetwork/arkeo/docs"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -32,11 +35,13 @@ import (
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
+	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
@@ -110,20 +115,16 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	// ibcclientclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/client"
-	tmjson "encoding/json"
 
 	"cosmossdk.io/log"
 	_ "cosmossdk.io/x/circuit" // import for side-effects
-	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	dbm "github.com/cosmos/cosmos-db"
 	_ "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts" // import for side-effects
-	icacontrollerkeeper "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/controller/keeper"
 	icahostkeeper "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/keeper"
 	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
 	_ "github.com/cosmos/ibc-go/v8/modules/apps/29-fee" // import for side-effects
-	ibcfeekeeper "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/keeper"
 	ibcfeetypes "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/types"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibcporttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
@@ -239,39 +240,13 @@ type ArkeoApp struct {
 	memKeys map[string]*storetypes.MemoryStoreKey
 
 	// keepers
-	AccountKeeper         authkeeper.AccountKeeper
-	BankKeeper            bankkeeper.Keeper
-	StakingKeeper         *stakingkeeper.Keeper
-	DistrKeeper           distrkeeper.Keeper
-	ConsensusParamsKeeper consensuskeeper.Keeper
-
-	SlashingKeeper       slashingkeeper.Keeper
-	MintKeeper           mintkeeper.Keeper
-	GovKeeper            *govkeeper.Keeper
-	CrisisKeeper         crisiskeeper.Keeper
-	UpgradeKeeper        *upgradekeeper.Keeper
-	ParamsKeeper         paramskeeper.Keeper
-	AuthzKeeper          authzkeeper.Keeper
-	EvidenceKeeper       evidencekeeper.Keeper
-	FeeGrantKeeper       feegrantkeeper.Keeper
-	GroupKeeper          groupkeeper.Keeper
-	CircuitBreakerKeeper circuitkeeper.Keeper
-
-	//IBC
-	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	CapabilityKeeper    *capabilitykeeper.Keeper
-	IBCFeeKeeper        ibcfeekeeper.Keeper
-	ICAControllerKeeper icacontrollerkeeper.Keeper
-	ICAHostKeeper       icahostkeeper.Keeper
-	TransferKeeper      ibctransferkeeper.Keeper
+	Keepers keepers.ArkeoKeepers
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
-	ArkeoKeeper arkeomodulekeeper.Keeper
-	ClaimKeeper claimmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -366,7 +341,7 @@ func NewArkeoApp(
 		txConfig:          txConfig,
 	}
 
-	app.ParamsKeeper = initParamsKeeper(
+	app.Keepers.ParamsKeeper = initParamsKeeper(
 		appCodec,
 		cdc,
 		keys[paramstypes.StoreKey],
@@ -374,7 +349,7 @@ func NewArkeoApp(
 	)
 	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
 
-	app.ConsensusParamsKeeper = consensuskeeper.NewKeeper(
+	app.Keepers.ConsensusParamsKeeper = consensuskeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[consensusparamtypes.StoreKey]),
 		govModuleAddr,
@@ -382,25 +357,25 @@ func NewArkeoApp(
 	)
 
 	// set the BaseApp's parameter store
-	app.SetParamStore(app.ConsensusParamsKeeper.ParamsStore)
+	app.SetParamStore(app.Keepers.ConsensusParamsKeeper.ParamsStore)
 	// bApp.SetParamStore(app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()))
 
 	// add capability keeper and ScopeToModule for ibc module
-	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
+	app.Keepers.CapabilityKeeper = capabilitykeeper.NewKeeper(
 		appCodec,
 		keys[capabilitytypes.StoreKey],
 		memKeys[capabilitytypes.MemStoreKey],
 	)
 
 	// grant capabilities for the ibc and ibc-transfer modules
-	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibcexported.ModuleName)
-	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
-	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
+	scopedIBCKeeper := app.Keepers.CapabilityKeeper.ScopeToModule(ibcexported.ModuleName)
+	scopedTransferKeeper := app.Keepers.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
+	scopedICAHostKeeper := app.Keepers.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 	// this line is used by starport scaffolding # stargate/app/scopedKeeper
-	app.CapabilityKeeper.Seal()
+	app.Keepers.CapabilityKeeper.Seal()
 
 	// add keepers
-	app.AccountKeeper = authkeeper.NewAccountKeeper(
+	app.Keepers.AccountKeeper = authkeeper.NewAccountKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[authtypes.StoreKey]),
 		authtypes.ProtoBaseAccount,
@@ -410,90 +385,77 @@ func NewArkeoApp(
 		govModuleAddr,
 	)
 
-	app.AuthzKeeper = authzkeeper.NewKeeper(
+	app.Keepers.AuthzKeeper = authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(keys[authz.ModuleName]),
 		appCodec,
 		app.MsgServiceRouter(),
-		app.AccountKeeper,
+		app.Keepers.AccountKeeper,
 	)
 
-	app.BankKeeper = bankkeeper.NewBaseKeeper(
+	app.Keepers.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
-		app.AccountKeeper,
+		app.Keepers.AccountKeeper,
 		app.BlockedModuleAccountAddrs(),
 		govModuleAddr,
 		logger,
 	)
 
-	app.StakingKeeper = stakingkeeper.NewKeeper(
+	app.Keepers.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
-		app.AccountKeeper,
-		app.BankKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
 		govModuleAddr,
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
 
-	app.MintKeeper = mintkeeper.NewKeeper(
+	app.Keepers.MintKeeper = mintkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[minttypes.StoreKey]),
-		app.StakingKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
+		app.Keepers.StakingKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
 		authtypes.FeeCollectorName,
 		govModuleAddr,
 	)
 
-	app.DistrKeeper = distrkeeper.NewKeeper(
+	app.Keepers.DistrKeeper = distrkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[distrtypes.StoreKey]),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.StakingKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
+		app.Keepers.StakingKeeper,
 		authtypes.FeeCollectorName,
 		govModuleAddr,
 	)
 
-	app.SlashingKeeper = slashingkeeper.NewKeeper(
+	app.Keepers.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec,
 		cdc,
 		runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
-		app.StakingKeeper,
+		app.Keepers.StakingKeeper,
 		govModuleAddr,
 	)
 
-	app.CrisisKeeper = *crisiskeeper.NewKeeper(
+	app.Keepers.CrisisKeeper = *crisiskeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[crisistypes.StoreKey]),
 		invCheckPeriod,
-		app.BankKeeper,
+		app.Keepers.BankKeeper,
 		authtypes.FeeCollectorName,
 		govModuleAddr,
-		app.AccountKeeper.AddressCodec(),
+		app.Keepers.AccountKeeper.AddressCodec(),
 	)
 
-	groupConfig := group.DefaultConfig()
-	/*
-		Example of setting group params:
-		groupConfig.MaxMetadataLen = 1000
-	*/
-	app.GroupKeeper = groupkeeper.NewKeeper(
-		keys[group.StoreKey],
-		appCodec,
-		app.MsgServiceRouter(),
-		app.AccountKeeper,
-		groupConfig,
-	)
-
-	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(
+	app.Keepers.FeeGrantKeeper = feegrantkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[feegrant.StoreKey]),
-		app.AccountKeeper,
+		app.Keepers.AccountKeeper,
 	)
 
-	app.UpgradeKeeper = upgradekeeper.NewKeeper(
+	app.Keepers.UpgradeKeeper = upgradekeeper.NewKeeper(
 		skipUpgradeHeights,
 		runtime.NewKVStoreService(keys[upgradetypes.StoreKey]),
 		appCodec,
@@ -502,79 +464,96 @@ func NewArkeoApp(
 		govModuleAddr,
 	)
 
-	app.ClaimKeeper = claimmodulekeeper.NewKeeper(
+	groupConfig := group.DefaultConfig()
+	/*
+		Example of setting group params:
+		groupConfig.MaxMetadataLen = 1000
+	*/
+	app.Keepers.GroupKeeper = groupkeeper.NewKeeper(
+		keys[group.StoreKey],
+		appCodec,
+		app.MsgServiceRouter(),
+		app.Keepers.AccountKeeper,
+		groupConfig,
+	)
+
+	app.Keepers.ClaimKeeper = claimmodulekeeper.NewKeeper(
 		appCodec,
 		keys[claimmoduletypes.StoreKey],
-		app.AccountKeeper,
-		app.BankKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
 		keys[claimmoduletypes.MemStoreKey],
 		app.GetSubspace(claimmoduletypes.ModuleName),
 		logger,
 	)
-	claimModule := claimmodule.NewAppModule(appCodec, app.ClaimKeeper, app.AccountKeeper, app.BankKeeper)
+	claimModule := claimmodule.NewAppModule(appCodec, app.Keepers.ClaimKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 
-	app.StakingKeeper.SetHooks(stakingtypes.NewMultiStakingHooks(app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(), app.ClaimKeeper.Hooks()))
+	app.Keepers.StakingKeeper.SetHooks(stakingtypes.NewMultiStakingHooks(app.Keepers.DistrKeeper.Hooks(), app.Keepers.SlashingKeeper.Hooks(), app.Keepers.ClaimKeeper.Hooks()))
 
 	// ... other modules keepers
 
+	govRouter := govv1beta1.NewRouter()
+	govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).AddRoute(
+		paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.Keepers.ParamsKeeper))
+
 	// Create IBC Keeper
-	app.IBCKeeper = ibckeeper.NewKeeper(
+	app.Keepers.IBCKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibcexported.StoreKey],
 		app.GetSubspace(ibcexported.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
+		app.Keepers.StakingKeeper,
+		app.Keepers.UpgradeKeeper,
 		scopedIBCKeeper,
 		govModuleAddr,
 	)
 
 	// Create Transfer Keepers
-	app.TransferKeeper = ibctransferkeeper.NewKeeper(
+	app.Keepers.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCFeeKeeper,
-		app.IBCKeeper.ChannelKeeper,
-		app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
+		app.Keepers.IBCFeeKeeper,
+		app.Keepers.IBCKeeper.ChannelKeeper,
+		app.Keepers.IBCKeeper.PortKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
 		scopedTransferKeeper,
 		govModuleAddr,
 	)
-	transferModule := transfer.NewAppModule(app.TransferKeeper)
-	transferIBCModule := transfer.NewIBCModule(app.TransferKeeper)
+	transferModule := transfer.NewAppModule(app.Keepers.TransferKeeper)
+	transferIBCModule := transfer.NewIBCModule(app.Keepers.TransferKeeper)
 
-	app.ICAHostKeeper = icahostkeeper.NewKeeper(
+	app.Keepers.ICAHostKeeper = icahostkeeper.NewKeeper(
 		appCodec,
 		keys[icahosttypes.StoreKey],
 		app.GetSubspace(icahosttypes.SubModuleName),
-		app.IBCFeeKeeper,
-		app.IBCKeeper.ChannelKeeper,
-		app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
+		app.Keepers.IBCFeeKeeper,
+		app.Keepers.IBCKeeper.ChannelKeeper,
+		app.Keepers.IBCKeeper.PortKeeper,
+		app.Keepers.AccountKeeper,
 		scopedICAHostKeeper,
 		app.MsgServiceRouter(),
 		govModuleAddr,
 	)
-	icaModule := ica.NewAppModule(nil, &app.ICAHostKeeper)
-	icaHostIBCModule := icahost.NewIBCModule(app.ICAHostKeeper)
+	icaModule := ica.NewAppModule(nil, &app.Keepers.ICAHostKeeper)
+	icaHostIBCModule := icahost.NewIBCModule(app.Keepers.ICAHostKeeper)
 
-	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
+	app.Keepers.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
 	// Create evidence Keeper for to register the IBC light client misbehaviour evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[evidencetypes.StoreKey]),
-		app.StakingKeeper,
-		app.SlashingKeeper,
-		app.AccountKeeper.AddressCodec(),
+		app.Keepers.StakingKeeper,
+		app.Keepers.SlashingKeeper,
+		app.Keepers.AccountKeeper.AddressCodec(),
 		runtime.ProvideCometInfoService(),
 	)
 	// If evidence needs to be handled for the app, set routes in router here and seal
-	app.EvidenceKeeper = *evidenceKeeper
+	app.Keepers.EvidenceKeeper = *evidenceKeeper
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
@@ -584,46 +563,41 @@ func NewArkeoApp(
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
 
 	// this line is used by starport scaffolding # ibc/app/router
-	app.IBCKeeper.SetRouter(ibcRouter)
-
-	govRouter := govv1beta1.NewRouter()
-	govRouter.
-		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
-		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper))
+	app.Keepers.IBCKeeper.SetRouter(ibcRouter)
 
 	govConfig := govtypes.DefaultConfig()
-	app.GovKeeper = govkeeper.NewKeeper(
+	app.Keepers.GovKeeper = govkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[govtypes.StoreKey]),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.StakingKeeper,
-		app.DistrKeeper,
+		app.Keepers.AccountKeeper,
+		app.Keepers.BankKeeper,
+		app.Keepers.StakingKeeper,
+		app.Keepers.DistrKeeper,
 		app.MsgServiceRouter(),
 		govConfig,
 		govModuleAddr,
 	)
 
-	app.GovKeeper.SetLegacyRouter(govRouter)
+	app.Keepers.GovKeeper.SetLegacyRouter(govRouter)
 
-	app.GovKeeper.SetHooks(
+	app.Keepers.GovKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
-			app.ClaimKeeper.Hooks(),
+			app.Keepers.ClaimKeeper.Hooks(),
 		),
 	)
 
-	app.ArkeoKeeper = *arkeomodulekeeper.NewKVStore(
+	app.Keepers.ArkeoKeeper = *arkeomodulekeeper.NewKVStore(
 		appCodec,
 		keys[arkeomoduletypes.StoreKey],
 		keys[arkeomoduletypes.MemStoreKey],
 		app.GetSubspace(arkeomoduletypes.ModuleName),
-		app.BankKeeper,
-		app.AccountKeeper,
-		*app.StakingKeeper,
+		app.Keepers.BankKeeper,
+		app.Keepers.AccountKeeper,
+		*app.Keepers.StakingKeeper,
 		govModuleAddr,
 		logger,
 	)
-	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper)
+	arkeoModule := arkeomodule.NewAppModule(appCodec, app.Keepers.ArkeoKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, *app.Keepers.StakingKeeper)
 
 	/****  Module Options ****/
 
@@ -636,26 +610,26 @@ func NewArkeoApp(
 
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
-			app.AccountKeeper, app.StakingKeeper, app,
+			app.Keepers.AccountKeeper, app.Keepers.StakingKeeper, app,
 			encodingConfig.TxConfig,
 		),
-		auth.NewAppModule(appCodec, app.AccountKeeper, nil, app.GetSubspace(authtypes.ModuleName)),
-		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
-		capability.NewAppModule(appCodec, *app.CapabilityKeeper, false),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
-		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
-		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
-		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
-		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
-		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
-		upgrade.NewAppModule(app.UpgradeKeeper, app.AccountKeeper.AddressCodec()),
-		evidence.NewAppModule(app.EvidenceKeeper),
-		ibc.NewAppModule(app.IBCKeeper),
-		params.NewAppModule(app.ParamsKeeper),
+		auth.NewAppModule(appCodec, app.Keepers.AccountKeeper, nil, app.GetSubspace(authtypes.ModuleName)),
+		authzmodule.NewAppModule(appCodec, app.Keepers.AuthzKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.interfaceRegistry),
+		vesting.NewAppModule(app.Keepers.AccountKeeper, app.Keepers.BankKeeper),
+		bank.NewAppModule(appCodec, app.Keepers.BankKeeper, app.Keepers.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
+		capability.NewAppModule(appCodec, *app.Keepers.CapabilityKeeper, false),
+		feegrantmodule.NewAppModule(appCodec, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.FeeGrantKeeper, app.interfaceRegistry),
+		groupmodule.NewAppModule(appCodec, app.Keepers.GroupKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.interfaceRegistry),
+		crisis.NewAppModule(&app.Keepers.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
+		gov.NewAppModule(appCodec, app.Keepers.GovKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
+		slashing.NewAppModule(appCodec, app.Keepers.SlashingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
+		distr.NewAppModule(appCodec, app.Keepers.DistrKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
+		staking.NewAppModule(appCodec, app.Keepers.StakingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
+		upgrade.NewAppModule(app.Keepers.UpgradeKeeper, app.Keepers.AccountKeeper.AddressCodec()),
+		evidence.NewAppModule(app.Keepers.EvidenceKeeper),
+		ibc.NewAppModule(app.Keepers.IBCKeeper),
+		params.NewAppModule(app.Keepers.ParamsKeeper),
 		transferModule,
 		icaModule,
 		arkeoModule,
@@ -668,6 +642,7 @@ func NewArkeoApp(
 	// CanWithdrawInvariant invariant.
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	app.mm.SetOrderBeginBlockers(
+		govtypes.ModuleName,
 		// upgrades should be run first
 		upgradetypes.ModuleName,
 		capabilitytypes.ModuleName,
@@ -678,7 +653,6 @@ func NewArkeoApp(
 		stakingtypes.ModuleName,
 		authtypes.ModuleName,
 		banktypes.ModuleName,
-		govtypes.ModuleName,
 		crisistypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
@@ -754,7 +728,7 @@ func NewArkeoApp(
 	// Uncomment if you want to set a custom migration order here.
 	// app.mm.SetOrderMigrations(custom order)
 
-	app.mm.RegisterInvariants(&app.CrisisKeeper)
+	app.mm.RegisterInvariants(&app.Keepers.CrisisKeeper)
 
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 	err := app.mm.RegisterServices(app.configurator)
@@ -770,22 +744,32 @@ func NewArkeoApp(
 	}
 	reflectionv1.RegisterReflectionServiceServer(app.GRPCQueryRouter(), reflectionSvc)
 
+	protoFiles, err := proto.MergedRegistry()
+	if err != nil {
+		panic(err)
+	}
+
+	err = msgservice.ValidateProtoAnnotations(protoFiles)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+
 	// create the simulation manager and define the order of the modules for deterministic simulations
 	app.sm = module.NewSimulationManager(
-		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
-		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
-		capability.NewAppModule(appCodec, *app.CapabilityKeeper, false),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
-		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
-		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
-		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
-		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
-		params.NewAppModule(app.ParamsKeeper),
-		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		evidence.NewAppModule(app.EvidenceKeeper),
-		ibc.NewAppModule(app.IBCKeeper),
+		auth.NewAppModule(appCodec, app.Keepers.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
+		authzmodule.NewAppModule(appCodec, app.Keepers.AuthzKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.interfaceRegistry),
+		bank.NewAppModule(appCodec, app.Keepers.BankKeeper, app.Keepers.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
+		capability.NewAppModule(appCodec, *app.Keepers.CapabilityKeeper, false),
+		feegrantmodule.NewAppModule(appCodec, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.FeeGrantKeeper, app.interfaceRegistry),
+		gov.NewAppModule(appCodec, app.Keepers.GovKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
+		staking.NewAppModule(appCodec, app.Keepers.StakingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
+		distr.NewAppModule(appCodec, app.Keepers.DistrKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
+		slashing.NewAppModule(appCodec, app.Keepers.SlashingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
+		params.NewAppModule(app.Keepers.ParamsKeeper),
+		groupmodule.NewAppModule(appCodec, app.Keepers.GroupKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.interfaceRegistry),
+		evidence.NewAppModule(app.Keepers.EvidenceKeeper),
+		ibc.NewAppModule(app.Keepers.IBCKeeper),
 		transferModule,
 		arkeoModule,
 		claimModule,
@@ -804,10 +788,10 @@ func NewArkeoApp(
 
 	anteHandler, err := ante.NewAnteHandler(
 		ante.HandlerOptions{
-			AccountKeeper:   app.AccountKeeper,
-			BankKeeper:      app.BankKeeper,
+			AccountKeeper:   app.Keepers.AccountKeeper,
+			BankKeeper:      app.Keepers.BankKeeper,
 			SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
-			FeegrantKeeper:  app.FeeGrantKeeper,
+			FeegrantKeeper:  app.Keepers.FeeGrantKeeper,
 			SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 		},
 	)
@@ -815,15 +799,25 @@ func NewArkeoApp(
 		panic(fmt.Errorf("failed to create AnteHandler: %s", err))
 	}
 
+	postHandler, err := posthandler.NewPostHandler(
+		posthandler.HandlerOptions{},
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create PostHandler: %s", err))
+	}
+
 	app.SetAnteHandler(anteHandler)
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
+	app.SetPostHandler(postHandler)
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(err.Error())
 		}
+
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
@@ -831,6 +825,10 @@ func NewArkeoApp(
 	// this line is used by starport scaffolding # stargate/app/beforeInitReturn
 
 	return app
+}
+
+func (app *ArkeoApp) PreBlocker(ctx sdk.Context, _ *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	return app.mm.PreBlock(ctx)
 }
 
 // Name returns the name of the App
@@ -852,10 +850,9 @@ func (app *ArkeoApp) EndBlocker(ctx sdk.Context) (sdk.EndBlock, error) {
 // InitChainer application update at chain initialization
 func (app *ArkeoApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*abci.ResponseInitChain, error) {
 	var genesisState GenesisState
-	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
-		panic(err)
-	}
-	if err := app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap()); err != nil {
+	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
+	err := app.Keepers.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+	if err != nil {
 		panic(err)
 	}
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
@@ -931,7 +928,7 @@ func (app *ArkeoApp) GetMemKey(storeKey string) *storetypes.MemoryStoreKey {
 //
 // NOTE: This is solely to be used for testing purposes.
 func (app *ArkeoApp) GetSubspace(moduleName string) paramstypes.Subspace {
-	subspace, _ := app.ParamsKeeper.GetSubspace(moduleName)
+	subspace, _ := app.Keepers.ParamsKeeper.GetSubspace(moduleName)
 	return subspace
 }
 

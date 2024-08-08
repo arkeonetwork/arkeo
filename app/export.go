@@ -39,7 +39,7 @@ func (app *ArkeoApp) ExportAppStateAndValidators(
 		return servertypes.ExportedApp{}, err
 	}
 
-	validators, err := staking.WriteValidators(ctx, app.StakingKeeper)
+	validators, err := staking.WriteValidators(ctx, app.Keepers.StakingKeeper)
 	if err != nil {
 		return servertypes.ExportedApp{}, err
 	}
@@ -74,18 +74,18 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	}
 
 	/* Just to be safe, assert the invariants on current state. */
-	app.CrisisKeeper.AssertInvariants(ctx)
+	app.Keepers.CrisisKeeper.AssertInvariants(ctx)
 
 	/* Handle fee distribution state. */
 
 	// withdraw all validator commission
-	app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
+	app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 
-		valBz, err := app.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		valBz, err := app.Keepers.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
 			panic(err)
 		}
-		_, err = app.DistrKeeper.WithdrawValidatorCommission(ctx, valBz)
+		_, err = app.Keepers.DistrKeeper.WithdrawValidatorCommission(ctx, valBz)
 		if err != nil {
 			panic(err)
 		}
@@ -93,7 +93,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	})
 
 	// withdraw all delegator rewards
-	dels, err := app.StakingKeeper.GetAllDelegations(ctx)
+	dels, err := app.Keepers.StakingKeeper.GetAllDelegations(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -106,46 +106,46 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 		if err != nil {
 			panic(err)
 		}
-		_, err = app.DistrKeeper.WithdrawDelegationRewards(ctx, delAddr, valAddr)
+		_, err = app.Keepers.DistrKeeper.WithdrawDelegationRewards(ctx, delAddr, valAddr)
 		if err != nil {
 			panic(err)
 		}
 	}
 
 	// clear validator slash events
-	app.DistrKeeper.DeleteAllValidatorSlashEvents(ctx)
+	app.Keepers.DistrKeeper.DeleteAllValidatorSlashEvents(ctx)
 
 	// clear validator historical rewards
-	app.DistrKeeper.DeleteAllValidatorHistoricalRewards(ctx)
+	app.Keepers.DistrKeeper.DeleteAllValidatorHistoricalRewards(ctx)
 
 	// set context height to zero
 	height := ctx.BlockHeight()
 	ctx = ctx.WithBlockHeight(0)
 
 	// reinitialize all validators
-	app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
+	app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 
-		valBz, err := app.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		valBz, err := app.Keepers.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
 			panic(err)
 		}
 		// donate any unwithdrawn outstanding reward fraction tokens to the community pool
-		scraps, err := app.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valBz)
+		scraps, err := app.Keepers.DistrKeeper.GetValidatorOutstandingRewardsCoins(ctx, valBz)
 		if err != nil {
 			panic(err)
 		}
-		feePool, err := app.DistrKeeper.FeePool.Get(ctx)
+		feePool, err := app.Keepers.DistrKeeper.FeePool.Get(ctx)
 		if err != nil {
 			panic(err)
 		}
 		feePool.CommunityPool = feePool.CommunityPool.Add(scraps...)
 
-		err = app.DistrKeeper.FeePool.Set(ctx, feePool)
+		err = app.Keepers.DistrKeeper.FeePool.Set(ctx, feePool)
 		if err != nil {
 			panic(err)
 		}
 
-		err = app.DistrKeeper.Hooks().AfterValidatorCreated(ctx, valBz)
+		err = app.Keepers.DistrKeeper.Hooks().AfterValidatorCreated(ctx, valBz)
 		if err != nil {
 			panic(err)
 		}
@@ -164,11 +164,11 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 			panic(err)
 		}
 
-		err = app.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, delAddr, valAddr)
+		err = app.Keepers.DistrKeeper.Hooks().BeforeDelegationCreated(ctx, delAddr, valAddr)
 		if err != nil {
 			panic(err)
 		}
-		err = app.DistrKeeper.Hooks().AfterDelegationModified(ctx, delAddr, valAddr)
+		err = app.Keepers.DistrKeeper.Hooks().AfterDelegationModified(ctx, delAddr, valAddr)
 		if err != nil {
 			panic(err)
 		}
@@ -180,20 +180,20 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	/* Handle staking state. */
 
 	// iterate through redelegations, reset creation height
-	app.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
+	app.Keepers.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
 		for i := range red.Entries {
 			red.Entries[i].CreationHeight = 0
 		}
-		app.StakingKeeper.SetRedelegation(ctx, red)
+		app.Keepers.StakingKeeper.SetRedelegation(ctx, red)
 		return false
 	})
 
 	// iterate through unbonding delegations, reset creation height
-	app.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
+	app.Keepers.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
 		for i := range ubd.Entries {
 			ubd.Entries[i].CreationHeight = 0
 		}
-		app.StakingKeeper.SetUnbondingDelegation(ctx, ubd)
+		app.Keepers.StakingKeeper.SetUnbondingDelegation(ctx, ubd)
 		return false
 	})
 
@@ -205,7 +205,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 
 	for ; iter.Valid(); iter.Next() {
 		addr := sdk.ValAddress(iter.Key()[1:])
-		validator, err := app.StakingKeeper.GetValidator(ctx, addr)
+		validator, err := app.Keepers.StakingKeeper.GetValidator(ctx, addr)
 		if err != nil {
 			panic("expected validator, not found")
 		}
@@ -215,7 +215,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 			validator.Jailed = true
 		}
 
-		err = app.StakingKeeper.SetValidator(ctx, validator)
+		err = app.Keepers.StakingKeeper.SetValidator(ctx, validator)
 		if err != nil {
 			panic(err)
 		}
@@ -224,18 +224,18 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 
 	iter.Close()
 
-	if _, err := app.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx); err != nil {
+	if _, err := app.Keepers.StakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx); err != nil {
 		panic(err)
 	}
 
 	/* Handle slashing state. */
 
 	// reset start height on signing infos
-	err = app.SlashingKeeper.IterateValidatorSigningInfos(
+	err = app.Keepers.SlashingKeeper.IterateValidatorSigningInfos(
 		ctx,
 		func(addr sdk.ConsAddress, info slashingtypes.ValidatorSigningInfo) (stop bool) {
 			info.StartHeight = 0
-			err := app.SlashingKeeper.SetValidatorSigningInfo(ctx, addr, info)
+			err := app.Keepers.SlashingKeeper.SetValidatorSigningInfo(ctx, addr, info)
 			if err != nil {
 				panic(err)
 			}
