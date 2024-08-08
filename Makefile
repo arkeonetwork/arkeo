@@ -38,7 +38,7 @@ BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet -test.short=true
 GOBIN?=${GOPATH}/bin
 BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/indexer ./cmd/directory/api
-
+TESNET_BUILD_FLAGS :=  -ldflags '$(ldflags)'  -tags=testnet
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH
 	BRANCH?=$(shell echo ${CI_COMMIT_BRANCH})
@@ -62,6 +62,9 @@ build:
 install:
 	go install ${BUILD_FLAGS} ${BINARIES}
 
+
+install-testnet:
+	go install ${TESNET_BUILD_FLAGS} ${BINARIES}
 
 # ------------------------------ Docker Build ------------------------------
 
