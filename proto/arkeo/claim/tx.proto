@@ -3,10 +3,12 @@ syntax = "proto3";
 package arkeo.claim;
 import "arkeo/claim/claim_record.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/msg/v1/msg.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   rpc ClaimEth(MsgClaimEth) returns (MsgClaimEthResponse);
   rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);

@@ -14,6 +14,7 @@ option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 // Msg defines the Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   rpc BondProvider        (MsgBondProvider       ) returns (MsgBondProviderResponse       );
   rpc ModProvider         (MsgModProvider        ) returns (MsgModProviderResponse        );
   rpc OpenContract        (MsgOpenContract       ) returns (MsgOpenContractResponse       );
