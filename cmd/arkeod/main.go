@@ -15,17 +15,8 @@ import (
 
 func main() {
 
+	// create new root command
 	rootCmd, _ := NewRootCmd()
-	// rootCmd, _ := NewRootCmd(
-	// 	app.Name,
-	// 	app.AccountAddressPrefix,
-	// 	app.DefaultNodeHome,
-	// 	xstrings.NoDash(app.Name),
-	// 	app.ModuleBasics,
-	// 	app.New,
-	// 	// this line is used by starport scaffolding # root/arguments
-	// )
-	// add in arkeo specific utilities
 	rootCmd.AddCommand(arkeocli.GetArkeoCmd())
 	if err := svrcmd.Execute(rootCmd, "ARKEO", app.DefaultNodeHome); err != nil {
 		fmt.Println(rootCmd.OutOrStderr(), err)
