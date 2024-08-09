@@ -21,6 +21,6 @@ lint:
     - COMMENT_FIELD
     - FIELD_LOWER_SNAKE_CASE
     - PACKAGE_DIRECTORY_MATCH
-  
+
   ignore:
     - tendermint

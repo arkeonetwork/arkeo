@@ -28,8 +28,8 @@ add_module() {
     }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 
-    TOTAL_SUPPLY=$(($TOTAL_SUPPLY + $3))
-    echo "Total supply after adding module: $TOTAL_SUPPLY"
+	TOTAL_SUPPLY=$((TOTAL_SUPPLY + $3))
+	echo "Total supply after adding module: $TOTAL_SUPPLY"
 }
 
 add_account() {
@@ -48,8 +48,8 @@ add_account() {
     }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 
-    TOTAL_SUPPLY=$(($TOTAL_SUPPLY + $3))
-    echo "Total supply after adding account: $TOTAL_SUPPLY"
+	TOTAL_SUPPLY=$((TOTAL_SUPPLY + $3))
+	echo "Total supply after adding account: $TOTAL_SUPPLY"
 }
 
 add_claim_records() {
@@ -116,4 +116,4 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod validate-genesis --trace
 fi
 
-arkeod start  --pruning nothing --minimum-gas-prices 0.0001uarkeo
+arkeod start --pruning nothing --minimum-gas-prices 0.0001uarkeo
