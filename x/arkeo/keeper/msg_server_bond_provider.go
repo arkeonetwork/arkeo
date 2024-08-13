@@ -57,11 +57,17 @@ func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProv
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, service)
+
+	providrPubKey, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return err
 	}
-	addr, err := msg.Provider.GetMyAddress()
+
+	provider, err := k.GetProvider(ctx, providrPubKey, service)
+	if err != nil {
+		return err
+	}
+	addr, err := providrPubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}

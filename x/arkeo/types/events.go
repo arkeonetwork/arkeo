@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
@@ -57,13 +58,17 @@ func NewCloseContractEvent(contract *Contract) EventCloseContract {
 	}
 }
 
-func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) EventBondProvider {
+func NewBondProviderEvent(bond cosmos.Int, msg *MsgBondProvider) (EventBondProvider, error) {
+	pubkey, err := common.NewPubKey(msg.Provider)
+	if err != nil {
+		return EventBondProvider{}, ErrInvalidPubKey
+	}
 	return EventBondProvider{
-		Provider: msg.Provider,
+		Provider: pubkey,
 		Service:  msg.Service,
 		BondRel:  msg.Bond,
 		BondAbs:  bond,
-	}
+	}, nil
 }
 
 func NewValidatorPayoutEvent(acc cosmos.AccAddress, reward cosmos.Int) EventValidatorPayout {

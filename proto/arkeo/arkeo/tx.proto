@@ -28,7 +28,7 @@ message MsgBondProvider {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name)           = "arkeo/x/arkeo/MsgBondProvider";  
   string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  bytes  provider = 2 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string  provider = 2;
   string service  = 3;
   string bond     = 4 [(cosmos_proto.scalar) = "cosmos.Int"                                   , (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
@@ -57,10 +57,10 @@ message MsgOpenContract {
   option (cosmos.msg.v1.signer) = "creator";
   option (amino.name)           = "arkeo/x/arkeo/MsgOpenContract";  
   string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  bytes                    provider            =  2 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string                    provider            =  2 ;
   string                   service             =  3;
-  bytes                    client              =  4 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
-  bytes                    delegate            =  5 [(gogoproto.casttype)  = "github.com/arkeonetwork/arkeo/common.PubKey"  ] ;
+  string                    client              =  4 ;
+  string                    delegate            =  5 ;
   ContractType             contract_type       =  6;
   int64                    duration            =  7;
   cosmos.base.v1beta1.Coin rate                =  8 [(gogoproto.nullable)  = false                                          ] ;

@@ -1,15 +1,20 @@
 package keeper
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func (k msgServer) EmitBondProviderEvent(ctx cosmos.Context, bond cosmos.Int, msg *types.MsgBondProvider) error {
+	provider, err := common.NewPubKey(msg.Provider)
+	if err != nil {
+		return types.ErrInvalidPubKey
+	}
 	return ctx.EventManager().EmitTypedEvent(
 		&types.EventBondProvider{
-			Provider: msg.Provider,
+			Provider: provider,
 			Service:  msg.Service,
 			BondRel:  msg.Bond,
 			BondAbs:  bond,

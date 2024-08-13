@@ -15,7 +15,7 @@ var _ sdk.Msg = &MsgBondProvider{}
 func NewMsgBondProvider(creator cosmos.AccAddress, provider common.PubKey, service string, bond cosmos.Int) *MsgBondProvider {
 	return &MsgBondProvider{
 		Creator:  creator.String(),
-		Provider: provider,
+		Provider: provider.String(),
 		Service:  service,
 		Bond:     bond,
 	}
@@ -44,13 +44,13 @@ func (msg *MsgBondProvider) GetSignBytes() []byte {
 
 func (msg *MsgBondProvider) ValidateBasic() error {
 	// verify pubkey
-	_, err := common.NewPubKey(msg.Provider.String())
+	providerPubKey, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s): %s", msg.Provider, err)
 	}
 
 	signer := msg.MustGetSigner()
-	provider, err := msg.Provider.GetMyAddress()
+	provider, err := providerPubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}

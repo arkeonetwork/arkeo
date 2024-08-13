@@ -48,9 +48,9 @@ func TestOpenContractValidate(t *testing.T) {
 
 	// happy path
 	msg := types.MsgOpenContract{
-		Provider:         providerPubkey,
+		Provider:         providerPubkey.String(),
 		Service:          service.String(),
-		Client:           clientPubKey,
+		Client:           clientPubKey.String(),
 		Creator:          acc.String(),
 		ContractType:     types.ContractType_SUBSCRIPTION,
 		Duration:         100,
@@ -118,10 +118,10 @@ func TestOpenContractHandle(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, acc, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:         pubkey,
+		Provider:         pubkey.String(),
 		Service:          service.String(),
 		Creator:          acc.String(),
-		Client:           pubkey,
+		Client:           pubkey.String(),
 		ContractType:     types.ContractType_PAY_AS_YOU_GO,
 		Duration:         100,
 		Rate:             cosmos.NewInt64Coin("uarkeo", 15),
@@ -193,10 +193,10 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, providerAddress, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
 		Creator:      providerAddress.String(),
-		Client:       providerPubKey,
+		Client:       providerPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
@@ -216,10 +216,10 @@ func TestOpenContract(t *testing.T) {
 	require.NoError(t, err)
 
 	msg = types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
 		Creator:      clientAddress.String(),
-		Client:       clientPubKey,
+		Client:       clientPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),
@@ -239,7 +239,7 @@ func TestOpenContract(t *testing.T) {
 
 	// confirm that the client can open a contract with a deleagate
 	delegatePubKey := types.GetRandomPubKey()
-	msg.Delegate = delegatePubKey
+	msg.Delegate = delegatePubKey.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -299,10 +299,10 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAddress, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
 		Creator:      clientAddress.String(),
-		Client:       clientPubKey,
+		Client:       clientPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         cosmos.NewInt64Coin("uarkeo", 15),

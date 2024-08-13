@@ -64,9 +64,9 @@ func TestCloseContractHandle(t *testing.T) {
 
 	openContractMessage := types.MsgOpenContract{
 		Creator:      clientAccount.String(),
-		Client:       clientPubKey,
+		Client:       clientPubKey.String(),
 		Service:      service.String(),
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Deposit:      cosmos.NewInt(500),
 		Rate:         rate,
 		Duration:     100,
@@ -147,10 +147,10 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Provider:         providerPubKey,
+		Provider:         providerPubKey.String(),
 		Service:          service.String(),
 		Creator:          providerAddress.String(),
-		Client:           userPubKey,
+		Client:           userPubKey.String(),
 		ContractType:     types.ContractType_SUBSCRIPTION,
 		Duration:         100,
 		Rate:             rates[0],
@@ -188,7 +188,7 @@ func TestCloseSubscriptionContract(t *testing.T) {
 	require.True(t, contract.IsEmpty())
 
 	// reopen contract this time with a delagate address.
-	openContractMessage.Delegate = user2PubKey
+	openContractMessage.Delegate = user2PubKey.String()
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 
@@ -255,10 +255,10 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      service.String(),
 		Creator:      providerAddress.String(),
-		Client:       userPubKey,
+		Client:       userPubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         rates[0],
@@ -284,7 +284,7 @@ func TestClosePayAsYouGoContract(t *testing.T) {
 	require.ErrorIs(t, err, types.ErrCloseContractUnauthorized)
 
 	// reopen contract this time with a delagate address.
-	openContractMessage.Delegate = use2PubKey
+	openContractMessage.Delegate = use2PubKey.String()
 	_, err = s.OpenContract(ctx, &openContractMessage)
 	require.NoError(t, err)
 

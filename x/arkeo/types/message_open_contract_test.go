@@ -19,8 +19,8 @@ func TestBondProviderValidateBasic(t *testing.T) {
 
 	msg := MsgOpenContract{
 		Creator:          acct.String(),
-		Provider:         pubkey,
-		Client:           pubkey,
+		Provider:         pubkey.String(),
+		Client:           pubkey.String(),
 		Service:          common.BTCService.String(),
 		Rate:             rate,
 		QueriesPerMinute: 10,

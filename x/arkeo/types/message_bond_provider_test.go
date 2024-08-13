@@ -16,7 +16,7 @@ func TestValidateBasic(t *testing.T) {
 
 	msg := MsgBondProvider{
 		Creator:  acct.String(),
-		Provider: pubkey,
+		Provider: pubkey.String(),
 	}
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrInvalidService)

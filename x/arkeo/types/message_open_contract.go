@@ -19,14 +19,14 @@ var _ sdk.Msg = &MsgOpenContract{}
 func NewMsgOpenContract(creator cosmos.AccAddress, provider common.PubKey, service string, client, delegate common.PubKey, contractType ContractType, duration, settlementDuration int64, rate types.Coin, deposit cosmos.Int, authorization ContractAuthorization, qpm int64) *MsgOpenContract {
 	return &MsgOpenContract{
 		Creator:            creator.String(),
-		Provider:           provider,
+		Provider:           provider.String(),
 		Service:            service,
 		ContractType:       contractType,
 		Duration:           duration,
 		Rate:               rate,
-		Client:             client,
+		Client:             client.String(),
 		Deposit:            deposit,
-		Delegate:           delegate,
+		Delegate:           delegate.String(),
 		SettlementDuration: settlementDuration,
 		Authorization:      authorization,
 		QueriesPerMinute:   qpm,
@@ -54,16 +54,26 @@ func (msg *MsgOpenContract) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgOpenContract) GetSpender() common.PubKey {
-	if !msg.Delegate.IsEmpty() {
-		return msg.Delegate
+func (msg *MsgOpenContract) GetSpender() (common.PubKey, error) {
+	if msg.Delegate == "" {
+		clientPubKey, err := common.NewPubKey(msg.Client)
+		if err != nil {
+			return nil, ErrInvalidPubKey
+		}
+		return clientPubKey, nil
+	} else {
+		delegatePubKey, err := common.NewPubKey(msg.Delegate)
+		if err != nil {
+			return nil, ErrInvalidPubKey
+		}
+		return delegatePubKey, nil
 	}
-	return msg.Client
+
 }
 
 func (msg *MsgOpenContract) ValidateBasic() error {
 	// verify pubkey
-	_, err := common.NewPubKey(msg.Provider.String())
+	_, err := common.NewPubKey(msg.Provider)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
@@ -75,13 +85,13 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 	}
 
 	// verify client
-	_, err = common.NewPubKey(msg.Client.String())
+	clientPubKey, err := common.NewPubKey(msg.Client)
 	if err != nil {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
 	signer := msg.MustGetSigner()
-	client, err := msg.Client.GetMyAddress()
+	client, err := clientPubKey.GetMyAddress()
 	if err != nil {
 		return err
 	}

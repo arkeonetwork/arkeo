@@ -11,7 +11,7 @@ var _ sdk.Msg = &MsgClaimEth{}
 
 func NewMsgClaimEth(creator cosmos.AccAddress, ethAdress, signature string) *MsgClaimEth {
 	return &MsgClaimEth{
-		Creator:    creator,
+		Creator:    creator.String(),
 		EthAddress: ethAdress,
 		Signature:  signature,
 	}
@@ -26,7 +26,7 @@ func (msg *MsgClaimEth) Type() string {
 }
 
 func (msg *MsgClaimEth) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgClaimEth) GetSignBytes() []byte {
