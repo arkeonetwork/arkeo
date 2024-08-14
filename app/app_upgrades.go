@@ -5,14 +5,10 @@ import (
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	"github.com/arkeonetwork/arkeo/app/upgrades"
-
-	upgrade1_0_0 "github.com/arkeonetwork/arkeo/app/upgrades/1_0_0"
 )
 
 // Upgrades
-var Upgrades = []upgrades.Upgrade{
-	upgrade1_0_0.Upgrade,
-}
+var Upgrades = []upgrades.Upgrade{}
 
 func (app *ArkeoApp) RegisterUpgradeHandlers() {
 	app.setUpgradeHandlers()
@@ -23,7 +19,7 @@ func (app *ArkeoApp) RegisterUpgradeHandlers() {
 func (app *ArkeoApp) setUpgradeStoreLoaders() {
 	upgradeInfo, err := app.Keepers.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
-		panic(fmt.Sprintf("faild to read upgrade infro from disk %s", err))
+		panic(fmt.Sprintf("failed to read upgrade info from disk %s", err))
 	}
 
 	if app.Keepers.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
