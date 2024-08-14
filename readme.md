@@ -74,3 +74,7 @@ Run
 ./scripts/genesis.sh
 ```
 This starts the chain 
+
+
+# Documentation
+To learn more about `Arkeo Protocol`, [please visit the official Arkeo Documentatin](https://docs.arkeo.network)
