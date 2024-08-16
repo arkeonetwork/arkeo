@@ -231,11 +231,11 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
 	result := make(map[string]any)
 	for _, attr := range event.Attributes {
-		key, err := base64.StdEncoding.DecodeString(string(attr.Key))
+		key, err := base64.StdEncoding.DecodeString(attr.Key)
 		if err != nil {
 			return nil, fmt.Errorf("fail to decode key %s, err: %w", attr.Key, err)
 		}
-		attrValue := strings.Trim(string(attr.Value), `"`)
+		attrValue := strings.Trim(attr.Value, `"`)
 		if len(attrValue) == 0 {
 			continue
 		}

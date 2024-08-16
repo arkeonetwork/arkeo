@@ -13,7 +13,6 @@ var Upgrades = []upgrades.Upgrade{}
 func (app *ArkeoApp) RegisterUpgradeHandlers() {
 	app.setUpgradeHandlers()
 	app.setUpgradeStoreLoaders()
-
 }
 
 func (app *ArkeoApp) setUpgradeStoreLoaders() {
@@ -28,7 +27,7 @@ func (app *ArkeoApp) setUpgradeStoreLoaders() {
 
 	for _, u := range Upgrades {
 		if upgradeInfo.Name == u.UpgradeName {
-			app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &u.StoreUpgrades))
+			app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &u.StoreUpgrades)) //nolint:staticcheck
 		}
 	}
 }

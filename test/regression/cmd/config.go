@@ -140,12 +140,12 @@ var httpClient = &http.Client{
 // trunk-ignore(trunk/ignore-does-nothing) # Getting weird lint error only on CI and running locally works fine
 // trunk-ignore-all(golangci-lint/gosec)
 const (
-	ModuleAddrBondedTokensPool    = "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43"
-	ModuleAddrNotBondedTokensPool = "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9"
-	ModuleAddrGov                 = "tarkeo10d07y265gmmuvt4z0w9aw880jnsr700jk8l664"
-	ModuleAddrDistribution        = "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e"
-	ModuleAddrMint                = "tarkeo1m3h30wlvsf8llruxtpukdvsy0km2kum8y5t8tx"
-	ModuleAddrFeeCollector        = "tarkeo17xpfvakm2amg962yls6f84z3kell8c5luu0l8m"
+	ModuleAddrBondedTokensPool    = "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43" //nolint:staticcheck
+	ModuleAddrNotBondedTokensPool = "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9" //nolint:staticcheck
+	ModuleAddrGov                 = "tarkeo10d07y265gmmuvt4z0w9aw880jnsr700jk8l664" //nolint:staticcheck
+	ModuleAddrDistribution        = "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e" //nolint:staticcheck
+	ModuleAddrMint                = "tarkeo1m3h30wlvsf8llruxtpukdvsy0km2kum8y5t8tx" //nolint:staticcheck
+	ModuleAddrFeeCollector        = "tarkeo17xpfvakm2amg962yls6f84z3kell8c5luu0l8m" //nolint:staticcheck
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

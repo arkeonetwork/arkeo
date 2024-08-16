@@ -55,7 +55,6 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 
 	claimRecords := []types.ClaimRecord{}
 	for ; iterator.Valid(); iterator.Next() {
-
 		claimRecord := types.ClaimRecord{}
 
 		err := k.cdc.Unmarshal(iterator.Value(), &claimRecord)

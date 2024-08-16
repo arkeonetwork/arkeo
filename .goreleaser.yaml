@@ -1,0 +1,27 @@
+--- 
+before:
+  hooks:
+    - apt update && apt install musl-dev=1.2.2-1
+env:
+  - CGO_ENABLED=1
+
+git:
+
+  tag_sort: -version:creatordate
+
+builds:
+  - id: arkeod-linux-arm64
+    main: ./cmd/arkeod
+    binary: arkeod
+    goos:
+      - linux
+    goarch:
+      - arm64
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    
+    flags:
+      - mod=readonly
+      - -trimpath
+  

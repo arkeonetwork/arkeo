@@ -57,7 +57,7 @@ type Keeper interface {
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
 	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
-	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params)
+	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -353,8 +353,8 @@ func (k KVStore) GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validat
 	return k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 }
 
-func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) {
-	k.stakingKeeper.SetParams(ctx, params)
+func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error {
+	return k.stakingKeeper.SetParams(ctx, params)
 }
 
 func (k KVStore) GetAuthority() string {

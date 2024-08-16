@@ -11,7 +11,7 @@ import (
 
 func TestParamsQuery(t *testing.T) {
 	keepers, ctx := testkeeper.CreateTestClaimKeepers(t)
-	wctx := sdk.WrapSDKContext(ctx)
+	wctx := sdk.WrapSDKContext(ctx) //nolint:staticcheck
 	params := types.DefaultParams()
 	keepers.ClaimKeeper.SetParams(ctx, params)
 

@@ -230,7 +230,7 @@ func (p Proxy) handleNewBlockHeaderEvent(result tmCoreTypes.ResultEvent) {
 		if evt.Type == types.EventTypeSettleContract {
 			input := make(map[string]string)
 			for _, attr := range evt.Attributes {
-				input[string(attr.Key)] = strings.Trim(string(attr.Value), `"`)
+				input[attr.Key] = strings.Trim(attr.Value, `"`)
 			}
 			evt, err := parseContractSettlementEvent(input)
 			if err != nil {

@@ -62,7 +62,7 @@ type ArkeoKeepers struct {
 	GroupKeeper          groupkeeper.Keeper
 	CircuitBreakerKeeper circuitkeeper.Keeper
 
-	//IBC
+	// IBC
 	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	CapabilityKeeper    *capabilitykeeper.Keeper
 	IBCFeeKeeper        ibcfeekeeper.Keeper

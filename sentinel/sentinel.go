@@ -97,7 +97,6 @@ func loadProxies() map[string]*url.URL {
 
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
-
 	// Limit the Size of incoming requests
 
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // TODO: Check
@@ -277,7 +276,6 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 		}
 
 		open_claims = append(open_claims, claim)
-
 	}
 
 	d, _ := json.Marshal(open_claims)

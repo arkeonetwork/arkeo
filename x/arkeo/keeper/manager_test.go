@@ -56,25 +56,25 @@ func TestValidatorPayout(t *testing.T) {
 
 	vals := []stakingtypes.Validator{val1, val2, val3}
 	for _, val := range vals {
-		sk.SetValidator(ctx, val)
+		require.NoError(t, sk.SetValidator(ctx, val))
 		require.NoError(t, sk.SetValidatorByConsAddr(ctx, val))
-		sk.SetNewValidatorByPowerIndex(ctx, val)
+		require.NoError(t, sk.SetNewValidatorByPowerIndex(ctx, val))
 	}
 
 	delAcc1 := types.GetRandomBech32Addr()
 	delAcc2 := types.GetRandomBech32Addr()
 	delAcc3 := types.GetRandomBech32Addr()
 
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500)))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100))))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200))))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500))))
 
 	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
 	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
 	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
-	sk.SetDelegation(ctx, del1)
-	sk.SetDelegation(ctx, del2)
-	sk.SetDelegation(ctx, del3)
+	require.NoError(t, sk.SetDelegation(ctx, del1))
+	require.NoError(t, sk.SetDelegation(ctx, del2))
+	require.NoError(t, sk.SetDelegation(ctx, del3))
 
 	// mint token1
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(50000))))
@@ -133,7 +133,7 @@ func TestValidatorPayout(t *testing.T) {
 
 	bal = k.GetBalance(ctx, delAcc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3711))
-	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	_ = totalBal.Add(bal.AmountOf(configs.Denom))
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3711))
 
 	// ensure block reward is equal to total rewarded to validators and delegates

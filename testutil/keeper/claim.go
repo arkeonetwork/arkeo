@@ -102,7 +102,10 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 		govModuleAddr,
 		logger,
 	)
-	bankKeeper.SetParams(ctx, banktypes.DefaultParams())
+	err := bankKeeper.SetParams(ctx, banktypes.DefaultParams())
+	if err != nil {
+		panic(err)
+	}
 
 	k := keeper.NewKeeper(
 		cdc,

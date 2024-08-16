@@ -19,7 +19,6 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
-
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgBondProvider{},
 		&MsgModProvider{},
@@ -43,5 +42,4 @@ func init() {
 	cryptoCodec.RegisterCrypto(Amino)
 	sdk.RegisterLegacyAminoCodec(Amino)
 	Amino.Seal()
-
 }

@@ -31,7 +31,6 @@ func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClai
 }
 
 func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.MsgClaimContractIncome) error {
-
 	// validate contract
 	if k.FetchConfig(ctx, configs.HandlerClaimContractIncome) > 0 {
 		return errors.Wrapf(types.ErrDisabledHandler, "Claim Contract Income")
@@ -69,5 +68,4 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		return err
 	}
 	return nil
-
 }

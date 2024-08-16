@@ -51,7 +51,6 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 			BlockIdFlag: cmptm.BlockIDFlag(vote.GetBlockIDFlag()),
 		}
 		votes = append(votes, abciVote)
-
 	}
 	if err := mgr.ValidatorPayout(ctx, votes); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
@@ -222,7 +221,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 		}
 
 		for _, vote := range votes {
-
 			// if !vote.SignedLastBlock {
 			// 	ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
 			// 	continue

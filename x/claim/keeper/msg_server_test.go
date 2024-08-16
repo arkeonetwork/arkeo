@@ -12,5 +12,5 @@ import (
 
 func setupMsgServer(t testing.TB) (types.MsgServer, keepertest.TestKeepers, context.Context) {
 	keepers, ctx := keepertest.CreateTestClaimKeepers(t)
-	return keeper.NewMsgServerImpl(keepers.ClaimKeeper), keepers, sdk.WrapSDKContext(ctx)
+	return keeper.NewMsgServerImpl(keepers.ClaimKeeper), keepers, sdk.WrapSDKContext(ctx) //nolint:staticcheck
 }

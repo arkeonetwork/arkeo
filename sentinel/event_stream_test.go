@@ -239,7 +239,7 @@ func TestHandleNewBlockHeaderEvent(t *testing.T) {
 func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
 	evts := make(map[string][]string, len(sdkEvent.Attributes))
 	for _, attr := range sdkEvent.Attributes {
-		evts[string(attr.Key)] = []string{string(attr.Value)}
+		evts[attr.Key] = []string{attr.Value}
 	}
 
 	abciEvents := []abciTypes.Event{{

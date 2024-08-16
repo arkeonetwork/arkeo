@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-
 	// create new root command
 	rootCmd, _ := NewRootCmd()
 	rootCmd.AddCommand(arkeocli.GetArkeoCmd())

@@ -54,7 +54,7 @@ func (app *ArkeoApp) ExportAppStateAndValidators(
 // prepare for fresh start at zero height
 // NOTE zero height genesis is a temporary feature which will be deprecated
 //
-//	in favour of export at a block height
+//	in favor of export at a block height
 func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
 	applyAllowedAddrs := false
 
@@ -79,8 +79,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	/* Handle fee distribution state. */
 
 	// withdraw all validator commission
-	app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
-
+	if err := app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 		valBz, err := app.Keepers.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
 			panic(err)
@@ -90,7 +89,9 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 			panic(err)
 		}
 		return false
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	// withdraw all delegator rewards
 	dels, err := app.Keepers.StakingKeeper.GetAllDelegations(ctx)
@@ -123,8 +124,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	ctx = ctx.WithBlockHeight(0)
 
 	// reinitialize all validators
-	app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
-
+	if err := app.Keepers.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 		valBz, err := app.Keepers.StakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
 			panic(err)
@@ -150,11 +150,12 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 			panic(err)
 		}
 		return false
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	// reinitialize all delegations
 	for _, del := range dels {
-
 		valAddr, err := sdk.ValAddressFromBech32(del.ValidatorAddress)
 		if err != nil {
 			panic(err)
@@ -180,22 +181,32 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	/* Handle staking state. */
 
 	// iterate through redelegations, reset creation height
-	app.Keepers.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
+	if err := app.Keepers.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
 		for i := range red.Entries {
 			red.Entries[i].CreationHeight = 0
 		}
-		app.Keepers.StakingKeeper.SetRedelegation(ctx, red)
+		err := app.Keepers.StakingKeeper.SetRedelegation(ctx, red)
+		if err != nil {
+			panic(err)
+		}
 		return false
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	// iterate through unbonding delegations, reset creation height
-	app.Keepers.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
+	if err := app.Keepers.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
 		for i := range ubd.Entries {
 			ubd.Entries[i].CreationHeight = 0
 		}
-		app.Keepers.StakingKeeper.SetUnbondingDelegation(ctx, ubd)
+		err := app.Keepers.StakingKeeper.SetUnbondingDelegation(ctx, ubd)
+		if err != nil {
+			panic(err)
+		}
 		return false
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	// Iterate through validators by power descending, reset bond heights, and
 	// update bond intra-tx counters.

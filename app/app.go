@@ -81,7 +81,6 @@ import (
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
@@ -158,7 +157,7 @@ var (
 )
 
 var (
-	//Bech32PrefixAccAddr
+	// Bech32PrefixAccAddr
 	Bech32PrefixAccAddr  = Bech32Prefix
 	Bech32PrefixAccPub   = Bech32Prefix + sdk.PrefixPublic
 	Bech32PrefixValAddr  = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
@@ -296,7 +295,6 @@ func NewArkeoApp(
 	appOpts servertypes.AppOptions,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *ArkeoApp {
-
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 
 	appCodec, cdc := codec.NewProtoCodec(interfaceRegistry), codec.NewLegacyAmino()
@@ -543,7 +541,7 @@ func NewArkeoApp(
 
 	app.Keepers.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
-	// Create evidence Keeper for to register the IBC light client misbehaviour evidence route
+	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[evidencetypes.StoreKey]),
@@ -817,7 +815,6 @@ func NewArkeoApp(
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(err.Error())
 		}
-
 	}
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
@@ -941,7 +938,7 @@ func (app *ArkeoApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIC
 	// Register new cometbft queries routes from grpc-gateway.
 	cmtservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
-	//Register node gRPC service for grpc-gateway
+	// Register node gRPC service for grpc-gateway
 	nodeservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// Register grpc-gateway routes for all modules.
@@ -989,9 +986,9 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(minttypes.ModuleName)
 	paramsKeeper.Subspace(distrtypes.ModuleName)
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
-	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable())
+	paramsKeeper.Subspace(govtypes.ModuleName)
 	paramsKeeper.Subspace(crisistypes.ModuleName)
-	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
+	paramsKeeper.Subspace(ibctransfertypes.ModuleName) //nolint:staticcheck
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(arkeomoduletypes.ModuleName)
@@ -1028,5 +1025,4 @@ func (app *ArkeoApp) AutoCliOpts() autocli.AppOptions {
 		ValidatorAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		ConsensusAddressCodec: authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	}
-
 }

@@ -86,7 +86,6 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 			}
 
 			return nil
-
 		},
 	}
 
@@ -102,11 +101,9 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 	}
 
 	return rootCmd, encodingConfig
-
 }
 
 func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
-
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
@@ -127,7 +124,6 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		txCommand(app.ModuleBasics),
 		keys.Commands(),
 	)
-
 }
 
 func txCommand(moduleBasics module.BasicManager) *cobra.Command {
@@ -260,7 +256,6 @@ func (ac appCreator) appExport(
 	}
 
 	return arkeoApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs, modulesToExport)
-
 }
 
 var tempDir = func() string {

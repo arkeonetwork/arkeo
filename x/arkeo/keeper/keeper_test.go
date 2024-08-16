@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	//Bech32PrefixAccAddr
+	// Bech32PrefixAccAddr
 	Bech32PrefixAccAddr  = bech32Prefix
 	Bech32PrefixAccPub   = bech32Prefix + sdk.PrefixPublic
 	Bech32PrefixValAddr  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
@@ -111,7 +111,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		govModuleAddr,
 		logger,
 	)
-	bk.SetParams(ctx, banktypes.DefaultParams())
+	require.NoError(t, bk.SetParams(ctx, banktypes.DefaultParams()))
 
 	sk := stakingkeeper.NewKeeper(
 		cdc,
@@ -211,7 +211,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		govModuleAddr,
 		logger,
 	)
-	bk.SetParams(ctx, banktypes.DefaultParams())
+	_ = bk.SetParams(ctx, banktypes.DefaultParams())
 
 	sk := stakingkeeper.NewKeeper(
 		cdc,

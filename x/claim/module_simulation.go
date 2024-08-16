@@ -57,7 +57,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 }
 
 // ProposalContents doesn't return any content functions for governance proposals
-func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
+func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent { //nolint:staticcheck
 	return nil
 }
 
@@ -80,9 +80,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		&weightMsgClaimEth,
 		nil,
 		func(r *rand.Rand) {
-
 			weightMsgClaimEth = defaultWeightMsgClaimEth
-
 		},
 	)
 	operations = append(operations, simulation.NewWeightedOperation(

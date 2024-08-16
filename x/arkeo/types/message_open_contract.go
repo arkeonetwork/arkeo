@@ -68,7 +68,6 @@ func (msg *MsgOpenContract) GetSpender() (common.PubKey, error) {
 		}
 		return delegatePubKey, nil
 	}
-
 }
 
 func (msg *MsgOpenContract) ValidateBasic() error {

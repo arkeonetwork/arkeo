@@ -389,7 +389,6 @@ func run(path string) error {
 
 	// if failed and debug enabled restart to allow inspection
 	if returnErr != nil && os.Getenv("DEBUG") != "" {
-
 		// remove validator key (otherwise arkeo will hang in begin block)
 		log.Debug().Msg("Removing validator key")
 		cmd = exec.Command("rm", "/regtest/.arkeo/config/priv_validator_key.json")
