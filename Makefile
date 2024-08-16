@@ -16,7 +16,7 @@ endif
 # compiler flags
 IMAGE="arkeo"
 PROJECT_NAME= arkeo
-DOCKER         := $(shell which docker)
+DOCKER := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 CHAIN_VERSION:=$(shell cat chain.version)
@@ -160,7 +160,7 @@ _test-regression:
 # Protobuf
 ########################################################################################
 
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.9.0
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.36.0
 
 containerProtoVer=0.14.0
 containerProtoImage=ghcr.io/cosmos/proto-builder:$(containerProtoVer)
@@ -176,18 +176,17 @@ protob:
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./scripts/protocgen.sh; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh ./scripts/protocgen.sh
 
 proto-swagger-gen:
 	@echo "Generating Swagger of Protobuf"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./scripts/protoc-swagger-gen.sh; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh  ./scripts/protoc-swagger-gen.sh
 
 proto-format:
 	@echo "Formatting Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
-		find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \; ; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace \
+	--workdir /workspace $(containerProtoImage) \
+	find ./ -name *.proto -exec clang-format -i {} \;
 
 proto-lint:
 	@echo "Linting Protobuf files"
