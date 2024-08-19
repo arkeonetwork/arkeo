@@ -33,7 +33,7 @@ builds:
       - -w -s
       - -linkmode=external
     tags:
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
+      - '{{ .Env.BUILD_TAG }}'
 
   - id: arkeod-darwin-arm64
     binary: arkeod
@@ -61,7 +61,7 @@ builds:
       - -w -s
       - -linkmode=external
     tags:
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
+      - '{{ .Env.BUILD_TAG }}'
 
   - id: arkeod-linux-arm64
     binary: arkeod
@@ -87,7 +87,7 @@ builds:
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
     tags:
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
+      - '{{ .Env.BUILD_TAG }}'
 
 universal_binaries:
   - id: arkeod-darwin-all

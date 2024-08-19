@@ -29,7 +29,7 @@ builds:
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
     tags:
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
+      - '{{ .Env.BUILD_TAG }}'
 
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
