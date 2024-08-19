@@ -49,6 +49,12 @@ endif
 BRANCH?=$(shell git rev-parse --abbrev-ref HEAD)
 GITREF=$(shell git rev-parse --short HEAD)
 BUILDTAG?=$(shell git rev-parse --abbrev-ref HEAD)
+GORELEASER_CROSS_VERSION = v1.21.9
+GORELEASER_VERSION = v1.21.0
+
+# Release Env Variable
+RELEASE ?= false
+GORELEASER_SKIP_VALIDATE ?= false
 
 ########################################################################################
 # Targets
@@ -195,6 +201,56 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+docker-build:
+	$(DOCKER) run \
+		--rm \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		--clean
+		--snapshot
+
+release-dryrun:
+	$(DOCKER) run \
+		--rm \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		--skip-publish \
+		--clean \
+		--skip-validate
+
+release:
+	$(DOCKER) run \
+		--rm \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE)
+
+release-cross:
+	$(DOCKER) run \
+		--rm \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser-cross:$(GORELEASER_CROSS_VERSION) \
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE)
 
 # arkeod binaries
 dist:
