@@ -4,7 +4,6 @@ before:
 
 env:
   - CGO_ENABLED=1
-  - BUILD_TAG=latest
 
 builds:
   - id: arkeod-darwin-amd64
