@@ -1,0 +1,31 @@
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: arkeod
+    binary: arkeod
+    env:
+      - CGO_ENABLED=1
+    main: ./cmd/arkeod
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+
+
