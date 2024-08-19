@@ -1,7 +1,7 @@
 --- 
 before:
   hooks:
-    - apt update && apt install musl-dev=1.2.2-1
+    - make proto-gen
 env:
   - CGO_ENABLED=1
 
@@ -10,18 +10,28 @@ git:
   tag_sort: -version:creatordate
 
 builds:
-  - id: arkeod-linux-arm64
+  - id: arkeo
     main: ./cmd/arkeod
     binary: arkeod
     goos:
       - linux
+      - darwin
     goarch:
+      - amd64
       - arm64
-    env:
-      - CC=aarch64-linux-gnu-gcc
-      - CXX=aarch64-linux-gnu-g++
-    
     flags:
-      - mod=readonly
+      - -mod=readonly
       - -trimpath
+    
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -linkmode=external
   
