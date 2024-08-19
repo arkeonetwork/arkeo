@@ -2,18 +2,20 @@ before:
   hooks:
     - go mod tidy
 
+env:
+  - CGO_ENABLED=1
+
 builds:
-  - id: arkeod
+  - id: arkeod-linux-amd64
     binary: arkeod
-    env:
-      - CGO_ENABLED=1
     main: ./cmd/arkeod
     goos:
       - linux
-      - darwin
     goarch:
       - amd64
-      - arm64
+    flags:
+      - -mod=readonly
+      - -trimpath
     ldflags:
       - -s -w
       - -X main.commit={{.Commit}}
@@ -27,5 +29,3 @@ builds:
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
-
-

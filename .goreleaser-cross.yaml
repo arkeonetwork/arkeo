@@ -1,0 +1,84 @@
+before:
+  hooks:
+    - go mod tidy
+
+env:
+  - CGO_ENABLED=1
+
+builds:
+  - id: arkeod-darwin-amd64
+    binary: arkeod
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/arkeod
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+
+  - id: arkeod-darwin-arm64
+    binary: arkeod
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/arkeod
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+
+  - id: arkeod-linux-arm64
+    binary: arkeod
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    main: ./cmd/arkeod
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+
