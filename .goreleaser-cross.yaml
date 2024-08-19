@@ -27,7 +27,7 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
       - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags= {{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -w -s
@@ -55,7 +55,7 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
       - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags= {{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -w -s
@@ -79,9 +79,8 @@ builds:
       - -X main.date={{ .CommitDate }}
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags= {{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -linkmode=external
