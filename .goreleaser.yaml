@@ -22,10 +22,40 @@ builds:
       - -X main.date={{ .CommitDate }}
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags= {{ .Env.BUILD_TAG }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{.Version}}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
+
+release:
+  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+archives:
+  - id: w/version
+    builds:
+      - arkeod-linux-amd64
+    name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: wo/version
+    builds:
+      - arkeod-linux-amd64
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}'
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: binary
+    builds:
+      - arkeod-linux-amd64
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}'
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+checksum:
+  name_template: '{{ .ProjectName }}d_v{{ .Version }}_checksums.txt'

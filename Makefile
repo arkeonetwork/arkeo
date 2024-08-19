@@ -253,6 +253,7 @@ release-dry-run-cross:
 	@docker run \
 		--rm \
 		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
