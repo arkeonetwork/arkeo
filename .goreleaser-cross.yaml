@@ -33,7 +33,7 @@ builds:
       - -w -s
       - -linkmode=external
     tags:
-      - '{{ .Env.BUILD_TAG }}'
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
 
   - id: arkeod-darwin-arm64
     binary: arkeod
@@ -60,6 +60,8 @@ builds:
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -w -s
       - -linkmode=external
+    tags:
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
 
   - id: arkeod-linux-arm64
     binary: arkeod
@@ -84,6 +86,8 @@ builds:
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{else}}mainnet{{end}}'
 
 universal_binaries:
   - id: arkeod-darwin-all
