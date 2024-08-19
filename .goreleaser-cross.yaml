@@ -32,6 +32,8 @@ builds:
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -w -s
       - -linkmode=external
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
 
   - id: arkeod-darwin-arm64
     binary: arkeod
