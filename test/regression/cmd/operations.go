@@ -16,9 +16,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/sentinel"
-	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,6 +24,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel"
+	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

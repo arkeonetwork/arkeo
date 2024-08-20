@@ -19,9 +19,6 @@ import (
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/arkeonetwork/arkeo/app/keepers"
-	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
-	"github.com/arkeonetwork/arkeo/docs"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
@@ -63,6 +60,10 @@ import (
 	"github.com/cosmos/ibc-go/modules/capability"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+
+	"github.com/arkeonetwork/arkeo/app/keepers"
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
+	"github.com/arkeonetwork/arkeo/docs"
 
 	// distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	"cosmossdk.io/x/evidence"
@@ -282,6 +283,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 	return govProposalHandlers
 }
 
+// nolint
 // New returns a reference to an initialized blockchain app
 func NewArkeoApp(
 	logger log.Logger,
@@ -355,7 +357,7 @@ func NewArkeoApp(
 	)
 
 	// set the BaseApp's parameter store
-	app.SetParamStore(app.Keepers.ConsensusParamsKeeper.ParamsStore)
+	app.SetParamStore(app.Keepers.ConsensusParamsKeeper.ParamsStore) // nolint
 	// bApp.SetParamStore(app.ParamsKeeper.Subspace(baseapp.Paramspace).WithKeyTable(paramstypes.ConsensusParamsKeyTable()))
 
 	// add capability keeper and ScopeToModule for ibc module
@@ -386,7 +388,7 @@ func NewArkeoApp(
 	app.Keepers.AuthzKeeper = authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(keys[authz.ModuleName]),
 		appCodec,
-		app.MsgServiceRouter(),
+		app.MsgServiceRouter(), // nolint
 		app.Keepers.AccountKeeper,
 	)
 
@@ -470,7 +472,7 @@ func NewArkeoApp(
 	app.Keepers.GroupKeeper = groupkeeper.NewKeeper(
 		keys[group.StoreKey],
 		appCodec,
-		app.MsgServiceRouter(),
+		app.MsgServiceRouter(), // nolint
 		app.Keepers.AccountKeeper,
 		groupConfig,
 	)
@@ -533,13 +535,13 @@ func NewArkeoApp(
 		app.Keepers.IBCKeeper.PortKeeper,
 		app.Keepers.AccountKeeper,
 		scopedICAHostKeeper,
-		app.MsgServiceRouter(),
+		app.MsgServiceRouter(), // nolint
 		govModuleAddr,
 	)
 	icaModule := ica.NewAppModule(nil, &app.Keepers.ICAHostKeeper)
 	icaHostIBCModule := icahost.NewIBCModule(app.Keepers.ICAHostKeeper)
 
-	app.Keepers.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
+	app.Keepers.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter()) // nolint
 
 	// Create evidence Keeper for to register the IBC light client misbehavior evidence route
 	evidenceKeeper := evidencekeeper.NewKeeper(
@@ -855,6 +857,7 @@ func (app *ArkeoApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
+// nolint
 // LoadHeight loads a particular height
 func (app *ArkeoApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height)
@@ -954,6 +957,7 @@ func (app *ArkeoApp) RegisterTxService(clientCtx client.Context) {
 	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
 }
 
+// nolint
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
 func (app *ArkeoApp) RegisterTendermintService(clientCtx client.Context) {
 	cmtservice.RegisterTendermintService(
@@ -963,6 +967,8 @@ func (app *ArkeoApp) RegisterTendermintService(clientCtx client.Context) {
 		app.Query,
 	)
 }
+
+// nolint
 func (app *ArkeoApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }

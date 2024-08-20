@@ -2,9 +2,10 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const TypeMsgCloseContract = "close_contract"

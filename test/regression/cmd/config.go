@@ -8,9 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/app"
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	tmhttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -19,10 +16,15 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -132,10 +134,10 @@ var httpClient = &http.Client{
 	Timeout: 30 * time.Second * getTimeFactor(),
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////
 // Module Addresses
-////////////////////////////////////////////////////////////////////////////////////////
-
+// //////////////////////////////////////////////////////////////////////////////////////
+// nolint
 // trunk-ignore-all(gitleaks/generic-api-key)
 // trunk-ignore(trunk/ignore-does-nothing) # Getting weird lint error only on CI and running locally works fine
 // trunk-ignore-all(golangci-lint/gosec)

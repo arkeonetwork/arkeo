@@ -3,9 +3,10 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (*types.MsgClaimArkeoResponse, error) {

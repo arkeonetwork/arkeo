@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/app"
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/sentinel/conf"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	abciTypes "github.com/cometbft/cometbft/abci/types"
 	tmCoreTypes "github.com/cometbft/cometbft/rpc/core/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/sentinel/conf"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func newTestConfig() conf.Configuration {

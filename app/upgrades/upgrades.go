@@ -3,8 +3,9 @@ package upgrades
 import (
 	"cosmossdk.io/store/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
-	"github.com/arkeonetwork/arkeo/app/keepers"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/arkeonetwork/arkeo/app/keepers"
 )
 
 type Upgrade struct {

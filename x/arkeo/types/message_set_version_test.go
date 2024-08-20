@@ -3,8 +3,9 @@ package types
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/sample"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
 )
 
 func TestMsgSetVersion_ValidateBasic(t *testing.T) {

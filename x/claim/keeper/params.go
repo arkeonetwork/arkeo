@@ -3,8 +3,9 @@ package keeper
 import (
 	"time"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 // GetParams get all parameters as types.Params

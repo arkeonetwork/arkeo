@@ -5,8 +5,9 @@ import (
 
 	"cosmossdk.io/errors"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const TypeMsgClaimContractIncome = "claim_contract_income"

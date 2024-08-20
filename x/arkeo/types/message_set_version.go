@@ -1,8 +1,9 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const TypeMsgSetVersion = "set_version"

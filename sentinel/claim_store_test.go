@@ -5,9 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type ClaimStoreSuite struct {

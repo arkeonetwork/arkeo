@@ -6,13 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/utils"
-	"github.com/arkeonetwork/arkeo/x/claim/keeper"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/utils"
+	"github.com/arkeonetwork/arkeo/x/claim/keeper"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestClaimEth(t *testing.T) {

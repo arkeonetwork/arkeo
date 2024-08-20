@@ -3,11 +3,12 @@ package keeper_test
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+
 	testkeeper "github.com/arkeonetwork/arkeo/testutil/keeper"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestClaimRecord(t *testing.T) {

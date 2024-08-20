@@ -18,9 +18,6 @@ import (
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/core/appmodule"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/arkeonetwork/arkeo/app/keepers"
-	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
-	"github.com/arkeonetwork/arkeo/docs"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
@@ -60,6 +57,10 @@ import (
 	"github.com/cosmos/ibc-go/modules/capability"
 	capabilitykeeper "github.com/cosmos/ibc-go/modules/capability/keeper"
 	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+
+	"github.com/arkeonetwork/arkeo/app/keepers"
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
+	"github.com/arkeonetwork/arkeo/docs"
 
 	// distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	"cosmossdk.io/x/evidence"

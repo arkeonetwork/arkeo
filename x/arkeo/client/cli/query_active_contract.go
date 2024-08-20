@@ -1,10 +1,11 @@
 package cli
 
 import (
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func CmdActiveContract() *cobra.Command {

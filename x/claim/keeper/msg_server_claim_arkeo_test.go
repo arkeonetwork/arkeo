@@ -3,10 +3,11 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/utils"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/utils"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestClaimArkeo(t *testing.T) {

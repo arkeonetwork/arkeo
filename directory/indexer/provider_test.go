@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/directory/db"

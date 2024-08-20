@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	storemetrics "cosmossdk.io/store/metrics"
+	"github.com/cosmos/cosmos-sdk/runtime"
+	"github.com/stretchr/testify/require"
+
 	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/cosmos/cosmos-sdk/runtime"
-	"github.com/stretchr/testify/require"
 
 	"cosmossdk.io/log"
 	"cosmossdk.io/store"

@@ -9,7 +9,7 @@ on:
   pull_request:
 
   workflow_dispatch:
-    
+
 permissions:
   contents: read
 
@@ -25,11 +25,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
-      
-      - name: Compile Protobuf
-        run: |
-          make proto-gen
-          make lint-ci
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3

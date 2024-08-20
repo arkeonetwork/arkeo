@@ -8,16 +8,18 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/gogo/protobuf/proto"
+
+	"github.com/arkeonetwork/arkeo/common"
 
 	"github.com/cometbft/cometbft/libs/log"
 
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	tmclient "github.com/cometbft/cometbft/rpc/client/http"
 	tmCoreTypes "github.com/cometbft/cometbft/rpc/core/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tmCoreTypes.ResultEvent {

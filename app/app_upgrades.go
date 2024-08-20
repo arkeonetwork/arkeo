@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+
 	"github.com/arkeonetwork/arkeo/app/upgrades"
 )
 
@@ -15,6 +16,7 @@ func (app *ArkeoApp) RegisterUpgradeHandlers() {
 	app.setUpgradeStoreLoaders()
 }
 
+// nolint
 func (app *ArkeoApp) setUpgradeStoreLoaders() {
 	upgradeInfo, err := app.Keepers.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {

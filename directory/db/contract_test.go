@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	cosmostypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )

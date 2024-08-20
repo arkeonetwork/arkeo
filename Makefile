@@ -87,23 +87,13 @@ testnet-fullnode:
 
 # ------------------------------ Housekeeping ------------------------------
 
-format:
-	@git ls-files '*.go' | grep -v -e '^docs/' | xargs gofumpt -w
-
 lint:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --no-fix --upstream origin/master
+	golangci-lint run
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" | xargs gofmt -d -s
 
-lint-fix:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --upstream origin/master
-
-lint-ci:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --all --no-progress --monitor=false
+format:
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/lcd/statik/statik.go" | xargs gofmt -w -s
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/lcd/statik/statik.go" | xargs goimports -w -local github.com/arkeonetwork/arkeo
 
 # ------------------------------ Unit Tests ------------------------------
 
@@ -183,6 +173,8 @@ protob:
 proto-gen:
 	@echo "Generating Protobuf files"
 	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh ./scripts/protocgen.sh
+	./scripts/dontcover.sh ./x/arkeo
+	./scripts/dontcover.sh ./x/claim
 
 proto-swagger-gen:
 	@echo "Generating Swagger of Protobuf"

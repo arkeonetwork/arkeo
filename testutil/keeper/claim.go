@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
@@ -13,7 +14,6 @@ import (
 	"cosmossdk.io/store"
 	storemetrics "cosmossdk.io/store/metrics"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/arkeonetwork/arkeo/app"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmdb "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -28,6 +28,8 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/app"
 )
 
 type (

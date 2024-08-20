@@ -2,9 +2,10 @@ package types
 
 import (
 	"cosmossdk.io/errors"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const TypeMsgAddClaim = "add_claim"

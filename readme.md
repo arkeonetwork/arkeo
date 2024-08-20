@@ -5,9 +5,7 @@ Arkeo Protocol - Free Market Blockchain Data Infrastructure
 [![Arkeo CI](https://github.com/arkeonetwork/arkeo/actions/workflows/ci.yml/badge.svg)](https://github.com/arkeonetwork/arkeo/actions/workflows/ci.yml)
 [![Release](https://github.com/arkeonetwork/arkeo/actions/workflows/release.yml/badge.svg)](https://github.com/arkeonetwork/arkeo/actions/workflows/release.yml)
 
-
 The core implementation of the Arkeo Protocol is built using the Cosmos SDK and Tendermint, and was created with the help of the [Ignite CLI](https://ignite.com/cli).
-
 
 # Software Prerequisites
 
@@ -16,22 +14,21 @@ The core implementation of the Arkeo Protocol is built using the Cosmos SDK and 
 - [Docker](https://www.docker.com)
 - [GNU Make](https://www.gnu.org/software/make)
 
-
 # Build from Source
 
-Clone the repository 
+Clone the repository
 
 ```shell
 git clone https://github.com/arkeonetwork/arkeo.git
 ```
 
-Check our `master` branch 
+Check our `master` branch
 
 ```shell
 git checkout master
 ```
 
-Build 
+Build
 
 ```shell
 make install
@@ -46,13 +43,15 @@ There multiple ways to run a localnet
 ## Containerized
 
 This solution uses docker-compose and docker on backend, To setup new localnet use:
+
 ```shell
 make localnet
 ```
 
-## Ignite CLI 
+## Ignite CLI
 
-Install Ignite Cli 
+Install Ignite Cli
+
 ```shell
 curl https://get.ignite.com/cli! | bash
 ```
@@ -63,18 +62,20 @@ ignite chain serve
 
 ## Local
 
-Build Binary 
+Build Binary
 
 ```shell
-make proto-gen install 
+make proto-gen install
 ```
 
-Run 
+Run
+
 ```shell
 ./scripts/genesis.sh
 ```
-This starts the chain 
 
+This starts the chain
 
 # Documentation
+
 To learn more about `Arkeo Protocol`, [please visit the official Arkeo Documentation](https://docs.arkeo.network)4

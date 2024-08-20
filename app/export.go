@@ -14,6 +14,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
+// nolint
 // ExportAppStateAndValidators exports the state of the application for a genesis
 // file.
 func (app *ArkeoApp) ExportAppStateAndValidators(

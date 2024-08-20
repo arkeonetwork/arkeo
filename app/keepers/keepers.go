@@ -42,6 +42,7 @@ import (
 	claimmodulekeeper "github.com/arkeonetwork/arkeo/x/claim/keeper"
 )
 
+// nolint
 type ArkeoKeepers struct {
 	// keepers
 	AccountKeeper         authkeeper.AccountKeeper

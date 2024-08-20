@@ -3,8 +3,9 @@ package types_test
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestGenesisState_Validate(t *testing.T) {

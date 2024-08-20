@@ -10,9 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/google/go-cmp/cmp"
 	"github.com/rs/zerolog/log"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

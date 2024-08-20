@@ -12,14 +12,15 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/arkeonetwork/arkeo/x/claim/client/cli"
-	"github.com/arkeonetwork/arkeo/x/claim/keeper"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/arkeonetwork/arkeo/x/claim/client/cli"
+	"github.com/arkeonetwork/arkeo/x/claim/keeper"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 var (

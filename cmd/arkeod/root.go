@@ -9,8 +9,6 @@ import (
 
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
-	"github.com/arkeonetwork/arkeo/app"
-	"github.com/arkeonetwork/arkeo/app/params"
 	tmcfg "github.com/cometbft/cometbft/config"
 	cmcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
@@ -32,6 +30,9 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/app/params"
 )
 
 // NewRootCmd

@@ -8,7 +8,6 @@ import (
 	"github.com/arkeonetwork/arkeo/app"
 
 	pruningtypes "cosmossdk.io/store/pruning/types"
-	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmdb "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -19,6 +18,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/stretchr/testify/require"
+
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 )
 
 type (

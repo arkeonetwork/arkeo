@@ -4,12 +4,13 @@ import (
 	"strconv"
 
 	"cosmossdk.io/errors"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func newClaimCmd() *cobra.Command {
