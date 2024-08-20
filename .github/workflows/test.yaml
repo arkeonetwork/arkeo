@@ -31,12 +31,12 @@ jobs:
           uses: docker/setup-buildx-action@v2
 
         - name: GoReleaser Cross
-          run: make release-dryrun-cross
+          run: make release-dry-run-cross
           env:
             RELEASE: false
             GITHUB_TOKEN: ""
         - name: GoReleaser
-          run: make release-dryrun
+          run: make release-dry-run
           env:
             RELEASE: false
             GITHUB_TOKEN: ""

@@ -168,7 +168,7 @@ _test-regression:
 
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.36.0
 
-containerProtoVer=0.14.0
+containerProtoVer=0.15.0
 containerProtoImage=ghcr.io/cosmos/proto-builder:$(containerProtoVer)
 containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
