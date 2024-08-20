@@ -20,9 +20,6 @@ jobs:
           uses: actions/setup-go@v3
           with:
             go-version-file: go.mod
-        
-        - name: Compile Protobuf
-          run: make proto-gen
 
         - name: Set up QEMU
           uses: docker/setup-qemu-action@v2
