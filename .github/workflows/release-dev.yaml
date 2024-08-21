@@ -43,6 +43,7 @@ jobs:
       - name: release-testnet
         run: make release
         env:
+            TAG: testnet
             GORELEASER_SKIP_VALIDATE: true
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: release-cross
