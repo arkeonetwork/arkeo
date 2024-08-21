@@ -138,7 +138,7 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -155,7 +155,7 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.dev
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -168,19 +168,19 @@ dockers:
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}d:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}d-dev:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'

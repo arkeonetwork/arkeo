@@ -3,7 +3,7 @@ version: "3"
 
 services:
   node:
-    image: ghcr.io/arkeonetwork/arkeod-dev:${IMAGE_TAG}
+    image: ghcr.io/arkeonetwork/arkeo-dev:${IMAGE_TAG}
     entrypoint:
       - sh
       - /opt/genesis.sh

@@ -65,7 +65,7 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
@@ -82,7 +82,7 @@ dockers:
     goarch: amd64
     dockerfile: Dockerfile.dev
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}d-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
