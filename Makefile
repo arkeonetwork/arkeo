@@ -74,8 +74,20 @@ install-testnet:
 
 # ------------------------------ Docker Build ------------------------------
 
-docker-build: proto-gen
-	@docker build . --file Dockerfile -t ${IMAGE}:${TAG}
+docker-build:
+	$(DOCKER) run \
+		--rm \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		--clean
+		--snapshot
+
+
 
 localnet: docker-build
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
@@ -246,6 +258,7 @@ release-dry-run-cross:
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
@@ -259,6 +272,7 @@ release-dry-run:
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
