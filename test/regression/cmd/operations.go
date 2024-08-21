@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -397,7 +396,7 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	}
 
 	// read response
-	buf, err := ioutil.ReadAll(resp.Body)
+	buf, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Err(err).Msg("failed to read response")
 		return err
