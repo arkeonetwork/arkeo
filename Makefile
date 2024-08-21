@@ -120,7 +120,8 @@ docker-build:
 		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
 		--clean \
 		--snapshot \
-		--skip=$(GORELEASER_SKIP_VALIDATE)
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
 
 docker-build-cross:
 	@docker run \
