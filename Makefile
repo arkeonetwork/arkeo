@@ -19,6 +19,7 @@ PROJECT_NAME= arkeo
 DOCKER := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
+SHORT_COMMIT:=$(shell git rev-parse --short=7 HEAD)
 CHAIN_VERSION:=$(shell cat chain.version)
 SENTINEL_VERSION:=$(shell cat sentinel.version)
 TAG?=latest
@@ -55,6 +56,7 @@ GORELEASER_VERSION = v1.21.0
 # Release Env Variable
 RELEASE ?= false
 GORELEASER_SKIP_VALIDATE ?= false
+GORELEASER_SKIP_PUBLISH ?= false
 
 ########################################################################################
 # Targets
@@ -74,8 +76,40 @@ install-testnet:
 
 # ------------------------------ Docker Build ------------------------------
 
+# Detect OS and architecture
+OS := $(shell uname -s)
+ARCH := $(shell uname -m)
+
+# Determine the Docker build command based on OS and architecture
+ifeq ($(OS), Darwin)
+    ifeq ($(ARCH), arm64)
+        DOCKER_BUILD := docker-build-cross
+		IMAGE_ARCH:= arm64
+    else ifeq ($(ARCH), x86_64)
+		IMAGE_ARCH:= arm64
+        DOCKER_BUILD := docker-build-cross
+    endif
+else ifeq ($(OS), Linux)
+    ifeq ($(ARCH), arm64)
+		IMAGE_ARCH:= arm64
+        DOCKER_BUILD := docker-build-cross
+    else ifeq ($(ARCH), x86_64)
+		IMAGE_ARCH:= amd64
+        DOCKER_BUILD := docker-build
+    endif
+endif
+
+# Fallback for unsupported architectures
+ifeq ($(DOCKER_BUILD),)
+    $(error Unsupported architecture: $(ARCH))
+endif
+
+# Docker build target
+build:
+	@$(MAKE) $(DOCKER_BUILD)
+
 docker-build:
-	$(DOCKER) run \
+	@docker  run \
 		--rm \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE) \
@@ -84,13 +118,31 @@ docker-build:
 		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
 		-w /go/src/github.com/arkeonetwork/arkeo \
 		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
-		--clean
-		--snapshot
+		--clean \
+		--snapshot \
+		--skip=$(GORELEASER_SKIP_VALIDATE)
+
+docker-build-cross:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--snapshot \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
 
 
 
-localnet: docker-build
-	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
+localnet: build
+	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
 
 # ------------------------------    Testnet   ------------------------------
 
@@ -280,19 +332,34 @@ release-dry-run:
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
 		--clean --skip=validate --skip=publish
 
-.PHONY: release
+.PHONY: releases
 release:
-	@if [ ! -f ".release-env" ]; then \
-		echo "\033[91m.release-env is required for release\033[0m";\
-		exit 1;\
-	fi
-	docker run \
+	@docker run \
 		--rm \
 		-e CGO_ENABLED=1 \
-		--env-file .release-env \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+release-cross:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		release --clean
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)

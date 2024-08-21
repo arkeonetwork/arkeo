@@ -1,0 +1,58 @@
+name: Release Dev image
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release-dev:
+    name: release-dev-binaries-and-images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: release-cross-testnet
+        run: make release-cross
+        env:
+          TAG: testnet
+          GORELEASER_SKIP_VALIDATE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+      - name: release-testnet
+        run: make release
+        env:
+            GORELEASER_SKIP_VALIDATE: true
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: release-cross
+        run: make release-cross
+        env:
+            GORELEASER_SKIP_VALIDATE: true
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: release
+        run: make release
+        env:
+            GORELEASER_SKIP_VALIDATE: true
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
