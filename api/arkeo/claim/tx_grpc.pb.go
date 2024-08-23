@@ -4,7 +4,6 @@ package claim
 
 import (
 	context "context"
-
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -23,6 +22,7 @@ type MsgClient interface {
 	ClaimArkeo(ctx context.Context, in *MsgClaimArkeo, opts ...grpc.CallOption) (*MsgClaimArkeoResponse, error)
 	TransferClaim(ctx context.Context, in *MsgTransferClaim, opts ...grpc.CallOption) (*MsgTransferClaimResponse, error)
 	AddClaim(ctx context.Context, in *MsgAddClaim, opts ...grpc.CallOption) (*MsgAddClaimResponse, error)
+	ClaimThorchain(ctx context.Context, in *MsgClaimThorchain, opts ...grpc.CallOption) (*MsgClaimThorchainResponse, error)
 }
 
 type msgClient struct {
@@ -69,6 +69,15 @@ func (c *msgClient) AddClaim(ctx context.Context, in *MsgAddClaim, opts ...grpc.
 	return out, nil
 }
 
+func (c *msgClient) ClaimThorchain(ctx context.Context, in *MsgClaimThorchain, opts ...grpc.CallOption) (*MsgClaimThorchainResponse, error) {
+	out := new(MsgClaimThorchainResponse)
+	err := c.cc.Invoke(ctx, "/arkeo.claim.Msg/ClaimThorchain", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
@@ -77,6 +86,7 @@ type MsgServer interface {
 	ClaimArkeo(context.Context, *MsgClaimArkeo) (*MsgClaimArkeoResponse, error)
 	TransferClaim(context.Context, *MsgTransferClaim) (*MsgTransferClaimResponse, error)
 	AddClaim(context.Context, *MsgAddClaim) (*MsgAddClaimResponse, error)
+	ClaimThorchain(context.Context, *MsgClaimThorchain) (*MsgClaimThorchainResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -95,6 +105,9 @@ func (UnimplementedMsgServer) TransferClaim(context.Context, *MsgTransferClaim) 
 }
 func (UnimplementedMsgServer) AddClaim(context.Context, *MsgAddClaim) (*MsgAddClaimResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddClaim not implemented")
+}
+func (UnimplementedMsgServer) ClaimThorchain(context.Context, *MsgClaimThorchain) (*MsgClaimThorchainResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClaimThorchain not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -181,6 +194,24 @@ func _Msg_AddClaim_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_ClaimThorchain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgClaimThorchain)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ClaimThorchain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/arkeo.claim.Msg/ClaimThorchain",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ClaimThorchain(ctx, req.(*MsgClaimThorchain))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -203,6 +234,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddClaim",
 			Handler:    _Msg_AddClaim_Handler,
+		},
+		{
+			MethodName: "ClaimThorchain",
+			Handler:    _Msg_ClaimThorchain_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

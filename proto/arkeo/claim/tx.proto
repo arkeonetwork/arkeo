@@ -15,11 +15,13 @@ service Msg {
   rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
   rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
-  // this line is used by starport scaffolding # proto/tx/rpc
+  rpc ClaimThorchain(MsgClaimThorchain) returns (MsgClaimThorchainResponse);
+
 }
+
 message MsgClaimEth {
   string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  string eth_address = 2; // the adress the claim is for
+  string eth_address = 2; // the address the claim is for
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
@@ -47,4 +49,10 @@ message MsgAddClaim {
 
 message MsgAddClaimResponse {}
 
-// this line is used by starport scaffolding # proto/tx/message
+message MsgClaimThorchain {
+  string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
+  string from_address = 2; // the address that is delegating the claim
+  string to_address = 3; // the address to delegate the claim to
+}
+
+message MsgClaimThorchainResponse {}
