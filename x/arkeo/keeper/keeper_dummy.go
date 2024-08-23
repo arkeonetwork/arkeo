@@ -9,12 +9,12 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
+	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/tendermint/tendermint/libs/log"
 )
 
 var kaboom = errors.New("Kaboom!!!")

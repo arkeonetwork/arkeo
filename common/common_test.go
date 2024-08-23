@@ -3,8 +3,9 @@ package common
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 func TestGetUncappedShare(t *testing.T) {

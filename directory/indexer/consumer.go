@@ -3,6 +3,7 @@ package indexer
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -10,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
+	abcitypes "github.com/cometbft/cometbft/abci/types"
+	tmclient "github.com/cometbft/cometbft/rpc/client/http"
+	ctypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
+	"github.com/cosmos/gogoproto/jsonpb"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/pkg/errors"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -124,7 +125,7 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 		}
 	}
 
-	for _, event := range blockResults.EndBlockEvents {
+	for _, event := range blockResults.FinalizeBlockEvents {
 		log.Debugf("received %s endblock event", event.Type)
 		if err := s.handleAbciEvent(event, nil, block.Block.Height); err != nil {
 			log.WithError(err).Errorf("error handling abci event %#v", event)
@@ -230,29 +231,75 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
 	result := make(map[string]any)
 	for _, attr := range event.Attributes {
-		attrValue := strings.Trim(string(attr.Value), `"`)
+		key, err := base64.StdEncoding.DecodeString(attr.Key)
+		if err != nil {
+			return nil, fmt.Errorf("fail to decode key %s, err: %w", attr.Key, err)
+		}
+		attrValue := strings.Trim(attr.Value, `"`)
 		if len(attrValue) == 0 {
 			continue
 		}
-		switch attrValue[0] {
+		value, err := base64.StdEncoding.DecodeString(attrValue)
+		if err != nil {
+			return nil, fmt.Errorf("fail to decode value %s, err: %w", attrValue, err)
+		}
+
+		// Handle JSON strings
+		if value[0] == '"' && value[len(value)-1] == '"' {
+			var strValue string
+			if err := json.Unmarshal(value, &strValue); err != nil {
+				return nil, fmt.Errorf("fail to unmarshal %s to string, err: %w", value, err)
+			}
+			result[string(key)] = strValue
+			continue
+		}
+
+		switch value[0] {
 		case '{':
 			var nest any
-			if err := json.Unmarshal(attr.Value, &nest); err != nil {
-				return nil, fmt.Errorf("fail to unmarshal %s to map,err: %w", attrValue, err)
+			if err := json.Unmarshal(value, &nest); err != nil {
+				return nil, fmt.Errorf("fail to unmarshal %s to map, err: %w", value, err)
 			}
-			result[string(attr.Key)] = nest
+			result[string(key)] = nest
 		case '[':
 			var nest []any
-			if err := json.Unmarshal(attr.Value, &nest); err != nil {
-				return nil, fmt.Errorf("fail to unmarshal %s to slice,err: %w", attrValue, err)
+			if err := json.Unmarshal(value, &nest); err != nil {
+				return nil, fmt.Errorf("fail to unmarshal %s to slice, err: %w", value, err)
 			}
-			result[string(attr.Key)] = nest
+			result[string(key)] = nest
 		default:
-			result[string(attr.Key)] = attrValue
+			result[string(key)] = string(value)
 		}
 	}
 	return result, nil
 }
+
+// func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
+// 	result := make(map[string]any)
+// 	for _, attr := range event.Attributes {
+// 		attrValue := strings.Trim(string(attr.Value), `"`)
+// 		if len(attrValue) == 0 {
+// 			continue
+// 		}
+// 		switch attrValue[0] {
+// 		case '{':
+// 			var nest any
+// 			if err := json.Unmarshal([]byte(attr.GetValue()), &nest); err != nil {
+// 				return nil, fmt.Errorf("fail to unmarshal %s to map,err: %w", attrValue, err)
+// 			}
+// 			result[string(attr.Key)] = nest
+// 		case '[':
+// 			var nest []any
+// 			if err := json.Unmarshal([]byte(attr.GetValue()), &nest); err != nil {
+// 				return nil, fmt.Errorf("fail to unmarshal %s to slice,err: %w", attrValue, err)
+// 			}
+// 			result[string(attr.Key)] = nest
+// 		default:
+// 			result[string(attr.Key)] = attrValue
+// 		}
+// 	}
+// 	return result, nil
+// }
 
 func subscribe(ctx context.Context, client *tmclient.HTTP, query string) (<-chan ctypes.ResultEvent, error) {
 	out, err := client.Subscribe(ctx, "", query)

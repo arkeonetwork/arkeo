@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func newOpenContractCmd() *cobra.Command {

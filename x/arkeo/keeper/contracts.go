@@ -4,10 +4,11 @@ import (
 	"errors"
 	"strconv"
 
+	gogotypes "github.com/gogo/protobuf/types"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	gogotypes "github.com/gogo/protobuf/types"
 )
 
 func (k KVStore) setContract(ctx cosmos.Context, contract types.Contract) {

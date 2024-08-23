@@ -8,21 +8,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/app"
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
+	tmhttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
-	tmhttp "github.com/tendermint/tendermint/rpc/client/http"
+
+	"github.com/arkeonetwork/arkeo/app"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +40,7 @@ const (
 )
 
 var (
-	encodingConfig cosmoscmd.EncodingConfig
+	encodingConfig arekoappParams.EncodingConfig
 	clientCtx      client.Context
 	txFactory      tx.Factory
 	keyRing        keyring.Keyring
@@ -51,7 +53,7 @@ func init() {
 	config.Seal()
 
 	// initialize the codec
-	encodingConfig = cosmoscmd.MakeEncodingConfig(app.ModuleBasics)
+	encodingConfig = app.MakeEncodingConfig()
 
 	// create new rpc client
 	rpcClient, err := tmhttp.New("http://localhost:26657", "/websocket")
@@ -84,6 +86,7 @@ func init() {
 	txFactory = txFactory.WithChainID(clientCtx.ChainID)
 	txFactory = txFactory.WithGas(1e8)
 	txFactory = txFactory.WithSignMode(signing.SignMode_SIGN_MODE_DIRECT)
+	txFactory = txFactory.WithTxConfig(clientCtx.TxConfig)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -131,20 +134,20 @@ var httpClient = &http.Client{
 	Timeout: 30 * time.Second * getTimeFactor(),
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////
 // Module Addresses
-////////////////////////////////////////////////////////////////////////////////////////
-
+// //////////////////////////////////////////////////////////////////////////////////////
+// nolint
 // trunk-ignore-all(gitleaks/generic-api-key)
 // trunk-ignore(trunk/ignore-does-nothing) # Getting weird lint error only on CI and running locally works fine
 // trunk-ignore-all(golangci-lint/gosec)
 const (
-	ModuleAddrBondedTokensPool    = "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43"
-	ModuleAddrNotBondedTokensPool = "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9"
-	ModuleAddrGov                 = "tarkeo10d07y265gmmuvt4z0w9aw880jnsr700jk8l664"
-	ModuleAddrDistribution        = "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e"
-	ModuleAddrMint                = "tarkeo1m3h30wlvsf8llruxtpukdvsy0km2kum8y5t8tx"
-	ModuleAddrFeeCollector        = "tarkeo17xpfvakm2amg962yls6f84z3kell8c5luu0l8m"
+	ModuleAddrBondedTokensPool    = "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43" //nolint:staticcheck
+	ModuleAddrNotBondedTokensPool = "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9" //nolint:staticcheck
+	ModuleAddrGov                 = "tarkeo10d07y265gmmuvt4z0w9aw880jnsr700jk8l664" //nolint:staticcheck
+	ModuleAddrDistribution        = "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e" //nolint:staticcheck
+	ModuleAddrMint                = "tarkeo1m3h30wlvsf8llruxtpukdvsy0km2kum8y5t8tx" //nolint:staticcheck
+	ModuleAddrFeeCollector        = "tarkeo17xpfvakm2amg962yls6f84z3kell8c5luu0l8m" //nolint:staticcheck
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////

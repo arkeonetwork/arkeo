@@ -4,26 +4,32 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
+
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"cosmossdk.io/store"
+	storemetrics "cosmossdk.io/store/metrics"
+	storetypes "cosmossdk.io/store/types"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	tmdb "github.com/cosmos/cosmos-db"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmdb "github.com/tendermint/tm-db"
+
+	"github.com/arkeonetwork/arkeo/app"
 )
 
 type (
@@ -34,17 +40,38 @@ type (
 	}
 )
 
+const (
+	bech32Prefix = "arkeo"
+)
+
+var (
+	// Bech32PrefixAccAddr
+	Bech32PrefixAccAddr  = bech32Prefix
+	Bech32PrefixAccPub   = bech32Prefix + sdk.PrefixPublic
+	Bech32PrefixValAddr  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
+	Bech32PrefixValPub   = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+	Bech32PrefixConsAddr = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	Bech32PrefixConsPub  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+)
+
 // CreateTestClaimKeepers creates test keepers for claim module
 func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
-	storeKey := sdk.NewKVStoreKey(types.StoreKey)
-	keyAcc := sdk.NewKVStoreKey(authtypes.StoreKey)
-	keyBank := sdk.NewKVStoreKey(banktypes.StoreKey)
-	keyParams := sdk.NewKVStoreKey(paramstypes.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(paramstypes.TStoreKey)
+	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
+	keyAcc := storetypes.NewKVStoreKey(authtypes.StoreKey)
+	keyBank := storetypes.NewKVStoreKey(banktypes.StoreKey)
+	keyParams := storetypes.NewKVStoreKey(paramstypes.StoreKey)
+	tkeyParams := storetypes.NewTransientStoreKey(paramstypes.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
+	cfg := sdk.GetConfig()
+
+	cfg.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	cfg.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	cfg.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+
+	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()
-	stateStore := store.NewCommitMultiStore(db)
+	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	stateStore.MountStoreWithDB(keyAcc, storetypes.StoreTypeIAVL, db)
@@ -53,7 +80,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
-	encodingConfig := simappparams.MakeTestEncodingConfig()
+	encodingConfig := app.MakeEncodingConfig()
 	types.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	cdc := utils.MakeTestMarshaler()
 	amino := encodingConfig.Amino
@@ -67,18 +94,40 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 	ctx = ctx.WithBlockTime(time.Now().UTC()) // needed for airdrop start time
 
-	paramsKeeper := paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
-	accountKeeper := authkeeper.NewAccountKeeper(cdc, keyAcc, paramsKeeper.Subspace(authtypes.ModuleName), authtypes.ProtoBaseAccount, map[string][]string{
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		types.ModuleName:               {authtypes.Minter},
-		arkeotypes.ReserveName:         {},
-		arkeotypes.ProviderName:        {},
-		arkeotypes.ContractName:        {},
-	}, sdk.Bech32PrefixAccAddr)
-	accountKeeper.SetParams(ctx, authtypes.DefaultParams())
-	bankKeeper := bankkeeper.NewBaseKeeper(cdc, keyBank, accountKeeper, paramsKeeper.Subspace(banktypes.ModuleName), nil)
-	bankKeeper.SetParams(ctx, banktypes.DefaultParams())
+	paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+
+	accountKeeper := authkeeper.NewAccountKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyAcc),
+		authtypes.ProtoBaseAccount,
+		map[string][]string{
+			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+			types.ModuleName:               {authtypes.Minter},
+			arkeotypes.ReserveName:         {},
+			arkeotypes.ProviderName:        {},
+			arkeotypes.ContractName:        {},
+		},
+		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
+		sdk.Bech32PrefixAccAddr,
+		govModuleAddr,
+	)
+
+	// accountKeeper.SetParams(ctx, authtypes.DefaultParams())
+
+	bankKeeper := bankkeeper.NewBaseKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyBank),
+		accountKeeper,
+		nil,
+		govModuleAddr,
+		logger,
+	)
+	err := bankKeeper.SetParams(ctx, banktypes.DefaultParams())
+	if err != nil {
+		panic(err)
+	}
 
 	k := keeper.NewKeeper(
 		cdc,
@@ -87,6 +136,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 		bankKeeper,
 		memStoreKey,
 		paramsSubspace,
+		logger,
 	)
 
 	// Initialize params

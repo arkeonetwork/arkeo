@@ -20,7 +20,7 @@ func SimulateMsgModProvider(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgModProvider{
-			Creator: simAccount.Address,
+			Creator: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the ModProvider simulation

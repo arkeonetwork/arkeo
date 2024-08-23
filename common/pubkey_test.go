@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 )

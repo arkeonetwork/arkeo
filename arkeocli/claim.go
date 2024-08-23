@@ -4,11 +4,13 @@ import (
 	"strconv"
 
 	"cosmossdk.io/errors"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func newClaimCmd() *cobra.Command {
@@ -79,7 +81,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	signBytes := types.GetBytesToSign(contract.Id, nonce)
-	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes)
+	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes, signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
 	}

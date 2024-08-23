@@ -3,9 +3,10 @@ package types
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/stretchr/testify/require"
 )
 
 func TestValidateBasic(t *testing.T) {
@@ -15,8 +16,8 @@ func TestValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgBondProvider{
-		Creator:  acct,
-		Provider: pubkey,
+		Creator:  acct.String(),
+		Provider: pubkey.String(),
 	}
 	err = msg.ValidateBasic()
 	require.ErrorIs(t, err, ErrInvalidService)

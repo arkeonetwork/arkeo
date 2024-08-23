@@ -2,9 +2,10 @@ package types
 
 import (
 	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const TypeMsgCloseContract = "close_contract"
@@ -13,7 +14,7 @@ var _ sdk.Msg = &MsgCloseContract{}
 
 func NewMsgCloseContract(creator cosmos.AccAddress, contractId uint64, client common.PubKey, delegate common.PubKey) *MsgCloseContract {
 	return &MsgCloseContract{
-		Creator:    creator,
+		Creator:    creator.String(),
 		ContractId: contractId,
 		Client:     client,
 		Delegate:   delegate,
@@ -29,11 +30,11 @@ func (msg *MsgCloseContract) Type() string {
 }
 
 func (msg *MsgCloseContract) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgCloseContract) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	return sdk.MustAccAddressFromBech32(msg.Creator)
 }
 
 func (msg *MsgCloseContract) GetSignBytes() []byte {
@@ -45,7 +46,7 @@ func (msg *MsgCloseContract) ValidateBasic() error {
 	if msg == nil {
 		return errors.Wrap(cosmos.ErrUnknownRequest("invalid close contract message"), "message cammot be empty")
 	}
-	if msg.Creator.Empty() {
+	if msg.Creator == "" {
 		return errors.Wrapf(ErrCloseContractUnauthorized, "creator cannot be empty")
 	}
 

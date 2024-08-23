@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
+	tmclient "github.com/cometbft/cometbft/rpc/client/http"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/common/utils"

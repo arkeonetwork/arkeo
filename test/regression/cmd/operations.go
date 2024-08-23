@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -16,9 +15,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/sentinel"
-	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -27,6 +23,10 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/sentinel"
+	arkeo "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -396,7 +396,7 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 	}
 
 	// read response
-	buf, err := ioutil.ReadAll(resp.Body)
+	buf, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Err(err).Msg("failed to read response")
 		return err
@@ -629,11 +629,11 @@ func (op *OpTxClaimContract) Execute(_ *os.Process, logs chan string) error {
 
 func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan string) error {
 	// check that message is valid
-	err := msg.ValidateBasic()
+
+	enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
+	enc.SetIndent("", "  ")
+	err := enc.Encode(op)
 	if err != nil {
-		enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
-		enc.SetIndent("", "  ")
-		_ = enc.Encode(op)
 		log.Fatal().Err(err).Msg("failed to validate basic")
 	}
 
@@ -643,6 +643,8 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 	ctx = ctx.WithFromName(addressToName[signer.String()])
 	ctx = ctx.WithOutput(buf)
 
+	ctx = ctx.WithBroadcastMode("sync")
+
 	// override the sequence if provided
 	txf := txFactory
 	if seq != nil {
@@ -650,7 +652,7 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 	}
 
 	// send message
-	err = tx.GenerateOrBroadcastTxWithFactory(ctx, txf, msg)
+	err = tx.BroadcastTx(ctx, txf, msg)
 	if err != nil {
 		fmt.Println(ColorPurple + "\nOperation:" + ColorReset)
 		enc := json.NewEncoder(os.Stdout) // json instead of yaml to encode amount
@@ -661,7 +663,7 @@ func sendMsg(msg sdk.Msg, signer sdk.AccAddress, seq *int64, op any, logs chan s
 		return err
 	}
 
-	// extract txhash from output json
+	// // extract txhash from output json
 	var txRes sdk.TxResponse
 	err = encodingConfig.Marshaler.UnmarshalJSON(buf.Bytes(), &txRes)
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	originalClaimAddr := sample.AccAddress()
 	claimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
@@ -32,8 +33,8 @@ func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
 
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 	transferClaimMessage := &types.MsgTransferClaim{
-		Creator:   originalClaimAddr,
-		ToAddress: sample.AccAddress(),
+		Creator:   originalClaimAddr.String(),
+		ToAddress: sample.AccAddress().String(),
 	}
 	result, err := msgServer.TransferClaim(ctx, transferClaimMessage)
 	require.ErrorIs(t, types.ErrClaimRecordNotTransferrable, err)
@@ -45,7 +46,7 @@ func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
 	require.False(t, claimRecord.IsEmpty())
 
 	// confirm we don't have a claimrecord for arkeo
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress.String(), types.ARKEO)
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress, types.ARKEO)
 	require.NoError(t, err)
 	require.True(t, claimRecord.IsEmpty())
 
@@ -76,8 +77,8 @@ func TestTransferClaim(t *testing.T) {
 	// get balance of arkeo address before claim
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 	transferClaimMessage := &types.MsgTransferClaim{
-		Creator:   originalClaimAddr,
-		ToAddress: toAddr,
+		Creator:   originalClaimAddr.String(),
+		ToAddress: toAddr.String(),
 	}
 	_, err := msgServer.TransferClaim(ctx, transferClaimMessage)
 	require.NoError(t, err)
@@ -88,9 +89,9 @@ func TestTransferClaim(t *testing.T) {
 	require.True(t, claimRecord.IsEmpty())
 
 	// confirm we have a claimrecord for arkeo
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress.String(), types.ARKEO)
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress, types.ARKEO)
 	require.NoError(t, err)
-	require.Equal(t, claimRecord.Address, transferClaimMessage.ToAddress.String())
+	require.Equal(t, claimRecord.Address, transferClaimMessage.ToAddress)
 	require.Equal(t, claimRecord.Chain, types.ARKEO)
 	require.True(t, claimRecord.AmountClaim.IsZero()) // nothing to claim for claim action
 	require.Equal(t, claimRecord.AmountVote, sdk.NewInt64Coin(types.DefaultClaimDenom, 100))
@@ -107,7 +108,7 @@ func TestTransferClaim(t *testing.T) {
 
 	// attempt to claim from arkeo should also fail!
 	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{
-		Creator: originalClaimAddr,
+		Creator: originalClaimAddr.String(),
 	})
 	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 }
@@ -124,10 +125,10 @@ func TestOriginalClaimNotExistShouldFail(t *testing.T) {
 	// get balance of arkeo address before claim
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, originalClaimAddr, types.DefaultClaimDenom)
 	transferClaimMessage := &types.MsgTransferClaim{
-		Creator:   originalClaimAddr,
-		ToAddress: sample.AccAddress(),
+		Creator:   originalClaimAddr.String(),
+		ToAddress: sample.AccAddress().String(),
 	}
-	toAddr, err := sdk.AccAddressFromBech32(transferClaimMessage.ToAddress.String())
+	toAddr, err := sdk.AccAddressFromBech32(transferClaimMessage.ToAddress)
 	require.NoError(t, err)
 	toAddrBalanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, toAddr, types.DefaultClaimDenom)
 
@@ -140,7 +141,7 @@ func TestOriginalClaimNotExistShouldFail(t *testing.T) {
 	require.True(t, claimRecord.IsEmpty())
 
 	// confirm we have a claimrecord for arkeo
-	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress.String(), types.ARKEO)
+	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, transferClaimMessage.ToAddress, types.ARKEO)
 	require.NoError(t, err)
 	require.True(t, claimRecord.IsEmpty())
 
@@ -187,8 +188,8 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 	// get balance of arkeo address before claim
 	toAddressBalanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, arkeoToAddress, types.DefaultClaimDenom)
 	transferClaimMessage := types.MsgTransferClaim{
-		Creator:   addrArkeo,
-		ToAddress: arkeoToAddress,
+		Creator:   addrArkeo.String(),
+		ToAddress: arkeoToAddress.String(),
 	}
 	result, err := msgServer.TransferClaim(ctx, &transferClaimMessage)
 	require.NoError(t, err)
@@ -219,7 +220,7 @@ func TestTransferClaimWithExistingClaimShouldMerge(t *testing.T) {
 	require.Nil(t, result)
 
 	// attempt to claim from arkeo should also fail!
-	resp, err := msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
+	resp, err := msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
 	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 	require.Nil(t, resp)
 }

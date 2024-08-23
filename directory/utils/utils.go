@@ -11,9 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/arkeonetwork/arkeo/directory/types"
 	"github.com/arkeonetwork/arkeo/sentinel"
-	"github.com/pkg/errors"
 
 	resty "github.com/go-resty/resty/v2"
 )

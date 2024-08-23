@@ -10,6 +10,8 @@ import (
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+
 	arkeotypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
@@ -69,7 +71,7 @@ func TestUpdateContract(t *testing.T) {
 		Type:               arkeotypes.ContractType_PAY_AS_YOU_GO,
 		Height:             1024,
 		Duration:           10,
-		Rate:               cosmostypes.NewCoin("uarkeo", cosmostypes.NewInt(10)),
+		Rate:               cosmostypes.NewCoin("uarkeo", cosmos.NewInt(10)),
 		OpenCost:           1000,
 		Deposit:            math.NewInt(10000),
 		SettlementDuration: 10,

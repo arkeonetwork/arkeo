@@ -3,17 +3,19 @@ package keeper
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	cKeys "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func TestValidate(t *testing.T) {
@@ -59,12 +61,12 @@ func TestValidate(t *testing.T) {
 
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
 
@@ -72,7 +74,7 @@ func TestValidate(t *testing.T) {
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + contract.Duration)
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 	err = s.HandlerClaimContractIncome(ctx, &msg)
@@ -120,12 +122,12 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -136,12 +138,12 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// repeat the same thing and ensure we don't pay providers twice
@@ -155,7 +157,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	// update signature for message
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -172,7 +174,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	// update signature for message
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -215,7 +217,7 @@ func TestHandleSubscription(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -226,7 +228,7 @@ func TestHandleSubscription(t *testing.T) {
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      21,
 	}
 	// repeat the same thing and ensure we don't pay providers twice
@@ -302,12 +304,12 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 
 	message := msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -320,7 +322,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	msg.Nonce = 0
 
 	message = msg.GetBytesToSign()
-	msg.Signature, _, err = kb.Sign("whatever", message)
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// handle claim with bad nonce
@@ -369,7 +371,7 @@ func TestClaimContractIncomeHandlerSignatureVerification(t *testing.T) {
 	// happy path
 	msg := types.MsgClaimContractIncome{
 		ContractId: contract.Id,
-		Creator:    acc,
+		Creator:    acc.String(),
 		Nonce:      20,
 	}
 

@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"testing"
 
+	abciTypes "github.com/cometbft/cometbft/abci/types"
+	tmCoreTypes "github.com/cometbft/cometbft/rpc/core/types"
+	tmtypes "github.com/cometbft/cometbft/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
-	abciTypes "github.com/tendermint/tendermint/abci/types"
-	tmCoreTypes "github.com/tendermint/tendermint/rpc/core/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func newTestConfig() conf.Configuration {
@@ -45,7 +46,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
@@ -117,7 +118,7 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
@@ -167,7 +168,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
@@ -203,7 +204,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	// confirm is a settlement event is emitted with a lower nonce, we handle it correctly, by not setting our claim to Claimed.
 	inputContract.Nonce = 8
 	proxy.MemStore.SetHeight(150)
-	settlementEvent := types.NewContractSettlementEvent(sdk.NewInt(8), sdk.NewInt(1), &inputContract)
+	settlementEvent := types.NewContractSettlementEvent(cosmos.NewInt(8), cosmos.NewInt(1), &inputContract)
 	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
 	require.NoError(t, err)
 
@@ -219,7 +220,7 @@ func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	// confirm is a settlement event is emitted with the samce nonce, we handle it correctly, by setting our claim to Claimed.
 	inputContract.Nonce = 10
 	proxy.MemStore.SetHeight(160)
-	settlementEvent = types.NewContractSettlementEvent(sdk.NewInt(10), sdk.NewInt(1), &inputContract)
+	settlementEvent = types.NewContractSettlementEvent(cosmos.NewInt(10), cosmos.NewInt(1), &inputContract)
 	sdkEvt, err = sdk.TypedEventToEvent(&settlementEvent)
 	require.NoError(t, err)
 
@@ -239,7 +240,7 @@ func TestHandleNewBlockHeaderEvent(t *testing.T) {
 func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
 	evts := make(map[string][]string, len(sdkEvent.Attributes))
 	for _, attr := range sdkEvent.Attributes {
-		evts[string(attr.Key)] = []string{string(attr.Value)}
+		evts[attr.Key] = []string{attr.Value}
 	}
 
 	abciEvents := []abciTypes.Event{{
@@ -256,7 +257,7 @@ func makeResultEvent(sdkEvent sdk.Event, height int64) tmCoreTypes.ResultEvent {
 				Height: height,
 				Index:  0,
 				Tx:     []byte{},
-				Result: abciTypes.ResponseDeliverTx{
+				Result: abciTypes.ExecTxResult{
 					Events: abciEvents,
 				},
 			},

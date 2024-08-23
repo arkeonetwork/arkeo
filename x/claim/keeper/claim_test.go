@@ -6,9 +6,10 @@ import (
 	testkeeper "github.com/arkeonetwork/arkeo/testutil/keeper"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestGetClaimRecordForArkeo(t *testing.T) {
@@ -204,7 +205,7 @@ func TestClaimFlow(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimArkeo{
-		Creator: addrArkeo,
+		Creator: addrArkeo.String(),
 	}
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
 	require.NoError(t, err)
@@ -299,7 +300,7 @@ func TestClaimDecay(t *testing.T) {
 	balanceBefore1 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo1, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimArkeo{
-		Creator: addrArkeo1,
+		Creator: addrArkeo1.String(),
 	}
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
 	require.NoError(t, err)
@@ -321,7 +322,7 @@ func TestClaimDecay(t *testing.T) {
 	balanceBefore2 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo2, types.DefaultClaimDenom)
 
 	claimMessage = types.MsgClaimArkeo{
-		Creator: addrArkeo2,
+		Creator: addrArkeo2.String(),
 	}
 	_, err = msgServer.ClaimArkeo(sdkCtx, &claimMessage)
 	require.NoError(t, err)
@@ -342,7 +343,7 @@ func TestClaimDecay(t *testing.T) {
 	balanceBefore3 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo3, types.DefaultClaimDenom)
 
 	claimMessage = types.MsgClaimArkeo{
-		Creator: addrArkeo3,
+		Creator: addrArkeo3.String(),
 	}
 	_, err = msgServer.ClaimArkeo(sdkCtx, &claimMessage)
 	require.ErrorIs(t, err, types.ErrAirdropEnded)

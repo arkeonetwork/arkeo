@@ -3,8 +3,9 @@ package types
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/sample"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/sample"
 )
 
 func TestMsgSetVersion_ValidateBasic(t *testing.T) {
@@ -16,14 +17,14 @@ func TestMsgSetVersion_ValidateBasic(t *testing.T) {
 		{
 			name: "valid address",
 			msg: MsgSetVersion{
-				Creator: sample.AccAddress(),
+				Creator: sample.AccAddress().String(),
 				Version: 15,
 			},
 		},
 		{
 			name: "invalid version",
 			msg: MsgSetVersion{
-				Creator: sample.AccAddress(),
+				Creator: sample.AccAddress().String(),
 				Version: 0,
 			},
 			err: ErrInvalidVersion,

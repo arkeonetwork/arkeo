@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 var _ = strconv.Itoa(0)

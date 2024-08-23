@@ -3,10 +3,11 @@ package keeper
 import (
 	"context"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func (k Keeper) ClaimRecord(goCtx context.Context, req *types.QueryClaimRecordRequest) (*types.QueryClaimRecordResponse, error) {

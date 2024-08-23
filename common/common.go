@@ -2,8 +2,8 @@ package common
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/url"
+	"os"
 	"path"
 	"runtime"
 	"strconv"
@@ -78,7 +78,7 @@ func MustParseURL(uri string) *url.URL {
 func GetCurrentVersion() int64 {
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "./../")
-	dat, err := ioutil.ReadFile(path.Join(dir, "chain.version"))
+	dat, err := os.ReadFile(path.Join(dir, "chain.version"))
 	if err != nil {
 		panic(err)
 	}

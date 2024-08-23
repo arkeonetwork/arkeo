@@ -8,6 +8,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
@@ -18,7 +19,7 @@ func (k msgServer) AddClaim(goCtx context.Context, msg *types.MsgAddClaim) (*typ
 		"creator", msg.Creator,
 		"amount", msg.Amount)
 	// This method is only provide on testnet for test purpose , so allow to override the record
-	coin := sdk.NewCoin(types.DefaultClaimDenom, sdk.NewInt(msg.Amount))
+	coin := sdk.NewCoin(types.DefaultClaimDenom, cosmos.NewInt(msg.Amount))
 	claim := types.ClaimRecord{
 		Chain:          msg.Chain,
 		Address:        msg.Address,

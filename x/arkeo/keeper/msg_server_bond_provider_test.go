@@ -3,11 +3,12 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestHandle(t *testing.T) {
@@ -23,8 +24,8 @@ func TestHandle(t *testing.T) {
 
 	// Add to bond
 	msg := types.MsgBondProvider{
-		Creator:  acct,
-		Provider: providerPubKey,
+		Creator:  acct.String(),
+		Provider: providerPubKey.String(),
 		Service:  common.BTCService.String(),
 		Bond:     cosmos.NewInt(common.Tokens(8)),
 	}
@@ -33,8 +34,8 @@ func TestHandle(t *testing.T) {
 	bal := k.GetBalance(ctx, acct)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
 	// check that provider now exists
-	require.True(t, k.ProviderExists(ctx, msg.Provider, common.BTCService))
-	provider, err := k.GetProvider(ctx, msg.Provider, common.BTCService)
+	require.True(t, k.ProviderExists(ctx, providerPubKey, common.BTCService))
+	provider, err := k.GetProvider(ctx, providerPubKey, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
@@ -48,7 +49,7 @@ func TestHandle(t *testing.T) {
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(2))
 
 	// check provider has same bond
-	provider, err = k.GetProvider(ctx, msg.Provider, common.BTCService)
+	provider, err = k.GetProvider(ctx, providerPubKey, common.BTCService)
 	require.NoError(t, err)
 	require.Equal(t, provider.Bond.Int64(), common.Tokens(8))
 
@@ -59,5 +60,5 @@ func TestHandle(t *testing.T) {
 
 	bal = k.GetBalance(ctx, acct) // check balance
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), common.Tokens(10))
-	require.False(t, k.ProviderExists(ctx, msg.Provider, common.BTCService)) // should be removed
+	require.False(t, k.ProviderExists(ctx, providerPubKey, common.BTCService)) // should be removed
 }

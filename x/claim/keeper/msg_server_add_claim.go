@@ -10,5 +10,5 @@ import (
 )
 
 func (k msgServer) AddClaim(goCtx context.Context, msg *types.MsgAddClaim) (*types.MsgAddClaimResponse, error) {
-	return nil, fmt.Errorf("MsgAddClaim is only support on testnet.")
+	return nil, fmt.Errorf("MsgAddClaim is only support on testnet")
 }

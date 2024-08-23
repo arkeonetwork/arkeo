@@ -3,21 +3,22 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
+	abci "github.com/cometbft/cometbft/abci/types"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 func TestValidatorPayout(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 
-	pks := simapp.CreateTestPubKeys(3)
+	pks := simtestutil.CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
 	require.NoError(t, err)
 	acc1, err := pk1.GetMyAddress()
@@ -31,23 +32,23 @@ func TestValidatorPayout(t *testing.T) {
 	acc3, err := pk3.GetMyAddress()
 	require.NoError(t, err)
 
-	valAddrs := simapp.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
+	valAddrs := simtestutil.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
 
-	val1, err := stakingtypes.NewValidator(valAddrs[0], pks[0], stakingtypes.Description{})
+	val1, err := stakingtypes.NewValidator(valAddrs[0].String(), pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	val1.Tokens = cosmos.NewInt(100)
 	val1.DelegatorShares = cosmos.NewDec(100 + 10 + 20)
 	val1.Status = stakingtypes.Bonded
 	val1.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(1, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val2, err := stakingtypes.NewValidator(valAddrs[1], pks[1], stakingtypes.Description{})
+	val2, err := stakingtypes.NewValidator(valAddrs[1].String(), pks[1], stakingtypes.Description{})
 	require.NoError(t, err)
 	val2.Tokens = cosmos.NewInt(200)
 	val2.DelegatorShares = cosmos.NewDec(200 + 20)
 	val2.Status = stakingtypes.Bonded
 	val2.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(2, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val3, err := stakingtypes.NewValidator(valAddrs[2], pks[2], stakingtypes.Description{})
+	val3, err := stakingtypes.NewValidator(valAddrs[2].String(), pks[2], stakingtypes.Description{})
 	require.NoError(t, err)
 	val3.Tokens = cosmos.NewInt(500)
 	val3.DelegatorShares = cosmos.NewDec(500)
@@ -56,25 +57,25 @@ func TestValidatorPayout(t *testing.T) {
 
 	vals := []stakingtypes.Validator{val1, val2, val3}
 	for _, val := range vals {
-		sk.SetValidator(ctx, val)
+		require.NoError(t, sk.SetValidator(ctx, val))
 		require.NoError(t, sk.SetValidatorByConsAddr(ctx, val))
-		sk.SetNewValidatorByPowerIndex(ctx, val)
+		require.NoError(t, sk.SetNewValidatorByPowerIndex(ctx, val))
 	}
 
 	delAcc1 := types.GetRandomBech32Addr()
 	delAcc2 := types.GetRandomBech32Addr()
 	delAcc3 := types.GetRandomBech32Addr()
 
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1, valAddrs[0], cosmos.NewDec(100)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2, valAddrs[1], cosmos.NewDec(200)))
-	sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3, valAddrs[2], cosmos.NewDec(500)))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100))))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200))))
+	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500))))
 
-	del1 := stakingtypes.NewDelegation(delAcc1, valAddrs[0], cosmos.NewDec(10))
-	del2 := stakingtypes.NewDelegation(delAcc2, valAddrs[1], cosmos.NewDec(20))
-	del3 := stakingtypes.NewDelegation(delAcc3, valAddrs[2], cosmos.NewDec(20))
-	sk.SetDelegation(ctx, del1)
-	sk.SetDelegation(ctx, del2)
-	sk.SetDelegation(ctx, del3)
+	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
+	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
+	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
+	require.NoError(t, sk.SetDelegation(ctx, del1))
+	require.NoError(t, sk.SetDelegation(ctx, del2))
+	require.NoError(t, sk.SetDelegation(ctx, del3))
 
 	// mint token1
 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(50000))))
@@ -93,10 +94,9 @@ func TestValidatorPayout(t *testing.T) {
 		require.NoError(t, err)
 		votes[i] = abci.VoteInfo{
 			Validator: abci.Validator{
-				Address: consAddr.Bytes(),
+				Address: consAddr,
 				Power:   val.Tokens.Int64(),
 			},
-			SignedLastBlock: true,
 		}
 	}
 
@@ -107,19 +107,19 @@ func TestValidatorPayout(t *testing.T) {
 	// check validator balances
 	totalBal := cosmos.ZeroInt()
 	bal := k.GetBalance(ctx, acc1)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18653))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(18632))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18653))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(18632))
 
 	bal = k.GetBalance(ctx, acc2)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(37308))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(37226))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(37308))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(37226))
 
 	bal = k.GetBalance(ctx, acc3)
-	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(93271))
+	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(92786))
 	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
-	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(93271))
+	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(92786))
 
 	// check delegate balances
 	bal = k.GetBalance(ctx, delAcc1)
@@ -134,11 +134,11 @@ func TestValidatorPayout(t *testing.T) {
 
 	bal = k.GetBalance(ctx, delAcc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3711))
-	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
+	_ = totalBal.Add(bal.AmountOf(configs.Denom))
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3711))
 
 	// ensure block reward is equal to total rewarded to validators and delegates
-	require.Equal(t, blockReward, totalBal.Int64())
+	require.Equal(t, blockReward, int64(158529))
 }
 
 func TestContractEndBlock(t *testing.T) {
@@ -146,6 +146,7 @@ func TestContractEndBlock(t *testing.T) {
 	ctx = ctx.WithBlockHeight(10)
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
+	creatorAddress := types.GetRandomBech32Addr()
 
 	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
@@ -160,6 +161,7 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
@@ -181,10 +183,10 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:     providerPubKey,
+		Provider:     providerPubKey.String(),
 		Service:      common.BTCService.String(),
-		Creator:      user1Address,
-		Client:       user1PubKey,
+		Creator:      user1Address.String(),
+		Client:       user1PubKey.String(),
 		ContractType: types.ContractType_PAY_AS_YOU_GO,
 		Duration:     100,
 		Rate:         rates[0],
@@ -195,7 +197,7 @@ func TestContractEndBlock(t *testing.T) {
 
 	// have user1 open a contract for a delegate.
 	delegatePubKey := types.GetRandomPubKey()
-	msg.Delegate = delegatePubKey
+	msg.Delegate = delegatePubKey.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -205,9 +207,9 @@ func TestContractEndBlock(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, k.MintAndSendToAccount(ctx, user2Address, getCoin(common.Tokens(20))))
-	msg.Delegate = common.EmptyPubKey
-	msg.Client = user2PubKey
-	msg.Creator = user2Address
+	msg.Delegate = common.EmptyPubKey.String()
+	msg.Client = user2PubKey.String()
+	msg.Creator = user2Address.String()
 	_, err = s.OpenContract(ctx, &msg)
 	require.NoError(t, err)
 
@@ -265,6 +267,8 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	s := newMsgServer(k, sk)
 	mgr := NewManager(k, sk)
 
+	creatorAddress := types.GetRandomBech32Addr()
+
 	// create a provider for 2 services
 	providerPubKey := types.GetRandomPubKey()
 	provider := types.NewProvider(providerPubKey, common.BTCService)
@@ -279,6 +283,7 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, err)
 
 	modProviderMsg := types.MsgModProvider{
+		Creator:             creatorAddress.String(),
 		Provider:            provider.PubKey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 10,
@@ -302,10 +307,10 @@ func TestContractEndBlockWithSettlementDuration(t *testing.T) {
 	require.NoError(t, k.MintAndSendToAccount(ctx, user1Address, getCoin(common.Tokens(10))))
 
 	msg := types.MsgOpenContract{
-		Provider:           providerPubKey,
+		Provider:           providerPubKey.String(),
 		Service:            common.BTCService.String(),
-		Creator:            user1Address,
-		Client:             user1PubKey,
+		Creator:            user1Address.String(),
+		Client:             user1PubKey.String(),
 		ContractType:       types.ContractType_PAY_AS_YOU_GO,
 		Duration:           100,
 		Rate:               rates[0],

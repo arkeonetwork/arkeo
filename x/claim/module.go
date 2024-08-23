@@ -12,14 +12,15 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/arkeonetwork/arkeo/x/claim/client/cli"
-	"github.com/arkeonetwork/arkeo/x/claim/keeper"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/arkeonetwork/arkeo/x/claim/client/cli"
+	"github.com/arkeonetwork/arkeo/x/claim/keeper"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 var (
@@ -55,7 +56,7 @@ func (a AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns a default GenesisState for the module, marshalled to json.RawMessage. The default GenesisState need to be defined by the module developer and is primarily used for testing
+// DefaultGenesis returns a default GenesisState for the module, marshaled to json.RawMessage. The default GenesisState need to be defined by the module developer and is primarily used for testing
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(types.DefaultGenesis())
 }
@@ -71,7 +72,9 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)) // nolint
+	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+		panic(fmt.Errorf("registering query handler for x/%s: %w", types.ModuleName, err))
+	} // nolint
 }
 
 // GetTxCmd returns the root Tx command for the module. The subcommands of this root command are used by end-users to generate new transactions containing messages defined in the module
@@ -111,16 +114,16 @@ func NewAppModule(
 	}
 }
 
-// Deprecated: use RegisterServices
-func (am AppModule) Route() sdk.Route { return sdk.Route{} }
+// // Deprecated: use RegisterServices
+// func (am AppModule) Route() sdk.Route { return sdk.Route{} }
 
-// Deprecated: use RegisterServices
-func (AppModule) QuerierRoute() string { return types.RouterKey }
+// // Deprecated: use RegisterServices
+// func (AppModule) QuerierRoute() string { return types.RouterKey }
 
-// Deprecated: use RegisterServices
-func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
-	return nil
-}
+// // Deprecated: use RegisterServices
+// func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
+// 	return nil
+// }
 
 // RegisterServices registers a gRPC query service to respond to the module-specific gRPC queries
 func (am AppModule) RegisterServices(cfg module.Configurator) {
@@ -158,3 +161,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
+
+func (am AppModule) IsAppModule() {}
+
+func (am AppModule) IsOnePerModuleType() {}

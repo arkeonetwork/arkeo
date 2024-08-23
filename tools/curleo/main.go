@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+
 	"github.com/arkeonetwork/arkeo/app"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -204,7 +206,7 @@ func (c Curl) sign(user string, contractId uint64, nonce int64) string {
 	msg := sentinel.GenerateMessageToSign(contractId, nonce)
 
 	println("invoking Sign...")
-	signature, pk, err := kb.Sign(user, []byte(msg))
+	signature, pk, err := kb.Sign(user, []byte(msg), signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		panic(fmt.Sprintf("error from kb.Sign: %+v", err))
 	}

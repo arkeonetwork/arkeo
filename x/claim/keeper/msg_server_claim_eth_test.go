@@ -6,13 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/utils"
-	"github.com/arkeonetwork/arkeo/x/claim/keeper"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/utils"
+	"github.com/arkeonetwork/arkeo/x/claim/keeper"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestClaimEth(t *testing.T) {
@@ -42,7 +43,7 @@ func TestClaimEth(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo,
+		Creator:    addrArkeo.String(),
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -72,7 +73,7 @@ func TestClaimEth(t *testing.T) {
 	require.Error(t, err)
 
 	// attempt to claim from arkeo should also fail!
-	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
 	require.Error(t, err)
 }
 
@@ -100,7 +101,7 @@ func TestClaimEthWithInvalidSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo,
+		Creator:    addrArkeo.String(),
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -146,7 +147,7 @@ func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo,
+		Creator:    addrArkeo.String(),
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
@@ -176,7 +177,7 @@ func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
 	require.Error(t, err)
 
 	// attempt to claim from arkeo should also fail!
-	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo})
+	_, err = msgServer.ClaimArkeo(ctx, &types.MsgClaimArkeo{Creator: addrArkeo.String()})
 	require.Error(t, err)
 }
 
@@ -194,7 +195,7 @@ func TestClaimEthWithNoClaimRecord(t *testing.T) {
 	require.NoError(t, err)
 
 	claimMessage := types.MsgClaimEth{
-		Creator:    addrArkeo,
+		Creator:    addrArkeo.String(),
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}

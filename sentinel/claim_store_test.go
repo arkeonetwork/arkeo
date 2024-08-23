@@ -1,13 +1,13 @@
 package sentinel
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type ClaimStoreSuite struct {
@@ -17,7 +17,7 @@ type ClaimStoreSuite struct {
 
 func (s *ClaimStoreSuite) SetUpTest() {
 	var err error
-	s.dir, err = ioutil.TempDir("/tmp", "claim-store")
+	s.dir, err = os.MkdirTemp("/tmp", "claim-store")
 	require.NoError(s.T(), err)
 }
 

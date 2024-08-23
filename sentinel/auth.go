@@ -286,7 +286,7 @@ func (p Proxy) getRemoteAddr(r *http.Request) string {
 
 func (p Proxy) freeTier(remoteAddr string) (int, error) {
 	if ok := p.isRateLimited(0, remoteAddr, p.Config.FreeTierRateLimit); ok {
-		return http.StatusTooManyRequests, fmt.Errorf(http.StatusText(429))
+		return http.StatusTooManyRequests, fmt.Errorf("client is rate limited %s", http.StatusText(429))
 	}
 
 	return http.StatusOK, nil
@@ -338,7 +338,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	if ok := p.isRateLimited(contract.Id, key, int(contract.QueriesPerMinute)); ok {
-		return http.StatusTooManyRequests, fmt.Errorf("client is rate limited," + http.StatusText(429))
+		return http.StatusTooManyRequests, fmt.Errorf("client is rate limited %s", http.StatusText(429))
 	}
 
 	claim.Nonce = aa.Nonce

@@ -8,11 +8,12 @@ import (
 	"strings"
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 )
 
 func setUpTest(t *testing.T, pk1, pk2 common.PubKey) *httptest.Server {
@@ -38,7 +39,7 @@ func TestHandleActiveContract(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 1,
 		SettlementDuration: 10,
@@ -93,7 +94,7 @@ func TestHandleClaim(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 150,
 		SettlementDuration: 10,
@@ -161,7 +162,7 @@ func TestHandleOpenClaims(t *testing.T) {
 		Height:             100,
 		Duration:           100,
 		Rate:               cosmos.NewInt64Coin("uarkeo", 1),
-		Deposit:            sdk.NewInt(100),
+		Deposit:            cosmos.NewInt(100),
 		Nonce:              0,
 		Id:                 151,
 		SettlementDuration: 10,

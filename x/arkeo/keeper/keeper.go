@@ -6,8 +6,9 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
+	"cosmossdk.io/log"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -15,7 +16,6 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -55,9 +55,9 @@ type Keeper interface {
 	// passthrough funcs
 	SendCoins(ctx cosmos.Context, from, to cosmos.AccAddress, coins cosmos.Coins) error
 	AddCoins(ctx cosmos.Context, addr cosmos.AccAddress, coins cosmos.Coins) error
-	GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator
+	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
-	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params)
+	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -117,6 +117,8 @@ type KVStore struct {
 	coinKeeper    bankkeeper.Keeper
 	accountKeeper authkeeper.AccountKeeper
 	stakingKeeper stakingkeeper.Keeper
+	authority     string
+	logger        log.Logger
 }
 
 func NewKVStore(
@@ -127,6 +129,8 @@ func NewKVStore(
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
 	stakingKeeper stakingkeeper.Keeper,
+	authority string,
+	logger log.Logger,
 ) *KVStore {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -141,11 +145,13 @@ func NewKVStore(
 		coinKeeper:    coinKeeper,
 		accountKeeper: accountKeeper,
 		stakingKeeper: stakingKeeper,
+		authority:     authority,
+		logger:        logger,
 	}
 }
 
 func (k KVStore) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+	return k.logger.With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // GetKey return a key that can be used to store into key value store
@@ -168,9 +174,13 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
+// TODO: Check Thi Again
 func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
-	validators := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	validators, err := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		k.Logger(ctx).Error(err.Error())
+	}
 
 	// if there is only one validator, no need for consensus. Just return the
 	// validator's current version. This also helps makes
@@ -187,7 +197,12 @@ func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 		if !val.IsBonded() {
 			continue
 		}
-		ver := k.GetVersionForAddress(ctx, val.GetOperator())
+
+		valBz, err := k.stakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
+		if err != nil {
+			k.Logger(ctx).Error(err.Error())
+		}
+		ver := k.GetVersionForAddress(ctx, valBz)
 		if _, ok := versions[ver]; !ok {
 			versions[ver] = 0
 		}
@@ -334,10 +349,14 @@ func (k KVStore) GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.A
 	return k.accountKeeper.GetAccount(ctx, addr)
 }
 
-func (k KVStore) GetActiveValidators(ctx cosmos.Context) []stakingtypes.Validator {
+func (k KVStore) GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error) {
 	return k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 }
 
-func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) {
-	k.stakingKeeper.SetParams(ctx, params)
+func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error {
+	return k.stakingKeeper.SetParams(ctx, params)
+}
+
+func (k KVStore) GetAuthority() string {
+	return k.authority
 }

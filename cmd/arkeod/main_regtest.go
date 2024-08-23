@@ -8,29 +8,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/arkeonetwork/arkeo/app"
-
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
-	"github.com/ignite/cli/ignite/pkg/xstrings"
+
+	"github.com/arkeonetwork/arkeo/app"
 )
 
 func main() {
-	rootCmd, _ := cosmoscmd.NewRootCmd(
-		app.Name,
-		app.AccountAddressPrefix,
-		app.DefaultNodeHome,
-		xstrings.NoDash(app.Name),
-		app.ModuleBasics,
-		app.New,
-		// this line is used by starport scaffolding # root/arguments
-	)
-
+	rootCmd, _ := NewRootCmd()
 	// for coverage data we need to exit main without allowing the server to call os.Exit
 
 	syn := make(chan error)
 	go func() {
-		syn <- svrcmd.Execute(rootCmd, "", app.DefaultNodeHome)
+		syn <- svrcmd.Execute(rootCmd, "ARKEO", app.DefaultNodeHome)
 	}()
 
 	sig := make(chan os.Signal, 1)

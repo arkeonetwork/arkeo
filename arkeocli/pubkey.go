@@ -1,9 +1,10 @@
 package arkeocli
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 func newShowPubkeyCmd() *cobra.Command {

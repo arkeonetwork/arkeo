@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"

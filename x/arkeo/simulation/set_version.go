@@ -3,11 +3,12 @@ package simulation
 import (
 	"math/rand"
 
-	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+
+	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 func SimulateMsgSetVersion(
@@ -19,7 +20,7 @@ func SimulateMsgSetVersion(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgSetVersion{
-			Creator: simAccount.Address,
+			Creator: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the SetVersion simulation

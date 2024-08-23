@@ -1,9 +1,10 @@
 package claim
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/arkeonetwork/arkeo/x/claim/keeper"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis initializes the module's state from a provided genesis state.

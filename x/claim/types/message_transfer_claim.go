@@ -1,8 +1,9 @@
 package types
 
 import (
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const TypeMsgTransferClaim = "transfer_claim"
@@ -11,8 +12,8 @@ var _ sdk.Msg = &MsgTransferClaim{}
 
 func NewMsgTransferClaim(creator, toAddress cosmos.AccAddress) *MsgTransferClaim {
 	return &MsgTransferClaim{
-		Creator:   creator,
-		ToAddress: toAddress,
+		Creator:   creator.String(),
+		ToAddress: toAddress.String(),
 	}
 }
 
@@ -25,7 +26,7 @@ func (msg *MsgTransferClaim) Type() string {
 }
 
 func (msg *MsgTransferClaim) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgTransferClaim) GetSignBytes() []byte {

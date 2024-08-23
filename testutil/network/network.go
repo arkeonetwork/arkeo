@@ -7,19 +7,19 @@ import (
 
 	"github.com/arkeonetwork/arkeo/app"
 
+	pruningtypes "cosmossdk.io/store/pruning/types"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmdb "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoscmd"
 	"github.com/stretchr/testify/require"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmdb "github.com/tendermint/tm-db"
+
+	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
 )
 
 type (
@@ -45,23 +45,37 @@ func New(t *testing.T, configs ...network.Config) *network.Network {
 	return net
 }
 
+// EmptyAppOptions is a stub implementing AppOptions
+type EmptyAppOptions struct{}
+
+// Get implements AppOptions
+func (ao EmptyAppOptions) Get(o string) interface{} {
+	return nil
+}
+
 // DefaultConfig will initialize config for the network with custom application,
 // genesis and single validator. All other parameters are inherited from cosmos-sdk/testutil/network.DefaultConfig
 func DefaultConfig() network.Config {
-	encoding := cosmoscmd.MakeEncodingConfig(app.ModuleBasics)
+	encoding := arekoappParams.MakeEncodingConfig()
 	return network.Config{
 		Codec:             encoding.Marshaler,
 		TxConfig:          encoding.TxConfig,
 		LegacyAmino:       encoding.Amino,
 		InterfaceRegistry: encoding.InterfaceRegistry,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		AppConstructor: func(val network.Validator) servertypes.Application {
-			return app.New(
-				val.Ctx.Logger, tmdb.NewMemDB(), nil, true, map[int64]bool{}, val.Ctx.Config.RootDir, 0,
+		AppConstructor: func(val network.ValidatorI) servertypes.Application {
+			return app.NewArkeoApp(
+				val.GetCtx().Logger,
+				tmdb.NewMemDB(),
+				nil,
+				true,
+				map[int64]bool{},
+				val.GetCtx().Config.RootDir,
+				0,
 				encoding,
-				simapp.EmptyAppOptions{},
-				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
-				baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
+				EmptyAppOptions{},
+				baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
+				baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
 			)
 		},
 		GenesisState:    app.ModuleBasics.DefaultGenesis(encoding.Marshaler),

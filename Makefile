@@ -16,9 +16,10 @@ endif
 # compiler flags
 IMAGE="arkeo"
 PROJECT_NAME= arkeo
-DOCKER         := $(shell which docker)
+DOCKER := $(shell which docker)
 NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
+SHORT_COMMIT:=$(shell git rev-parse --short=7 HEAD)
 CHAIN_VERSION:=$(shell cat chain.version)
 SENTINEL_VERSION:=$(shell cat sentinel.version)
 TAG?=latest
@@ -38,7 +39,7 @@ BUILD_FLAGS := -ldflags '$(ldflags)' -tags ${TAG}
 TEST_BUILD_FLAGS := -parallel=1 -tags=mocknet -test.short=true
 GOBIN?=${GOPATH}/bin
 BINARIES=./cmd/arkeod ./cmd/sentinel ./cmd/directory/indexer ./cmd/directory/api
-
+TESNET_BUILD_FLAGS :=  -ldflags '$(ldflags)'  -tags=testnet
 # pull branch name from CI if unset and available
 ifdef CI_COMMIT_BRANCH
 	BRANCH?=$(shell echo ${CI_COMMIT_BRANCH})
@@ -49,6 +50,13 @@ endif
 BRANCH?=$(shell git rev-parse --abbrev-ref HEAD)
 GITREF=$(shell git rev-parse --short HEAD)
 BUILDTAG?=$(shell git rev-parse --abbrev-ref HEAD)
+GORELEASER_CROSS_VERSION = v1.21.9
+GORELEASER_VERSION = v1.21.0
+
+# Release Env Variable
+RELEASE ?= false
+GORELEASER_SKIP_VALIDATE ?= false
+GORELEASER_SKIP_PUBLISH ?= false
 
 ########################################################################################
 # Targets
@@ -62,39 +70,91 @@ build:
 install:
 	go install ${BUILD_FLAGS} ${BINARIES}
 
-
 # ------------------------------ Docker Build ------------------------------
 
-docker-build: proto-gen
-	@docker build . --file Dockerfile -t ${IMAGE}:${TAG}
+# Detect OS and architecture
+OS := $(shell uname -s)
+ARCH := $(shell uname -m)
 
-localnet: docker-build
-	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 ${IMAGE}:${TAG}
+# Determine the Docker build command and image architecture based on OS and architecture
+ifeq ($(OS),Darwin)
+	BUILD_OS:=darwin
+    IMAGE_ARCH := arm64
+    DOCKER_BUILD := docker-build-cross
+	TESTNET_BUILD:= release-dry-run-cross
+else ifeq ($(OS),Linux)
+    ifeq ($(ARCH),x86_64)
+		BUILD_OS:=linux
+        IMAGE_ARCH := amd64
+        DOCKER_BUILD := docker-build
+		TESTNET_BUILD:= release-dry-run
+    else ifeq ($(ARCH),arm64)
+		BUILD_OS:=linux
+        IMAGE_ARCH := arm64
+        DOCKER_BUILD := docker-build-cross
+		TESTNET_BUILD:= release-dry-run-cross
+    else
+        $(error Unsupported architecture: $(ARCH))
+    endif
+else
+    $(error Unsupported OS: $(OS))
+endif
+
+# Docker build target
+build-docker:
+	@$(MAKE) $(DOCKER_BUILD)
+
+docker-build:
+	@docker  run \
+		--rm \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE) \
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
+		-w /go/src/github.com/arkeonetwork/arkeo \
+		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		--clean \
+		--snapshot
+
+docker-build-cross:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--snapshot 
+
+
+
+localnet: build-docker
+	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
 
 # ------------------------------    Testnet   ------------------------------
+
+install-testnet-binary:
+	@TAG=testnet $(MAKE) $(TESTNET_BUILD)
+	@sudo cp dist/arkeod-$(BUILD_OS)-$(IMAGE_ARCH)_$(BUILD_OS)_$(IMAGE_ARCH)/arkeod  /usr/local/bin
 
 testnet-fullnode:
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ghcr.io/arkeonetwork/arkeo:latest
 
 # ------------------------------ Housekeeping ------------------------------
 
-format:
-	@git ls-files '*.go' | grep -v -e '^docs/' | xargs gofumpt -w
-
 lint:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --no-fix --upstream origin/master
+	golangci-lint run
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" | xargs gofmt -d -s
 
-lint-fix:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --upstream origin/master
-
-lint-ci:
-	@./scripts/lint.sh
-	@go build ${BINARIES}
-	@./scripts/trunk check --all --no-progress --monitor=false
+format:
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/lcd/statik/statik.go" | xargs gofmt -w -s
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/lcd/statik/statik.go" | xargs goimports -w -local github.com/arkeonetwork/arkeo
 
 # ------------------------------ Unit Tests ------------------------------
 
@@ -157,10 +217,10 @@ _test-regression:
 # Protobuf
 ########################################################################################
 
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.9.0
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.36.0
 
-containerProtoVer=v0.7
-containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
+containerProtoVer=0.15.0
+containerProtoImage=ghcr.io/cosmos/proto-builder:$(containerProtoVer)
 containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
@@ -173,18 +233,19 @@ protob:
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./scripts/protocgen.sh; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh ./scripts/protocgen.sh
+	./scripts/dontcover.sh ./x/arkeo
+	./scripts/dontcover.sh ./x/claim
 
 proto-swagger-gen:
 	@echo "Generating Swagger of Protobuf"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./scripts/protoc-swagger-gen.sh; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh  ./scripts/protoc-swagger-gen.sh
 
 proto-format:
 	@echo "Formatting Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoFmt}$$"; then docker start -a $(containerProtoFmt); else docker run --name $(containerProtoFmt) -v $(CURDIR):/workspace --workdir /workspace tendermintdev/docker-build-proto \
-		find ./ -name "*.proto" -exec sh -c 'clang-format -style=file -i {}' \; ; fi
+	$(DOCKER) run --rm -v $(CURDIR):/workspace \
+	--workdir /workspace $(containerProtoImage) \
+	find ./ -name *.proto -exec clang-format -i {} \;
 
 proto-lint:
 	@echo "Linting Protobuf files"
@@ -225,3 +286,77 @@ dist:
 	popd
 
 	rm -rf bin/linux_amd64 bin/linux_arm64 bin/darwin_amd64 bin/darwin_arm64
+
+PACKAGE_NAME          := github.com/arkeonetwork/arkeo
+GOLANG_CROSS_VERSION  ?= v1.21.9
+
+SYSROOT_DIR     ?= sysroots
+SYSROOT_ARCHIVE ?= sysroots.tar.bz2
+
+.PHONY: sysroot-pack
+sysroot-pack:
+	@tar cf - $(SYSROOT_DIR) -P | pv -s $[$(du -sk $(SYSROOT_DIR) | awk '{print $1}') * 1024] | pbzip2 > $(SYSROOT_ARCHIVE)
+
+.PHONY: sysroot-unpack
+sysroot-unpack:
+	@pv $(SYSROOT_ARCHIVE) | pbzip2 -cd | tar -xf -
+
+.PHONY: release-dry-run
+release-dry-run-cross:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-cross.yaml \
+		--clean --skip=validate --skip=publish
+
+release-dry-run:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		--clean --skip=validate --skip=publish
+
+.PHONY: releases
+release:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+release-cross:
+	@docker run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)

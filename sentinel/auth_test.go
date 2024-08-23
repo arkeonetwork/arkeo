@@ -5,11 +5,13 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"golang.org/x/time/rate"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -44,7 +46,7 @@ func TestArkAuth(t *testing.T) {
 	contractId := uint64(50)
 
 	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
-	signature, _, err = kb.Sign("whatever", message)
+	signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// happy path
@@ -98,7 +100,7 @@ func TestPaidTier(t *testing.T) {
 	service := common.BTCService.String()
 
 	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
-	signature, _, err = kb.Sign("whatever", message)
+	signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	config := conf.Configuration{

@@ -53,7 +53,11 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	if err != nil {
 		return err
 	}
-	provider, err := k.GetProvider(ctx, msg.Provider, service)
+	providerPubKey, err := common.NewPubKey(msg.Provider)
+	if err != nil {
+		return err
+	}
+	provider, err := k.GetProvider(ctx, providerPubKey, service)
 	if err != nil {
 		return err
 	}
@@ -104,7 +108,12 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrInvalidContractType, "%s", msg.ContractType.String())
 	}
 
-	activeContract, err := k.GetActiveContractForUser(ctx, msg.GetSpender(), msg.Provider, service)
+	spender, err := msg.GetSpender()
+	if err != nil {
+		return err
+	}
+
+	activeContract, err := k.GetActiveContractForUser(ctx, spender, providerPubKey, service)
 	if err != nil {
 		return err
 	}
@@ -133,13 +142,28 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
+	providerPubKey, err := common.NewPubKey(msg.Provider)
+	if err != nil {
+		return types.ErrInvalidPubKey
+	}
+
+	clientPubKey, err := common.NewPubKey(msg.Client)
+	if err != nil {
+		return types.ErrInvalidPubKey
+	}
+
+	delegatePubKey, err := common.NewPubKey(msg.Delegate)
+	if err != nil {
+		return types.ErrInvalidPubKey
+	}
+
 	contract := types.Contract{
-		Provider:           msg.Provider,
+		Provider:           providerPubKey,
 		Id:                 k.Keeper.GetAndIncrementNextContractId(ctx),
 		Service:            service,
 		Type:               msg.ContractType,
-		Client:             msg.Client,
-		Delegate:           msg.Delegate,
+		Client:             clientPubKey,
+		Delegate:           delegatePubKey,
 		Duration:           msg.Duration,
 		Rate:               msg.Rate,
 		Deposit:            msg.Deposit,
@@ -164,8 +188,13 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return err
 	}
 
+	spender, err := msg.GetSpender()
+	if err != nil {
+		return err
+	}
+
 	// create user set.
-	userSet, err := k.GetUserContractSet(ctx, msg.GetSpender())
+	userSet, err := k.GetUserContractSet(ctx, spender)
 	if err != nil {
 		return err
 	}

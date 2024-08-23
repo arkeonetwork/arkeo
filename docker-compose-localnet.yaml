@@ -1,0 +1,16 @@
+---
+version: "3"
+
+services:
+  node:
+    image: ghcr.io/arkeonetwork/arkeo-dev:${IMAGE_TAG}
+    entrypoint:
+      - sh
+      - /opt/genesis.sh
+    ports:
+      - 9090:9090
+      - 26657:26657
+      - 26656:26656
+    volumes:
+      - ./scripts:/opt:z
+    working_dir: /opt

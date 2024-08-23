@@ -9,9 +9,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
+
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/directory/db"
-	"github.com/gorilla/mux"
 )
 
 type ApiService struct {

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,12 +14,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/koding/websocketproxy"
 	"github.com/sirupsen/logrus"
-	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
@@ -97,7 +97,6 @@ func loadProxies() map[string]*url.URL {
 
 // Given a request send it to the appropriate url
 func (p Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
-
 	// Limit the Size of incoming requests
 
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<20) // TODO: Check
@@ -223,7 +222,7 @@ func (p Proxy) handleContract(w http.ResponseWriter, r *http.Request) {
 		d, _ := json.Marshal(conf)
 		_, _ = w.Write(d)
 	case http.MethodPost:
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "Error reading request body", http.StatusInternalServerError)
 			return
@@ -277,7 +276,6 @@ func (p Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 		}
 
 		open_claims = append(open_claims, claim)
-
 	}
 
 	d, _ := json.Marshal(open_claims)

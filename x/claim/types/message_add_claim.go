@@ -2,9 +2,10 @@ package types
 
 import (
 	"cosmossdk.io/errors"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 )
 
 const TypeMsgAddClaim = "add_claim"
@@ -13,7 +14,7 @@ var _ sdk.Msg = &MsgAddClaim{}
 
 func NewMsgAddClaim(creator cosmos.AccAddress, chain Chain, address string, amount int64) *MsgAddClaim {
 	return &MsgAddClaim{
-		Creator: creator,
+		Creator: creator.String(),
 		Chain:   chain,
 		Address: address,
 		Amount:  amount,
@@ -29,7 +30,7 @@ func (msg *MsgAddClaim) Type() string {
 }
 
 func (msg *MsgAddClaim) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgAddClaim) GetSignBytes() []byte {

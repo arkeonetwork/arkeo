@@ -3,10 +3,11 @@ package cosmos
 import (
 	"cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
+	"github.com/cosmos/cosmos-sdk/types/bech32/legacybech32" //nolint:staticcheck
 	se "github.com/cosmos/cosmos-sdk/types/errors"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -20,42 +21,42 @@ const (
 
 var (
 	KeyringServiceName           = sdk.KeyringServiceName
-	NewRoute                     = sdk.NewRoute
-	NewKVStoreKeys               = sdk.NewKVStoreKeys
-	NewUint                      = sdk.NewUint
+	NewRoute                     = baseapp.NewMsgServiceRouter
+	NewKVStoreKeys               = storetypes.NewKVStoreKeys
+	NewUint                      = sdkmath.NewUint
 	ParseUint                    = sdkmath.ParseUint
-	NewInt                       = sdk.NewInt
-	NewIntFromString             = sdk.NewIntFromString
-	NewDec                       = sdk.NewDec
-	ZeroInt                      = sdk.ZeroInt
+	NewInt                       = sdkmath.NewInt
+	NewIntFromString             = sdkmath.NewIntFromString
+	NewDec                       = sdkmath.LegacyNewDec
+	ZeroInt                      = sdkmath.ZeroInt
 	ZeroUint                     = sdkmath.ZeroUint
-	ZeroDec                      = sdk.ZeroDec
+	ZeroDec                      = sdkmath.LegacyZeroDec
 	OneUint                      = sdkmath.OneUint
 	NewInt64Coin                 = sdk.NewInt64Coin
 	NewCoin                      = sdk.NewCoin
 	NewCoins                     = sdk.NewCoins
 	ParseCoin                    = sdk.ParseCoinNormalized
 	ParseCoins                   = sdk.ParseCoinsNormalized
-	NewDecWithPrec               = sdk.NewDecWithPrec
-	NewDecFromBigInt             = sdk.NewDecFromBigInt
-	NewIntFromBigInt             = sdk.NewIntFromBigInt
+	NewDecWithPrec               = sdkmath.LegacyNewDecWithPrec
+	NewDecFromBigInt             = sdkmath.LegacyNewDecFromBigInt
+	NewIntFromBigInt             = sdkmath.NewIntFromBigInt
 	NewUintFromBigInt            = sdkmath.NewUintFromBigInt
 	ValAddressFromBech32         = sdk.ValAddressFromBech32
 	AccAddressFromBech32         = sdk.AccAddressFromBech32
 	VerifyAddressFormat          = sdk.VerifyAddressFormat
 	GetFromBech32                = sdk.GetFromBech32
 	NewAttribute                 = sdk.NewAttribute
-	NewDecFromStr                = sdk.NewDecFromStr
+	NewDecFromStr                = sdkmath.LegacyNewDecFromStr
 	GetConfig                    = sdk.GetConfig
 	NewEvent                     = sdk.NewEvent
 	RegisterCodec                = sdk.RegisterLegacyAminoCodec
 	NewEventManager              = sdk.NewEventManager
 	EventTypeMessage             = sdk.EventTypeMessage
 	AttributeKeyModule           = sdk.AttributeKeyModule
-	KVStorePrefixIterator        = sdk.KVStorePrefixIterator
-	KVStoreReversePrefixIterator = sdk.KVStoreReversePrefixIterator
-	NewKVStoreKey                = sdk.NewKVStoreKey
-	NewTransientStoreKey         = sdk.NewTransientStoreKey
+	KVStorePrefixIterator        = storetypes.KVStorePrefixIterator
+	KVStoreReversePrefixIterator = storetypes.KVStoreReversePrefixIterator
+	NewKVStoreKey                = storetypes.NewKVStoreKey
+	NewTransientStoreKey         = storetypes.NewTransientStoreKey
 	NewContext                   = sdk.NewContext
 
 	// nolint
@@ -72,8 +73,8 @@ var (
 )
 
 type (
-	Context    = sdk.Context
-	Route      = sdk.Route
+	Context = sdk.Context
+	// Route      = baseapp.MessageRouter
 	Uint       = sdkmath.Uint
 	Int        = sdkmath.Int
 	Coin       = sdk.Coin
@@ -84,13 +85,13 @@ type (
 	Result     = sdk.Result
 	Event      = sdk.Event
 	Events     = sdk.Events
-	Dec        = sdk.Dec
+	Dec        = sdkmath.LegacyDec
 	Msg        = sdk.Msg
-	Iterator   = sdk.Iterator
-	Handler    = sdk.Handler
-	Querier    = sdk.Querier
+	Iterator   = storetypes.Iterator
+	// Handler    = baseapp.MsgServiceHandler
+	// Querier    = func(ctx Context, path []string, req abci.RequestQuery) ([]byte, error)
 	TxResponse = sdk.TxResponse
-	Account    = authtypes.AccountI
+	Account    = sdk.AccountI
 )
 
 var _ sdk.Address = AccAddress{}

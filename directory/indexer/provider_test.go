@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/arkeonetwork/arkeo/common/logging"
 	"github.com/arkeonetwork/arkeo/directory/db"
@@ -196,7 +197,7 @@ func TestHandleModProviderEvent(t *testing.T) {
 		MaxContractDuration: 0,
 		SubscriptionRate:    nil,
 		PayAsYouGoRate:      nil,
-		Bond:                sdk.NewInt(100),
+		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
 	})
 	assert.NotNil(t, err)
@@ -216,7 +217,7 @@ func TestHandleModProviderEvent(t *testing.T) {
 		MaxContractDuration: 0,
 		SubscriptionRate:    nil,
 		PayAsYouGoRate:      nil,
-		Bond:                sdk.NewInt(100),
+		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
 	})
 	assert.NotNil(t, err)
@@ -237,7 +238,7 @@ func TestHandleModProviderEvent(t *testing.T) {
 		MaxContractDuration: 0,
 		SubscriptionRate:    nil,
 		PayAsYouGoRate:      nil,
-		Bond:                sdk.NewInt(100),
+		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
 	})
 	assert.Nil(t, err)

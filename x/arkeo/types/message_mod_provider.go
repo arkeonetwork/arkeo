@@ -19,7 +19,7 @@ func NewMsgModProvider(creator cosmos.AccAddress, provider common.PubKey, servic
 	maxContractDuration int64, subscriptionRate, payAsYouGoRate types.Coins, settlementDuration int64,
 ) *MsgModProvider {
 	return &MsgModProvider{
-		Creator:             creator,
+		Creator:             creator.String(),
 		Provider:            provider,
 		Service:             service,
 		MetadataUri:         metadataUri,
@@ -42,11 +42,11 @@ func (msg *MsgModProvider) Type() string {
 }
 
 func (msg *MsgModProvider) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Creator}
+	return []sdk.AccAddress{sdk.MustAccAddressFromBech32(msg.Creator)}
 }
 
 func (msg *MsgModProvider) MustGetSigner() sdk.AccAddress {
-	return msg.Creator
+	return sdk.MustAccAddressFromBech32(msg.Creator)
 }
 
 func (msg *MsgModProvider) GetSignBytes() []byte {

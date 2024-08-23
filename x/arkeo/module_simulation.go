@@ -9,8 +9,6 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
@@ -20,7 +18,7 @@ import (
 var (
 	_ = sample.AccAddress
 	_ = arkeosimulation.FindAccount
-	_ = simappparams.StakePerAccount
+	// _ = simappparams.StakePerAccount
 	_ = simulation.MsgEntryKind
 	_ = baseapp.Paramspace
 )
@@ -67,24 +65,24 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 }
 
 // ProposalContents doesn't return any content functions for governance proposals
-func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
+func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent { //nolint:staticcheck
 	return nil
 }
 
 // RandomizedParams creates randomized  param changes for the simulator
-func (am AppModule) RandomizedParams(_ *rand.Rand) []simtypes.ParamChange {
-	return []simtypes.ParamChange{}
+func (am AppModule) RandomizedParams(_ *rand.Rand) []simtypes.LegacyParamChange {
+	return []simtypes.LegacyParamChange{}
 }
 
 // RegisterStoreDecoder registers a decoder
-func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
+func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
 
 // WeightedOperations returns the all the gov module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
 
 	var weightMsgBondProvider int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgBondProvider, &weightMsgBondProvider, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgBondProvider, &weightMsgBondProvider, nil,
 		func(_ *rand.Rand) {
 			weightMsgBondProvider = defaultWeightMsgBondProvider
 		},
@@ -95,7 +93,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgModProvider int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgModProvider, &weightMsgModProvider, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgModProvider, &weightMsgModProvider, nil,
 		func(_ *rand.Rand) {
 			weightMsgModProvider = defaultWeightMsgModProvider
 		},
@@ -106,7 +104,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgOpenContract int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgOpenContract, &weightMsgOpenContract, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgOpenContract, &weightMsgOpenContract, nil,
 		func(_ *rand.Rand) {
 			weightMsgOpenContract = defaultWeightMsgOpenContract
 		},
@@ -117,7 +115,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgCloseContract int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgCloseContract, &weightMsgCloseContract, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgCloseContract, &weightMsgCloseContract, nil,
 		func(_ *rand.Rand) {
 			weightMsgCloseContract = defaultWeightMsgCloseContract
 		},
@@ -128,7 +126,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgClaimContractIncome int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgClaimContractIncome, &weightMsgClaimContractIncome, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgClaimContractIncome, &weightMsgClaimContractIncome, nil,
 		func(_ *rand.Rand) {
 			weightMsgClaimContractIncome = defaultWeightMsgClaimContractIncome
 		},
@@ -139,7 +137,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	))
 
 	var weightMsgSetVersion int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgSetVersion, &weightMsgSetVersion, nil,
+	simState.AppParams.GetOrGenerate(opWeightMsgSetVersion, &weightMsgSetVersion, nil,
 		func(_ *rand.Rand) {
 			weightMsgSetVersion = defaultWeightMsgSetVersion
 		},

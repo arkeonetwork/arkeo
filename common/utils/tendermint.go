@@ -3,9 +3,9 @@ package utils
 import (
 	"os"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
+	tmclient "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/pkg/errors"
-	tmlog "github.com/tendermint/tendermint/libs/log"
-	tmclient "github.com/tendermint/tendermint/rpc/client/http"
 )
 
 func NewTendermintClient(baseURL string) (*tmclient.HTTP, error) {

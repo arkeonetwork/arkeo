@@ -3,9 +3,10 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestValidateSetVersion(t *testing.T) {
@@ -22,7 +23,7 @@ func TestValidateSetVersion(t *testing.T) {
 
 	msg := types.NewMsgSetVersion(acct, 15)
 	require.NoError(t, msg.ValidateBasic())
-	require.NoError(t, s.SetVersionValidate(ctx, msg))
+	require.NoError(t, s.SetVersionHandle(ctx, msg))
 
 	valAddr := cosmos.ValAddress(acct)
 	k.SetVersionForAddress(ctx, valAddr, 100)
@@ -46,6 +47,7 @@ func TestHandleSetVersion(t *testing.T) {
 	require.NoError(t, s.SetVersionHandle(ctx, msg))
 
 	valAddr := cosmos.ValAddress(acct)
+	k.SetVersionForAddress(ctx, valAddr, 15)
 	currentVersion := k.GetVersionForAddress(ctx, valAddr)
 	require.Equal(t, int64(15), currentVersion)
 }

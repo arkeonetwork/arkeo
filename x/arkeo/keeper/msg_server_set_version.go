@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func (k msgServer) SetVersion(goCtx context.Context, msg *types.MsgSetVersion) (*types.MsgSetVersionResponse, error) {

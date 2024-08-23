@@ -3,10 +3,11 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/arkeonetwork/arkeo/testutil/utils"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/arkeonetwork/arkeo/testutil/utils"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func TestClaimArkeo(t *testing.T) {
@@ -33,7 +34,7 @@ func TestClaimArkeo(t *testing.T) {
 	balanceBefore := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo, types.DefaultClaimDenom)
 
 	claimMessage := types.MsgClaimArkeo{
-		Creator: addrArkeo,
+		Creator: addrArkeo.String(),
 	}
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
 	require.NoError(t, err)
@@ -60,7 +61,7 @@ func TestClaimArkeo(t *testing.T) {
 	// ensure claim Arkeo fails from address with no claim record
 	addrArkeo2 := utils.GetRandomArkeoAddress()
 	claimMessage2 := types.MsgClaimArkeo{
-		Creator: addrArkeo2,
+		Creator: addrArkeo2.String(),
 	}
 	_, err = msgServer.ClaimArkeo(ctx, &claimMessage2)
 	require.ErrorIs(t, err, types.ErrNoClaimableAmount)

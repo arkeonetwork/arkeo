@@ -20,7 +20,7 @@ func SimulateMsgCloseContract(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgCloseContract{
-			Creator: simAccount.Address,
+			Creator: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the CloseContract simulation

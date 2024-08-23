@@ -3,11 +3,12 @@ package simulation
 import (
 	"math/rand"
 
-	"github.com/arkeonetwork/arkeo/x/claim/keeper"
-	"github.com/arkeonetwork/arkeo/x/claim/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+
+	"github.com/arkeonetwork/arkeo/x/claim/keeper"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 func SimulateMsgClaimEth(
@@ -19,7 +20,7 @@ func SimulateMsgClaimEth(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgClaimEth{
-			Creator: simAccount.Address,
+			Creator: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the ClaimEth simulation

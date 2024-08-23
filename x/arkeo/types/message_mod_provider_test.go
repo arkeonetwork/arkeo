@@ -3,9 +3,10 @@ package types
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/stretchr/testify/require"
 )
 
 func TestModProviderValidateBasic(t *testing.T) {
@@ -19,7 +20,7 @@ func TestModProviderValidateBasic(t *testing.T) {
 
 	// happy path
 	msg := MsgModProvider{
-		Creator:             acct,
+		Creator:             acct.String(),
 		Provider:            pubkey,
 		Service:             common.BTCService.String(),
 		MinContractDuration: 12,

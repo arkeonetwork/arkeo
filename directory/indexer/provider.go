@@ -90,7 +90,6 @@ func (s *Service) handleBondProviderEvent(ctx context.Context, evt atypes.EventB
 			return errors.Wrapf(err, "error creating provider %s service %s", evt.Provider, evt.Service)
 		}
 		isNewProvider = true
-
 	}
 	if !isNewProvider {
 		if evt.BondAbs.IsNil() {

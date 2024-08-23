@@ -3,10 +3,11 @@ package keeper
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestModProviderValidate(t *testing.T) {
@@ -63,7 +64,7 @@ func TestModProviderHandle(t *testing.T) {
 
 	// happy path
 	msg := types.MsgModProvider{
-		Creator:             acct,
+		Creator:             acct.String(),
 		Provider:            pubkey,
 		Service:             common.BTCService.String(),
 		MetadataUri:         "foobar",

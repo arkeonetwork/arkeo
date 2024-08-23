@@ -30,7 +30,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
 
 	// validate signature
-	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator.String(),
+	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
 		totalAmountClaimable.Amount.String(), msg.Signature)
 	if err != nil {
 		return nil, errors.Wrapf(types.ErrInvalidSignature, "failed to validate signature for %s", msg.EthAddress)
@@ -43,7 +43,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 
 	// create new arkeo claim
 	arkeoClaim := types.ClaimRecord{
-		Address:        msg.Creator.String(),
+		Address:        msg.Creator,
 		Chain:          types.ARKEO,
 		AmountClaim:    ethClaim.AmountClaim,
 		AmountVote:     ethClaim.AmountVote,
@@ -66,7 +66,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	})
 
 	// see if there is an existing arkeo claim so we can merge it
-	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.Creator.String(), types.ARKEO)
+	existingArkeoClaim, err := k.GetClaimRecord(ctx, msg.Creator, types.ARKEO)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.Creator)
 	}
@@ -82,7 +82,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	// call claim on arkeo to claim arkeo (note: this could CLAIM for all tokens that are now merged)
-	_, err = k.ClaimCoinsForAction(ctx, msg.Creator.String(), types.ACTION_CLAIM)
+	_, err = k.ClaimCoinsForAction(ctx, msg.Creator, types.ACTION_CLAIM)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
 	}

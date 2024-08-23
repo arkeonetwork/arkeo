@@ -3,18 +3,22 @@ package keeper
 import (
 	"strings"
 
-	"github.com/arkeonetwork/arkeo/x/claim/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	sdkerror "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/pkg/errors"
+
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
 
 // SetClaimRecord sets a claim record for an address in store
 func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) error {
 	// validate address if valid based on chain
 	if !types.IsValidAddress(claimRecord.Address, claimRecord.Chain) {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address for chain %s", claimRecord.Chain.String())
+		return sdkerror.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address for chain %s", claimRecord.Chain.String())
 	}
 
 	store := ctx.KVStore(k.storeKey)
@@ -52,7 +56,6 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 
 	claimRecords := []types.ClaimRecord{}
 	for ; iterator.Valid(); iterator.Next() {
-
 		claimRecord := types.ClaimRecord{}
 
 		err := k.cdc.Unmarshal(iterator.Value(), &claimRecord)
@@ -105,7 +108,7 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 		return sdk.Coin{}, nil
 	}
 
-	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, sdk.ZeroInt())
+	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, cosmos.ZeroInt())
 	for action := range types.Action_name {
 		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, types.Action(action), chain)
 		if err != nil {
@@ -157,10 +160,10 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 
 	// Positive, since goneTime > params.DurationUntilDecay
 	decayTime := elapsedAirdropTime - params.DurationUntilDecay
-	decayPercent := sdk.NewDec(decayTime.Nanoseconds()).QuoInt64(params.DurationOfDecay.Nanoseconds())
-	claimablePercent := sdk.OneDec().Sub(decayPercent)
+	decayPercent := cosmos.NewDec(decayTime.Nanoseconds()).QuoInt64(params.DurationOfDecay.Nanoseconds())
+	claimablePercent := sdkmath.LegacyOneDec().Sub(decayPercent)
 
-	claimableAmount := initalClaimableAmount.Amount.Mul(claimablePercent.Mul(sdk.NewDec(10000)).RoundInt()).QuoRaw(10000)
+	claimableAmount := initalClaimableAmount.Amount.Mul(claimablePercent.Mul(cosmos.NewDec(10000)).RoundInt()).QuoRaw(10000)
 	claimableCoin := sdk.NewCoin(initalClaimableAmount.Denom, claimableAmount)
 
 	return claimableCoin, nil
@@ -239,7 +242,7 @@ func chainToStorePrefix(chain types.Chain) []byte {
 }
 
 func getInitialClaimableAmountTotal(claim types.ClaimRecord) sdk.Coin {
-	totalAmount := sdk.NewCoin(claim.AmountClaim.Denom, sdk.ZeroInt())
+	totalAmount := sdk.NewCoin(claim.AmountClaim.Denom, cosmos.ZeroInt())
 	totalAmount = totalAmount.Add(claim.AmountClaim)
 	totalAmount = totalAmount.Add(claim.AmountDelegate)
 	totalAmount = totalAmount.Add(claim.AmountVote)
