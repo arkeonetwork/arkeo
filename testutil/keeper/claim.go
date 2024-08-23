@@ -40,6 +40,20 @@ type (
 	}
 )
 
+const (
+	bech32Prefix = "arkeo"
+)
+
+var (
+	// Bech32PrefixAccAddr
+	Bech32PrefixAccAddr  = bech32Prefix
+	Bech32PrefixAccPub   = bech32Prefix + sdk.PrefixPublic
+	Bech32PrefixValAddr  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
+	Bech32PrefixValPub   = bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+	Bech32PrefixConsAddr = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+	Bech32PrefixConsPub  = bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+)
+
 // CreateTestClaimKeepers creates test keepers for claim module
 func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	storeKey := storetypes.NewKVStoreKey(types.StoreKey)
@@ -48,6 +62,12 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 	keyParams := storetypes.NewKVStoreKey(paramstypes.StoreKey)
 	tkeyParams := storetypes.NewTransientStoreKey(paramstypes.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+
+	cfg := sdk.GetConfig()
+
+	cfg.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	cfg.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	cfg.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
 
 	logger := log.NewNopLogger()
 	db := tmdb.NewMemDB()

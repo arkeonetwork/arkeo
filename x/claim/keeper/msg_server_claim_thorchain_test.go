@@ -16,7 +16,6 @@ func TestClaimThorchain(t *testing.T) {
 
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
-	config.Seal()
 
 	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1z02ke8639m47g9dfrheegr2u9zecegt5qvtj00")
 	require.NoError(t, err)

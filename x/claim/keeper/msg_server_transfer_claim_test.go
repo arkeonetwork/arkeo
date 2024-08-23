@@ -14,6 +14,7 @@ import (
 func TestTransferClaimNotTransferableRecordShouldError(t *testing.T) {
 	msgServer, keepers, ctx := setupMsgServer(t)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	originalClaimAddr := sample.AccAddress()
 	claimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
