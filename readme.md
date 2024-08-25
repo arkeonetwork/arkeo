@@ -79,4 +79,4 @@ This starts the chain
 
 # Documentation
 
-To learn more about `Arkeo Protocol`, [please visit the official Arkeo Documentation](https://docs.arkeo.network)4
+To learn more about `Arkeo Protocol`, [please visit the official Arkeo Documentation](https://docs.arkeo.network)
