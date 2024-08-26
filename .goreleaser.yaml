@@ -77,7 +77,6 @@ dockers:
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
-      - "{{ if eq .Env.BUILD_TAG \"testnet\" }}--label=org.opencontainers.image.tag=testnet{{ end }}"
 
   - use: buildx
     goos: linux
