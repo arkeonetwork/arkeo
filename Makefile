@@ -52,6 +52,7 @@ GITREF=$(shell git rev-parse --short HEAD)
 BUILDTAG?=$(shell git rev-parse --abbrev-ref HEAD)
 GORELEASER_CROSS_VERSION = v1.21.9
 GORELEASER_VERSION = v1.21.0
+DOCKER := $(shell which docker)
 
 # Release Env Variable
 RELEASE ?= false
@@ -105,7 +106,7 @@ build-docker:
 	@$(MAKE) $(DOCKER_BUILD)
 
 docker-build:
-	@docker  run \
+	$(DOCKER) run \
 		--rm \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE) \
@@ -118,11 +119,12 @@ docker-build:
 		--snapshot
 
 docker-build-cross:
-	@docker run \
+	$(DOCKER) run \
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
@@ -303,11 +305,12 @@ sysroot-unpack:
 
 .PHONY: release-dry-run
 release-dry-run-cross:
-	@docker run \
+	$(DOCKER) run \
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
@@ -317,11 +320,12 @@ release-dry-run-cross:
 		--clean --skip=validate --skip=publish
 
 release-dry-run:
-	@docker run \
+	$(DOCKER) run \
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
@@ -331,11 +335,12 @@ release-dry-run:
 
 .PHONY: releases
 release:
-	@docker run \
+	$(DOCKER) run \
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
@@ -346,11 +351,12 @@ release:
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
 
 release-cross:
-	@docker run \
+	$(DOCKER) run \
 		--rm \
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
 		-v `pwd`/sysroot:/sysroot \
