@@ -21,6 +21,7 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{ .CommitDate }}
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
