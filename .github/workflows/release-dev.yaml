@@ -38,22 +38,22 @@ jobs:
         env:
           TAG: testnet
           GORELEASER_SKIP_VALIDATE: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     
       - name: release-testnet
         run: make release
         env:
             TAG: testnet
             GORELEASER_SKIP_VALIDATE: true
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       - name: release-cross
         run: make release-cross
         env:
             GORELEASER_SKIP_VALIDATE: true
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         
       - name: release
         run: make release
         env:
             GORELEASER_SKIP_VALIDATE: true
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
