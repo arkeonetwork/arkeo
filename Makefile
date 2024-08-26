@@ -366,3 +366,36 @@ release-cross:
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+release-testnet:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+release-testnet-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)

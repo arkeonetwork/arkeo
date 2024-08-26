@@ -37,7 +37,7 @@ archives:
   - id: w/version
     builds:
       - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
     wrap_in_directory: false
     format: zip
     files:
@@ -45,7 +45,7 @@ archives:
   - id: wo/version
     builds:
       - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}'
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
     wrap_in_directory: false
     format: zip
     files:
@@ -53,7 +53,7 @@ archives:
   - id: binary
     builds:
       - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}'
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
     wrap_in_directory: false
     format: binary
     files:
@@ -65,7 +65,7 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
@@ -77,12 +77,14 @@ dockers:
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
+      - "{{ if eq .Env.BUILD_TAG \"testnet\" }}--label=org.opencontainers.image.tag=testnet{{ end }}"
+
   - use: buildx
     goos: linux
     goarch: amd64
     dockerfile: Dockerfile.dev
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version }}{{ else }}{{ .ShortCommit }}{{ end }}-amd64{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"

@@ -93,9 +93,11 @@ universal_binaries:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
     replace: false
-    name_template: "{{ .ProjectName }}d"
+    name_template: "{{ .ProjectName }}d{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+
 archives:
   - id: w/version
     builds:
@@ -103,7 +105,7 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
@@ -114,7 +116,7 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
@@ -125,11 +127,12 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
     wrap_in_directory: false
     format: binary
     files:
       - none*
+
 checksum:
   name_template: "{{ .ProjectName }}d_v{{ .Version }}_cross_checksums.txt"
 
@@ -138,7 +141,7 @@ dockers:
     goos: linux
     goarch: arm64
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -155,7 +158,7 @@ dockers:
     goarch: arm64
     dockerfile: Dockerfile.dev
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -167,8 +170,9 @@ dockers:
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
     create_flags:
       - --insecure
     push_flags:
@@ -176,11 +180,11 @@ docker_manifests:
     image_templates:
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
