@@ -26,13 +26,14 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: release-cross
-        run: make release-cross
         env:
           RELEASE: true
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: make release-cross
+
         
       - name: release
-        run: make release
         env:
           RELEASE: true
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: make release
