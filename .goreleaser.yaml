@@ -59,7 +59,7 @@ archives:
     files:
       - none*
 checksum:
-  name_template: '{{ .ProjectName }}d_v{{ .Version }}_checksums.txt'
+  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_checksums.txt'
 dockers:
   - use: buildx
     goos: linux
