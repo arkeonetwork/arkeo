@@ -4,12 +4,7 @@ Run testnet setup using the pre-complied testnet binary.
 
 ## Download Testnet Binary
 ```shell
-curl https://github.com/arkeonetwork/arkeo/releases/latest
-```
-
-Move binary to `/usr/bin/`
-```shell
-mv arkeod /usr/bin/
+./scripts/install-binary.sh
 ```
 
 ## Build Your Own Binary 
@@ -36,7 +31,7 @@ arkeod init $MONIKER --chain-id arkeo
 
 ## Download Genesis 
 ```shell
-wget -qO- http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json 
+wget -qO- http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json
 ```
 ## Set Custom Ports
 
@@ -75,6 +70,51 @@ sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.arkeo/config/config.toml
 
 ```
 
+## Configure Seeds and Peers
 
+```shell
+SEEDS="aab68f68841eb072d996cd1b45c2b9c9b612d95b@seed.innovationtheory.com:26656"
+PEERS="dc824a97b930d9c8086d96ea4da515ffccc050d6@23.22.39.126:26656"
+sed -i -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*seeds *=.*/seeds = \"$SEEDS\"/}" \
+       -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*persistent_peers *=.*/persistent_peers = \"$PEERS\"/}" $HOME/.arkeo/config/config.toml
+```
 
+# Configure Service
 
+Create the node service file
+
+```shell
+sudo tee /etc/systemd/system/arkeo.service > /dev/null <<EOF
+[Unit]
+Description=Arkeo node
+After=network-online.target
+[Service]
+User=$USER
+WorkingDirectory=$HOME/.arkeo
+ExecStart= $(which arkeod) start --home $HOME/.arkeo
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65535
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+Reset node and download snapshot
+```shell
+arkeod tendermint unsafe-reset-all --home $HOME/.arkeo --keep-addr-book
+```
+
+Allow node P2P port in firewall
+
+```shell
+sudo ufw allow 26656/tcp
+```
+
+Enable and start the node service
+
+```shell
+sudo systemctl daemon-reload
+sudo systemctl enable arkeo
+sudo systemctl restart arkeo && sudo journalctl -fu arkeo
+```
