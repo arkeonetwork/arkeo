@@ -17,6 +17,20 @@ make install-testnet-binary
 
 ## Configure variables 
 
+Set variables
+
+```shell
+echo "export ARKEO_WALLET="MyWallet"" >> $HOME/.bash_profile
+echo "export MONIKER="MyNode"" >> $HOME/.bash_profile
+echo "export ARKEO_CHAIN_ID="arkeo"" >> $HOME/.bash_profile
+echo "export ARKEO_PORT="10"" >> $HOME/.bash_profile
+
+
+source $HOME/.bash_profile
+```
+
+
+
 Configure `client.toml` 
 ```shell
 arkeod config set client node tcp://localhost:${ARKEO_PORT}57
@@ -108,7 +122,7 @@ arkeod tendermint unsafe-reset-all --home $HOME/.arkeo --keep-addr-book
 Allow node P2P port in firewall
 
 ```shell
-sudo ufw allow 26656/tcp
+sudo ufw allow ${ARKEO_PORT}56/tcp
 ```
 
 Enable and start the node service
