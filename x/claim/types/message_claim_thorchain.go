@@ -8,7 +8,7 @@ import (
 
 const TypeMsgClaimThorchain = "claim_thorchain"
 
-var _ sdk.Msg = &MsgClaimEth{}
+var _ sdk.Msg = &MsgClaimThorchain{}
 
 func NewMsgClaimThorchain(creator cosmos.AccAddress, fromAddress string, toAddress string) *MsgClaimThorchain {
 	return &MsgClaimThorchain{
@@ -23,7 +23,7 @@ func (msg *MsgClaimThorchain) Route() string {
 }
 
 func (msg *MsgClaimThorchain) Type() string {
-	return TypeMsgClaimEth
+	return TypeMsgClaimThorchain
 }
 
 func (msg *MsgClaimThorchain) GetSigners() []sdk.AccAddress {
