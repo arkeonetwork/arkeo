@@ -143,7 +143,7 @@ localnet: build-docker
 
 install-testnet-binary:
 	@TAG=testnet $(MAKE) $(TESTNET_BUILD)
-	@sudo cp dist/arkeod-$(BUILD_OS)-$(IMAGE_ARCH)_$(BUILD_OS)_$(IMAGE_ARCH)$(if $(filter amd64,$(IMAGE_ARCH)),_v1)/arkeod /usr/local/bin
+	@cp dist/arkeod-$(BUILD_OS)-$(IMAGE_ARCH)_$(BUILD_OS)_$(IMAGE_ARCH)$(if $(filter amd64,$(IMAGE_ARCH)),_v1)/arkeod $(HOME)/go/bin
 
 testnet-fullnode:
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ghcr.io/arkeonetwork/arkeo:latest
