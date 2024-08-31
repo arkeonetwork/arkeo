@@ -21,15 +21,16 @@ NOW=$(shell date +'%Y-%m-%d_%T')
 COMMIT:=$(shell git log -1 --format='%H')
 SHORT_COMMIT:=$(shell git rev-parse --short=7 HEAD)
 CHAIN_VERSION:=$(shell cat chain.version)
+LATEST_VERSION=$(shell curl -s "https://api.github.com/repos/arkeonetwork/arkeo/releases/latest" | jq -r '.tag_name')
 SENTINEL_VERSION:=$(shell cat sentinel.version)
 TAG?=latest
-ldflags = -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=$(CHAIN_VERSION) \
+ldflags = -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=$(LATEST_VERSION) \
 		  -X github.com/arkeonetwork/arkeo/sentinel.Version=$(SENTINEL_VERSION) \
           -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit=$(COMMIT) \
           -X github.com/arkeonetwork/arkeo/x/arkeo/configs.BuildTime=${NOW} \
 		  -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo \
 		  -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo \
-		  -X github.com/cosmos/cosmos-sdk/version.Version=$(CHAIN_VERSION) \
+		  -X github.com/cosmos/cosmos-sdk/version.Version=$(LATEST_VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X github.com/cosmos/cosmos-sdk/version.BuildTags=$(TAG)
 
@@ -143,7 +144,7 @@ localnet: build-docker
 
 install-testnet-binary:
 	@TAG=testnet $(MAKE) $(TESTNET_BUILD)
-	@sudo cp dist/arkeod-$(BUILD_OS)-$(IMAGE_ARCH)_$(BUILD_OS)_$(IMAGE_ARCH)$(if $(filter amd64,$(IMAGE_ARCH)),_v1)/arkeod /usr/local/bin
+	@cp dist/arkeod-$(BUILD_OS)-$(IMAGE_ARCH)_$(BUILD_OS)_$(IMAGE_ARCH)$(if $(filter amd64,$(IMAGE_ARCH)),_v1)/arkeod $(HOME)/go/bin
 
 testnet-fullnode:
 	@docker run --rm -it -p 1317:1317 -p 26656:26656 -p 26657:26657 -v ./scripts:/scripts --entrypoint /scripts/fullnode.sh ghcr.io/arkeonetwork/arkeo:latest

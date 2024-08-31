@@ -28,6 +28,15 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.1-Prerelease 
+
+## Added 
+- Thorchain Claims Proto Updates
+- Documentation of Testnet Setup using local build and Cosmovisor
+
+## Fixed 
+- Testnet binary generation using go build 
+
 # v1.0.0-Prerelease
 
 ## Added 

@@ -1,75 +1,76 @@
 # Testnet Setup
 
-Run testnet setup using the pre-complied testnet binary.
+ Arkeo Testnet Setup
 
-## Download Testnet Binary
+## Prerequisites 
+
+### Install Go 
+
+Make sure your system is updated and set the system parameters correctly
+
 ```shell
-./scripts/install-binary.sh
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get install -y build-essential curl wget jq make gcc chrony git
+sudo su -c "echo 'fs.file-max = 65536' >> /etc/sysctl.conf"
+sudo sysctl -p
+```
+Install GO 
+
+```shell
+sudo rm -rf /usr/local/.go
+wget https://go.dev/dl/go1.21.13.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.21.13.linux-amd64.tar.gz
+sudo cp /usr/local/go /usr/local/.go -r 
+sudo rm -rf /usr/local/go
+```
+Update environment variables to include go
+
+```shell
+cat <<'EOF' >>$HOME/.profile
+export GOROOT=/usr/local/.go
+export GOPATH=$HOME/go
+export GO111MODULE=on
+export PATH=$PATH:/usr/local/.go/bin:$HOME/go/bin
+
+export ARKEO_PORT="<your-port>"
+EOF
+source $HOME/.profile
 ```
 
-## Build Your Own Binary 
-
-This installs binary to /usr/local/bin
+Check if go is correctly installed
 ```shell
-make install-testnet-binary 
+go version 
 ```
 
+This should return something like `go version go1.21.13 linux/amd64`
 
-## Configure variables 
+# Arkeo Binary 
 
-Set variables
-
+Install the Arkeo Binary 
 ```shell
-echo "export ARKEO_WALLET="MyWallet"" >> $HOME/.bash_profile
-echo "export MONIKER="MyNode"" >> $HOME/.bash_profile
-echo "export ARKEO_CHAIN_ID="arkeo"" >> $HOME/.bash_profile
-echo "export ARKEO_PORT="10"" >> $HOME/.bash_profile
-
-
-source $HOME/.bash_profile
+git clone https://github.com/arkeonetwork/arkeo
+cd arkeo
+git checkout master
+TAG=testnet make install 
 ```
 
+Configure The Binary 
 
-
-Configure `client.toml` 
 ```shell
+
+arkeod keys add <key-name>
 arkeod config set client node tcp://localhost:${ARKEO_PORT}57
 arkeod config set client keyring-backend os
-arkeod config set client chain-id arkeo 
-```
-
-Init App 
-```shell
-arkeod init $MONIKER --chain-id arkeo
+arkeod config set client chain-id arkeo
+arkeod init <your-custom-moniker> --chain-id arkeo
+sudo ufw allow ${ARKEO_PORT}56/tcp
 ```
 
 ## Download Genesis 
 ```shell
-wget -qO- http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json
+curl -s http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json
 ```
-## Set Custom Ports
-
-In `app.toml`
-```shell
-sed -i.bak -e "s%:1317%:${ARKEO_PORT}17%g;
-s%:8080%:${ARKEO_PORT}80%g;
-s%:9090%:${ARKEO_PORT}90%g;
-s%:9091%:${ARKEO_PORT}91%g;
-s%:8545%:${ARKEO_PORT}45%g;
-s%:8546%:${ARKEO_PORT}46%g;
-s%:6065%:${ARKEO_PORT}65%g" $HOME/.arkeo/config/app.toml
-```
-In `config.toml`
-
-```shell
-sed -i.bak -e "s%:26658%:${ARKEO_PORT}58%g;
-s%:26657%:${ARKEO_PORT}57%g;
-s%:6060%:${ARKEO_PORT}60%g;
-s%:26656%:${ARKEO_PORT}56%g;
-s%^external_address = \"\"%external_address = \"$(wget -qO- eth0.me):${ARKEO_PORT}56\"%;
-s%:26660%:${ARKEO_PORT}61%g" $HOME/.arkeo/config/config.toml
-```
-
 ## Configure Pruning, Minimum gas price , enable prometheus and disable indexing 
 
 ```shell
@@ -87,8 +88,9 @@ sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.arkeo/config/config.toml
 ## Configure Seeds and Peers
 
 ```shell
-SEEDS="aab68f68841eb072d996cd1b45c2b9c9b612d95b@seed.innovationtheory.com:26656"
-PEERS="dc824a97b930d9c8086d96ea4da515ffccc050d6@23.22.39.126:26656"
+SEEDS="aab68f68841eb072d996cd1b45c2b9c9b612d95b@seed.innovationtheory.com:26656,85341b428cf5993fcc04a324d95d14590ae5172c@seed2.innovationtheory.com:26656"
+PEERS="c27c96c5b54a9f2bea776858e2cff364e410d2a8@71.218.54.128:26656,f7da702c17e45e463adf21e57b1d0d936cbc97a3@peer2.innovationtheory.com:26656,46e6d4751bbc67d3e72e13dacdfb0770227fbfc3@65.108.79.241:46656,fc5464b2ce731c5787be0fd316b6c4b6611886ea@37.252.184.241:26656,
+57f693ba3fed4dd82d02d4cbcc73712c6da4bd34@65.109.113.228:60756,38ab548031dea2b46889c253b762e51306d29cbb@65.109.92.148:61656"
 sed -i -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*seeds *=.*/seeds = \"$SEEDS\"/}" \
        -e "/^\[p2p\]/,/^\[/{s/^[[:space:]]*persistent_peers *=.*/persistent_peers = \"$PEERS\"/}" $HOME/.arkeo/config/config.toml
 ```
@@ -114,15 +116,9 @@ WantedBy=multi-user.target
 EOF
 ```
 
-Reset node and download snapshot
+Reset Node
 ```shell
 arkeod tendermint unsafe-reset-all --home $HOME/.arkeo --keep-addr-book
-```
-
-Allow node P2P port in firewall
-
-```shell
-sudo ufw allow ${ARKEO_PORT}56/tcp
 ```
 
 Enable and start the node service

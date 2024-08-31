@@ -77,6 +77,14 @@ Run
 
 This starts the chain
 
+# Setting Up Testnet 
+
+Follow below mentioned steps to setup `TESTNET`
+
+- [By Running Arkeo Binary](./docs/TESTNET.md)
+- [By using Cosmovisor](./docs/COSMOVISOR.md)
+
+
 # Documentation
 
 To learn more about `Arkeo Protocol`, [please visit the official Arkeo Documentation](https://docs.arkeo.network)
