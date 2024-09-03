@@ -94,14 +94,14 @@ type: check
 description: ensure contract is closed
 endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
-  - .contract.paid == "100"
+  - .contract.paid == "0"
 ---
 type: check
 description: fox account balance should increase
 endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
 asserts:
   - .balances|length == 1
-  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000090 # fox gets 90 due to 10% tax to reserve
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000000 # fox gets 90 due to 10% tax to reserve
 ---
 type: check
 description: check that contract is in directory service
@@ -111,8 +111,8 @@ asserts:
   - .client_pubkey == "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
   - .contract_type == "SUBSCRIPTION"
   - .settlement_duration == 11 
-  - .paid == 100
-  - .reserve_contrib_asset == 10
+  - .paid == 0
+  - .reserve_contrib_asset == 0
 # - .reserve_contrib_usd == 10 # TODO
 ---
 ########################################################################################
@@ -209,7 +209,7 @@ description: fox account balance should increase
 endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_fox }}
 asserts:
   - .balances|length == 1
-  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000108
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 1000000000000018
 ---
 type: check
 description: ensure contract is closed

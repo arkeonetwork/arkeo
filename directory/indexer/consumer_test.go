@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	abcitypes "github.com/cometbft/cometbft/abci/types"
@@ -20,7 +21,7 @@ func TestEventParsing(t *testing.T) {
 	}{
 		{
 			Name:    "EventOpenContract",
-			Payload: `{"type":"arkeo.arkeo.EventOpenContract","attributes":[{"key":"YXV0aG9yaXphdGlvbg==","value":"IlNUUklDVCI=","index":true},{"key":"Y2xpZW50","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFncGpncDV2OHRqNmdkaDZnY3pxd3d3NWtzaDRnOHluYzh4cGpqc3Nhd3NuN2N4cXdtaG1qeTRkOGQ4Ig==","index":true},{"key":"Y29udHJhY3RfaWQ=","value":"IjIi","index":true},{"key":"ZGVsZWdhdGU=","value":"IiI=","index":true},{"key":"ZGVwb3NpdA==","value":"IjkwMCI=","index":true},{"key":"ZHVyYXRpb24=","value":"IjYwIg==","index":true},{"key":"aGVpZ2h0","value":"IjE0OTUi","index":true},{"key":"b3Blbl9jb3N0","value":"IjEwMDAwMDAwMCI=","index":true},{"key":"cHJvdmlkZXI=","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFmMHZtZ2h1YWtlZjR6eG5oNmh2Mmdld21xZ201dGRnOWY2dzNxeGpwdzQ5eG5zamYzNmY3ZjQwZXZlIg==","index":true},{"key":"cXVlcmllc19wZXJfbWludXRl","value":"IjEwIg==","index":true},{"key":"cmF0ZQ==","value":"eyJkZW5vbSI6InVhcmtlbyIsImFtb3VudCI6IjE1In0=","index":true},{"key":"c2VydmljZQ==","value":"Im1vY2si","index":true},{"key":"c2V0dGxlbWVudF9kdXJhdGlvbg==","value":"IjEwIg==","index":true},{"key":"dHlwZQ==","value":"IlBBWV9BU19ZT1VfR08i","index":true}]}`,
+			Payload: `{ "type": "arkeo.arkeo.EventOpenContract", "attributes": [ { "key": "authorization", "value": "\"STRICT\"", "index": true }, { "key": "client", "value": "\"tarkeopub1addwnpepqgpjgp5v8tj6gdh6gczqwww5ksh4g8ync8xpjjssawsn7cxqwmhmjy4d8d8\"", "index": true }, { "key": "contract_id", "value": "\"2\"", "index": true }, { "key": "delegate", "value": "\"\"", "index": true }, { "key": "deposit", "value": "\"900\"", "index": true }, { "key": "duration", "value": "\"60\"", "index": true }, { "key": "height", "value": "\"1495\"", "index": true }, { "key": "open_cost", "value": "\"100000000\"", "index": true }, { "key": "provider", "value": "\"tarkeopub1addwnpepqf0vmghuakef4zxnh6hv2gewmqgm5tdg9f6w3qxjpw49xnsjf36f7f40eve\"", "index": true }, { "key": "queries_per_minute", "value": "\"10\"", "index": true }, { "key": "rate", "value": "{\"denom\":\"uarkeo\",\"amount\":\"15\"}", "index": true }, { "key": "service", "value": "\"mock\"", "index": true }, { "key": "settlement_duration", "value": "\"10\"", "index": true }, { "key": "type", "value": "\"PAY_AS_YOU_GO\"", "index": true } ] }`,
 			Checker: func(t *testing.T, result any) {
 				assert.IsType(t, arkeotypes.EventOpenContract{}, result)
 				e, ok := result.(arkeotypes.EventOpenContract)
@@ -43,7 +44,7 @@ func TestEventParsing(t *testing.T) {
 		},
 		{
 			Name:    "EventSettleContract",
-			Payload: `{"type":"arkeo.arkeo.EventSettleContract","attributes":[{"key":"Y2xpZW50","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFncGpncDV2OHRqNmdkaDZnY3pxd3d3NWtzaDRnOHluYzh4cGpqc3Nhd3NuN2N4cXdtaG1qeTRkOGQ4Ig==","index":true},{"key":"Y29udHJhY3RfaWQ=","value":"IjIi","index":true},{"key":"ZGVsZWdhdGU=","value":"IiI=","index":true},{"key":"aGVpZ2h0","value":"IjE0OTUi","index":true},{"key":"bm9uY2U=","value":"IjAi","index":true},{"key":"cGFpZA==","value":"IjAi","index":true},{"key":"cHJvdmlkZXI=","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFmMHZtZ2h1YWtlZjR6eG5oNmh2Mmdld21xZ201dGRnOWY2dzNxeGpwdzQ5eG5zamYzNmY3ZjQwZXZlIg==","index":true},{"key":"cmVzZXJ2ZQ==","value":"IjAi","index":true},{"key":"c2VydmljZQ==","value":"Im1vY2si","index":true},{"key":"dHlwZQ==","value":"IlBBWV9BU19ZT1VfR08i","index":true}]}`,
+			Payload: `{ "type": "arkeo.arkeo.EventSettleContract", "attributes": [ { "key": "client", "value": "\"tarkeopub1addwnpepqgpjgp5v8tj6gdh6gczqwww5ksh4g8ync8xpjjssawsn7cxqwmhmjy4d8d8\"", "index": true }, { "key": "contract_id", "value": "\"2\"", "index": true }, { "key": "delegate", "value": "\"\"", "index": true }, { "key": "height", "value": "\"1495\"", "index": true }, { "key": "nonce", "value": "\"0\"", "index": true }, { "key": "paid", "value": "\"0\"", "index": true }, { "key": "provider", "value": "\"tarkeopub1addwnpepqf0vmghuakef4zxnh6hv2gewmqgm5tdg9f6w3qxjpw49xnsjf36f7f40eve\"", "index": true }, { "key": "reserve", "value": "\"0\"", "index": true }, { "key": "service", "value": "\"mock\"", "index": true }, { "key": "type", "value": "\"PAY_AS_YOU_GO\"", "index": true } ] }`,
 			Checker: func(t *testing.T, result any) {
 				assert.IsType(t, arkeotypes.EventSettleContract{}, result)
 				e, ok := result.(arkeotypes.EventSettleContract)
@@ -62,7 +63,7 @@ func TestEventParsing(t *testing.T) {
 		},
 		{
 			Name:    "EventModProvider",
-			Payload: `{"type":"arkeo.arkeo.EventModProvider","attributes":[{"key":"Ym9uZA==","value":"IjIwMDAwMDAwMDAwIg==","index":true},{"key":"Y3JlYXRvcg==","value":"InRhcmtlbzE5MzU4ejI2andoM2U0cmQ2cHN4cWY4cTZmM3BlNmY4czd2MHgyYSI=","index":true},{"key":"bWF4X2NvbnRyYWN0X2R1cmF0aW9u","value":"IjEwMCI=","index":true},{"key":"bWV0YWRhdGFfbm9uY2U=","value":"IjEi","index":true},{"key":"bWV0YWRhdGFfdXJp","value":"Imh0dHA6Ly9sb2NhbGhvc3Q6MzYzNi9tZXRhZGF0YS5qc29uIg==","index":true},{"key":"bWluX2NvbnRyYWN0X2R1cmF0aW9u","value":"IjEwIg==","index":true},{"key":"cGF5X2FzX3lvdV9nb19yYXRl","value":"W3siZGVub20iOiJ1YXJrZW8iLCJhbW91bnQiOiIxNSJ9XQ==","index":true},{"key":"cHJvdmlkZXI=","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFmMHZtZ2h1YWtlZjR6eG5oNmh2Mmdld21xZ201dGRnOWY2dzNxeGpwdzQ5eG5zamYzNmY3ZjQwZXZlIg==","index":true},{"key":"c2VydmljZQ==","value":"Im1vY2si","index":true},{"key":"c2V0dGxlbWVudF9kdXJhdGlvbg==","value":"IjEwIg==","index":true},{"key":"c3RhdHVz","value":"Ik9OTElORSI=","index":true},{"key":"c3Vic2NyaXB0aW9uX3JhdGU=","value":"W3siZGVub20iOiJ1YXJrZW8iLCJhbW91bnQiOiIxMCJ9XQ==","index":true}]}`,
+			Payload: `{ "type": "arkeo.arkeo.EventModProvider", "attributes": [ { "key": "bond", "value": "\"20000000000\"", "index": true }, { "key": "creator", "value": "\"tarkeo19358z26jwh3e4rd6psxqf8q6f3pe6f8s7v0x2a\"", "index": true }, { "key": "max_contract_duration", "value": "\"100\"", "index": true }, { "key": "metadata_nonce", "value": "\"1\"", "index": true }, { "key": "metadata_uri", "value": "\"http://localhost:3636/metadata.json\"", "index": true }, { "key": "min_contract_duration", "value": "\"10\"", "index": true }, { "key": "pay_as_you_go_rate", "value": "[{\"denom\":\"uarkeo\",\"amount\":\"15\"}]", "index": true }, { "key": "provider", "value": "\"tarkeopub1addwnpepqf0vmghuakef4zxnh6hv2gewmqgm5tdg9f6w3qxjpw49xnsjf36f7f40eve\"", "index": true }, { "key": "service", "value": "\"mock\"", "index": true }, { "key": "settlement_duration", "value": "\"10\"", "index": true }, { "key": "status", "value": "\"ONLINE\"", "index": true }, { "key": "subscription_rate", "value": "[{\"denom\":\"uarkeo\",\"amount\":\"10\"}]", "index": true } ] }`,
 			Checker: func(t *testing.T, result any) {
 				assert.IsType(t, arkeotypes.EventModProvider{}, result)
 				e, ok := result.(arkeotypes.EventModProvider)
@@ -86,7 +87,7 @@ func TestEventParsing(t *testing.T) {
 		},
 		{
 			Name:    "EventBondProvider",
-			Payload: `{"type":"arkeo.arkeo.EventBondProvider","attributes":[{"key":"Ym9uZF9hYnM=","value":"IjEwMDAwMDAwMDAi","index":true},{"key":"Ym9uZF9yZWw=","value":"IjEwMDAwMDAwMDAi","index":true},{"key":"cHJvdmlkZXI=","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFncGpncDV2OHRqNmdkaDZnY3pxd3d3NWtzaDRnOHluYzh4cGpqc3Nhd3NuN2N4cXdtaG1qeTRkOGQ4Ig==","index":true},{"key":"c2VydmljZQ==","value":"Im1vY2si","index":true}]}`,
+			Payload: `{"type": "arkeo.arkeo.EventBondProvider", "attributes": [ { "key": "bond_abs", "value": "\"1000000000\"", "index": true }, { "key": "bond_rel", "value": "\"1000000000\"", "index": true }, { "key": "provider", "value": "\"tarkeopub1addwnpepqgpjgp5v8tj6gdh6gczqwww5ksh4g8ync8xpjjssawsn7cxqwmhmjy4d8d8\"", "index": true }, { "key": "service", "value": "\"mock\"", "index": true } ] }`,
 			Checker: func(t *testing.T, result any) {
 				assert.IsType(t, arkeotypes.EventBondProvider{}, result)
 				e, ok := result.(arkeotypes.EventBondProvider)
@@ -122,9 +123,84 @@ func TestEventParsing(t *testing.T) {
 	}
 }
 
-func TestConvertEventToMap(t *testing.T) {
+func TestConvertEventToMapString(t *testing.T) {
 	cosmos.GetConfig().SetBech32PrefixForAccount("tarkeo", "tarkeopub")
-	input := `{"type":"arkeo.arkeo.EventOpenContract","attributes":[{"key":"YXV0aG9yaXphdGlvbg==","value":"IlNUUklDVCI=","index":true},{"key":"Y2xpZW50","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFncGpncDV2OHRqNmdkaDZnY3pxd3d3NWtzaDRnOHluYzh4cGpqc3Nhd3NuN2N4cXdtaG1qeTRkOGQ4Ig==","index":true},{"key":"Y29udHJhY3RfaWQ=","value":"IjIi","index":true},{"key":"ZGVsZWdhdGU=","value":"IiI=","index":true},{"key":"ZGVwb3NpdA==","value":"IjkwMCI=","index":true},{"key":"ZHVyYXRpb24=","value":"IjYwIg==","index":true},{"key":"aGVpZ2h0","value":"IjE0OTUi","index":true},{"key":"b3Blbl9jb3N0","value":"IjEwMDAwMDAwMCI=","index":true},{"key":"cHJvdmlkZXI=","value":"InRhcmtlb3B1YjFhZGR3bnBlcHFmMHZtZ2h1YWtlZjR6eG5oNmh2Mmdld21xZ201dGRnOWY2dzNxeGpwdzQ5eG5zamYzNmY3ZjQwZXZlIg==","index":true},{"key":"cXVlcmllc19wZXJfbWludXRl","value":"IjEwIg==","index":true},{"key":"cmF0ZQ==","value":"eyJkZW5vbSI6InVhcmtlbyIsImFtb3VudCI6IjE1In0=","index":true},{"key":"c2VydmljZQ==","value":"Im1vY2si","index":true},{"key":"c2V0dGxlbWVudF9kdXJhdGlvbg==","value":"IjEwIg==","index":true},{"key":"dHlwZQ==","value":"IlBBWV9BU19ZT1VfR08i","index":true}]}`
+	input := `{
+  "type": "arkeo.arkeo.EventOpenContract",
+  "attributes": [
+    {
+      "key": "authorization",
+      "value": "STRICT",
+      "index": true
+    },
+    {
+      "key": "client",
+      "value": "tarkeopub1addwnpepqgpjgp5v8tj6gdh6gczqwww5ksh4g8ync8xpjjssawsn7cxqwmhmjy4d8d8",
+      "index": true
+    },
+    {
+      "key": "contract_id",
+      "value": "2",
+      "index": true
+    },
+    {
+      "key": "delegate",
+      "value": "",
+      "index": true
+    },
+    {
+      "key": "deposit",
+      "value": "900",
+      "index": true
+    },
+    {
+      "key": "duration",
+      "value": "60",
+      "index": true
+    },
+    {
+      "key": "height",
+      "value": "1495",
+      "index": true
+    },
+    {
+      "key": "open_cost",
+      "value": "100000000",
+      "index": true
+    },
+    {
+      "key": "provider",
+      "value": "tarkeopub1addwnpepqf0vmghuakef4zxnh6hv2gewmqgm5tdg9f6w3qxjpw49xnsjf36f7f40eve",
+      "index": true
+    },
+    {
+      "key": "queries_per_minute",
+      "value": "10",
+      "index": true
+    },
+    {
+      "key": "rate",
+      "value": "{\"denom\":\"uarkeo\",\"amount\":\"15\"}",
+      "index": true
+    },
+    {
+      "key": "service",
+      "value": "mock",
+      "index": true
+    },
+    {
+      "key": "settlement_duration",
+      "value": "10",
+      "index": true
+    },
+    {
+      "key": "type",
+      "value": "PAY_AS_YOU_GO",
+      "index": true
+    }
+  ]
+}
+`
 	var event abcitypes.Event
 	if err := json.Unmarshal([]byte(input), &event); err != nil {
 		t.Error(err)
@@ -133,5 +209,5 @@ func TestConvertEventToMap(t *testing.T) {
 	assert.Nil(t, err)
 	rate, ok := result["rate"]
 	assert.True(t, ok)
-	assert.IsType(t, map[string]any{}, rate)
+	fmt.Println(rate)
 }

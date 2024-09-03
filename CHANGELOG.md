@@ -36,6 +36,9 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ## Fixed 
 - Testnet binary generation using go build 
+- Fixed Regression Testing 
+- Updated Docs
+- Fixed Consumer in Directory Service
 
 # v1.0.0-Prerelease
 

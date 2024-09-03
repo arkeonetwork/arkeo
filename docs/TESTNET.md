@@ -54,14 +54,13 @@ cd arkeo
 git checkout master
 TAG=testnet make install 
 ```
-
 Configure The Binary 
 
 ```shell
 
 arkeod keys add <key-name>
 arkeod config set client node tcp://localhost:${ARKEO_PORT}57
-arkeod config set client keyring-backend os
+arkeod config set client keyring-backend test
 arkeod config set client chain-id arkeo
 arkeod init <your-custom-moniker> --chain-id arkeo
 sudo ufw allow ${ARKEO_PORT}56/tcp

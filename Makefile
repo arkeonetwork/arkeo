@@ -96,7 +96,7 @@ else ifeq ($(OS),Linux)
         DOCKER_BUILD := docker-build-cross
 		TESTNET_BUILD:= release-dry-run-cross
     else
-        $(error Unsupported architecture: $(ARCH))
+
     endif
 else
     $(error Unsupported OS: $(OS))

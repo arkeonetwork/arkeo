@@ -3,7 +3,6 @@ package indexer
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -217,7 +216,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err := s.handleCloseContractEvent(ctx, eventCloseContract, height); err != nil {
 			return err
 		}
-	case "coin_spent", "coin_received", "transfer", "message", "tx":
+	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
 		// do nothing
 	default:
 		// panic to make it immediately obvious that something is not handled
@@ -231,75 +230,33 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
 	result := make(map[string]any)
 	for _, attr := range event.Attributes {
-		key, err := base64.StdEncoding.DecodeString(attr.Key)
-		if err != nil {
-			return nil, fmt.Errorf("fail to decode key %s, err: %w", attr.Key, err)
-		}
-		attrValue := strings.Trim(attr.Value, `"`)
+		attrValue := strings.Trim(string(attr.Value), `"`)
 		if len(attrValue) == 0 {
 			continue
 		}
-		value, err := base64.StdEncoding.DecodeString(attrValue)
-		if err != nil {
-			return nil, fmt.Errorf("fail to decode value %s, err: %w", attrValue, err)
-		}
-
-		// Handle JSON strings
-		if value[0] == '"' && value[len(value)-1] == '"' {
-			var strValue string
-			if err := json.Unmarshal(value, &strValue); err != nil {
-				return nil, fmt.Errorf("fail to unmarshal %s to string, err: %w", value, err)
-			}
-			result[string(key)] = strValue
+		// Skip handling of "msg_index" field
+		if attr.Key == "msg_index" {
 			continue
 		}
-
-		switch value[0] {
+		switch attrValue[0] {
 		case '{':
 			var nest any
-			if err := json.Unmarshal(value, &nest); err != nil {
-				return nil, fmt.Errorf("fail to unmarshal %s to map, err: %w", value, err)
+			if err := json.Unmarshal([]byte(attr.Value), &nest); err != nil {
+				return nil, fmt.Errorf("fail to unmarshal %s to map,err: %w", attrValue, err)
 			}
-			result[string(key)] = nest
+			result[string(attr.Key)] = nest
 		case '[':
 			var nest []any
-			if err := json.Unmarshal(value, &nest); err != nil {
-				return nil, fmt.Errorf("fail to unmarshal %s to slice, err: %w", value, err)
+			if err := json.Unmarshal([]byte(attr.Value), &nest); err != nil {
+				return nil, fmt.Errorf("fail to unmarshal %s to slice,err: %w", attrValue, err)
 			}
-			result[string(key)] = nest
+			result[string(attr.Key)] = nest
 		default:
-			result[string(key)] = string(value)
+			result[string(attr.Key)] = attrValue
 		}
 	}
 	return result, nil
 }
-
-// func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
-// 	result := make(map[string]any)
-// 	for _, attr := range event.Attributes {
-// 		attrValue := strings.Trim(string(attr.Value), `"`)
-// 		if len(attrValue) == 0 {
-// 			continue
-// 		}
-// 		switch attrValue[0] {
-// 		case '{':
-// 			var nest any
-// 			if err := json.Unmarshal([]byte(attr.GetValue()), &nest); err != nil {
-// 				return nil, fmt.Errorf("fail to unmarshal %s to map,err: %w", attrValue, err)
-// 			}
-// 			result[string(attr.Key)] = nest
-// 		case '[':
-// 			var nest []any
-// 			if err := json.Unmarshal([]byte(attr.GetValue()), &nest); err != nil {
-// 				return nil, fmt.Errorf("fail to unmarshal %s to slice,err: %w", attrValue, err)
-// 			}
-// 			result[string(attr.Key)] = nest
-// 		default:
-// 			result[string(attr.Key)] = attrValue
-// 		}
-// 	}
-// 	return result, nil
-// }
 
 func subscribe(ctx context.Context, client *tmclient.HTTP, query string) (<-chan ctypes.ResultEvent, error) {
 	out, err := client.Subscribe(ctx, "", query)
