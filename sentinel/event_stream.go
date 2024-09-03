@@ -70,7 +70,7 @@ func (p Proxy) EventListener(host string) {
 
 	// subscribe to events
 	go subscribeToEvents(
-		"tm.event = 'NewBlockHeader'",
+		"tm.event = 'NewBlock'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'",
@@ -78,7 +78,7 @@ func (p Proxy) EventListener(host string) {
 
 	dispatchEvents := func(result tmCoreTypes.ResultEvent) {
 		switch {
-		case strings.Contains(result.Query, "NewBlockHeader"):
+		case strings.Contains(result.Query, "NewBlock"):
 			p.handleNewBlockHeaderEvent(result)
 
 		case strings.Contains(result.Query, "MsgOpenContract"):

@@ -236,12 +236,12 @@ description: cat account balance should increase
 endpoint: http://localhost:1317/cosmos/bank/v1beta1/balances/{{ addr_cat }}
 asserts:
   - .balances|length == 1
-  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999997
+  - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
 ---
 type: check
 description: ensure contract is closed
 endpoint: http://localhost:1317/arkeo/contract/1
 asserts:
   - .contract.paid == "3"
-  - .contract.deposit == "3"
+  - .contract.deposit == "100"
 ---
