@@ -33,12 +33,14 @@ Contains all the PRs that improved the code without changing the behaviors.
 ## Added 
 - Thorchain Claims Proto Updates
 - Documentation of Testnet Setup using local build and Cosmovisor
+- Documentation update and addition of validator setup documentation 
 
 ## Fixed 
 - Testnet binary generation using go build 
 - Fixed Regression Testing 
 - Updated Docs
 - Fixed Consumer in Directory Service
+- Fixed Regression Export 
 
 # v1.0.0-Prerelease
 

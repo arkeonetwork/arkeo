@@ -57,7 +57,6 @@ TAG=testnet make install
 Configure The Binary 
 
 ```shell
-
 arkeod keys add <key-name>
 arkeod config set client node tcp://localhost:${ARKEO_PORT}57
 arkeod config set client keyring-backend test
@@ -73,15 +72,10 @@ curl -s http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > 
 ## Configure Pruning, Minimum gas price , enable prometheus and disable indexing 
 
 ```shell
-
 sed -i -e "s/^pruning *=.*/pruning = \"custom\"/" $HOME/.arkeo/config/app.toml
 sed -i -e "s/^pruning-keep-recent *=.*/pruning-keep-recent = \"100\"/" $HOME/.arkeo/config/app.toml
 sed -i -e "s/^pruning-interval *=.*/pruning-interval = \"50\"/" $HOME/.arkeo/config/app.toml
-
 sed -i 's|minimum-gas-prices =.*|minimum-gas-prices = "0.001uarkeo"|g' $HOME/.arkeo/config/app.toml
-sed -i -e "s/prometheus = false/prometheus = true/" $HOME/.arkeo/config/config.toml
-sed -i -e "s/^indexer *=.*/indexer = \"null\"/" $HOME/.arkeo/config/config.toml
-
 ```
 
 ## Configure Seeds and Peers

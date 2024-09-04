@@ -53,11 +53,9 @@ jobs:
           files: ./coverage.txt
           fail_ci_if_error: false
         if: env.GIT_DIFF
-  
   regression-test:
           name: Regression Test
           runs-on: ubuntu-latest
-      
           steps:
             - name: Check out repository code
               uses: actions/checkout@v2
