@@ -1,5 +1,6 @@
 {
-  "app_hash": "",
+  "app_hash": null,
+  "app_name": "arkeo",
   "app_state": {
     "arkeo": {
       "contract_expiration_sets": [
@@ -25,7 +26,7 @@
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
-          "deposit": "3",
+          "deposit": "100",
           "duration": "10",
           "height": "2",
           "id": "1",
@@ -39,7 +40,7 @@
           },
           "service": 1,
           "settlement_duration": "11",
-          "settlement_height": "15",
+          "settlement_height": "0",
           "type": "PAY_AS_YOU_GO"
         }
       ],
@@ -71,8 +72,17 @@
           ]
         }
       ],
-      "user_contract_sets": [],
-      "version": "1"
+      "user_contract_sets": [
+        {
+          "contract_set": {
+            "contract_ids": [
+              "1"
+            ]
+          },
+          "user": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
+        }
+      ],
+      "version": "0"
     },
     "auth": {
       "accounts": [
@@ -249,7 +259,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "99999961",
+              "amount": "100000000",
               "denom": "uarkeo"
             }
           ]
@@ -258,16 +268,16 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "16066160612",
-              "denom": "stake"
+              "amount": "16066162928",
+              "denom": "uarkeo"
             }
           ]
         },
         {
-          "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
+          "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
           "coins": [
             {
-              "amount": "39",
+              "amount": "97",
               "denom": "uarkeo"
             }
           ]
@@ -276,7 +286,7 @@
           "address": "tarkeo1uhapc6jjq6ns0ydnk7zld5x7f5kl2ukemjw5fg",
           "coins": [
             {
-              "amount": "999999899999997",
+              "amount": "999999899999900",
               "denom": "uarkeo"
             }
           ]
@@ -287,13 +297,10 @@
         "default_send_enabled": true,
         "send_enabled": []
       },
+      "send_enabled": [],
       "supply": [
         {
-          "amount": "16066160612",
-          "denom": "stake"
-        },
-        {
-          "amount": "52001000000000000",
+          "amount": "52001016066162928",
           "denom": "uarkeo"
         }
       ]
@@ -333,23 +340,10 @@
         }
       ]
     },
-    "claimarkeo": {
-      "claim_records": [],
-      "module_account_balance": {
-        "amount": "0",
-        "denom": "uarkeo"
-      },
-      "params": {
-        "claim_denom": "uarkeo",
-        "duration_of_decay": "3600s",
-        "duration_until_decay": "3600s",
-        "initial_gas_amount": null
-      }
-    },
     "crisis": {
       "constant_fee": {
         "amount": "1000",
-        "denom": "stake"
+        "denom": "uarkeo"
       }
     },
     "distribution": {
@@ -368,8 +362,8 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "321323212.240000000000000000",
-            "denom": "stake"
+            "amount": "321323258.560000000000000000",
+            "denom": "uarkeo"
           }
         ]
       },
@@ -377,16 +371,16 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "15744837399.760000000000000000",
-              "denom": "stake"
+              "amount": "15744839669.440000000000000000",
+              "denom": "uarkeo"
             }
           ],
           "validator_address": "tarkeovaloper1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyfn54sh"
         }
       ],
       "params": {
-        "base_proposer_reward": "0.010000000000000000",
-        "bonus_proposer_reward": "0.040000000000000000",
+        "base_proposer_reward": "0.000000000000000000",
+        "bonus_proposer_reward": "0.000000000000000000",
         "community_tax": "0.020000000000000000",
         "withdraw_addr_enabled": true
       },
@@ -396,8 +390,8 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "1574483739.976000000000000000",
-                "denom": "stake"
+                "amount": "1574483966.944000000000000000",
+                "denom": "uarkeo"
               }
             ]
           },
@@ -410,8 +404,8 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "14170353659.784000000000000000",
-                "denom": "stake"
+                "amount": "14170355702.496000000000000000",
+                "denom": "uarkeo"
               }
             ]
           },
@@ -440,27 +434,42 @@
       "gen_txs": []
     },
     "gov": {
-      "deposit_params": {
+      "constitution": "",
+      "deposit_params": null,
+      "deposits": [],
+      "params": {
+        "burn_proposal_deposit_prevote": false,
+        "burn_vote_quorum": false,
+        "burn_vote_veto": true,
+        "expedited_min_deposit": [
+          {
+            "amount": "50000000",
+            "denom": "uarkeo"
+          }
+        ],
+        "expedited_threshold": "0.667000000000000000",
+        "expedited_voting_period": "86400s",
         "max_deposit_period": "172800s",
         "min_deposit": [
           {
             "amount": "10000000",
-            "denom": "stake"
+            "denom": "uarkeo"
           }
-        ]
-      },
-      "deposits": [],
-      "proposals": [],
-      "starting_proposal_id": "1",
-      "tally_params": {
+        ],
+        "min_deposit_ratio": "0.010000000000000000",
+        "min_initial_deposit_ratio": "0.000000000000000000",
+        "proposal_cancel_dest": "",
+        "proposal_cancel_ratio": "0.500000000000000000",
         "quorum": "0.334000000000000000",
         "threshold": "0.500000000000000000",
-        "veto_threshold": "0.334000000000000000"
-      },
-      "votes": [],
-      "voting_params": {
+        "veto_threshold": "0.334000000000000000",
         "voting_period": "172800s"
-      }
+      },
+      "proposals": [],
+      "starting_proposal_id": "1",
+      "tally_params": null,
+      "votes": [],
+      "voting_params": null
     },
     "group": {
       "group_members": [],
@@ -479,26 +488,68 @@
         "channels": [],
         "commitments": [],
         "next_channel_sequence": "0",
+        "params": {
+          "upgrade_timeout": {
+            "height": {
+              "revision_height": "0",
+              "revision_number": "0"
+            },
+            "timestamp": "600000000000"
+          }
+        },
         "receipts": [],
         "recv_sequences": [],
         "send_sequences": []
       },
       "client_genesis": {
-        "clients": [],
+        "clients": [
+          {
+            "client_id": "09-localhost",
+            "client_state": {
+              "@type": "/ibc.lightclients.localhost.v2.ClientState",
+              "latest_height": {
+                "revision_height": "15",
+                "revision_number": "0"
+              }
+            }
+          }
+        ],
         "clients_consensus": [],
         "clients_metadata": [],
         "create_localhost": false,
         "next_client_sequence": "0",
         "params": {
           "allowed_clients": [
-            "06-solomachine",
-            "07-tendermint"
+            "*"
           ]
         }
       },
       "connection_genesis": {
         "client_connection_paths": [],
-        "connections": [],
+        "connections": [
+          {
+            "client_id": "09-localhost",
+            "counterparty": {
+              "client_id": "09-localhost",
+              "connection_id": "connection-localhost",
+              "prefix": {
+                "key_prefix": "aWJj"
+              }
+            },
+            "delay_period": "0",
+            "id": "connection-localhost",
+            "state": "STATE_OPEN",
+            "versions": [
+              {
+                "features": [
+                  "ORDER_ORDERED",
+                  "ORDER_UNORDERED"
+                ],
+                "identifier": "1"
+              }
+            ]
+          }
+        ],
         "next_connection_sequence": "0",
         "params": {
           "max_expected_time_per_block": "30000000000"
@@ -518,7 +569,9 @@
         "active_channels": [],
         "interchain_accounts": [],
         "params": {
-          "allow_messages": [],
+          "allow_messages": [
+            "*"
+          ],
           "host_enabled": true
         },
         "port": "icahost"
@@ -526,8 +579,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6760123009538421.891755000000000000",
-        "inflation": "0.129999865570631755"
+        "annual_provisions": "6760124958900879.440734825593079684",
+        "inflation": "0.129999865570695682"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -535,10 +588,9 @@
         "inflation_max": "0.200000000000000000",
         "inflation_min": "0.070000000000000000",
         "inflation_rate_change": "0.130000000000000000",
-        "mint_denom": "stake"
+        "mint_denom": "uarkeo"
       }
     },
-    "params": null,
     "slashing": {
       "missed_blocks": [
         {
@@ -620,6 +672,8 @@
           "status": "BOND_STATUS_BONDED",
           "tokens": "50000000000000000",
           "unbonding_height": "0",
+          "unbonding_ids": [],
+          "unbonding_on_hold_ref_count": "0",
           "unbonding_time": "1970-01-01T00:00:00Z"
         }
       ]
@@ -630,40 +684,48 @@
         "receive_enabled": true,
         "send_enabled": true
       },
-      "port_id": "transfer"
+      "port_id": "transfer",
+      "total_escrowed": []
     },
     "upgrade": {},
     "vesting": {}
   },
+  "app_version": "null",
   "chain_id": "arkeo",
-  "consensus_params": {
-    "block": {
-      "max_bytes": "22020096",
-      "max_gas": "-1",
-      "time_iota_ms": "1000"
-    },
-    "evidence": {
-      "max_age_duration": "172800000000000",
-      "max_age_num_blocks": "100000",
-      "max_bytes": "1048576"
-    },
-    "validator": {
-      "pub_key_types": [
-        "ed25519"
-      ]
-    },
-    "version": {}
-  },
-  "initial_height": "16",
-  "validators": [
-    {
-      "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",
-      "name": "local",
-      "power": "50000000000",
-      "pub_key": {
-        "type": "tendermint/PubKeyEd25519",
-        "value": "6ERoG0djS6fNNdNZCezEL8e8aSdffT87d2sJMK5TXVo="
+  "consensus": {
+    "params": {
+      "abci": {
+        "vote_extensions_enable_height": "0"
+      },
+      "block": {
+        "max_bytes": "22020096",
+        "max_gas": "-1"
+      },
+      "evidence": {
+        "max_age_duration": "172800000000000",
+        "max_age_num_blocks": "100000",
+        "max_bytes": "1048576"
+      },
+      "validator": {
+        "pub_key_types": [
+          "ed25519"
+        ]
+      },
+      "version": {
+        "app": "0"
       }
-    }
-  ]
+    },
+    "validators": [
+      {
+        "address": "5C887D7F98C1B007B7DA9AC180DBB9E66F3C7680",
+        "name": "local",
+        "power": "50000000000",
+        "pub_key": {
+          "type": "tendermint/PubKeyEd25519",
+          "value": "6ERoG0djS6fNNdNZCezEL8e8aSdffT87d2sJMK5TXVo="
+        }
+      }
+    ]
+  },
+  "initial_height": 16
 }
