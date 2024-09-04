@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+      branches:
+        - '**'
 
 jobs:
   run-tests:
@@ -60,6 +62,8 @@ jobs:
       
           steps:
             - uses: actions/checkout@v2
+              with:
+                ref: ${{ github.head_ref }}
             - uses: technote-space/get-diff-action@v4
               with:
                 PATTERNS: |
