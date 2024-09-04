@@ -41,8 +41,8 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	mgr.keeper.SetVersion(ctx, ver) // update stored version
 
 	var votes = []abci.VoteInfo{}
-	for i := 0; i <= ctx.CometInfo().GetLastCommit().Votes().Len(); i++ {
-		vote := ctx.CometInfo().GetLastCommit().Votes().Get(0)
+	for i := 0; i < ctx.CometInfo().GetLastCommit().Votes().Len(); i++ {
+		vote := ctx.CometInfo().GetLastCommit().Votes().Get(i)
 		abciVote := abci.VoteInfo{
 			Validator: abci.Validator{
 				Address: vote.Validator().Address(),
@@ -221,10 +221,11 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 		}
 
 		for _, vote := range votes {
-			// if !vote.SignedLastBlock {
-			// 	ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
-			// 	continue
-			// }
+
+			if vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_ABSENT" {
+				ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
+				continue
+			}
 
 			val, err := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
 			if err != nil {
