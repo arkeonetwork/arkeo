@@ -221,9 +221,8 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo) er
 		}
 
 		for _, vote := range votes {
-
-			if vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_ABSENT" {
-				ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
+			if vote.BlockIdFlag.String() != "BLOCK_ID_FLAG_COMMIT" {
+				ctx.Logger().Info("validator rewards skipped due to lack of commit signature", "validator", string(vote.Validator.Address))
 				continue
 			}
 
