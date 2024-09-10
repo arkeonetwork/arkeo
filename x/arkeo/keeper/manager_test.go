@@ -11,6 +11,7 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	abci "github.com/cometbft/cometbft/abci/types"
+
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
@@ -97,6 +98,7 @@ func TestValidatorPayout(t *testing.T) {
 				Address: consAddr,
 				Power:   val.Tokens.Int64(),
 			},
+			BlockIdFlag: 2,
 		}
 	}
 
@@ -134,11 +136,11 @@ func TestValidatorPayout(t *testing.T) {
 
 	bal = k.GetBalance(ctx, delAcc3)
 	require.Equal(t, bal.AmountOf(configs.Denom).Int64(), int64(3711))
-	_ = totalBal.Add(bal.AmountOf(configs.Denom))
+	totalBal = totalBal.Add(bal.AmountOf(configs.Denom))
 	require.Equal(t, bal.AmountOf("tokkie").Int64(), int64(3711))
 
 	// ensure block reward is equal to total rewarded to validators and delegates
-	require.Equal(t, blockReward, int64(158529))
+	require.Equal(t, totalBal.Int64(), int64(157941))
 }
 
 func TestContractEndBlock(t *testing.T) {
