@@ -103,6 +103,7 @@ type AppModule struct {
 	stakingKeeper stakingkeeper.Keeper
 }
 
+         
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,

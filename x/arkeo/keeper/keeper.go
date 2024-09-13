@@ -126,6 +126,13 @@ func NewKVStore(
 	storeKey,
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
+
+	/*
+			accountKeeper       keeper.AccountKeeper
+		    bankKeeper          keeper.Keeper
+		    distributionKeeper  distkeeper.Keeper
+		    stakingKeeper       stakingkeeper.Keeper
+	*/
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
 	stakingKeeper stakingkeeper.Keeper,

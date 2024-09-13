@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	abci "github.com/cometbft/cometbft/abci/types"
 	cmptm "github.com/cometbft/cometbft/proto/tendermint/types"
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -17,6 +18,7 @@ import (
 type Manager struct {
 	keeper Keeper
 	sk     stakingkeeper.Keeper
+	mk     mintTypes.BankKeeper
 }
 
 func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
