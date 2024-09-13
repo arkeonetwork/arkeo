@@ -213,7 +213,6 @@ var (
 		arkeomoduletypes.ReserveName:   {},
 		arkeomoduletypes.ProviderName:  {},
 		arkeomoduletypes.ContractName:  {},
-		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
 
