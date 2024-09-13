@@ -99,6 +99,8 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 		# add_claim_records "ETHEREUM" "{YOUR ETH ADDRESS}" 500000 600000 700000 true
 
+		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 600000 700000 true
+
 		# enable CORs on testnet/localnet
 		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
 		sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
@@ -106,6 +108,9 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
+	sed -i 's/localhost:1317/0.0.0.0:1317/g' ~/.arkeo/config/app.toml
+	sed -i 's/localhost:9090/0.0.0.0:9090/g' ~/.arkeo/config/app.toml
+	sed -i 's/3600s/7884000s/g' ~/.arkeo/config/app.toml # 7884000s = 91.25 days
 	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 
 	# Update the supply field in genesis.json using jq
