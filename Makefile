@@ -135,11 +135,15 @@ docker-build-cross:
 		--clean \
 		--snapshot 
 
+build-docker-localnet:
+	@docker build . --file Dockerfile.localnet -t ${IMAGE}:${TAG}
+
+# localnet: build-docker
+# 	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
 
 
-localnet: build-docker
-	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
-
+localnet: build-docker-localnet
+	IMAGE_TAG=${IMAGE}:${TAG} docker-compose -f docker-compose-localnet.yaml  up
 # ------------------------------    Testnet   ------------------------------
 
 install-testnet-binary:

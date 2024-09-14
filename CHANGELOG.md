@@ -41,6 +41,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Updated Docs
 - Fixed Consumer in Directory Service
 - Fixed Regression Export 
+- Fixed localnet docker 
+- updated the genesis file 
 
 # v1.0.0-Prerelease
 
