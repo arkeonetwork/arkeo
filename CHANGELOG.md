@@ -42,7 +42,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed Consumer in Directory Service
 - Fixed Regression Export 
 - Fixed localnet docker 
-- updated the genesis file 
+- updated the genesis file
+- claim timeout
 
 # v1.0.0-Prerelease
 
