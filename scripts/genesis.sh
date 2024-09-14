@@ -96,7 +96,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 		# Thorchain derived test addresses
 		add_account "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" $TOKEN 1000000000000000 # bob, 10m
-		add_claim_records "ARKEO" "ch" 1000 1000 1000 true
+		add_claim_records "ARKEO" "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" 1000 1000 1000 true
 		add_account "tarkeo1xrz7z3zwtpc45xm72tpnevuf3wn53re8q4u4nr" $TOKEN 1000000000000000
 		add_claim_records "ARKEO" "tarkeo1xrz7z3zwtpc45xm72tpnevuf3wn53re8q4u4nr" 1000 1000 1000 true
 
@@ -106,13 +106,13 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		# add_claim_records "ETHEREUM" "{YOUR ETH ADDRESS}" 500000 600000 700000 true
 		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 600000 700000 true
 
-
 		# enable CORs on testnet/localnet
 		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
 		sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
 	fi
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
+	sed -i '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
 	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 	sed -i 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml
