@@ -2,10 +2,13 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName   = "arkeo"
-	ReserveName  = "arkeo-reserve"
-	ProviderName = "providers"
-	ContractName = "contracts"
+	ModuleName          = "arkeo"
+	ReserveName         = "arkeo-reserve"
+	ProviderName        = "providers"
+	ContractName        = "contracts"
+	DevFundPool         = "dev-fund"
+	CommunityPool       = "community-fund"
+	ValidatorRewardPool = "validator-fund"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
