@@ -7,8 +7,12 @@ import (
 
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
-	"cosmossdk.io/math"
+	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -17,11 +21,6 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type dbPrefix string
@@ -59,6 +58,8 @@ type Keeper interface {
 	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
+	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) error
+	GetCirculatingSupply(ctx cosmos.Context, denom string) cosmos.Coin
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -375,8 +376,7 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) cosmos.C
 	totalSupply := k.coinKeeper.GetSupply(ctx, denom)
 
 	// Module Address for which the circulating supply should be exempted
-
-	exemptModules := []string{"FoundationPool", "DevFund", "CommunityPool"}
+	exemptModules := []string{types.ValidatorRewardPool, types.CommunityPool, types.DevFundPool}
 	exemptBalance := cosmos.NewInt(0)
 
 	// range over the module and create exempt balances
@@ -392,33 +392,28 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) cosmos.C
 	return cosmos.NewCoin(denom, circulatingSupply)
 }
 
-func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (math.Int, error) {
-	if err := k.MintToModule(ctx, types.ModuleName, newlyMinted); err != nil {
-		return math.NewInt(0), fmt.Errorf("failed to mint to module %s : error : %s", types.ModuleName, err)
-	}
+func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) error {
 
 	params := k.GetParams(ctx)
 
-	devFundAmount := newlyMinted.Amount.MulRaw(params.DevFundPercentage.RoundInt64()).QuoRaw(100)
-	communityPoolAmount := newlyMinted.Amount.MulRaw(params.CommunityPoolPercentage.RoundInt64()).QuoRaw(100)
+	newlyMintedDec := sdkmath.LegacyNewDecFromInt(newlyMinted.Amount)
 
-	validatorRewardAmount := newlyMinted.Amount.Sub(devFundAmount).Sub(communityPoolAmount)
+	devFundAmount := newlyMintedDec.Mul(params.DevFundPercentage).TruncateInt()
+	communityPoolAmount := newlyMintedDec.Mul(params.CommunityPoolPercentage).TruncateInt()
+	validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
 
-	devFundAddr := k.accountKeeper.GetModuleAddress("DevFund")
-	if err := k.SendFromModuleToAccount(ctx, types.ModuleName, devFundAddr, cosmos.NewCoins(cosmos.NewCoin(newlyMinted.Denom, devFundAmount))); err != nil {
-		return math.NewInt(0), fmt.Errorf("error sending amount to module %s", err)
+	if err := k.MintToModule(ctx, types.DevFundPool, cosmos.NewCoin(newlyMinted.Denom, devFundAmount)); err != nil {
+		return fmt.Errorf("error sending amount to module %s", err)
 	}
 
-	communityPoolAddr := k.accountKeeper.GetModuleAddress("CommunityPool")
-	if err := k.SendFromModuleToAccount(ctx, types.ModuleName, communityPoolAddr, cosmos.NewCoins(cosmos.NewCoin(newlyMinted.Denom, devFundAmount))); err != nil {
-		return math.NewInt(0), fmt.Errorf("error sending amount to module %s", err)
+	if err := k.MintToModule(ctx, types.CommunityPool, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount)); err != nil {
+		return fmt.Errorf("error sending amount to module %s", err)
 	}
 
-	return validatorRewardAmount, nil
+	if err := k.MintToModule(ctx, types.ValidatorRewardPool, cosmos.NewCoin(newlyMinted.Denom, validatorRewardAmount)); err != nil {
+		return fmt.Errorf("error sending amount to module %s", err)
+	}
 
-}
-
-func (k KVStore) DistributeValidatorRewards(ctx cosmos.Context, denom string, amount cosmos.Int, validator stakingtypes.Validator) error {
-	// TODO: Add Logic Here
 	return nil
+
 }
