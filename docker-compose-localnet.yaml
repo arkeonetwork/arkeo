@@ -1,16 +1,21 @@
----
 version: "3"
 
 services:
   node:
-    image: ghcr.io/arkeonetwork/arkeo-dev:${IMAGE_TAG}
+    image: ${IMAGE_TAG}
+    build:
+      context: .
+      dockerfile: Dockerfile.localnet  # Ensure the Dockerfile is correctly referenced
     entrypoint:
-      - sh
-      - /opt/genesis.sh
+      - bash
+      - -c
+      - |
+        ./genesis.sh && \
+        arkeod start
     ports:
-      - 9090:9090
+      - 1317:1317
       - 26657:26657
       - 26656:26656
     volumes:
-      - ./scripts:/opt:z
-    working_dir: /opt
+      - ./scripts:/scripts:z
+    working_dir: /scripts

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/client/cli"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -26,8 +25,10 @@ import (
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule       = AppModule{}
+	_ module.AppModuleBasic  = AppModuleBasic{}
+	_ module.HasABCIEndBlock = AppModule{}
+	_ module.HasGenesis      = AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -129,15 +130,13 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 // RegisterInvariants registers the invariants of the module. If an invariant deviates from its predicted value, the InvariantRegistry triggers appropriate logic (most often the chain will be halted)
 func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// InitGenesis performs the module's genesis initialization. It returns no validator updates.
-func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
+// InitGenesis performs the module's genesis initialization.
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) {
 	var genState types.GenesisState
 	// Initialize global index to index in genesis state
 	cdc.MustUnmarshalJSON(gs, &genState)
 
 	InitGenesis(ctx, am.keeper, genState)
-
-	return []abci.ValidatorUpdate{}
 }
 
 // ExportGenesis returns the module's exported genesis state as raw JSON bytes.
@@ -158,10 +157,11 @@ func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestFinalizeBlock) {
 }
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
-func (am AppModule) EndBlock(ctx cosmos.Context) ([]abci.ValidatorUpdate, error) {
+func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
 	mgr := keeper.NewManager(am.keeper, am.stakingKeeper)
-	if err := mgr.EndBlock(ctx); err != nil {
-		ctx.Logger().Error("manager endblock error ", "error", err)
+	context := sdk.UnwrapSDKContext(ctx)
+	if err := mgr.EndBlock(context); err != nil {
+		context.Logger().Error("manager endblock error ", "error", err)
 	}
 	return []abci.ValidatorUpdate{}, nil
 }

@@ -238,6 +238,9 @@ func convertEventToMap(event abcitypes.Event) (map[string]any, error) {
 		if attr.Key == "msg_index" {
 			continue
 		}
+		if attr.Key == "mode" {
+			continue
+		}
 		switch attrValue[0] {
 		case '{':
 			var nest any
