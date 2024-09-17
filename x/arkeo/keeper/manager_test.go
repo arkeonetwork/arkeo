@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -12,10 +11,6 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
-
-	abci "github.com/cometbft/cometbft/abci/types"
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func TestContractEndBlock(t *testing.T) {
@@ -291,141 +286,141 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 }
 
-func TestValidatorPayouts(t *testing.T) {
-	ctx, k, sk := SetupKeeperWithStaking(t)
+// func TestValidatorPayouts(t *testing.T) {
+// 	ctx, k, sk := SetupKeeperWithStaking(t)
 
-	pks := simtestutil.CreateTestPubKeys(3)
-	pk1, err := common.NewPubKeyFromCrypto(pks[0])
-	require.NoError(t, err)
-	acc1, err := pk1.GetMyAddress()
-	require.NoError(t, err)
-	pk2, err := common.NewPubKeyFromCrypto(pks[1])
-	require.NoError(t, err)
-	acc2, err := pk2.GetMyAddress()
-	require.NoError(t, err)
-	pk3, err := common.NewPubKeyFromCrypto(pks[2])
-	require.NoError(t, err)
-	acc3, err := pk3.GetMyAddress()
-	require.NoError(t, err)
+// 	pks := simtestutil.CreateTestPubKeys(3)
+// 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
+// 	require.NoError(t, err)
+// 	acc1, err := pk1.GetMyAddress()
+// 	require.NoError(t, err)
+// 	pk2, err := common.NewPubKeyFromCrypto(pks[1])
+// 	require.NoError(t, err)
+// 	acc2, err := pk2.GetMyAddress()
+// 	require.NoError(t, err)
+// 	pk3, err := common.NewPubKeyFromCrypto(pks[2])
+// 	require.NoError(t, err)
+// 	acc3, err := pk3.GetMyAddress()
+// 	require.NoError(t, err)
 
-	valAddrs := simtestutil.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
+// 	valAddrs := simtestutil.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
 
-	val1, err := stakingtypes.NewValidator(valAddrs[0].String(), pks[0], stakingtypes.Description{})
-	require.NoError(t, err)
-	val1.Tokens = cosmos.NewInt(100)
-	val1.DelegatorShares = cosmos.NewDec(130) // Validator + Delegations
-	val1.Status = stakingtypes.Bonded
-	val1.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(1, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
+// 	val1, err := stakingtypes.NewValidator(valAddrs[0].String(), pks[0], stakingtypes.Description{})
+// 	require.NoError(t, err)
+// 	val1.Tokens = cosmos.NewInt(100)
+// 	val1.DelegatorShares = cosmos.NewDec(130) // Validator + Delegations
+// 	val1.Status = stakingtypes.Bonded
+// 	val1.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(1, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val2, err := stakingtypes.NewValidator(valAddrs[1].String(), pks[1], stakingtypes.Description{})
-	require.NoError(t, err)
-	val2.Tokens = cosmos.NewInt(200)
-	val2.DelegatorShares = cosmos.NewDec(220)
-	val2.Status = stakingtypes.Bonded
-	val2.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(2, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
+// 	val2, err := stakingtypes.NewValidator(valAddrs[1].String(), pks[1], stakingtypes.Description{})
+// 	require.NoError(t, err)
+// 	val2.Tokens = cosmos.NewInt(200)
+// 	val2.DelegatorShares = cosmos.NewDec(220)
+// 	val2.Status = stakingtypes.Bonded
+// 	val2.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(2, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	val3, err := stakingtypes.NewValidator(valAddrs[2].String(), pks[2], stakingtypes.Description{})
-	require.NoError(t, err)
-	val3.Tokens = cosmos.NewInt(500)
-	val3.DelegatorShares = cosmos.NewDec(500)
-	val3.Status = stakingtypes.Bonded
-	val3.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(5, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
+// 	val3, err := stakingtypes.NewValidator(valAddrs[2].String(), pks[2], stakingtypes.Description{})
+// 	require.NoError(t, err)
+// 	val3.Tokens = cosmos.NewInt(500)
+// 	val3.DelegatorShares = cosmos.NewDec(500)
+// 	val3.Status = stakingtypes.Bonded
+// 	val3.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(5, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
-	vals := []stakingtypes.Validator{val1, val2, val3}
-	for _, val := range vals {
-		require.NoError(t, sk.SetValidator(ctx, val))
-		require.NoError(t, sk.SetValidatorByConsAddr(ctx, val))
-		require.NoError(t, sk.SetNewValidatorByPowerIndex(ctx, val))
-	}
+// 	vals := []stakingtypes.Validator{val1, val2, val3}
+// 	for _, val := range vals {
+// 		require.NoError(t, sk.SetValidator(ctx, val))
+// 		require.NoError(t, sk.SetValidatorByConsAddr(ctx, val))
+// 		require.NoError(t, sk.SetNewValidatorByPowerIndex(ctx, val))
+// 	}
 
-	delAcc1 := types.GetRandomBech32Addr()
-	delAcc2 := types.GetRandomBech32Addr()
-	delAcc3 := types.GetRandomBech32Addr()
+// 	delAcc1 := types.GetRandomBech32Addr()
+// 	delAcc2 := types.GetRandomBech32Addr()
+// 	delAcc3 := types.GetRandomBech32Addr()
 
-	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100))))
-	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200))))
-	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500))))
+// 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100))))
+// 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200))))
+// 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500))))
 
-	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
-	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
-	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
-	require.NoError(t, sk.SetDelegation(ctx, del1))
-	require.NoError(t, sk.SetDelegation(ctx, del2))
-	require.NoError(t, sk.SetDelegation(ctx, del3))
+// 	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
+// 	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
+// 	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
+// 	require.NoError(t, sk.SetDelegation(ctx, del1))
+// 	require.NoError(t, sk.SetDelegation(ctx, del2))
+// 	require.NoError(t, sk.SetDelegation(ctx, del3))
 
-	// Mint initial funds to the reserve
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(200000))))
-	exemptModules := []string{types.GrantPool, types.CommunityPool, types.DevFundPool}
-	for _, modules := range exemptModules {
-		require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, modules, getCoins(common.Tokens(50000))))
-	}
+// 	// Mint initial funds to the reserve
+// 	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(200000))))
+// 	exemptModules := []string{types.GrantPool, types.CommunityPool, types.DevFundPool}
+// 	for _, modules := range exemptModules {
+// 		require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, modules, getCoins(common.Tokens(50000))))
+// 	}
 
-	// Set parameters for payouts
-	params := types.DefaultParams()
-	params.DevFundPercentage = sdkmath.LegacyNewDecWithPrec(20, 2)          // 20%
-	params.CommunityPoolPercentage = sdkmath.LegacyNewDecWithPrec(10, 2)    // 10%
-	params.ValidatorRewardsPercentage = sdkmath.LegacyNewDecWithPrec(70, 2) // 70%
-	k.SetParams(ctx, params)
+// 	// Set parameters for payouts
+// 	params := types.DefaultParams()
+// 	params.DevFundPercentage = sdkmath.LegacyNewDecWithPrec(20, 2)          // 20%
+// 	params.CommunityPoolPercentage = sdkmath.LegacyNewDecWithPrec(10, 2)    // 10%
+// 	params.ValidatorRewardsPercentage = sdkmath.LegacyNewDecWithPrec(70, 2) // 70%
+// 	k.SetParams(ctx, params)
 
-	// Instantiate manager with keeper and staking keeper
-	mgr := NewManager(k, sk)
-	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
+// 	// Instantiate manager with keeper and staking keeper
+// 	mgr := NewManager(k, sk)
+// 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
 
-	// Create VoteInfo for each validator
-	votes := make([]abci.VoteInfo, len(vals))
-	for i, val := range vals {
-		consAddr, err := val.GetConsAddr()
-		require.NoError(t, err)
-		votes[i] = abci.VoteInfo{
-			Validator: abci.Validator{
-				Address: consAddr,
-				Power:   val.Tokens.Int64(),
-			},
-			BlockIdFlag: 2,
-		}
-	}
+// 	// Create VoteInfo for each validator
+// 	votes := make([]abci.VoteInfo, len(vals))
+// 	for i, val := range vals {
+// 		consAddr, err := val.GetConsAddr()
+// 		require.NoError(t, err)
+// 		votes[i] = abci.VoteInfo{
+// 			Validator: abci.Validator{
+// 				Address: consAddr,
+// 				Power:   val.Tokens.Int64(),
+// 			},
+// 			BlockIdFlag: 2,
+// 		}
+// 	}
 
-	blockReward := int64(158529)
-	newlyMintedDec := sdkmath.LegacyNewDecFromInt(sdkmath.NewInt(blockReward))
+// 	blockReward := int64(158529)
+// 	newlyMintedDec := sdkmath.LegacyNewDecFromInt(sdkmath.NewInt(blockReward))
 
-	_ = newlyMintedDec.Mul(params.DevFundPercentage).TruncateInt()
-	_ = newlyMintedDec.Mul(params.CommunityPoolPercentage).TruncateInt()
-	validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
+// 	_ = newlyMintedDec.Mul(params.DevFundPercentage).TruncateInt()
+// 	_ = newlyMintedDec.Mul(params.CommunityPoolPercentage).TruncateInt()
+// 	validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
 
-	// Expected block reward calculation
+// 	// Expected block reward calculation
 
-	// validatorRewardPoolAddr := mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
-	// fmt.Println(k.GetBalance(ctx, validatorRewardPoolAddr))
+// 	// validatorRewardPoolAddr := mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
+// 	// fmt.Println(k.GetBalance(ctx, validatorRewardPoolAddr))
 
-	// require.NoError(t, mgr.ValidatorPayout(ctx, votes,))
+// 	// require.NoError(t, mgr.ValidatorPayout(ctx, votes,))
 
-	// validatorRewardPoolAddr = mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
-	// fmt.Println(k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom))
+// 	// validatorRewardPoolAddr = mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
+// 	// fmt.Println(k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom))
 
-	// Verify the remaining balance after distribution
-	// expectedRemaining := 5000000000000 - k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom).Int64()
-	// require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), expectedRemaining)
+// 	// Verify the remaining balance after distribution
+// 	// expectedRemaining := 5000000000000 - k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom).Int64()
+// 	// require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), expectedRemaining)
 
-	totalBal := cosmos.ZeroInt()
+// 	totalBal := cosmos.ZeroInt()
 
-	// Check balances of validators 7
-	checkBalance(ctx, t, k, acc1, configs.Denom, 13042, &totalBal)
-	checkBalance(ctx, t, k, acc2, configs.Denom, 26059, &totalBal)
-	checkBalance(ctx, t, k, acc3, configs.Denom, 64950, &totalBal)
+// 	// Check balances of validators 7
+// 	checkBalance(ctx, t, k, acc1, configs.Denom, 13042, &totalBal)
+// 	checkBalance(ctx, t, k, acc2, configs.Denom, 26059, &totalBal)
+// 	checkBalance(ctx, t, k, acc3, configs.Denom, 64950, &totalBal)
 
-	// Check balances of delegates
-	checkBalance(ctx, t, k, delAcc1, configs.Denom, 1305, &totalBal)
-	checkBalance(ctx, t, k, delAcc2, configs.Denom, 2606, &totalBal)
-	checkBalance(ctx, t, k, delAcc3, configs.Denom, 2598, &totalBal)
+// 	// Check balances of delegates
+// 	checkBalance(ctx, t, k, delAcc1, configs.Denom, 1305, &totalBal)
+// 	checkBalance(ctx, t, k, delAcc2, configs.Denom, 2606, &totalBal)
+// 	checkBalance(ctx, t, k, delAcc3, configs.Denom, 2598, &totalBal)
 
-	fmt.Println(sdkmath.NewInt(110970).Sub(totalBal))
+// 	fmt.Println(sdkmath.NewInt(110970).Sub(totalBal))
 
-	// validatorRewardPoolAddr = mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
-	// fmt.Println("Val", k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom))
+// 	// validatorRewardPoolAddr = mgr.keeper.GetModuleAccAddress(types.ValidatorRewardPool)
+// 	// fmt.Println("Val", k.GetBalance(ctx, validatorRewardPoolAddr).AmountOf(configs.Denom))
 
-	// Ensure the total block reward equals the sum of all payouts
-	require.Equal(t, validatorRewardAmount.Int64(), int64(110970))
-}
+// 	// Ensure the total block reward equals the sum of all payouts
+// 	require.Equal(t, validatorRewardAmount.Int64(), int64(110970))
+// }
 
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)

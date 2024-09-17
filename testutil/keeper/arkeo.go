@@ -27,6 +27,8 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -43,6 +45,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	keyParams := cosmos.NewKVStoreKey(paramstypes.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+	keyMint := cosmos.NewKVStoreKey(minttypes.StoreKey)
 	logger := log.NewNopLogger()
 
 	db := tmdb.NewMemDB()
@@ -76,6 +79,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 			types.ReserveName:              {},
 			types.ProviderName:             {},
 			types.ContractName:             {},
+			minttypes.ModuleName:           {authtypes.Minter},
 		},
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
 		sdk.Bech32PrefixAccAddr,
@@ -100,6 +104,17 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
+
+	mk := mintkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keyMint),
+		sk,
+		ak,
+		bk,
+		authtypes.FeeCollectorName,
+		govModuleAddr,
+	)
+
 	k := keeper.NewKVStore(
 		cdc,
 		storeKey,
@@ -110,6 +125,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		*sk,
 		govModuleAddr,
 		logger,
+		mk,
 	)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
