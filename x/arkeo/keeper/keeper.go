@@ -7,6 +7,7 @@ import (
 
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/arkeonetwork/arkeo/common"
@@ -18,6 +19,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -58,8 +61,9 @@ type Keeper interface {
 	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
-	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) error
-	GetCirculatingSupply(ctx cosmos.Context, denom string) cosmos.Coin
+	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (cosmos.Coin, error)
+	GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.Coin, error)
+	GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error)
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -121,6 +125,7 @@ type KVStore struct {
 	stakingKeeper stakingkeeper.Keeper
 	authority     string
 	logger        log.Logger
+	mintKeeper    minttypes.Keeper
 }
 
 func NewKVStore(
@@ -140,6 +145,7 @@ func NewKVStore(
 	stakingKeeper stakingkeeper.Keeper,
 	authority string,
 	logger log.Logger,
+	mintKeeper minttypes.Keeper,
 ) *KVStore {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -156,6 +162,7 @@ func NewKVStore(
 		stakingKeeper: stakingKeeper,
 		authority:     authority,
 		logger:        logger,
+		mintKeeper:    mintKeeper,
 	}
 }
 
@@ -370,29 +377,37 @@ func (k KVStore) GetAuthority() string {
 	return k.authority
 }
 
-func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) cosmos.Coin {
+func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.Coin, error) {
 
-	// Get the total token supply of the given token
-	totalSupply := k.coinKeeper.GetSupply(ctx, denom)
+	sdkContext := sdk.UnwrapSDKContext(ctx)
+
+	// Get Total Supply
+	fullTokenSupply, err := k.coinKeeper.TotalSupply(ctx, &banktypes.QueryTotalSupplyRequest{})
+	if err != nil {
+		sdkContext.Logger().Error("Failed to get full token supply data", err)
+		return cosmos.NewCoin(denom, sdkmath.NewInt(0)), err
+	}
+	totalSupply := fullTokenSupply.Supply.AmountOf(configs.Denom)
+	sdkContext.Logger().Error("Current supply of token with denom :", denom, "supply:", totalSupply)
 
 	// Module Address for which the circulating supply should be exempted
-	exemptModules := []string{types.ValidatorRewardPool, types.CommunityPool, types.DevFundPool}
+	modulesToExempt := []string{types.GrantPool, types.CommunityPool, types.DevFundPool}
 	exemptBalance := cosmos.NewInt(0)
 
 	// range over the module and create exempt balances
-	for _, moduleName := range exemptModules {
+	for _, moduleName := range modulesToExempt {
 		moduleAddr := k.accountKeeper.GetModuleAddress(moduleName)
 		moduleBalance := k.coinKeeper.GetBalance(ctx, moduleAddr, denom)
 		exemptBalance = exemptBalance.Add(moduleBalance.Amount)
 	}
 
-	// get the circulating supply
-	circulatingSupply := totalSupply.Amount.Sub(exemptBalance)
+	// total supply without balances of exempted module
+	circulatingSupply := totalSupply.Sub(exemptBalance)
 
-	return cosmos.NewCoin(denom, circulatingSupply)
+	return cosmos.NewCoin(denom, circulatingSupply), nil
 }
 
-func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) error {
+func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (cosmos.Coin, error) {
 
 	params := k.GetParams(ctx)
 
@@ -400,20 +415,26 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.
 
 	devFundAmount := newlyMintedDec.Mul(params.DevFundPercentage).TruncateInt()
 	communityPoolAmount := newlyMintedDec.Mul(params.CommunityPoolPercentage).TruncateInt()
-	validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
+	// validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
 
 	if err := k.MintToModule(ctx, types.DevFundPool, cosmos.NewCoin(newlyMinted.Denom, devFundAmount)); err != nil {
-		return fmt.Errorf("error sending amount to module %s", err)
+		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
 	}
 
 	if err := k.MintToModule(ctx, types.CommunityPool, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount)); err != nil {
-		return fmt.Errorf("error sending amount to module %s", err)
+		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	}
+	balance := newlyMintedDec.Sub(sdkmath.LegacyDec(devFundAmount)).Sub(sdkmath.LegacyDec(communityPoolAmount))
+
+	return cosmos.NewCoin(configs.Denom, balance.RoundInt()), nil
+
+}
+
+func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
+	minter, err := k.mintKeeper.Minter.Get(ctx)
+	if err != nil {
+		return math.LegacyNewDec(0), err
 	}
 
-	if err := k.MintToModule(ctx, types.ValidatorRewardPool, cosmos.NewCoin(newlyMinted.Denom, validatorRewardAmount)); err != nil {
-		return fmt.Errorf("error sending amount to module %s", err)
-	}
-
-	return nil
-
+	return minter.Inflation, nil
 }

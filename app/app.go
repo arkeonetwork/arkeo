@@ -200,22 +200,22 @@ var (
 
 	// module account permissions
 	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:           nil,
-		distrtypes.ModuleName:                nil,
-		icatypes.ModuleName:                  nil,
-		minttypes.ModuleName:                 {authtypes.Minter},
-		stakingtypes.BondedPoolName:          {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName:       {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:                  {authtypes.Burner},
-		ibctransfertypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
-		claimmoduletypes.ModuleName:          {authtypes.Minter},
-		arkeomoduletypes.ModuleName:          {},
-		arkeomoduletypes.ReserveName:         {},
-		arkeomoduletypes.ProviderName:        {},
-		arkeomoduletypes.ContractName:        {},
-		arkeomoduletypes.DevFundPool:         {authtypes.Minter, authtypes.Burner},
-		arkeomoduletypes.CommunityPool:       {authtypes.Minter, authtypes.Burner},
-		arkeomoduletypes.ValidatorRewardPool: {authtypes.Minter, authtypes.Burner},
+		authtypes.FeeCollectorName:     nil,
+		distrtypes.ModuleName:          nil,
+		icatypes.ModuleName:            nil,
+		minttypes.ModuleName:           {authtypes.Minter},
+		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
+		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
+		govtypes.ModuleName:            {authtypes.Burner},
+		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		claimmoduletypes.ModuleName:    {authtypes.Minter},
+		arkeomoduletypes.ModuleName:    {},
+		arkeomoduletypes.ReserveName:   {},
+		arkeomoduletypes.ProviderName:  {},
+		arkeomoduletypes.ContractName:  {},
+		arkeomoduletypes.DevFundPool:   {authtypes.Minter},
+		arkeomoduletypes.CommunityPool: {authtypes.Minter},
+		arkeomoduletypes.GrantPool:     {authtypes.Minter},
 	}
 )
 
@@ -597,6 +597,7 @@ func NewArkeoApp(
 		*app.Keepers.StakingKeeper,
 		govModuleAddr,
 		logger,
+		app.Keepers.MintKeeper,
 	)
 
 	/****  Module Options ****/
