@@ -6,7 +6,11 @@
       "contract_expiration_sets": [],
       "contracts": [],
       "next_contract_id": "1",
-      "params": {},
+      "params": {
+        "CommunityPoolPercentage": "0.100000000000000000",
+        "DevFundPercentage": "0.200000000000000000",
+        "ValidatorRewardsPercentage": "0.700000000000000000"
+      },
       "providers": [],
       "user_contract_sets": [],
       "version": "0"

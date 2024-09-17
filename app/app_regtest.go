@@ -602,6 +602,7 @@ func NewArkeoApp(
 		*app.Keepers.StakingKeeper,
 		govModuleAddr,
 		logger,
+		app.Keepers.MintKeeper,
 	)
 	arkeoModule := arkeomodule.NewAppModule(appCodec, app.ArkeoKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, *app.Keepers.StakingKeeper)
 
