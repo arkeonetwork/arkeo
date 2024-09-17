@@ -26,7 +26,7 @@
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
-          "deposit": "100",
+          "deposit": "3",
           "duration": "10",
           "height": "2",
           "id": "1",
@@ -40,7 +40,7 @@
           },
           "service": 1,
           "settlement_duration": "11",
-          "settlement_height": "0",
+          "settlement_height": "15",
           "type": "PAY_AS_YOU_GO"
         }
       ],
@@ -72,16 +72,7 @@
           ]
         }
       ],
-      "user_contract_sets": [
-        {
-          "contract_set": {
-            "contract_ids": [
-              "1"
-            ]
-          },
-          "user": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
-        }
-      ],
+      "user_contract_sets": [],
       "version": "0"
     },
     "auth": {
@@ -274,19 +265,10 @@
           ]
         },
         {
-          "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
-          "coins": [
-            {
-              "amount": "97",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
           "address": "tarkeo1uhapc6jjq6ns0ydnk7zld5x7f5kl2ukemjw5fg",
           "coins": [
             {
-              "amount": "999999899999900",
+              "amount": "999999899999997",
               "denom": "uarkeo"
             }
           ]
@@ -339,6 +321,19 @@
           }
         }
       ]
+    },
+    "claimarkeo": {
+      "claim_records": [],
+      "module_account_balance": {
+        "amount": "0",
+        "denom": "uarkeo"
+      },
+      "params": {
+        "claim_denom": "uarkeo",
+        "duration_of_decay": "3600s",
+        "duration_until_decay": "3600s",
+        "initial_gas_amount": null
+      }
     },
     "crisis": {
       "constant_fee": {

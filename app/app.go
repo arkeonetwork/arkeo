@@ -486,7 +486,6 @@ func NewArkeoApp(
 		app.GetSubspace(claimmoduletypes.ModuleName),
 		logger,
 	)
-	claimModule := claimmodule.NewAppModule(appCodec, app.Keepers.ClaimKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -597,7 +596,6 @@ func NewArkeoApp(
 		govModuleAddr,
 		logger,
 	)
-	arkeoModule := arkeomodule.NewAppModule(appCodec, app.Keepers.ArkeoKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, *app.Keepers.StakingKeeper)
 
 	/****  Module Options ****/
 
@@ -610,7 +608,7 @@ func NewArkeoApp(
 
 	app.mm = module.NewManager(
 		genutil.NewAppModule(
-			app.Keepers.AccountKeeper, app.Keepers.StakingKeeper, app,
+			app.Keepers.AccountKeeper, app.Keepers.StakingKeeper, app.BaseApp,
 			encodingConfig.TxConfig,
 		),
 		auth.NewAppModule(appCodec, app.Keepers.AccountKeeper, nil, app.GetSubspace(authtypes.ModuleName)),
@@ -632,8 +630,8 @@ func NewArkeoApp(
 		params.NewAppModule(app.Keepers.ParamsKeeper),
 		transferModule,
 		icaModule,
-		arkeoModule,
-		claimModule,
+		arkeomodule.NewAppModule(appCodec, app.Keepers.ArkeoKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, *app.Keepers.StakingKeeper),
+		claimmodule.NewAppModule(appCodec, app.Keepers.ClaimKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -771,8 +769,8 @@ func NewArkeoApp(
 		evidence.NewAppModule(app.Keepers.EvidenceKeeper),
 		ibc.NewAppModule(app.Keepers.IBCKeeper),
 		transferModule,
-		arkeoModule,
-		claimModule,
+		arkeomodule.NewAppModule(appCodec, app.Keepers.ArkeoKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, *app.Keepers.StakingKeeper),
+		claimmodule.NewAppModule(appCodec, app.Keepers.ClaimKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper),
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()

@@ -31,7 +31,7 @@
           "height": "2",
           "id": "1",
           "nonce": "0",
-          "paid": "0",
+          "paid": "100",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
           "queries_per_minute": "1",
           "rate": {
@@ -40,7 +40,7 @@
           },
           "service": 1,
           "settlement_duration": "11",
-          "settlement_height": "0",
+          "settlement_height": "12",
           "type": "SUBSCRIPTION"
         },
         {
@@ -93,16 +93,7 @@
           ]
         }
       ],
-      "user_contract_sets": [
-        {
-          "contract_set": {
-            "contract_ids": [
-              "1"
-            ]
-          },
-          "user": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem"
-        }
-      ],
+      "user_contract_sets": [],
       "version": "0"
     },
     "auth": {
@@ -268,7 +259,7 @@
           "address": "tarkeo1v0n7wer498vqq6yddkr4clg3lck7kaw9lstp4k",
           "coins": [
             {
-              "amount": "1000000000000018",
+              "amount": "1000000000000108",
               "denom": "uarkeo"
             }
           ]
@@ -277,7 +268,7 @@
           "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
           "coins": [
             {
-              "amount": "200000002",
+              "amount": "200000012",
               "denom": "uarkeo"
             }
           ]
@@ -287,15 +278,6 @@
           "coins": [
             {
               "amount": "19279394116",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
-          "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
-          "coins": [
-            {
-              "amount": "100",
               "denom": "uarkeo"
             }
           ]
@@ -357,6 +339,19 @@
           }
         }
       ]
+    },
+    "claimarkeo": {
+      "claim_records": [],
+      "module_account_balance": {
+        "amount": "0",
+        "denom": "uarkeo"
+      },
+      "params": {
+        "claim_denom": "uarkeo",
+        "duration_of_decay": "3600s",
+        "duration_until_decay": "3600s",
+        "initial_gas_amount": null
+      }
     },
     "crisis": {
       "constant_fee": {
@@ -708,7 +703,7 @@
     "upgrade": {},
     "vesting": {}
   },
- "app_version": "v1.0.0-prerelease",
+  "app_version": "v1.0.0-prerelease",
   "chain_id": "arkeo",
   "consensus": {
     "params": {
