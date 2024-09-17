@@ -243,7 +243,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 	/* Handle slashing state. */
 
 	// reset start height on signing infos
-	err = app.Keepers.SlashingKeeper.IterateValidatorSigningInfos(
+	if err := app.Keepers.SlashingKeeper.IterateValidatorSigningInfos(
 		ctx,
 		func(addr sdk.ConsAddress, info slashingtypes.ValidatorSigningInfo) (stop bool) {
 			info.StartHeight = 0
@@ -253,8 +253,7 @@ func (app *ArkeoApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs 
 			}
 			return false
 		},
-	)
-	if err != nil {
+	); err != nil {
 		panic(err)
 	}
 }
