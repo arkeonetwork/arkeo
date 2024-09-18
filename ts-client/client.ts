@@ -5,11 +5,10 @@ import {
   EncodeObject,
   Registry,
 } from "@cosmjs/proto-signing";
-import { StdFee } from "@cosmjs/launchpad";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { SigningStargateClient, StdFee } from "@cosmjs/stargate";
 import { Env } from "./env";
 import { UnionToIntersection, Return, Constructor } from "./helpers";
-import { Module } from "./modules";
+import { IgntModule } from "./modules";
 import { EventEmitter } from "events";
 import { ChainInfo } from "@keplr-wallet/types";
 
@@ -19,11 +18,11 @@ const defaultFee = {
 };
 
 export class IgniteClient extends EventEmitter {
-	static plugins: Module[] = [];
+	static plugins: IgntModule[] = [];
   env: Env;
   signer?: OfflineSigner;
   registry: Array<[string, GeneratedType]> = [];
-  static plugin<T extends Module | Module[]>(plugin: T) {
+  static plugin<T extends IgntModule | IgntModule[]>(plugin: T) {
     const currentPlugins = this.plugins;
 
     class AugmentedClient extends this {
@@ -42,7 +41,7 @@ export class IgniteClient extends EventEmitter {
   async signAndBroadcast(msgs: EncodeObject[], fee: StdFee, memo: string) {
     if (this.signer) {
       const { address } = (await this.signer.getAccounts())[0];
-      const signingClient = await SigningStargateClient.connectWithSigner(this.env.rpcURL, this.signer, { registry: new Registry(this.registry), prefix: this.env.prefix });
+      const signingClient = await SigningStargateClient.connectWithSigner(this.env.rpcURL, this.signer, { registry: new Registry(this.registry) });
       return await signingClient.signAndBroadcast(address, msgs, fee ? fee : defaultFee, memo)
     } else {
       throw new Error(" Signer is not present.");
@@ -77,28 +76,22 @@ export class IgniteClient extends EventEmitter {
       const queryClient = (
         await import("./cosmos.base.tendermint.v1beta1/module")
       ).queryClient;
-      const stakingQueryClient = (
-        await import("./cosmos.staking.v1beta1/module")
-      ).queryClient;
       const bankQueryClient = (await import("./cosmos.bank.v1beta1/module"))
         .queryClient;
-
+      
+      const stakingQueryClient = (await import("./cosmos.staking.v1beta1/module")).queryClient;
       const stakingqc = stakingQueryClient({ addr: this.env.apiURL });
+      const staking = await (await stakingqc.queryParams()).data;
+      
       const qc = queryClient({ addr: this.env.apiURL });
       const node_info = await (await qc.serviceGetNodeInfo()).data;
       const chainId = node_info.default_node_info?.network ?? "";
       const chainName = chainId?.toUpperCase() + " Network";
-      const staking = await (await stakingqc.queryParams()).data;
       const bankqc = bankQueryClient({ addr: this.env.apiURL });
       const tokens = await (await bankqc.queryTotalSupply()).data;
       const addrPrefix = this.env.prefix ?? "cosmos";
       const rpc = this.env.rpcURL;
       const rest = this.env.apiURL;
-      let stakeCurrency = {
-        coinDenom: staking.params?.bond_denom?.toUpperCase() ?? "",
-        coinMinimalDenom: staking.params?.bond_denom ?? "",
-        coinDecimals: 0,
-      };
 
       let bip44 = {
         coinType: 118,
@@ -123,6 +116,13 @@ export class IgniteClient extends EventEmitter {
           return y;
         }) ?? [];
 
+      
+      let stakeCurrency = {
+              coinDenom: staking.params?.bond_denom?.toUpperCase() ?? "",
+              coinMinimalDenom: staking.params?.bond_denom ?? "",
+              coinDecimals: 0,
+            };
+      
       let feeCurrencies =
         tokens.supply?.map((x) => {
           const y = {
@@ -132,8 +132,6 @@ export class IgniteClient extends EventEmitter {
           };
           return y;
         }) ?? [];
-
-      let coinType = 118;
 
       if (chainId) {
         const suggestOptions: ChainInfo = {
@@ -146,7 +144,6 @@ export class IgniteClient extends EventEmitter {
           bech32Config,
           currencies,
           feeCurrencies,
-          coinType,
           ...keplrChainInfo,
         };
         await window.keplr.experimentalSuggestChain(suggestOptions);
