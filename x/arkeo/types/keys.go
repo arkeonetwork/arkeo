@@ -2,13 +2,10 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName    = "arkeo"
-	ReserveName   = "arkeo-reserve"
-	ProviderName  = "providers"
-	ContractName  = "contracts"
-	DevFundPool   = "devpool"
-	CommunityPool = "communitypool"
-	GrantPool     = "grantpool"
+	ModuleName   = "arkeo"
+	ReserveName  = "arkeo-reserve"
+	ProviderName = "providers"
+	ContractName = "contracts"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
@@ -23,3 +20,10 @@ const (
 func KeyPrefix(p string) []byte {
 	return []byte(p)
 }
+
+// Foundational Accounts
+const (
+	FoundationDevAccount       = "devpool"
+	FoundationCommunityAccount = "communitypool"
+	FoundationGrantsAccount    = "grantspool"
+)

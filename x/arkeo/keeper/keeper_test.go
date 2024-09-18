@@ -24,6 +24,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -56,6 +58,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 	keyMint := cosmos.NewKVStoreKey(minttypes.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+	keydist := cosmos.NewKVStoreKey(disttypes.StoreKey)
 
 	cfg := sdk.GetConfig()
 
@@ -127,6 +130,15 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ValidatorAddrPrefix()),
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
+	dk := distkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keydist),
+		ak,
+		bk,
+		sk,
+		authtypes.FeeCollectorName,
+		govModuleAddr,
+	)
 
 	mk := mintkeeper.NewKeeper(
 		cdc,
@@ -149,6 +161,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		govModuleAddr,
 		logger,
 		mk,
+		dk,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 
@@ -167,6 +180,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	keyParams := cosmos.NewKVStoreKey(typesparams.StoreKey)
 	tkeyParams := cosmos.NewTransientStoreKey(typesparams.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
+	keydist := cosmos.NewKVStoreKey(disttypes.StoreKey)
 
 	cfg := sdk.GetConfig()
 
@@ -207,17 +221,17 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		runtime.NewKVStoreService(keyAcc),
 		authtypes.ProtoBaseAccount,
 		map[string][]string{
-			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-			types.ModuleName:               {authtypes.Minter, authtypes.Burner},
-			types.ReserveName:              {},
-			types.ProviderName:             {},
-			types.ContractName:             {},
-			govtypes.ModuleName:            {authtypes.Minter, authtypes.Burner},
-			types.DevFundPool:              {authtypes.Minter, authtypes.Burner},
-			types.GrantPool:                {authtypes.Minter, authtypes.Burner},
-			types.CommunityPool:            {authtypes.Minter, authtypes.Burner},
-			minttypes.ModuleName:           {authtypes.Minter},
+			stakingtypes.BondedPoolName:      {authtypes.Burner, authtypes.Staking},
+			stakingtypes.NotBondedPoolName:   {authtypes.Burner, authtypes.Staking},
+			types.ModuleName:                 {authtypes.Minter, authtypes.Burner},
+			types.ReserveName:                {},
+			types.ProviderName:               {},
+			types.ContractName:               {},
+			govtypes.ModuleName:              {authtypes.Minter, authtypes.Burner},
+			types.FoundationDevAccount:       {authtypes.Minter, authtypes.Burner},
+			types.FoundationGrantsAccount:    {authtypes.Minter, authtypes.Burner},
+			types.FoundationCommunityAccount: {authtypes.Minter, authtypes.Burner},
+			minttypes.ModuleName:             {authtypes.Minter},
 		},
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32AccountAddrPrefix()),
 		sdk.Bech32PrefixAccAddr,
@@ -253,6 +267,15 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		authtypes.FeeCollectorName,
 		govModuleAddr,
 	)
+	dk := distkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keydist),
+		ak,
+		bk,
+		sk,
+		authtypes.FeeCollectorName,
+		govModuleAddr,
+	)
 
 	k := NewKVStore(
 		cdc,
@@ -265,6 +288,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		govModuleAddr,
 		logger,
 		mk,
+		dk,
 	)
 	k.SetVersion(ctx, common.GetCurrentVersion())
 

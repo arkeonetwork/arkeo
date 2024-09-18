@@ -20,6 +20,7 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
@@ -64,6 +65,7 @@ type Keeper interface {
 	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (cosmos.Coin, error)
 	GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.Coin, error)
 	GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error)
+	MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -116,16 +118,17 @@ const (
 )
 
 type KVStore struct {
-	cdc           codec.BinaryCodec
-	storeKey      storetypes.StoreKey
-	memKey        storetypes.StoreKey
-	paramstore    paramtypes.Subspace
-	coinKeeper    bankkeeper.Keeper
-	accountKeeper authkeeper.AccountKeeper
-	stakingKeeper stakingkeeper.Keeper
-	authority     string
-	logger        log.Logger
-	mintKeeper    minttypes.Keeper
+	cdc                codec.BinaryCodec
+	storeKey           storetypes.StoreKey
+	memKey             storetypes.StoreKey
+	paramstore         paramtypes.Subspace
+	coinKeeper         bankkeeper.Keeper
+	accountKeeper      authkeeper.AccountKeeper
+	stakingKeeper      stakingkeeper.Keeper
+	authority          string
+	logger             log.Logger
+	mintKeeper         minttypes.Keeper
+	distributionKeeper distkeeper.Keeper
 }
 
 func NewKVStore(
@@ -133,19 +136,13 @@ func NewKVStore(
 	storeKey,
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
-
-	/*
-			accountKeeper       keeper.AccountKeeper
-		    bankKeeper          keeper.Keeper
-		    distributionKeeper  distkeeper.Keeper
-		    stakingKeeper       stakingkeeper.Keeper
-	*/
 	coinKeeper bankkeeper.Keeper,
 	accountKeeper authkeeper.AccountKeeper,
 	stakingKeeper stakingkeeper.Keeper,
 	authority string,
 	logger log.Logger,
 	mintKeeper minttypes.Keeper,
+	distributionKeeper distkeeper.Keeper,
 ) *KVStore {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -153,16 +150,17 @@ func NewKVStore(
 	}
 
 	return &KVStore{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		memKey:        memKey,
-		paramstore:    ps,
-		coinKeeper:    coinKeeper,
-		accountKeeper: accountKeeper,
-		stakingKeeper: stakingKeeper,
-		authority:     authority,
-		logger:        logger,
-		mintKeeper:    mintKeeper,
+		cdc:                cdc,
+		storeKey:           storeKey,
+		memKey:             memKey,
+		paramstore:         ps,
+		coinKeeper:         coinKeeper,
+		accountKeeper:      accountKeeper,
+		stakingKeeper:      stakingKeeper,
+		authority:          authority,
+		logger:             logger,
+		mintKeeper:         mintKeeper,
+		distributionKeeper: distributionKeeper,
 	}
 }
 
@@ -390,14 +388,25 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.
 	totalSupply := fullTokenSupply.Supply.AmountOf(configs.Denom)
 	sdkContext.Logger().Error("Current supply of token with denom :", denom, "supply:", totalSupply)
 
+	// Get the account addresses whose balances need to be exempted
+	devAccountAddress := k.getFoundationDevAccountAddress()
+
+	communityAccountAddress := k.getFoundationCommunityAccountAddress()
+
+	grantAccountAddress := k.getFoundationGrantsAccountAddress()
+
 	// Module Address for which the circulating supply should be exempted
-	modulesToExempt := []string{types.GrantPool, types.CommunityPool, types.DevFundPool}
+	moduleAddressToExempt := []sdk.AccAddress{
+		devAccountAddress,
+		communityAccountAddress,
+		grantAccountAddress,
+	}
+
 	exemptBalance := cosmos.NewInt(0)
 
 	// range over the module and create exempt balances
-	for _, moduleName := range modulesToExempt {
-		moduleAddr := k.accountKeeper.GetModuleAddress(moduleName)
-		moduleBalance := k.coinKeeper.GetBalance(ctx, moduleAddr, denom)
+	for _, moduleAddress := range moduleAddressToExempt {
+		moduleBalance := k.coinKeeper.GetBalance(ctx, moduleAddress, denom)
 		exemptBalance = exemptBalance.Add(moduleBalance.Amount)
 	}
 
@@ -407,26 +416,35 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.
 	return cosmos.NewCoin(denom, circulatingSupply), nil
 }
 
-func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (cosmos.Coin, error) {
+func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (sdk.Coin, error) {
 
 	params := k.GetParams(ctx)
-
 	newlyMintedDec := sdkmath.LegacyNewDecFromInt(newlyMinted.Amount)
+
+	// mint newly added tokens to reserve
+	if err := k.MintToModule(ctx, types.ReserveName, newlyMinted); err != nil {
+		return cosmos.NewCoin(newlyMinted.Denom, sdkmath.NewInt(0)), err
+	}
 
 	devFundAmount := newlyMintedDec.Mul(params.DevFundPercentage).TruncateInt()
 	communityPoolAmount := newlyMintedDec.Mul(params.CommunityPoolPercentage).TruncateInt()
-	// validatorRewardAmount := newlyMintedDec.Mul(params.ValidatorRewardsPercentage).TruncateInt()
+	grantFundAmount := newlyMintedDec.Mul(params.GrantFundPercentage).TruncateInt()
 
-	if err := k.MintToModule(ctx, types.DevFundPool, cosmos.NewCoin(newlyMinted.Denom, devFundAmount)); err != nil {
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	if err := k.SendFromModuleToModule(ctx, types.ReserveName, types.FoundationDevAccount, cosmos.NewCoins(cosmos.NewCoin(newlyMinted.Denom, devFundAmount))); err != nil {
+		return cosmos.NewCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
 	}
 
-	if err := k.MintToModule(ctx, types.CommunityPool, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount)); err != nil {
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	if err := k.SendFromModuleToModule(ctx, types.ReserveName, types.FoundationCommunityAccount, cosmos.NewCoins(cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount))); err != nil {
+		return cosmos.NewCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
 	}
-	balance := newlyMintedDec.Sub(sdkmath.LegacyDec(devFundAmount)).Sub(sdkmath.LegacyDec(communityPoolAmount))
 
-	return cosmos.NewCoin(configs.Denom, balance.RoundInt()), nil
+	if err := k.SendFromModuleToModule(ctx, types.ReserveName, types.FoundationGrantsAccount, cosmos.NewCoins(cosmos.NewCoin(newlyMinted.Denom, grantFundAmount))); err != nil {
+		return cosmos.NewCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	}
+
+	balance := newlyMintedDec.Sub(sdkmath.LegacyDec(devFundAmount)).Sub(sdkmath.LegacyDec(communityPoolAmount)).Sub(sdkmath.LegacyDec(grantFundAmount))
+
+	return cosmos.NewCoin(newlyMinted.Denom, sdkmath.NewInt(balance.RoundInt64())), nil
 
 }
 
@@ -437,4 +455,38 @@ func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
 	}
 
 	return minter.Inflation, nil
+}
+
+// transfer tokens form the Distribution to Foundation Community Pool
+func (k KVStore) MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error {
+
+	// get pool balance
+	pool, err := k.distributionKeeper.FeePool.Get(ctx)
+	if err != nil {
+		return err
+	}
+	amount := pool.CommunityPool.AmountOf(configs.Denom)
+
+	communityAccountAddress := k.getFoundationCommunityAccountAddress()
+
+	if amount.RoundInt64() > 0 {
+		err = k.distributionKeeper.DistributeFromFeePool(ctx, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, amount.RoundInt())), communityAccountAddress)
+		if err != nil {
+			return err
+		}
+
+	}
+	return err
+}
+
+func (k KVStore) getFoundationDevAccountAddress() cosmos.AccAddress {
+	return k.GetModuleAccAddress(types.FoundationDevAccount)
+}
+
+func (k KVStore) getFoundationCommunityAccountAddress() cosmos.AccAddress {
+	return k.GetModuleAccAddress(types.FoundationCommunityAccount)
+}
+
+func (k KVStore) getFoundationGrantsAccountAddress() cosmos.AccAddress {
+	return k.GetModuleAccAddress(types.FoundationGrantsAccount)
 }

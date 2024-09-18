@@ -8,6 +8,8 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	authcodec "github.com/cosmos/cosmos-sdk/x/auth/codec"
+	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -46,6 +48,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 	tkeyParams := cosmos.NewTransientStoreKey(paramstypes.TStoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 	keyMint := cosmos.NewKVStoreKey(minttypes.StoreKey)
+	keydist := cosmos.NewKVStoreKey(disttypes.StoreKey)
 	logger := log.NewNopLogger()
 
 	db := tmdb.NewMemDB()
@@ -105,6 +108,16 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		authcodec.NewBech32Codec(sdk.GetConfig().GetBech32ConsensusAddrPrefix()),
 	)
 
+	dk := distkeeper.NewKeeper(
+		cdc,
+		runtime.NewKVStoreService(keydist),
+		ak,
+		bk,
+		sk,
+		authtypes.FeeCollectorName,
+		govModuleAddr,
+	)
+
 	mk := mintkeeper.NewKeeper(
 		cdc,
 		runtime.NewKVStoreService(keyMint),
@@ -126,6 +139,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		govModuleAddr,
 		logger,
 		mk,
+		dk,
 	)
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 

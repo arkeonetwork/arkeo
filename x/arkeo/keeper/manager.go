@@ -60,13 +60,21 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 		ctx.Logger().Error("unable to get supply with inflation calculation", "error", err)
 	}
 
+	err = mgr.keeper.MoveTokensFromDistributionToFoundationPoolAccount(ctx)
+	if err != nil {
+		ctx.Logger().Error("unable to send tokens from distribution to pool account", "error", err)
+	}
+
 	// Calculate Block Rewards
 	blockReward := mgr.calcBlockReward(ctx, circSupply.Amount.Int64())
 
 	// Distribute Minted To Pools
-	afterDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, blockReward)
+	balanceDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, blockReward)
+	if err != nil {
+		ctx.Logger().Error("unable to mint and distribute tokens", "error", err)
+	}
 
-	if err := mgr.ValidatorPayout(ctx, votes, afterDistribution); err != nil {
+	if err := mgr.ValidatorPayout(ctx, votes, balanceDistribution); err != nil {
 		ctx.Logger().Error("unable to settle contracts", "error", err)
 	}
 	return nil

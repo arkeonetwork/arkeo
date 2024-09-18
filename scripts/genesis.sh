@@ -84,6 +84,9 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 10m
 		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 10000000000000000 'claimarkeo'
+		add_module tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r $TOKEN 10000000000000000 'devpool'
+		add_module tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx $TOKEN 10000000000000000 'communitypool'
+		add_module tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup $TOKEN 10000000000000000 'grantspool'
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test --recover
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)
