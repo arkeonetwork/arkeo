@@ -427,9 +427,8 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.
 
 func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.Coin) (sdk.Coin, error) {
 	sdkContext := sdk.UnwrapSDKContext(ctx)
-	params := k.GetParams(ctx)
 
-	sdkContext.Logger().Info(fmt.Sprintf("newly minted token  %v", newlyMinted))
+	params := k.GetParams(ctx)
 	newlyMintedAmount := newlyMinted.Amount
 
 	// mint newly added tokens to reserve
@@ -476,8 +475,6 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.
 	}
 
 	balance := newlyMintedAmount.Sub(devFundAmount).Sub(communityPoolAmount).Sub(grantFundAmount)
-	// newlyMintedAmount.Sub(sdkmath.LegacyDec(devFundAmount)).Sub(sdkmath.LegacyDec(communityPoolAmount)).Sub(sdkmath.LegacyDec(grantFundAmount))
-
 	return cosmos.NewCoin(newlyMinted.Denom, balance), nil
 
 }

@@ -444,8 +444,6 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosm
 		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
 
-	sdkContext.Logger().Info(fmt.Sprintf("Circulating supply: %v", circulatingSupply))
-
 	// Get the inflation rate
 	inflationRate, err := mgr.keeper.GetInflationRate(ctx)
 	if err != nil {
@@ -463,8 +461,6 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosm
 
 	// Convert the result back to integer and truncate any decimals
 	newTokenAmountMinted := newTokenAmountMintedDec.TruncateInt()
-
-	sdkContext.Logger().Info(fmt.Sprintf("Newly minted token amount: %v", newTokenAmountMinted))
 
 	return cosmos.NewCoin(configs.Denom, newTokenAmountMinted), nil
 }
