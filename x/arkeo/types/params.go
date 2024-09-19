@@ -16,9 +16,9 @@ func ParamKeyTable() paramtypes.KeyTable {
 // NewParams creates a new Params instance
 func NewParams() Params {
 	return Params{
-		CommunityPoolPercentage: math.LegacyNewDecWithPrec(10, 2),
-		DevFundPercentage:       math.LegacyNewDecWithPrec(20, 2),
-		GrantFundPercentage:     math.LegacyNewDecWithPrec(20, 2),
+		CommunityPoolPercentage: math.NewInt(10),
+		DevFundPercentage:       math.NewInt(20),
+		GrantFundPercentage:     math.NewInt(20),
 	}
 }
 

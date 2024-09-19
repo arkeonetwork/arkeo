@@ -10,7 +10,7 @@ option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 // Params defines the parameters for the module.
 message Params { 
     option (gogoproto.goproto_stringer) = false; 
-    string  CommunityPoolPercentage= 1 [(cosmos_proto.scalar) = "cosmos.LegacyDec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
-    string  DevFundPercentage= 2 [(cosmos_proto.scalar) = "cosmos.LegacyDec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
-    string  GrantFundPercentage= 3 [(cosmos_proto.scalar) = "cosmos.LegacyDec", (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec", (gogoproto.nullable) = false];
+    string  CommunityPoolPercentage= 1 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+    string  DevFundPercentage= 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+    string  GrantFundPercentage= 3 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
