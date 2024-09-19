@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
 )
@@ -14,7 +15,11 @@ func ParamKeyTable() paramtypes.KeyTable {
 
 // NewParams creates a new Params instance
 func NewParams() Params {
-	return Params{}
+	return Params{
+		CommunityPoolPercentage: math.NewInt(10),
+		DevFundPercentage:       math.NewInt(20),
+		GrantFundPercentage:     math.NewInt(20),
+	}
 }
 
 // DefaultParams returns a default set of parameters

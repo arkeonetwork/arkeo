@@ -94,6 +94,15 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_account "$BOB" $TOKEN 1000000000000000 # bob, 1m
 		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
 
+		# Add Foundational Accounts
+		#  FoundationCommunityAccount = "tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx"
+		add_account "tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx" $TOKEN 10000
+		# 	FoundationDevAccount       = "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r"
+		add_account "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r" $TOKEN 10000
+		#   FoundationGrantsAccount    = "tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup"
+		add_account "tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup" $TOKEN 10000
+	
+	
 		# Thorchain derived test addresses
 		add_account "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" $TOKEN 1000000000000000 # bob, 10m
 		add_claim_records "ARKEO" "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" 1000 1000 1000 true

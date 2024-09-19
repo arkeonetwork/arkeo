@@ -34,6 +34,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Thorchain Claims Proto Updates
 - Documentation of Testnet Setup using local build and Cosmovisor
 - Documentation update and addition of validator setup documentation 
+- New Module accounts to handle rewards 
+- New Params to Arkeo Module 
 
 ## Fixed 
 - Testnet binary generation using go build 
@@ -46,6 +48,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - claim timeout
 - Fixed module imports
 - update module to implement APPModuleBasic and AppModule
+- Updated Tests on arkeo module keeper
 
 # v1.0.0-Prerelease
 
