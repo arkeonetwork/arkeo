@@ -10,8 +10,8 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
@@ -287,11 +287,9 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage, math.LegacyNewDecWithPrec(10, 2))
-
+	require.Equal(t, params.CommunityPoolPercentage.Int64(), int64(10))
 }
 func TestCommunityPoolDistributionToFoundationCommunityPool(t *testing.T) {
-
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	mgr := NewManager(k, sk)
 
@@ -469,7 +467,6 @@ func TestValidatorPayouts(t *testing.T) {
 
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
 	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
-
 }
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)

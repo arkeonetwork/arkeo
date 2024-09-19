@@ -95,7 +95,9 @@
             "sequence": "0"
           },
           "name": "distribution",
-          "permissions": []
+          "permissions": [
+            "minter"
+          ]
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",

@@ -217,7 +217,6 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 // Since the development goal at the moment is to get this chain up and
 // running, we can save this optimization for another day.
 func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, blockReward cosmos.Coin) error {
-
 	if blockReward.IsZero() {
 		return nil
 	}
@@ -240,7 +239,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 	}
 
 	for _, vote := range votes {
-
 		if vote.BlockIdFlag.String() != "BLOCK_ID_FLAG_COMMIT" {
 			ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
 			continue
@@ -320,7 +318,6 @@ func (mgr Manager) calcBlockReward(ctx cosmos.Context, totalReserve, emissionCur
 	if emissionCurve == 0 || blocksPerYear == 0 {
 		sdkContext.Logger().Info("block and emission-curve cannot be zero")
 		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0))
-
 	}
 
 	if validatorPayoutCycle == 0 || sdkContext.BlockHeight()%validatorPayoutCycle != 0 {
@@ -434,7 +431,6 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 }
 
 func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosmos.Coin, error) {
-
 	sdkContext := sdk.UnwrapSDKContext(ctx)
 
 	// Get the circulating supply

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/core/appmodule"
+
 	"github.com/arkeonetwork/arkeo/x/arkeo/client/cli"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"

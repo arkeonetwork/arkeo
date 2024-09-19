@@ -76,6 +76,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 		runtime.NewKVStoreService(keyAcc),
 		authtypes.ProtoBaseAccount,
 		map[string][]string{
+			disttypes.ModuleName:           {authtypes.Minter},
 			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 			types.ModuleName:               {authtypes.Minter, authtypes.Burner},

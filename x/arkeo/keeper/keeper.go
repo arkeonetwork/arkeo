@@ -10,10 +10,6 @@ import (
 	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -25,6 +21,11 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type dbPrefix string
@@ -376,7 +377,6 @@ func (k KVStore) GetAuthority() string {
 }
 
 func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.Coin, error) {
-
 	sdkContext := sdk.UnwrapSDKContext(ctx)
 
 	// Get Total Supply
@@ -476,7 +476,6 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted cosmos.
 
 	balance := newlyMintedAmount.Sub(devFundAmount).Sub(communityPoolAmount).Sub(grantFundAmount)
 	return cosmos.NewCoin(newlyMinted.Denom, balance), nil
-
 }
 
 func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
@@ -490,7 +489,6 @@ func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
 
 // transfer tokens form the Distribution to Foundation Community Pool
 func (k KVStore) MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error {
-
 	// get pool balance
 	pool, err := k.distributionKeeper.FeePool.Get(ctx)
 	if err != nil {

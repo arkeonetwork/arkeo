@@ -101,6 +101,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		runtime.NewKVStoreService(keyAcc),
 		authtypes.ProtoBaseAccount,
 		map[string][]string{
+			distrtypes.ModuleName:          {authtypes.Minter},
 			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 			types.ModuleName:               {authtypes.Minter, authtypes.Burner},
@@ -281,7 +282,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		authtypes.FeeCollectorName,
 		govModuleAddr,
 	)
-	dk.FeePool.Set(ctx, disttypes.FeePool{CommunityPool: []sdk.DecCoin{sdk.NewDecCoin(configs.Denom, math.NewInt(10000))}})
+	_ = dk.FeePool.Set(ctx, disttypes.FeePool{CommunityPool: []sdk.DecCoin{sdk.NewDecCoin(configs.Denom, math.NewInt(10000))}})
 
 	k := NewKVStore(
 		cdc,
