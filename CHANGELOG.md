@@ -46,6 +46,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed localnet docker 
 - updated the genesis file
 - claim timeout
+- Fixed module imports
+- update module to implement APPModuleBasic and AppModule
 - Updated Tests on arkeo module keeper
 
 # v1.0.0-Prerelease
