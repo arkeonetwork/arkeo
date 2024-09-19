@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	math "cosmossdk.io/math"
 	storemetrics "cosmossdk.io/store/metrics"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/stretchr/testify/require"
@@ -11,6 +12,7 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
+	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
 	"cosmossdk.io/log"
@@ -25,6 +27,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
@@ -36,7 +39,7 @@ import (
 )
 
 const (
-	bech32Prefix = "arkeo"
+	bech32Prefix = "tarkeo"
 )
 
 var (
@@ -198,6 +201,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 	stateStore.MountStoreWithDB(keyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(tkeyParams, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
+	stateStore.MountStoreWithDB(keydist, storetypes.StoreTypeIAVL, db)
 	require.NoError(t, stateStore.LoadLatestVersion())
 
 	encodingConfig := arekoappParams.MakeEncodingConfig()
@@ -214,13 +218,14 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
 
-	govModuleAddr := "arkeo12jurap3ypfmwzghj9d0t4wanc9gne2cktxh2y2"
+	govModuleAddr := "tarkeo1krj9ywwmqcellgunxg66kjw5dtt402kq0uf6pu"
 	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	ak := authkeeper.NewAccountKeeper(
 		cdc,
 		runtime.NewKVStoreService(keyAcc),
 		authtypes.ProtoBaseAccount,
 		map[string][]string{
+			distrtypes.ModuleName:            {authtypes.Minter},
 			stakingtypes.BondedPoolName:      {authtypes.Burner, authtypes.Staking},
 			stakingtypes.NotBondedPoolName:   {authtypes.Burner, authtypes.Staking},
 			types.ModuleName:                 {authtypes.Minter, authtypes.Burner},
@@ -276,6 +281,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		authtypes.FeeCollectorName,
 		govModuleAddr,
 	)
+	dk.FeePool.Set(ctx, disttypes.FeePool{CommunityPool: []sdk.DecCoin{sdk.NewDecCoin(configs.Denom, math.NewInt(10000))}})
 
 	k := NewKVStore(
 		cdc,

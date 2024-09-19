@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/core/appmodule"
 	"github.com/arkeonetwork/arkeo/x/arkeo/client/cli"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -29,6 +30,7 @@ var (
 	_ module.AppModuleBasic  = AppModuleBasic{}
 	_ module.HasABCIEndBlock = AppModule{}
 	_ module.HasGenesis      = AppModule{}
+	_ appmodule.AppModule    = AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -104,7 +106,6 @@ type AppModule struct {
 	stakingKeeper stakingkeeper.Keeper
 }
 
-         
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
@@ -149,11 +150,14 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) ConsensusVersion() uint64 { return 1 }
 
 // BeginBlock contains the logic that is automatically triggered at the beginning of each block
-func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestFinalizeBlock) {
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	context := sdk.UnwrapSDKContext(ctx)
 	mgr := keeper.NewManager(am.keeper, am.stakingKeeper)
-	if err := mgr.BeginBlock(ctx); err != nil {
-		ctx.Logger().Error("manager beginblock error ", "error", err)
+	if err := mgr.BeginBlock(context); err != nil {
+		context.Logger().Error("manager beginblock error ", "error", err)
+		return err
 	}
+	return nil
 }
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
