@@ -331,8 +331,6 @@ func (mgr Manager) calcBlockReward(ctx cosmos.Context, totalReserve, emissionCur
 
 	blockReward := trD.Quo(ecD).Quo(bpyD).RoundInt()
 
-	sdkContext.Logger().Info(fmt.Sprintf("block reward %d ", trD.Quo(ecD).Quo(bpyD).TruncateInt64()))
-
 	return cosmos.NewCoin(configs.Denom, blockReward)
 }
 
@@ -446,8 +444,6 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosm
 		sdkContext.Logger().Error(fmt.Sprintf("failed to get inflation rate: %s", err))
 		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
-
-	sdkContext.Logger().Info(fmt.Sprintf("Inflation rate: %v", inflationRate))
 
 	// Convert circulating supply to decimal for precise calculation
 	circulatingSupplyDec := sdkmath.LegacyNewDec(circulatingSupply.Amount.Int64())
