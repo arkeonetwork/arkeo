@@ -34,8 +34,11 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Thorchain Claims Proto Updates
 - Documentation of Testnet Setup using local build and Cosmovisor
 - Documentation update and addition of validator setup documentation 
-- New Module accounts to handle rewards 
+- New accounts to handle rewards 
 - New Params to Arkeo Module 
+
+## Changed
+- Removed unused module account
 
 ## Fixed 
 - Testnet binary generation using go build 
