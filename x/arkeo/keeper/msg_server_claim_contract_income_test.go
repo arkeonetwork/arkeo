@@ -106,8 +106,9 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.NoError(t, err)
 	client, err := common.NewPubKeyFromCrypto(pk)
 	require.NoError(t, err)
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
-	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10000))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
+	initalModuleBalance := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
 	rate, err := cosmos.ParseCoin("10uarkeo")
 	require.NoError(t, err)
 
@@ -134,7 +135,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(180))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(800))
-	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(20))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999020))
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
@@ -150,7 +151,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
 	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(189))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(790))
-	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(21))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999021))
 
 	// increase the nonce and get slightly more funds for the provider
 	msg.Nonce = 25
@@ -165,9 +166,9 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, acct, int64(225))
 	cname := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
 	require.Equal(t, cname, int64(750))
-	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	require.Equal(t, rname, int64(25))
-	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
+	rname := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
+	require.Equal(t, rname, int64(999999999025))
+	require.Equal(t, (rname+cname+acct)-initalModuleBalance, contract.Rate.Amount.Int64()*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
 	msg.Nonce = contract.Deposit.Int64() / contract.Rate.Amount.Int64() * 1000000000000
@@ -182,9 +183,9 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, acct, int64(900))
 	cname = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
 	require.Equal(t, cname, int64(0))
-	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	require.Equal(t, rname, int64(100))
-	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
+	rname = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
+	require.Equal(t, rname, int64(999999999100))
+	require.Equal(t, (rname+cname+acct)-initalModuleBalance, contract.Rate.Amount.Int64()*contract.Duration)
 }
 
 func TestHandleSubscription(t *testing.T) {
@@ -199,8 +200,9 @@ func TestHandleSubscription(t *testing.T) {
 	require.NoError(t, err)
 	service := common.BTCService
 	client := types.GetRandomPubKey()
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
-	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10000))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
+	initalModuleBalance := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
 	rate, err := cosmos.ParseCoin("10uarkeo")
 	require.NoError(t, err)
 
@@ -224,7 +226,7 @@ func TestHandleSubscription(t *testing.T) {
 
 	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(90))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(900))
-	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(10))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999010))
 
 	msg = types.MsgClaimContractIncome{
 		ContractId: contract.Id,
@@ -235,7 +237,7 @@ func TestHandleSubscription(t *testing.T) {
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
 	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(90))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(900))
-	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(10))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999010))
 
 	// increase the nonce and get slightly more funds for the provider
 	ctx = ctx.WithBlockHeight(30)
@@ -246,9 +248,9 @@ func TestHandleSubscription(t *testing.T) {
 	require.Equal(t, acct, int64(180))
 	cname := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
 	require.Equal(t, cname, int64(800))
-	rname := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	require.Equal(t, rname, int64(20))
-	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
+	rname := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
+	require.Equal(t, rname, int64(999999999020))
+	require.Equal(t, (rname+cname+acct)-initalModuleBalance, contract.Rate.Amount.Int64()*contract.Duration)
 
 	// ensure provider cannot take more than what is deposited into the account, overspend the contract
 	ctx = ctx.WithBlockHeight(110)
@@ -258,9 +260,9 @@ func TestHandleSubscription(t *testing.T) {
 	require.Equal(t, acct, int64(900))
 	cname = k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64()
 	require.Equal(t, cname, int64(0))
-	rname = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64()
-	require.Equal(t, rname, int64(100))
-	require.Equal(t, rname+cname+acct, contract.Rate.Amount.Int64()*contract.Duration)
+	rname = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64()
+	require.Equal(t, rname, int64(999999999100))
+	require.Equal(t, (rname+cname+acct)-initalModuleBalance, contract.Rate.Amount.Int64()*contract.Duration)
 }
 
 func TestClaimContractIncomeHandler(t *testing.T) {
@@ -288,8 +290,9 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	require.NoError(t, err)
 	client, err := common.NewPubKeyFromCrypto(pk)
 	require.NoError(t, err)
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
-	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10000))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
+
 	rate, err := cosmos.ParseCoin("10uarkeo")
 	require.NoError(t, err)
 
@@ -316,7 +319,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 
 	require.Equal(t, k.GetBalance(ctx, acc).AmountOf(configs.Denom).Int64(), int64(180))
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom).Int64(), int64(800))
-	require.Equal(t, k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom).Int64(), int64(20))
+	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999020))
 
 	// bad nonce
 	msg.Nonce = 0
@@ -355,8 +358,8 @@ func TestClaimContractIncomeHandlerSignatureVerification(t *testing.T) {
 	require.NoError(t, err)
 	client, err := common.NewPubKeyFromCrypto(pk)
 	require.NoError(t, err)
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10*100*2))))
-	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(10*100)))
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10000))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
 	rate, err := cosmos.ParseCoin("10uarkeo")
 	require.NoError(t, err)
 

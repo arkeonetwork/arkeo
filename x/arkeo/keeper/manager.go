@@ -361,7 +361,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, debt))); err != nil {
 			return contract, err
 		}
-		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome))); err != nil {
+		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ModuleName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome))); err != nil {
 			return contract, err
 		}
 	}
@@ -436,7 +436,7 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosm
 	// Get the circulating supply
 	circulatingSupply, err := mgr.keeper.GetCirculatingSupply(ctx, configs.Denom)
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to get circulating supply   %s", err))
+		sdkContext.Logger().Error(fmt.Sprintf("failed to get circulating supply %s", err))
 		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
 

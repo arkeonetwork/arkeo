@@ -99,7 +99,6 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	// upgradeclient "cosmossdk.io/x/upgrade/client"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	ica "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts"
@@ -112,7 +111,6 @@ import (
 	ibc "github.com/cosmos/ibc-go/v8/modules/core"
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
-	// ibcclientclient "github.com/cosmos/ibc-go/v8/modules/core/02-client/client"
 	tmjson "encoding/json"
 
 	"cosmossdk.io/log"
@@ -130,15 +128,12 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	"github.com/spf13/cast"
 
-	// "github.com/ignite/cli/ignite/pkg/cosmoscmd"
-
 	arkeomodule "github.com/arkeonetwork/arkeo/x/arkeo"
 	arkeomodulekeeper "github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	arkeomoduletypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 	claimmodule "github.com/arkeonetwork/arkeo/x/claim"
 	claimmodulekeeper "github.com/arkeonetwork/arkeo/x/claim/keeper"
 	claimmoduletypes "github.com/arkeonetwork/arkeo/x/claim/types"
-	// this line is used by starport scaffolding # stargate/app/moduleImport
 )
 
 const (
@@ -228,9 +223,9 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		arkeomoduletypes.ModuleName:    {authtypes.Minter},
-		arkeomoduletypes.ReserveName:   {},
 		arkeomoduletypes.ProviderName:  {},
 		arkeomoduletypes.ContractName:  {},
+		claimmoduletypes.ModuleName:    {authtypes.Minter},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -976,7 +971,6 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(arkeomoduletypes.ModuleName)
-	paramsKeeper.Subspace(arkeomoduletypes.ReserveName)
 	paramsKeeper.Subspace(arkeomoduletypes.ProviderName)
 	paramsKeeper.Subspace(arkeomoduletypes.ContractName)
 	paramsKeeper.Subspace(claimmoduletypes.ModuleName)
