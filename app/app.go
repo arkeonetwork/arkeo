@@ -210,7 +210,6 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		claimmoduletypes.ModuleName:    {authtypes.Minter},
 		arkeomoduletypes.ModuleName:    {authtypes.Minter},
-		arkeomoduletypes.ReserveName:   {},
 		arkeomoduletypes.ProviderName:  {},
 		arkeomoduletypes.ContractName:  {},
 	}
@@ -997,7 +996,6 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(arkeomoduletypes.ModuleName)
-	paramsKeeper.Subspace(arkeomoduletypes.ReserveName)
 	paramsKeeper.Subspace(arkeomoduletypes.ProviderName)
 	paramsKeeper.Subspace(arkeomoduletypes.ContractName)
 	paramsKeeper.Subspace(claimmoduletypes.ModuleName)

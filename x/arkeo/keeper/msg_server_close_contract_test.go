@@ -104,7 +104,7 @@ func TestCloseContractHandle(t *testing.T) {
 	require.Equal(t, bal.Int64(), int64(0))
 	require.True(t, k.HasCoins(ctx, provider, getCoins(18)))
 	require.True(t, k.HasCoins(ctx, contract.ClientAddress(), getCoins(480)))
-	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
+	bal = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
 	require.Equal(t, bal.Int64(), int64(100000002)) // open cost + fee
 }
 

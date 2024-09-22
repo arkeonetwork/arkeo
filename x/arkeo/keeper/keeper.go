@@ -386,7 +386,6 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (cosmos.
 		return cosmos.NewCoin(denom, sdkmath.NewInt(0)), err
 	}
 	totalSupply := fullTokenSupply.Supply.AmountOf(configs.Denom)
-	sdkContext.Logger().Info(fmt.Sprintf("current supply of token with denom :%s : supply : %d", denom, totalSupply.Int64()))
 
 	// Get the account addresses whose balances need to be exempted
 	devAccountAddress, err := k.getFoundationDevAccountAddress()

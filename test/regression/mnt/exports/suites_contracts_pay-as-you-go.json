@@ -127,17 +127,6 @@
           "sequence": "0"
         },
         {
-          "@type": "/cosmos.auth.v1beta1.ModuleAccount",
-          "base_account": {
-            "account_number": "14",
-            "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
-            "pub_key": null,
-            "sequence": "0"
-          },
-          "name": "arkeo-reserve",
-          "permissions": []
-        },
-        {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "account_number": "13",
           "address": "tarkeo1w3shy6m9damxzmr0wpjhyvtgdeuhjdr8wq6hgempwfcxwvmcw5m8wdtrwu685umewp58svnv09nxudf5wd5qsks9jp",
@@ -180,7 +169,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "15",
+            "account_number": "14",
             "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
             "pub_key": null,
             "sequence": "0"
@@ -303,15 +292,6 @@
           ]
         },
         {
-          "address": "tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t",
-          "coins": [
-            {
-              "amount": "100000000",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
           "address": "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r",
           "coins": [
             {
@@ -333,7 +313,7 @@
           "address": "tarkeo1k8925g52vwe5jgfp4nqr7ljuhs7nzu2f8g0za5",
           "coins": [
             {
-              "amount": "107167575",
+              "amount": "207167575",
               "denom": "uarkeo"
             }
           ]

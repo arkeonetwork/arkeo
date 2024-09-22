@@ -128,7 +128,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
 	openCost := k.FetchConfig(ctx, configs.OpenContractCost)
 	if openCost > 0 {
-		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ReserveName, getCoins(openCost)); err != nil {
+		if err := k.SendFromAccountToModule(ctx, msg.MustGetSigner(), types.ModuleName, getCoins(openCost)); err != nil {
 			return errors.Wrapf(err, "failed to send open contract costs openCost=%d", openCost)
 		}
 	}
