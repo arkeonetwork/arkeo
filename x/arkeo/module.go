@@ -155,7 +155,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 	context := sdk.UnwrapSDKContext(ctx)
 	mgr := keeper.NewManager(am.keeper, am.stakingKeeper)
 	if err := mgr.BeginBlock(context); err != nil {
-		context.Logger().Error("manager beginblock error ", "error", err)
+		context.Logger().Error(fmt.Sprintf("manager beginblock error: %s", err))
 		return err
 	}
 	return nil

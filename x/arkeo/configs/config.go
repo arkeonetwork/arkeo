@@ -3,6 +3,7 @@ package configs
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,8 +19,6 @@ var (
 	boolOverrides         = map[ConfigName]bool{}
 	stringOverrides       = map[ConfigName]string{}
 )
-
-var SWVersion, _ = strconv.ParseInt(Version, 10, 64)
 
 var BlockTime = 5 * time.Second
 
@@ -128,4 +127,22 @@ func (cv ConfigVals) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.MarshalIndent(result, "", " ")
+}
+
+func GetSWVersion() (int64, error) {
+	re := regexp.MustCompile(`\d+`) // matches digits
+	versionParts := re.FindAllString(Version, -1)
+	var version int64
+
+	if len(versionParts) > 0 {
+		majorVersion, err := strconv.ParseInt(versionParts[0], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		version = majorVersion
+	} else {
+		version = 1
+
+	}
+	return version, nil
 }

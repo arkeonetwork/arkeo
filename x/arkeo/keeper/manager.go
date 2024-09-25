@@ -32,10 +32,15 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	// if local version is behind the consensus version, panic and don't try to
 	// create a new block
 	ver := mgr.keeper.GetComputedVersion(ctx)
-	if ver > configs.SWVersion {
+	swVersion, err := configs.GetSWVersion()
+	if err != nil {
+		return err
+	}
+	ctx.Logger().Info(fmt.Sprintf("current version :%s", swVersion))
+	if ver > swVersion {
 		panic(
 			fmt.Sprintf("Unsupported Version: update your binary (your version: %d, network consensus version: %d)",
-				configs.SWVersion,
+				swVersion,
 				ver,
 			),
 		)
@@ -239,8 +244,8 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 	}
 
 	for _, vote := range votes {
-		if vote.BlockIdFlag.String() != "BLOCK_ID_FLAG_COMMIT" {
-			ctx.Logger().Info("validator rewards skipped due to lack of signature", "validator", string(vote.Validator.Address))
+		if vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_ABSENT" || vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_UNKNOWN" {
+			ctx.Logger().Info(fmt.Sprintf("validator rewards skipped due to lack of signature: %s, validator : %s ", vote.BlockIdFlag.String(), string(vote.Validator.GetAddress())))
 			continue
 		}
 
