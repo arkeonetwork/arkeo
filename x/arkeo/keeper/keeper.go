@@ -191,17 +191,23 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 
 // TODO: Check Thi Again
 func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
+
 	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
 	validators, err := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 	if err != nil {
-		k.Logger(ctx).Error(err.Error())
+		ctx.Logger().Error(fmt.Sprintf("get Bonded Validator error :%s ", err.Error()))
+
 	}
 
 	// if there is only one validator, no need for consensus. Just return the
 	// validator's current version. This also helps makes
 	// integration/regression tests run the latest version
 	if len(validators) == 1 {
-		return configs.SWVersion
+		version, err := configs.GetSWVersion()
+		if err != nil {
+			ctx.Logger().Error(fmt.Sprintf("invalid version :%s ", err.Error()))
+		}
+		return version
 	}
 
 	currentVersion := k.GetVersion(ctx)
@@ -215,7 +221,7 @@ func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
 
 		valBz, err := k.stakingKeeper.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
-			k.Logger(ctx).Error(err.Error())
+			ctx.Logger().Error(fmt.Sprintf("get  Validator address codec error : %s ", err.Error()))
 		}
 		ver := k.GetVersionForAddress(ctx, valBz)
 		if _, ok := versions[ver]; !ok {
