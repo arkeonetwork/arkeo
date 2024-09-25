@@ -52,6 +52,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed module imports
 - update module to implement APPModuleBasic and AppModule
 - Updated Tests on arkeo module keeper
+- version issue on begin blocker 
 
 # v1.0.0-Prerelease
 
