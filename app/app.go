@@ -210,7 +210,7 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		claimmoduletypes.ModuleName:    {authtypes.Minter},
-		arkeomoduletypes.ModuleName:    {authtypes.Minter},
+		arkeomoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		arkeomoduletypes.ProviderName:  {},
 		arkeomoduletypes.ContractName:  {},
 	}

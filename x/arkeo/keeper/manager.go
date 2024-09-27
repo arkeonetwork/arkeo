@@ -298,8 +298,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 				continue
 			}
 			ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
-
-			totalAllocated = totalAllocated.Add(delegateReward)
 		}
 
 		if !validatorReward.IsZero() {
