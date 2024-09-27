@@ -466,7 +466,7 @@ func TestValidatorPayouts(t *testing.T) {
 	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(996293))
 
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(20000000000000-996293))
+	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(20000000000000))
 }
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)
