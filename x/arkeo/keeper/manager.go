@@ -306,7 +306,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 				continue
 			}
 			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
-
 		}
 
 		if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {

@@ -142,7 +142,6 @@ func GetSWVersion() (int64, error) {
 		version = majorVersion
 	} else {
 		version = 1
-
 	}
 	return version, nil
 }

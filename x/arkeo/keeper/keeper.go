@@ -193,12 +193,10 @@ func (k KVStore) SetParams(ctx sdk.Context, params types.Params) {
 
 // TODO: Check Thi Again
 func (k KVStore) GetComputedVersion(ctx cosmos.Context) int64 {
-
 	versions := make(map[int64]int64) // maps are safe in blockchains, but should be okay in this case
 	validators, err := k.stakingKeeper.GetBondedValidatorsByPower(ctx)
 	if err != nil {
 		ctx.Logger().Error(fmt.Sprintf("get Bonded Validator error :%s ", err.Error()))
-
 	}
 
 	// if there is only one validator, no need for consensus. Just return the
@@ -499,7 +497,6 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.Dec
 }
 
 func (k KVStore) GetInflationRate(ctx cosmos.Context) math.LegacyDec {
-
 	params := k.GetParams(ctx)
 
 	return params.InflationChangePercentage.ToLegacyDec()
@@ -529,7 +526,6 @@ func (k KVStore) MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Co
 				return err
 			}
 		}
-
 	}
 
 	return nil
