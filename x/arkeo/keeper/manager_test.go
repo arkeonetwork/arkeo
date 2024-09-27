@@ -315,37 +315,37 @@ func TestBlockRewardCalculation(t *testing.T) {
 	// Total Reserve -> 100000000
 	// validator cycle -> 100
 	// reward = (totalReserve / emissionCurve) / (blocksPerYear / valCycle)) -> 2000
-	valCycle := int64(100)
-	emissionCurve := int64(10)
-	blocksPerYear := int64(5000)
-	totalReserve := int64(1000000)
+	valCycle := sdkmath.LegacyNewDec(100)
+	emissionCurve := sdkmath.LegacyNewDec(10)
+	blocksPerYear := sdkmath.LegacyNewDec(5000)
+	totalReserve := sdkmath.LegacyNewDec(1000000)
 
 	reward := mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, reward.Amount.Int64(), int64(2000))
+	require.Equal(t, reward.Amount.RoundInt64(), int64(2000))
 
-	valCycle = int64(10)
-	emissionCurve = int64(5)
-	blocksPerYear = int64(200)
-	totalReserve = int64(999999)
+	valCycle = sdkmath.LegacyNewDec(10)
+	emissionCurve = sdkmath.LegacyNewDec(5)
+	blocksPerYear = sdkmath.LegacyNewDec(200)
+	totalReserve = sdkmath.LegacyNewDec(999999)
 
 	reward = mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, reward.Amount.Int64(), int64(10000)) // its 9999.99 rounded to 10000
+	require.Equal(t, reward.Amount.RoundInt64(), int64(10000)) // its 9999.99 rounded to 10000
 }
 
 func TestValidatorPayouts(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	mgr := NewManager(k, sk)
 
-	valCycle := int64(100)
-	emissionCurve := int64(10)
-	blocksPerYear := int64(5000)
-	totalReserve := int64(1000000000)
+	valCycle := sdkmath.NewInt(100).ToLegacyDec()
+	emissionCurve := sdkmath.NewInt(10).ToLegacyDec()
+	blocksPerYear := sdkmath.NewInt(5000).ToLegacyDec()
+	totalReserve := sdkmath.NewInt(1000000000).ToLegacyDec()
 
 	blockReward := mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, blockReward.Amount.Int64(), int64(2000000))
+	require.Equal(t, blockReward.Amount.RoundInt64(), int64(2000000))
 
 	pks := simtestutil.CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
@@ -466,7 +466,7 @@ func TestValidatorPayouts(t *testing.T) {
 	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(996293))
 
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
+	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(20000000000000-996293))
 }
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)

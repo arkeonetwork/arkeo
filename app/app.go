@@ -12,6 +12,7 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
 	clienthelpers "cosmossdk.io/client/v2/helpers"
+	"cosmossdk.io/math"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/gogoproto/proto"
@@ -620,7 +621,7 @@ func NewArkeoApp(
 		groupmodule.NewAppModule(appCodec, app.Keepers.GroupKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.interfaceRegistry),
 		crisis.NewAppModule(&app.Keepers.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 		gov.NewAppModule(appCodec, app.Keepers.GovKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, nil, app.GetSubspace(minttypes.ModuleName)),
 		slashing.NewAppModule(appCodec, app.Keepers.SlashingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
 		distr.NewAppModule(appCodec, app.Keepers.DistrKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
 		staking.NewAppModule(appCodec, app.Keepers.StakingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
@@ -760,7 +761,7 @@ func NewArkeoApp(
 		capability.NewAppModule(appCodec, *app.Keepers.CapabilityKeeper, false),
 		feegrantmodule.NewAppModule(appCodec, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, app.Keepers.GovKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, minttypes.DefaultInflationCalculationFn, app.GetSubspace(minttypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.Keepers.MintKeeper, app.Keepers.AccountKeeper, nil, app.GetSubspace(minttypes.ModuleName)),
 		staking.NewAppModule(appCodec, app.Keepers.StakingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),
 		distr.NewAppModule(appCodec, app.Keepers.DistrKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),
 		slashing.NewAppModule(appCodec, app.Keepers.SlashingKeeper, app.Keepers.AccountKeeper, app.Keepers.BankKeeper, app.Keepers.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName), app.interfaceRegistry),
@@ -852,6 +853,21 @@ func (app *ArkeoApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*
 	if err != nil {
 		panic(err)
 	}
+	mintGen := minttypes.GenesisState{
+		Minter: minttypes.Minter{
+			Inflation:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			AnnualProvisions: math.LegacyMustNewDecFromStr("0.000000000000000000"),
+		},
+		Params: minttypes.Params{
+			MintDenom:           "uarkeo",
+			InflationRateChange: math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			InflationMax:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			InflationMin:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			GoalBonded:          math.LegacyNewDec(670000000000000000),
+			BlocksPerYear:       5256666,
+		},
+	}
+	genesisState[minttypes.ModuleName] = app.cdc.MustMarshalJSON(&mintGen)
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
