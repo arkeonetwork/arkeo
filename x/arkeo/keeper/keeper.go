@@ -448,9 +448,9 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.Dec
 	params := k.GetParams(ctx)
 	newlyMintedAmount := newlyMinted.Amount
 
-	devFundAmount := newlyMintedAmount.Mul(params.DevFundPercentage.ToLegacyDec()).Quo(sdkmath.NewInt(100).ToLegacyDec())
-	communityPoolAmount := newlyMintedAmount.Mul(params.CommunityPoolPercentage.ToLegacyDec()).Quo(sdkmath.NewInt(100).ToLegacyDec())
-	grantFundAmount := newlyMintedAmount.Mul(params.GrantFundPercentage.ToLegacyDec()).Quo(sdkmath.NewInt(100).ToLegacyDec())
+	devFundAmount := newlyMintedAmount.Mul(params.DevFundPercentage)
+	communityPoolAmount := newlyMintedAmount.Mul(params.CommunityPoolPercentage)
+	grantFundAmount := newlyMintedAmount.Mul(params.GrantFundPercentage)
 
 	devAccountAddress, err := k.getFoundationDevAccountAddress()
 	if err != nil {
@@ -492,7 +492,7 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.Dec
 func (k KVStore) GetInflationRate(ctx cosmos.Context) math.LegacyDec {
 	params := k.GetParams(ctx)
 
-	return params.InflationChangePercentage.ToLegacyDec()
+	return params.InflationChangePercentage
 }
 
 // transfer tokens form the Distribution to Foundation Community Pool

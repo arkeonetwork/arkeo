@@ -855,14 +855,14 @@ func (app *ArkeoApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*
 	}
 	mintGen := minttypes.GenesisState{
 		Minter: minttypes.Minter{
-			Inflation:        math.LegacyMustNewDecFromStr("0.030000000000000000"),
+			Inflation:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
 			AnnualProvisions: math.LegacyMustNewDecFromStr("0.000000000000000000"),
 		},
 		Params: minttypes.Params{
 			MintDenom:           "uarkeo",
-			InflationRateChange: math.LegacyMustNewDecFromStr("0.030000000000000000"),
-			InflationMax:        math.LegacyMustNewDecFromStr("0.050000000000000000"),
-			InflationMin:        math.LegacyMustNewDecFromStr("0.020000000000000000"),
+			InflationRateChange: math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			InflationMax:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
+			InflationMin:        math.LegacyMustNewDecFromStr("0.000000000000000000"),
 			GoalBonded:          math.LegacyNewDec(670000000000000000),
 			BlocksPerYear:       6311520,
 		},

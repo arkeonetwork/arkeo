@@ -287,7 +287,7 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage.Int64(), int64(10))
+	require.Equal(t, params.CommunityPoolPercentage.RoundInt(), int64(10))
 }
 func TestCommunityPoolDistributionToFoundationCommunityPool(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)

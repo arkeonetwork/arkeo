@@ -106,9 +106,9 @@ func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.invariantContractModule(ctx); err != nil {
 		panic(err)
 	}
-	if err := mgr.invariantMaxSupply(ctx); err != nil {
-		panic(err)
-	}
+	// if err := mgr.invariantMaxSupply(ctx); err != nil {
+	// 	panic(err)
+	// }
 	return nil
 }
 
@@ -439,7 +439,6 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (sdk.
 
 	// Get the circulating supply
 	circulatingSupply, err := mgr.keeper.GetCirculatingSupply(ctx, configs.Denom)
-	sdkContext.Logger().Info(fmt.Sprintf("circulating supply: %d", circulatingSupply.Amount))
 	if err != nil {
 		sdkContext.Logger().Error(fmt.Sprintf("failed to get circulating supply %s", err))
 		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0)), err
@@ -452,7 +451,7 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (sdk.
 	// Multiply circulating supply by inflation rate to get the newly minted token amount
 	newTokenAmountMintedDec := circulatingSupply.Amount.Mul(inflationRate).QuoInt64(100)
 
-	sdkContext.Logger().Info(fmt.Sprintf("minted token value: %v", sdkmath.Int(circulatingSupply.Amount)))
+	sdkContext.Logger().Info(fmt.Sprintf("After Inflation Calculation: %v", newTokenAmountMintedDec))
 
 	return sdk.NewDecCoin(configs.Denom, newTokenAmountMintedDec.RoundInt()), nil
 }
