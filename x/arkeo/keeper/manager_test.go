@@ -287,7 +287,7 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage.RoundInt(), int64(10))
+	require.Equal(t, params.CommunityPoolPercentage, sdkmath.LegacyMustNewDecFromStr("0.100000000000000000"))
 }
 func TestCommunityPoolDistributionToFoundationCommunityPool(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
@@ -447,7 +447,7 @@ func TestValidatorPayouts(t *testing.T) {
 	require.Equal(t, communityAccountBal, sdkmath.NewInt(200000))
 
 	moduleBalance := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.Int64(), int64(20000001000000))
+	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
 
 	require.NoError(t, mgr.ValidatorPayout(ctx, votes, balanceDistribution))
 
