@@ -17,7 +17,7 @@ func NewConfigValue010() *ConfigVals {
 			OpenContractCost:           common.Tokens(1),           // cost to open a contract
 			MinProviderBond:            common.Tokens(1),           // min bond for a data provider to be able to open contracts with
 			ReserveTax:                 1000,                       // reserve income off provider income, in basis points
-			BlocksPerYear:              5256666,                    // blocks per year
+			BlocksPerYear:              6311520,                    // blocks per year
 			EmissionCurve:              6,                          // rate in which the reserve is depleted to pay validators
 			ValidatorPayoutCycle:       1,                          // how often validators are paid out rewards
 			VersionConsensus:           90,                         // out of 100, percentage of nodes on a specific version before it is accepted

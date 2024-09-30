@@ -19,7 +19,7 @@ func NewParams() Params {
 		CommunityPoolPercentage:   math.NewInt(10),
 		DevFundPercentage:         math.NewInt(20),
 		GrantFundPercentage:       math.NewInt(20),
-		InflationChangePercentage: math.NewInt(13),
+		InflationChangePercentage: math.NewInt(3),
 	}
 }
 
