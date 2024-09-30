@@ -445,14 +445,14 @@ func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (sdk.
 		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
 
-	// // Get the inflation rate
-	// inflationRate := mgr.keeper.GetInflationRate(ctx)
-	// sdkContext.Logger().Info(fmt.Sprintf("inflation rate: %d", inflationRate))
+	// Get the inflation rate
+	inflationRate := mgr.keeper.GetInflationRate(ctx)
+	sdkContext.Logger().Info(fmt.Sprintf("inflation rate: %d", inflationRate))
 
-	// // Multiply circulating supply by inflation rate to get the newly minted token amount
-	// newTokenAmountMintedDec := circulatingSupply.Amount.Mul(inflationRate).QuoInt64(100)
+	// Multiply circulating supply by inflation rate to get the newly minted token amount
+	newTokenAmountMintedDec := circulatingSupply.Amount.Mul(inflationRate).QuoInt64(100)
 
-	// sdkContext.Logger().Info(fmt.Sprintf("minted token value: %v", sdkmath.Int(circulatingSupply.Amount)))
+	sdkContext.Logger().Info(fmt.Sprintf("minted token value: %v", sdkmath.Int(circulatingSupply.Amount)))
 
-	return sdk.NewDecCoin(configs.Denom, circulatingSupply.Amount.RoundInt()), nil
+	return sdk.NewDecCoin(configs.Denom, newTokenAmountMintedDec.RoundInt()), nil
 }
