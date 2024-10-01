@@ -51,13 +51,13 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	// Get the circulating supply after calculating inflation
 	circSupply, err := mgr.circulatingSupplyAfterInflationCalc(ctx)
 	if err != nil {
-		ctx.Logger().Error("unable to get supply with inflation calculation", "error", err)
+		mgr.keeper.Logger().Error("unable to get supply with inflation calculation", "error", err)
 		return err
 	}
 
 	err = mgr.keeper.MoveTokensFromDistributionToFoundationPoolAccount(ctx)
 	if err != nil {
-		ctx.Logger().Error("unable to send tokens from distribution to pool account", "error", err)
+		mgr.keeper.Logger().Error("unable to send tokens from distribution to pool account", "error", err)
 	}
 
 	validatorPayoutCycle := sdkmath.LegacyNewDec(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
@@ -68,14 +68,14 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	// Distribute Minted To Pools
 	balanceDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, circSupply)
 	if err != nil {
-		ctx.Logger().Error("unable to mint and distribute tokens", "error", err)
+		mgr.keeper.Logger().Error("unable to mint and distribute tokens", "error", err)
 	}
 
-	ctx.Logger().Info(fmt.Sprintf("Circulating Supply After Funding Foundational Account  %s", balanceDistribution))
+	mgr.keeper.Logger().Info(fmt.Sprintf("Circulating Supply After Funding Foundational Account  %s", balanceDistribution))
 
 	// Calculate Block Rewards
 	blockReward := mgr.calcBlockReward(ctx, balanceDistribution.Amount, emissionCurve, blocksPerYear, validatorPayoutCycle)
-	ctx.Logger().Info(fmt.Sprintf("Block Reward for block number %d, %v", ctx.BlockHeight(), blockReward))
+	mgr.keeper.Logger().Info(fmt.Sprintf("Block Reward for block number %d, %v", ctx.BlockHeight(), blockReward))
 
 	var votes = []abci.VoteInfo{}
 	for i := 0; i < ctx.CometInfo().GetLastCommit().Votes().Len(); i++ {
@@ -91,14 +91,14 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	}
 
 	if err := mgr.ValidatorPayout(ctx, votes, blockReward); err != nil {
-		ctx.Logger().Error("unable to settle contracts", "error", err)
+		mgr.keeper.Logger().Error("unable to settle contracts", "error", err)
 	}
 	return nil
 }
 
 func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.ContractEndBlock(ctx); err != nil {
-		ctx.Logger().Error("unable to settle contracts", "error", err)
+		mgr.keeper.Logger().Error("unable to settle contracts", "error", err)
 	}
 
 	// invariant checks
@@ -128,7 +128,7 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 	for ; iter.Valid(); iter.Next() {
 		var provider types.Provider
 		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &provider); err != nil {
-			ctx.Logger().Error("fail to unmarshal provider", "error", err)
+			mgr.keeper.Logger().Error("fail to unmarshal provider", "error", err)
 			continue
 		}
 		sum = sum.Add(provider.Bond)

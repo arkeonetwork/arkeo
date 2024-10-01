@@ -385,17 +385,15 @@ func (k KVStore) GetAuthority() string {
 }
 
 func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.DecCoin, error) {
-	sdkContext := sdk.UnwrapSDKContext(ctx)
-
 	// Get Total Supply
 	fullTokenSupply, err := k.coinKeeper.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{Denom: configs.Denom})
 	if err != nil {
-		sdkContext.Logger().Error("Failed to get full token supply data", err)
+		k.Logger().Error("Failed to get full token supply data", err)
 		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), err
 	}
 	totalSupply := fullTokenSupply.GetAmount().Amount
 
-	sdkContext.Logger().Info(fmt.Sprintf("TotalSupply %v", totalSupply))
+	k.Logger().Info(fmt.Sprintf("TotalSupply %v", totalSupply))
 
 	// Get the account addresses whose balances need to be exempted
 	devAccountAddress, err := k.getFoundationDevAccountAddress()
@@ -425,22 +423,22 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.Dec
 
 	exemptBalance := cosmos.NewInt(0)
 
-	sdkContext.Logger().Info("Starting to calculate exempt balances")
+	k.Logger().Info("Starting to calculate exempt balances")
 
 	// Range over the module accounts to create exempt balances
 	for _, address := range addressToExempt {
 		moduleBalance := k.coinKeeper.GetBalance(ctx, address, denom)
-		sdkContext.Logger().Info(fmt.Sprintf("Module address: %v, Balance: %v %v", address.String(), moduleBalance.Amount, denom))
+		k.Logger().Info(fmt.Sprintf("Module address: %v, Balance: %v %v", address.String(), moduleBalance.Amount, denom))
 
 		if !moduleBalance.IsZero() {
 			exemptBalance = exemptBalance.Add(moduleBalance.Amount)
 		} else {
-			sdkContext.Logger().Info(fmt.Sprintf("Module address: %v has zero balance for denom: %v", address.String(), denom))
+			k.Logger().Info(fmt.Sprintf("Module address: %v has zero balance for denom: %v", address.String(), denom))
 		}
 	}
 
 	circulatingSupply := totalSupply.Sub(exemptBalance)
-	sdkContext.Logger().Info(fmt.Sprintf("TotalSupply=%v  Foundation Accounts Exempted Balance=%v, Circulating Supply=%v", totalSupply, exemptBalance, circulatingSupply))
+	k.Logger().Info(fmt.Sprintf("TotalSupply=%v  Foundation Accounts Exempted Balance=%v, Circulating Supply=%v", totalSupply, exemptBalance, circulatingSupply))
 
 	return sdk.NewDecCoin(denom, circulatingSupply), nil
 }
