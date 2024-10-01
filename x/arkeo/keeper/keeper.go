@@ -28,6 +28,8 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
+var inflation math.LegacyDec = math.LegacyNewDec(0)
+
 type dbPrefix string
 
 func (p dbPrefix) String() string {
@@ -35,7 +37,7 @@ func (p dbPrefix) String() string {
 }
 
 type Keeper interface {
-	Logger(ctx sdk.Context) log.Logger
+	Logger() log.Logger
 	GetParams(ctx sdk.Context) types.Params
 	SetParams(ctx sdk.Context, params types.Params)
 	Cdc() codec.BinaryCodec
@@ -65,7 +67,7 @@ type Keeper interface {
 	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
 	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.DecCoin) (sdk.DecCoin, error)
 	GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.DecCoin, error)
-	GetInflationRate(ctx cosmos.Context) math.LegacyDec
+	GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error)
 	MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error
 	AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error
 	BurnCoins(ctx context.Context, moduleName string, coins sdk.Coins) error
@@ -167,7 +169,7 @@ func NewKVStore(
 	}
 }
 
-func (k KVStore) Logger(ctx sdk.Context) log.Logger {
+func (k KVStore) Logger() log.Logger {
 	return k.logger.With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
@@ -418,6 +420,7 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.Dec
 		grantAccountAddress,
 		k.stakingKeeper.GetBondedPool(ctx).GetAddress(),
 		k.GetModuleAccAddress("claimarkeo"),
+		k.GetModuleAccAddress(types.ModuleName),
 	}
 
 	exemptBalance := cosmos.NewInt(0)
@@ -443,7 +446,6 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.Dec
 }
 
 func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.DecCoin) (sdk.DecCoin, error) {
-	sdkContext := sdk.UnwrapSDKContext(ctx)
 
 	params := k.GetParams(ctx)
 	newlyMintedAmount := newlyMinted.Amount
@@ -454,45 +456,70 @@ func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.Dec
 
 	devAccountAddress, err := k.getFoundationDevAccountAddress()
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
+		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
 		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
 	}
 
 	communityAccountAddress, err := k.getFoundationCommunityAccountAddress()
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
+		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
 		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
 	}
 
 	grantAccountAddress, err := k.getFoundationGrantsAccountAddress()
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
+		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
 		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
 	}
 
-	if err := k.MintAndSendToAccount(ctx, devAccountAddress, cosmos.NewCoin(newlyMinted.Denom, devFundAmount.RoundInt())); err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to send amount to Dev foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	if !devFundAmount.IsZero() {
+		if err := k.MintAndSendToAccount(ctx, devAccountAddress, cosmos.NewCoin(newlyMinted.Denom, devFundAmount.RoundInt())); err != nil {
+			k.Logger().Error(fmt.Sprintf("failed to send amount to Dev foundational account %s", err))
+			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+		}
 	}
 
-	if err := k.MintAndSendToAccount(ctx, communityAccountAddress, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount.RoundInt())); err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to send amount to Community foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	if !communityPoolAmount.IsZero() {
+		if err := k.MintAndSendToAccount(ctx, communityAccountAddress, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount.RoundInt())); err != nil {
+			k.Logger().Error(fmt.Sprintf("failed to send amount to Community foundational account %s", err))
+			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+		}
 	}
 
-	if err := k.MintAndSendToAccount(ctx, grantAccountAddress, cosmos.NewCoin(newlyMinted.Denom, grantFundAmount.RoundInt())); err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to send amount to Grant foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+	if !grantFundAmount.IsZero() {
+		if err := k.MintAndSendToAccount(ctx, grantAccountAddress, cosmos.NewCoin(newlyMinted.Denom, grantFundAmount.RoundInt())); err != nil {
+			k.Logger().Error(fmt.Sprintf("failed to send amount to Grant foundational account %s", err))
+			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
+		}
 	}
 
 	balance := newlyMintedAmount.Sub(devFundAmount).Sub(communityPoolAmount).Sub(grantFundAmount)
 	return sdk.NewDecCoin(newlyMinted.Denom, balance.RoundInt()), nil
 }
 
-func (k KVStore) GetInflationRate(ctx cosmos.Context) math.LegacyDec {
+func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
 	params := k.GetParams(ctx)
 
-	return params.InflationChangePercentage
+	bondedRatio, err := k.stakingKeeper.BondedRatio(ctx)
+	if err != nil {
+		ctx.Logger().Error(fmt.Sprintf("failed to get bonded ration %s", err.Error()))
+		return math.LegacyNewDec(0), err
+	}
+
+	inflationRateChangePerYear := math.LegacyOneDec().Sub(bondedRatio.Quo(params.GoalBonded)).Mul(params.InflationChangePercentage)
+
+	inflationRateChange := inflationRateChangePerYear.Quo(sdkmath.LegacyNewDec(int64(params.BlockPerYear)))
+
+	inflationRate := inflation.Add(inflationRateChange)
+
+	if inflationRate.GT(params.InflationMax) {
+		inflationRate = params.InflationMax
+	}
+	if inflation.LT(params.InflationMin) {
+		inflationRate = params.InflationMin
+	}
+
+	return inflationRate, nil
 }
 
 // transfer tokens form the Distribution to Foundation Community Pool

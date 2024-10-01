@@ -18,8 +18,13 @@ func NewParams() Params {
 	return Params{
 		CommunityPoolPercentage:   math.LegacyMustNewDecFromStr("0.100000000000000000"),
 		DevFundPercentage:         math.LegacyMustNewDecFromStr("0.200000000000000000"),
-		GrantFundPercentage:       math.LegacyMustNewDecFromStr("0.200000000000000000"),
+		GrantFundPercentage:       math.LegacyMustNewDecFromStr("0.000000000000000000"),
 		InflationChangePercentage: math.LegacyMustNewDecFromStr("0.030000000000000000"),
+		InflationMin:              math.LegacyMustNewDecFromStr("0.020000000000000000"),
+		InflationMax:              math.LegacyMustNewDecFromStr("0.050000000000000000"),
+		GoalBonded:                math.LegacyMustNewDecFromStr("0.670000000000000000"),
+		BlockPerYear:              6311520,
+		EmissionCurve:             6,
 	}
 }
 

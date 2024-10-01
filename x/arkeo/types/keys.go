@@ -23,7 +23,7 @@ func KeyPrefix(p string) []byte {
 
 // Foundational Accounts
 const (
-	FoundationDevAccount       = "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r"
-	FoundationCommunityAccount = "tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx"
-	FoundationGrantsAccount    = "tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup"
+	FoundationDevAccount       = "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q"
+	FoundationCommunityAccount = "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc"
+	FoundationGrantsAccount    = "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj"
 )
