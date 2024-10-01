@@ -446,7 +446,6 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.Dec
 }
 
 func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.DecCoin) (sdk.DecCoin, error) {
-
 	params := k.GetParams(ctx)
 	newlyMintedAmount := newlyMinted.Amount
 

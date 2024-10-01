@@ -314,7 +314,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 		if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {
 			mgr.keeper.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
 		}
-
 	}
 
 	return nil
@@ -435,7 +434,6 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 }
 
 func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (sdk.DecCoin, error) {
-
 	// Get the circulating supply
 	circulatingSupply, err := mgr.keeper.GetCirculatingSupply(ctx, configs.Denom)
 	if err != nil {
