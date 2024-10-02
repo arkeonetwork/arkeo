@@ -222,7 +222,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		arkeomoduletypes.ModuleName:    {authtypes.Minter},
+		arkeomoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		arkeomoduletypes.ProviderName:  {},
 		arkeomoduletypes.ContractName:  {},
 		claimmoduletypes.ModuleName:    {authtypes.Minter},

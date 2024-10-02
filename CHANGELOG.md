@@ -39,6 +39,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ## Changed
 - Removed unused module account
+- Disabled System Validator Rewards 
+- Default Mint params set to zero
 
 ## Fixed 
 - Testnet binary generation using go build 

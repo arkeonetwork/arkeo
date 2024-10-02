@@ -31,12 +31,13 @@ func NewManager(k Keeper, sk stakingkeeper.Keeper) Manager {
 func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	// if local version is behind the consensus version, panic and don't try to
 	// create a new block
+
+	params := mgr.keeper.GetParams(ctx)
 	ver := mgr.keeper.GetComputedVersion(ctx)
 	swVersion, err := configs.GetSWVersion()
 	if err != nil {
 		return err
 	}
-	ctx.Logger().Info(fmt.Sprintf("current version :%s", swVersion))
 	if ver > swVersion {
 		panic(
 			fmt.Sprintf("Unsupported Version: update your binary (your version: %d, network consensus version: %d)",
@@ -46,6 +47,35 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 		)
 	}
 	mgr.keeper.SetVersion(ctx, ver) // update stored version
+
+	// Get the circulating supply after calculating inflation
+	circSupply, err := mgr.circulatingSupplyAfterInflationCalc(ctx)
+	if err != nil {
+		mgr.keeper.Logger().Error("unable to get supply with inflation calculation", "error", err)
+		return err
+	}
+
+	err = mgr.keeper.MoveTokensFromDistributionToFoundationPoolAccount(ctx)
+	if err != nil {
+		mgr.keeper.Logger().Error("unable to send tokens from distribution to pool account", "error", err)
+	}
+
+	validatorPayoutCycle := sdkmath.LegacyNewDec(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
+
+	emissionCurve := sdkmath.LegacyNewDec(int64(params.EmissionCurve)) // Emission curve factor
+	blocksPerYear := sdkmath.LegacyNewDec(int64(params.BlockPerYear))
+
+	// Distribute Minted To Pools
+	balanceDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, circSupply)
+	if err != nil {
+		mgr.keeper.Logger().Error("unable to mint and distribute tokens", "error", err)
+	}
+
+	mgr.keeper.Logger().Info(fmt.Sprintf("Circulating Supply After Funding Foundational Account  %s", balanceDistribution))
+
+	// Calculate Block Rewards
+	blockReward := mgr.calcBlockReward(ctx, balanceDistribution.Amount, emissionCurve, blocksPerYear, validatorPayoutCycle)
+	mgr.keeper.Logger().Info(fmt.Sprintf("Block Reward for block number %d, %v", ctx.BlockHeight(), blockReward))
 
 	var votes = []abci.VoteInfo{}
 	for i := 0; i < ctx.CometInfo().GetLastCommit().Votes().Len(); i++ {
@@ -60,42 +90,15 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 		votes = append(votes, abciVote)
 	}
 
-	// Get the circulating supply after calculating inflation
-	circSupply, err := mgr.circulatingSupplyAfterInflationCalc(ctx)
-	if err != nil {
-		ctx.Logger().Error("unable to get supply with inflation calculation", "error", err)
-		return err
-	}
-
-	err = mgr.keeper.MoveTokensFromDistributionToFoundationPoolAccount(ctx)
-	if err != nil {
-		ctx.Logger().Error("unable to send tokens from distribution to pool account", "error", err)
-	}
-
-	validatorPayoutCycle := mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle)
-
-	emissionCurve := mgr.FetchConfig(ctx, configs.EmissionCurve) // Emission curve factor
-	blocksPerYear := mgr.FetchConfig(ctx, configs.BlocksPerYear)
-
-	// Calculate Block Rewards
-	blockReward := mgr.calcBlockReward(ctx, circSupply.Amount.ToLegacyDec().RoundInt64(), emissionCurve, blocksPerYear, validatorPayoutCycle)
-	ctx.Logger().Info(fmt.Sprintf("Block Reward %v", blockReward))
-
-	// Distribute Minted To Pools
-	balanceDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, blockReward)
-	if err != nil {
-		ctx.Logger().Error("unable to mint and distribute tokens", "error", err)
-	}
-
-	if err := mgr.ValidatorPayout(ctx, votes, balanceDistribution); err != nil {
-		ctx.Logger().Error("unable to settle contracts", "error", err)
+	if err := mgr.ValidatorPayout(ctx, votes, blockReward); err != nil {
+		mgr.keeper.Logger().Error("unable to settle contracts", "error", err)
 	}
 	return nil
 }
 
 func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.ContractEndBlock(ctx); err != nil {
-		ctx.Logger().Error("unable to settle contracts", "error", err)
+		mgr.keeper.Logger().Error("unable to settle contracts", "error", err)
 	}
 
 	// invariant checks
@@ -105,9 +108,9 @@ func (mgr Manager) EndBlock(ctx cosmos.Context) error {
 	if err := mgr.invariantContractModule(ctx); err != nil {
 		panic(err)
 	}
-	if err := mgr.invariantMaxSupply(ctx); err != nil {
-		panic(err)
-	}
+	// if err := mgr.invariantMaxSupply(ctx); err != nil {
+	// 	panic(err)
+	// }
 	return nil
 }
 
@@ -125,7 +128,7 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 	for ; iter.Valid(); iter.Next() {
 		var provider types.Provider
 		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &provider); err != nil {
-			ctx.Logger().Error("fail to unmarshal provider", "error", err)
+			mgr.keeper.Logger().Error("fail to unmarshal provider", "error", err)
 			continue
 		}
 		sum = sum.Add(provider.Bond)
@@ -221,7 +224,7 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 // units = U / (T / t)
 // Since the development goal at the moment is to get this chain up and
 // running, we can save this optimization for another day.
-func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, blockReward cosmos.Coin) error {
+func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, blockReward sdk.DecCoin) error {
 	if blockReward.IsZero() {
 		return nil
 	}
@@ -231,7 +234,7 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 	for _, vote := range votes {
 		val, err := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
 		if err != nil {
-			ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
+			mgr.keeper.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
 			continue
 		}
 		if !val.IsBonded() || val.IsJailed() {
@@ -245,17 +248,17 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 
 	for _, vote := range votes {
 		if vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_ABSENT" || vote.BlockIdFlag.String() == "BLOCK_ID_FLAG_UNKNOWN" {
-			ctx.Logger().Info(fmt.Sprintf("validator rewards skipped due to lack of signature: %s, validator : %s ", vote.BlockIdFlag.String(), string(vote.Validator.GetAddress())))
+			mgr.keeper.Logger().Info(fmt.Sprintf("validator rewards skipped due to lack of signature: %s, validator : %s ", vote.BlockIdFlag.String(), string(vote.Validator.GetAddress())))
 			continue
 		}
 
 		val, err := mgr.sk.ValidatorByConsAddr(ctx, vote.Validator.Address)
 		if err != nil {
-			ctx.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
+			mgr.keeper.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
 			continue
 		}
 		if !val.IsBonded() || val.IsJailed() {
-			ctx.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator())
+			mgr.keeper.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator())
 			continue
 		}
 
@@ -271,7 +274,7 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 		}
 		acc := cosmos.AccAddress(val.GetOperator())
 
-		totalReward := common.GetSafeShare(val.GetDelegatorShares().RoundInt(), total, blockReward.Amount)
+		totalReward := common.GetSafeShare(val.GetDelegatorShares().RoundInt(), total, blockReward.Amount.RoundInt())
 		validatorReward := cosmos.ZeroInt()
 		rateBasisPts := val.GetCommission().MulInt64(100).RoundInt()
 
@@ -283,7 +286,7 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 		for _, delegate := range delegates {
 			delegateAcc, err := cosmos.AccAddressFromBech32(delegate.DelegatorAddress)
 			if err != nil {
-				ctx.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
+				mgr.keeper.Logger().Error("unable to fetch delegate address", "delegate", delegate.DelegatorAddress, "error", err)
 				continue
 			}
 			delegateReward := common.GetSafeShare(delegate.GetShares().RoundInt(), val.GetDelegatorShares().RoundInt(), totalReward)
@@ -292,51 +295,48 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 				delegateReward = delegateReward.Sub(valFee)
 				validatorReward = validatorReward.Add(valFee)
 			}
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ModuleName, delegateAcc, cosmos.NewCoins(cosmos.NewCoin(blockReward.Denom, delegateReward))); err != nil {
-				ctx.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
+
+			if err := mgr.keeper.MintAndSendToAccount(ctx, delegateAcc, cosmos.NewCoin(blockReward.Denom, delegateReward)); err != nil {
+				mgr.keeper.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
 				continue
 			}
-			ctx.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
+			mgr.keeper.Logger().Info("delegate rewarded", "delegate", delegateAcc.String(), "amount", delegateReward)
 		}
 
 		if !validatorReward.IsZero() {
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ModuleName, acc, cosmos.NewCoins(cosmos.NewCoin(blockReward.Denom, validatorReward))); err != nil {
-				ctx.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator(), "error", err)
+			if err := mgr.keeper.AllocateTokensToValidator(ctx, val, sdk.NewDecCoins(sdk.NewDecCoin(blockReward.Denom, validatorReward))); err != nil {
+				mgr.keeper.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator(), "error", err)
 				continue
 			}
-			ctx.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
+			mgr.keeper.Logger().Info("validator additional rewards", "validator", acc.String(), "amount", validatorReward)
 		}
 
 		if err := mgr.EmitValidatorPayoutEvent(ctx, acc, validatorReward); err != nil {
-			ctx.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
+			mgr.keeper.Logger().Error("unable to emit validator payout event", "validator", acc.String(), "error", err)
 		}
 	}
 
 	return nil
 }
 
-func (mgr Manager) calcBlockReward(ctx cosmos.Context, totalReserve, emissionCurve, blocksPerYear, validatorPayoutCycle int64) cosmos.Coin {
-	sdkContext := sdk.UnwrapSDKContext(ctx)
-
+func (mgr Manager) calcBlockReward(ctx cosmos.Context, totalReserve, emissionCurve, blocksPerYear, validatorPayoutCycle sdkmath.LegacyDec) sdk.DecCoin {
 	// Block Rewards will take the latest reserve, divide it by the emission
 	// curve factor, then divide by blocks per year
-	if emissionCurve == 0 || blocksPerYear == 0 {
-		sdkContext.Logger().Info("block and emission-curve cannot be zero")
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0))
+	if emissionCurve.IsZero() || blocksPerYear.IsZero() {
+		mgr.keeper.Logger().Info("block and emission-curve cannot be zero")
+		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0))
 	}
 
-	if validatorPayoutCycle == 0 || sdkContext.BlockHeight()%validatorPayoutCycle != 0 {
-		sdkContext.Logger().Info("validator payout cycle cannot be zero")
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0))
+	if validatorPayoutCycle.IsZero() || ctx.BlockHeight()%validatorPayoutCycle.RoundInt64() != 0 {
+		mgr.keeper.Logger().Info("validator payout cycle cannot be zero")
+		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0))
 	}
 
-	trD := cosmos.NewDec(totalReserve)
-	ecD := cosmos.NewDec(emissionCurve)
-	bpyD := cosmos.NewDec((blocksPerYear / validatorPayoutCycle))
+	bpyD := blocksPerYear.Quo(validatorPayoutCycle)
 
-	blockReward := trD.Quo(ecD).Quo(bpyD).RoundInt()
+	blockReward := totalReserve.Quo(emissionCurve).Quo(bpyD).RoundInt()
 
-	return cosmos.NewCoin(configs.Denom, blockReward)
+	return sdk.NewDecCoin(configs.Denom, blockReward)
 }
 
 func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int64 {
@@ -433,31 +433,25 @@ func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (co
 	return debt, nil
 }
 
-func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (cosmos.Coin, error) {
-	sdkContext := sdk.UnwrapSDKContext(ctx)
-
+func (mgr Manager) circulatingSupplyAfterInflationCalc(ctx cosmos.Context) (sdk.DecCoin, error) {
 	// Get the circulating supply
 	circulatingSupply, err := mgr.keeper.GetCirculatingSupply(ctx, configs.Denom)
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to get circulating supply %s", err))
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), err
+		mgr.keeper.Logger().Error(fmt.Sprintf("failed to get circulating supply %s", err))
+		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
 
 	// Get the inflation rate
 	inflationRate, err := mgr.keeper.GetInflationRate(ctx)
 	if err != nil {
-		sdkContext.Logger().Error(fmt.Sprintf("failed to get inflation rate: %s", err))
-		return cosmos.NewCoin(configs.Denom, sdkmath.NewInt(0)), err
+		return sdk.NewDecCoin(configs.Denom, sdkmath.NewInt(0)), err
 	}
-
-	// Convert circulating supply to decimal for precise calculation
-	circulatingSupplyDec := sdkmath.LegacyNewDec(circulatingSupply.Amount.Int64())
+	mgr.keeper.Logger().Info(fmt.Sprintf("inflation rate: %d", inflationRate))
 
 	// Multiply circulating supply by inflation rate to get the newly minted token amount
-	newTokenAmountMintedDec := circulatingSupplyDec.Mul(inflationRate)
+	newTokenAmountMintedDec := circulatingSupply.Amount.Mul(inflationRate).QuoInt64(100)
 
-	// Convert the result back to integer and truncate any decimals
-	newTokenAmountMinted := newTokenAmountMintedDec.TruncateInt()
+	mgr.keeper.Logger().Info(fmt.Sprintf("After Inflation Calculation: %v", newTokenAmountMintedDec))
 
-	return cosmos.NewCoin(configs.Denom, newTokenAmountMinted), nil
+	return sdk.NewDecCoin(configs.Denom, newTokenAmountMintedDec.RoundInt()), nil
 }

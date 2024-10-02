@@ -287,7 +287,7 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage.Int64(), int64(10))
+	require.Equal(t, params.CommunityPoolPercentage, sdkmath.LegacyMustNewDecFromStr("0.100000000000000000"))
 }
 func TestCommunityPoolDistributionToFoundationCommunityPool(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
@@ -315,37 +315,37 @@ func TestBlockRewardCalculation(t *testing.T) {
 	// Total Reserve -> 100000000
 	// validator cycle -> 100
 	// reward = (totalReserve / emissionCurve) / (blocksPerYear / valCycle)) -> 2000
-	valCycle := int64(100)
-	emissionCurve := int64(10)
-	blocksPerYear := int64(5000)
-	totalReserve := int64(1000000)
+	valCycle := sdkmath.LegacyNewDec(100)
+	emissionCurve := sdkmath.LegacyNewDec(10)
+	blocksPerYear := sdkmath.LegacyNewDec(5000)
+	totalReserve := sdkmath.LegacyNewDec(1000000)
 
 	reward := mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, reward.Amount.Int64(), int64(2000))
+	require.Equal(t, reward.Amount.RoundInt64(), int64(2000))
 
-	valCycle = int64(10)
-	emissionCurve = int64(5)
-	blocksPerYear = int64(200)
-	totalReserve = int64(999999)
+	valCycle = sdkmath.LegacyNewDec(10)
+	emissionCurve = sdkmath.LegacyNewDec(5)
+	blocksPerYear = sdkmath.LegacyNewDec(200)
+	totalReserve = sdkmath.LegacyNewDec(999999)
 
 	reward = mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, reward.Amount.Int64(), int64(10000)) // its 9999.99 rounded to 10000
+	require.Equal(t, reward.Amount.RoundInt64(), int64(10000)) // its 9999.99 rounded to 10000
 }
 
 func TestValidatorPayouts(t *testing.T) {
 	ctx, k, sk := SetupKeeperWithStaking(t)
 	mgr := NewManager(k, sk)
 
-	valCycle := int64(100)
-	emissionCurve := int64(10)
-	blocksPerYear := int64(5000)
-	totalReserve := int64(1000000000)
+	valCycle := sdkmath.NewInt(100).ToLegacyDec()
+	emissionCurve := sdkmath.NewInt(10).ToLegacyDec()
+	blocksPerYear := sdkmath.NewInt(5000).ToLegacyDec()
+	totalReserve := sdkmath.NewInt(1000000000).ToLegacyDec()
 
 	blockReward := mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
 
-	require.Equal(t, blockReward.Amount.Int64(), int64(2000000))
+	require.Equal(t, blockReward.Amount.RoundInt64(), int64(2000000))
 
 	pks := simtestutil.CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
@@ -441,32 +441,32 @@ func TestValidatorPayouts(t *testing.T) {
 	require.Equal(t, devAccountBal, sdkmath.NewInt(400000))
 
 	grantAccountBal := k.GetBalance(ctx, grantAccountAddress).AmountOf(configs.Denom)
-	require.Equal(t, grantAccountBal, sdkmath.NewInt(400000))
+	require.Equal(t, grantAccountBal, sdkmath.NewInt(0))
 
 	communityAccountBal := k.GetBalance(ctx, communityAccountAddress).AmountOf(configs.Denom)
 	require.Equal(t, communityAccountBal, sdkmath.NewInt(200000))
 
 	moduleBalance := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.Int64(), int64(20000001000000))
+	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
 
 	require.NoError(t, mgr.ValidatorPayout(ctx, votes, balanceDistribution))
 
 	totalBal := cosmos.ZeroInt()
 
 	// Check balances of validators 7
-	checkBalance(ctx, t, k, acc1, configs.Denom, 117529, &totalBal)
-	checkBalance(ctx, t, k, acc2, configs.Denom, 234824, &totalBal)
-	checkBalance(ctx, t, k, acc3, configs.Denom, 585294, &totalBal)
+	checkBalance(ctx, t, k, acc1, configs.Denom, 164541, &totalBal)
+	checkBalance(ctx, t, k, acc2, configs.Denom, 328753, &totalBal)
+	checkBalance(ctx, t, k, acc3, configs.Denom, 819411, &totalBal)
 
 	// Check balances of delegates
-	checkBalance(ctx, t, k, delAcc1, configs.Denom, 11753, &totalBal)
-	checkBalance(ctx, t, k, delAcc2, configs.Denom, 23482, &totalBal)
-	checkBalance(ctx, t, k, delAcc3, configs.Denom, 23411, &totalBal)
+	checkBalance(ctx, t, k, delAcc1, configs.Denom, 16455, &totalBal)
+	checkBalance(ctx, t, k, delAcc2, configs.Denom, 32875, &totalBal)
+	checkBalance(ctx, t, k, delAcc3, configs.Denom, 32776, &totalBal)
 
-	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(996293))
+	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(1394811))
 
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
+	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(20000000000000))
 }
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)

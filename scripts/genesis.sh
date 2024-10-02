@@ -4,10 +4,10 @@ set -o pipefail
 set -ex
 
 CHAIN_ID="arkeo-testnet-v2"
-STAKE="50000000000000000uarkeo"
+STAKE="1000000000uarkeo"
 TOKEN="uarkeo"
 USER="ark"
-TOTAL_SUPPLY=50000000000000000 # Initial supply corresponding to the stake
+TOTAL_SUPPLY=1000000000 # Initial supply corresponding to the stake
 
 add_module() {
 	jq --arg ADDRESS "$1" --arg ASSET "$2" --arg AMOUNT "$3" --arg NAME "$4" '.app_state.auth.accounts += [{
@@ -82,8 +82,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 10m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 10000000000000000 'arkeo-reserve' # reserve, 10m
-		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 10000000000000000 'claimarkeo'
+		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 30250000000000 'claimarkeo'
 
 		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test --recover
 		ALICE=$(arkeod keys show alice -a --keyring-backend test)
@@ -94,13 +93,14 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_account "$BOB" $TOKEN 1000000000000000 # bob, 1m
 		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
 
+
 		# Add Foundational Accounts
-		#  FoundationCommunityAccount = "tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx"
-		add_account "tarkeo1v50hrsxx0mxar4653aujcnqyjft07w0npcxrjx" $TOKEN 10000
-		# 	FoundationDevAccount       = "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r"
-		add_account "tarkeo10sav33v67743s6cl2cvjmmua7c5arysw3txz9r" $TOKEN 10000
-		#   FoundationGrantsAccount    = "tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup"
-		add_account "tarkeo16k3k0erkwaanqnup20dxxenpd6wh058nh4pgup" $TOKEN 10000
+		#  FoundationCommunityAccount = "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc"
+		add_account "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc" $TOKEN 1048400000000000000
+		# 	FoundationDevAccount       = "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q"
+		add_account "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q" $TOKEN 12100000000000
+		#   FoundationGrantsAccount    = "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj"
+		add_account "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj" $TOKEN 6050000000000
 	
 	
 		# Thorchain derived test addresses
@@ -116,15 +116,15 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 600000 700000 true
 
 		# enable CORs on testnet/localnet
-		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
-		sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
+		sed -i '' 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
+		sed -i '' 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
 	fi
 
-	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
-	sed -i '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
-	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
-	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
-	sed -i 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml
+	sed -i '' 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
+	sed -i '' '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
+	sed -i '' 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
+	sed -i '' 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
+	sed -i '' 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml
 
 	# Update the supply field in genesis.json using jq
 	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
