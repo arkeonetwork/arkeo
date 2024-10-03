@@ -7,7 +7,6 @@ import (
 
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
-	"cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,8 +24,6 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
-
-var inflation math.LegacyDec = math.LegacyNewDec(0)
 
 type dbPrefix string
 
@@ -376,18 +373,6 @@ func (k KVStore) StakingSetParams(ctx cosmos.Context, params stakingtypes.Params
 
 func (k KVStore) GetAuthority() string {
 	return k.authority
-}
-
-func (k KVStore) getFoundationDevAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationDevAccount)
-}
-
-func (k KVStore) getFoundationCommunityAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationCommunityAccount)
-}
-
-func (k KVStore) getFoundationGrantsAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationGrantsAccount)
 }
 
 func (k KVStore) AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error {
