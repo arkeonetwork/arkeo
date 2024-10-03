@@ -285,7 +285,7 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage, sdkmath.LegacyMustNewDecFromStr("0.100000000000000000"))
+	require.Equal(t, params.BlockPerYear, uint64(6311520))
 }
 
 func TestBlockRewardCalculation(t *testing.T) {
