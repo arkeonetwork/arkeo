@@ -17,6 +17,7 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
@@ -70,7 +71,7 @@ type Keeper interface {
 	GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error)
 	MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error
 	AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error
-	BurnCoins(ctx context.Context, moduleName string, coins sdk.Coins) error
+	SendToCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -411,6 +412,8 @@ func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.Dec
 		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
 	}
 
+	k.Logger().Info(fmt.Sprintf("Community address :%s", k.GetModuleAccAddress(disttypes.ModuleName)))
+
 	// Account Address for which the circulating supply should be exempted
 	addressToExempt := []sdk.AccAddress{
 		devAccountAddress,
@@ -566,4 +569,8 @@ func (k KVStore) AllocateTokensToValidator(ctx context.Context, val stakingtypes
 
 func (k KVStore) BurnCoins(ctx context.Context, moduleName string, coins sdk.Coins) error {
 	return k.coinKeeper.BurnCoins(ctx, moduleName, coins)
+}
+
+func (k KVStore) SendToCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error {
+	return k.distributionKeeper.FundCommunityPool(ctx, amount, sender)
 }

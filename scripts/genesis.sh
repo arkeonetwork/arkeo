@@ -79,28 +79,21 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 
 	arkeod keys add faucet --keyring-backend test
 	FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
-	add_account "$FAUCET" $TOKEN 10000000000000000 # faucet, 10m
+	add_account "$FAUCET" $TOKEN 2900000000000000 # faucet, 29m
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 30250000000000 'claimarkeo'
+		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 2420000000000000 'arkeo-reserve' 
+		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 3025000000000000 'claimarkeo'
+		add_module tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e $TOKEN 4840000000000000 'distribution'
 
-		echo "shoulder heavy loyal save patient deposit crew bag pull club escape eyebrow hip verify border into wire start pact faint fame festival solve shop" | arkeod keys add alice --keyring-backend test --recover
-		ALICE=$(arkeod keys show alice -a --keyring-backend test)
-		add_account "$ALICE" $TOKEN 1100000000000000 # alice, 1.1m
+		
 
-		echo "clog swear steak glide artwork glory solution short company borrow aerobic idle corn climb believe wink forum destroy miracle oak cover solid valve make" | arkeod keys add bob --keyring-backend test --recover
-		BOB=$(arkeod keys show bob -a --keyring-backend test)
-		add_account "$BOB" $TOKEN 1000000000000000 # bob, 1m
-		add_claim_records "ARKEO" "$BOB" 1000 1000 1000 true
-
-
-		# Add Foundational Accounts
-		#  FoundationCommunityAccount = "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc"
-		add_account "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc" $TOKEN 1048400000000000000
+		# Add Foundational Accounts            
 		# 	FoundationDevAccount       = "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q"
-		add_account "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q" $TOKEN 12100000000000
+		add_account "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q" $TOKEN 1210000000000000
 		#   FoundationGrantsAccount    = "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj"
-		add_account "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj" $TOKEN 6050000000000
+		add_account "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj" $TOKEN 605000000000000
+		                                                                   
 	
 	
 		# Thorchain derived test addresses
@@ -116,15 +109,15 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		add_claim_records "ETHEREUM" "0x92E14917A0508Eb56C90C90619f5F9Adbf49f47d" 500000 600000 700000 true
 
 		# enable CORs on testnet/localnet
-		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
-		sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
+		sed -i '' 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
+		sed -i '' 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
 	fi
 
-	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
-	sed -i '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
-	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
-	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
-	sed -i 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml
+	sed -i '' 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
+	sed -i '' '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
+	sed -i '' 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
+	sed -i '' 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
+	sed -i '' 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml
 
 	# Update the supply field in genesis.json using jq
 	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
