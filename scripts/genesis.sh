@@ -64,6 +64,27 @@ add_claim_records() {
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
+set_fee_pool() {
+    local denom="$1"
+    local amount="$2"
+
+    jq --arg DENOM "$denom" --arg AMOUNT "$amount" '.app_state.distribution.fee_pool.community_pool = [{
+        "denom": $DENOM,
+        "amount": $AMOUNT
+    }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
+    mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+}
+
+disable_mint_params() {
+    jq '.app_state.mint.minter.inflation = "0.000000000000000000" |
+        .app_state.mint.minter.annual_provisions = "0.000000000000000000" |
+        .app_state.mint.params.inflation_rate_change = "0.000000000000000000" |
+        .app_state.mint.params.inflation_max = "0.000000000000000000" |
+        .app_state.mint.params.inflation_min = "0.000000000000000000"' \
+    <~/.arkeo/config/genesis.json >/tmp/genesis.json
+    mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+}
+
 if [ ! -f ~/.arkeo/config/priv_validator_key.json ]; then
 	# remove the original generate genesis file, as below will init chain again
 	rm -rf ~/.arkeo/config/genesis.json
@@ -80,11 +101,14 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod keys add faucet --keyring-backend test
 	FAUCET=$(arkeod keys show faucet -a --keyring-backend test)
 	add_account "$FAUCET" $TOKEN 2900000000000000 # faucet, 29m
+	disable_mint_params
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
 		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 2420000000000000 'arkeo-reserve' 
 		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 3025000000000000 'claimarkeo'
 		add_module tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e $TOKEN 4840000000000000 'distribution'
+		# this is to handle the balance set to distribution as a community pool 
+		set_fee_pool $TOKEN 4840000000000000
 
 		
 
