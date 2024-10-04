@@ -417,23 +417,26 @@ func TestValidatorPayouts(t *testing.T) {
 
 	totalBal := cosmos.ZeroInt()
 
-	// Check balances of validators 7
-	checkBalance(ctx, t, k, acc1, configs.Denom, 2350588235294, &totalBal)
-	checkBalance(ctx, t, k, acc2, configs.Denom, 4696470588235, &totalBal)
-	checkBalance(ctx, t, k, acc3, configs.Denom, 11705882352941, &totalBal)
+	rewardsAcc1, err := k.GetValidatorRewards(ctx, acc1.Bytes())
+	require.NoError(t, err)
+	require.Equal(t, rewardsAcc1.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(2588235294117))
+	totalBal = totalBal.Add(rewardsAcc1.Rewards.AmountOf(configs.Denom).RoundInt())
 
-	// Check balances of delegates
-	checkBalance(ctx, t, k, delAcc1, configs.Denom, 235058823529, &totalBal)
-	checkBalance(ctx, t, k, delAcc2, configs.Denom, 469647058823, &totalBal)
-	checkBalance(ctx, t, k, delAcc3, configs.Denom, 468235294117, &totalBal)
+	rewardsAcc2, err := k.GetValidatorRewards(ctx, acc2.Bytes())
+	require.NoError(t, err)
+	require.Equal(t, rewardsAcc2.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(5176470588234))
+	totalBal = totalBal.Add(rewardsAcc2.Rewards.AmountOf(configs.Denom).RoundInt())
 
-	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(19925882352939))
+	rewardsAcc3, err := k.GetValidatorRewards(ctx, acc3.Bytes())
+	require.NoError(t, err)
+	require.Equal(t, rewardsAcc3.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(12235294117646))
+	totalBal = totalBal.Add(rewardsAcc3.Rewards.AmountOf(configs.Denom).RoundInt())
+
+	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(19999999999997))
 
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(0))
-}
-func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
-	bal := k.GetBalance(ctx, acc)
-	*total = total.Add(bal.AmountOf(denom))
-	require.Equal(t, bal.AmountOf(denom).Int64(), expectedAmt)
+	p, err := k.GetCommunityPool(ctx)
+	require.NoError(t, err)
+	require.Equal(t, p.CommunityPool.AmountOf(configs.Denom), sdkmath.LegacyNewDec(10003))
 }
