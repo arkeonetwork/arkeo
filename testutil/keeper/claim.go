@@ -105,6 +105,7 @@ func CreateTestClaimKeepers(t testing.TB) (TestKeepers, sdk.Context) {
 			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 			types.ModuleName:               {authtypes.Minter},
+			arkeotypes.ReserveName:         {authtypes.Minter},
 			arkeotypes.ProviderName:        {},
 			arkeotypes.ContractName:        {},
 		},

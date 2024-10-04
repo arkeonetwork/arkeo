@@ -7,15 +7,12 @@ import (
 
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
-	"cosmossdk.io/math"
-	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -27,8 +24,6 @@ import (
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
-
-var inflation math.LegacyDec = math.LegacyNewDec(0)
 
 type dbPrefix string
 
@@ -65,12 +60,8 @@ type Keeper interface {
 	GetActiveValidators(ctx cosmos.Context) ([]stakingtypes.Validator, error)
 	GetAccount(ctx cosmos.Context, addr cosmos.AccAddress) cosmos.Account
 	StakingSetParams(ctx cosmos.Context, params stakingtypes.Params) error
-	MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.DecCoin) (sdk.DecCoin, error)
-	GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.DecCoin, error)
-	GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error)
-	MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error
 	AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error
-	BurnCoins(ctx context.Context, moduleName string, coins sdk.Coins) error
+	SendToCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error
 
 	// Query
 	Params(c context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error)
@@ -384,186 +375,14 @@ func (k KVStore) GetAuthority() string {
 	return k.authority
 }
 
-func (k KVStore) GetCirculatingSupply(ctx cosmos.Context, denom string) (sdk.DecCoin, error) {
-	// Get Total Supply
-	fullTokenSupply, err := k.coinKeeper.SupplyOf(ctx, &banktypes.QuerySupplyOfRequest{Denom: configs.Denom})
-	if err != nil {
-		k.Logger().Error("Failed to get full token supply data", err)
-		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), err
-	}
-	totalSupply := fullTokenSupply.GetAmount().Amount
-
-	k.Logger().Info(fmt.Sprintf("TotalSupply %v", totalSupply))
-
-	// Get the account addresses whose balances need to be exempted
-	devAccountAddress, err := k.getFoundationDevAccountAddress()
-	if err != nil {
-		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	communityAccountAddress, err := k.getFoundationCommunityAccountAddress()
-	if err != nil {
-		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	grantAccountAddress, err := k.getFoundationGrantsAccountAddress()
-	if err != nil {
-		return sdk.NewDecCoin(denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	// Account Address for which the circulating supply should be exempted
-	addressToExempt := []sdk.AccAddress{
-		devAccountAddress,
-		communityAccountAddress,
-		grantAccountAddress,
-		k.stakingKeeper.GetBondedPool(ctx).GetAddress(),
-		k.GetModuleAccAddress("claimarkeo"),
-		k.GetModuleAccAddress(types.ModuleName),
-	}
-
-	exemptBalance := cosmos.NewInt(0)
-
-	k.Logger().Info("Starting to calculate exempt balances")
-
-	// Range over the module accounts to create exempt balances
-	for _, address := range addressToExempt {
-		moduleBalance := k.coinKeeper.GetBalance(ctx, address, denom)
-		k.Logger().Info(fmt.Sprintf("Module address: %v, Balance: %v %v", address.String(), moduleBalance.Amount, denom))
-
-		if !moduleBalance.IsZero() {
-			exemptBalance = exemptBalance.Add(moduleBalance.Amount)
-		} else {
-			k.Logger().Info(fmt.Sprintf("Module address: %v has zero balance for denom: %v", address.String(), denom))
-		}
-	}
-
-	circulatingSupply := totalSupply.Sub(exemptBalance)
-	k.Logger().Info(fmt.Sprintf("TotalSupply=%v  Foundation Accounts Exempted Balance=%v, Circulating Supply=%v", totalSupply, exemptBalance, circulatingSupply))
-
-	return sdk.NewDecCoin(denom, circulatingSupply), nil
-}
-
-func (k KVStore) MintAndDistributeTokens(ctx cosmos.Context, newlyMinted sdk.DecCoin) (sdk.DecCoin, error) {
-	params := k.GetParams(ctx)
-	newlyMintedAmount := newlyMinted.Amount
-
-	devFundAmount := newlyMintedAmount.Mul(params.DevFundPercentage)
-	communityPoolAmount := newlyMintedAmount.Mul(params.CommunityPoolPercentage)
-	grantFundAmount := newlyMintedAmount.Mul(params.GrantFundPercentage)
-
-	devAccountAddress, err := k.getFoundationDevAccountAddress()
-	if err != nil {
-		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	communityAccountAddress, err := k.getFoundationCommunityAccountAddress()
-	if err != nil {
-		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	grantAccountAddress, err := k.getFoundationGrantsAccountAddress()
-	if err != nil {
-		k.Logger().Error(fmt.Sprintf("failed to fetch foundational account %s", err))
-		return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	if !devFundAmount.IsZero() {
-		if err := k.MintAndSendToAccount(ctx, devAccountAddress, cosmos.NewCoin(newlyMinted.Denom, devFundAmount.RoundInt())); err != nil {
-			k.Logger().Error(fmt.Sprintf("failed to send amount to Dev foundational account %s", err))
-			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
-		}
-	}
-
-	if !communityPoolAmount.IsZero() {
-		if err := k.MintAndSendToAccount(ctx, communityAccountAddress, cosmos.NewCoin(newlyMinted.Denom, communityPoolAmount.RoundInt())); err != nil {
-			k.Logger().Error(fmt.Sprintf("failed to send amount to Community foundational account %s", err))
-			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
-		}
-	}
-
-	if !grantFundAmount.IsZero() {
-		if err := k.MintAndSendToAccount(ctx, grantAccountAddress, cosmos.NewCoin(newlyMinted.Denom, grantFundAmount.RoundInt())); err != nil {
-			k.Logger().Error(fmt.Sprintf("failed to send amount to Grant foundational account %s", err))
-			return sdk.NewDecCoin(newlyMinted.Denom, sdkmath.NewInt(0)), fmt.Errorf("error sending amount to module %s", err)
-		}
-	}
-
-	balance := newlyMintedAmount.Sub(devFundAmount).Sub(communityPoolAmount).Sub(grantFundAmount)
-	return sdk.NewDecCoin(newlyMinted.Denom, balance.RoundInt()), nil
-}
-
-func (k KVStore) GetInflationRate(ctx cosmos.Context) (math.LegacyDec, error) {
-	params := k.GetParams(ctx)
-
-	bondedRatio, err := k.stakingKeeper.BondedRatio(ctx)
-	if err != nil {
-		ctx.Logger().Error(fmt.Sprintf("failed to get bonded ration %s", err.Error()))
-		return math.LegacyNewDec(0), err
-	}
-
-	inflationRateChangePerYear := math.LegacyOneDec().Sub(bondedRatio.Quo(params.GoalBonded)).Mul(params.InflationChangePercentage)
-
-	inflationRateChange := inflationRateChangePerYear.Quo(sdkmath.LegacyNewDec(int64(params.BlockPerYear)))
-
-	inflationRate := inflation.Add(inflationRateChange)
-
-	if inflationRate.GT(params.InflationMax) {
-		inflationRate = params.InflationMax
-	}
-	if inflation.LT(params.InflationMin) {
-		inflationRate = params.InflationMin
-	}
-
-	return inflationRate, nil
-}
-
-// transfer tokens form the Distribution to Foundation Community Pool
-func (k KVStore) MoveTokensFromDistributionToFoundationPoolAccount(ctx cosmos.Context) error {
-	// get pool balance
-	pool, err := k.distributionKeeper.FeePool.Get(ctx)
-	if err != nil {
-		return err
-	}
-	amount := pool.CommunityPool.AmountOf(configs.Denom)
-
-	communityAccountAddress, err := k.getFoundationCommunityAccountAddress()
-	if err != nil {
-		return fmt.Errorf("failed to fetch foundational account %s", err)
-	}
-
-	if !amount.IsZero() {
-		if err := k.distributionKeeper.DistributeFromFeePool(ctx, cosmos.NewCoins(cosmos.NewCoin(configs.Denom, amount.RoundInt())), communityAccountAddress); err != nil {
-			if err.Error() == "community pool does not have sufficient coins to distribute" {
-				ctx.Logger().Info(fmt.Sprintf("%s", err))
-				return nil
-			} else {
-				ctx.Logger().Error(fmt.Sprintf("failed to distribute from community pool %s", err))
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (k KVStore) getFoundationDevAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationDevAccount)
-}
-
-func (k KVStore) getFoundationCommunityAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationCommunityAccount)
-}
-
-func (k KVStore) getFoundationGrantsAccountAddress() (cosmos.AccAddress, error) {
-	return sdk.AccAddressFromBech32(types.FoundationGrantsAccount)
-}
-
 func (k KVStore) AllocateTokensToValidator(ctx context.Context, val stakingtypes.ValidatorI, tokens sdk.DecCoins) error {
 	return k.distributionKeeper.AllocateTokensToValidator(ctx, val, tokens)
 }
 
 func (k KVStore) BurnCoins(ctx context.Context, moduleName string, coins sdk.Coins) error {
 	return k.coinKeeper.BurnCoins(ctx, moduleName, coins)
+}
+
+func (k KVStore) SendToCommunityPool(ctx context.Context, amount sdk.Coins, sender sdk.AccAddress) error {
+	return k.distributionKeeper.FundCommunityPool(ctx, amount, sender)
 }

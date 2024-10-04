@@ -8,14 +8,7 @@
       "next_contract_id": "1",
       "params": {
         "block_per_year": "6311520",
-        "community_pool_percentage": "0.100000000000000000",
-        "dev_fund_percentage": "0.200000000000000000",
-        "emission_curve": "6",
-        "goal_bonded": "0.670000000000000000",
-        "grant_fund_percentage": "0.000000000000000000",
-        "inflation_change_percentage": "0.030000000000000000",
-        "inflation_max": "0.050000000000000000",
-        "inflation_min": "0.020000000000000000"
+        "emission_curve": "6"
       },
       "providers": [],
       "user_contract_sets": [],
@@ -26,20 +19,13 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "12",
+            "account_number": "9",
             "address": "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k",
             "pub_key": null,
             "sequence": "0"
           },
           "name": "providers",
           "permissions": []
-        },
-        {
-          "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "account_number": "10",
-          "address": "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q",
-          "pub_key": null,
-          "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -54,13 +40,6 @@
             "burner",
             "staking"
           ]
-        },
-        {
-          "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "account_number": "11",
-          "address": "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc",
-          "pub_key": null,
-          "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -110,20 +89,6 @@
           "name": "distribution",
           "permissions": [
             "minter"
-          ]
-        },
-        {
-          "@type": "/cosmos.auth.v1beta1.ModuleAccount",
-          "base_account": {
-            "account_number": "9",
-            "address": "tarkeo1k8925g52vwe5jgfp4nqr7ljuhs7nzu2f8g0za5",
-            "pub_key": null,
-            "sequence": "0"
-          },
-          "name": "arkeo",
-          "permissions": [
-            "minter",
-            "burner"
           ]
         },
         {
@@ -182,28 +147,10 @@
     "bank": {
       "balances": [
         {
-          "address": "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q",
-          "coins": [
-            {
-              "amount": "480000890270",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
           "address": "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43",
           "coins": [
             {
               "amount": "50000000000000000",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
-          "address": "tarkeo124qmjmg55v6q5c5vy0vcpefrywxnxhkm7426pc",
-          "coins": [
-            {
-              "amount": "240128972735",
               "denom": "uarkeo"
             }
           ]
@@ -221,16 +168,7 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "6297852460",
-              "denom": "uarkeo"
-            }
-          ]
-        },
-        {
-          "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
-          "coins": [
-            {
-              "amount": "36935",
+              "amount": "6426342986",
               "denom": "uarkeo"
             }
           ]
@@ -253,7 +191,7 @@
       "send_enabled": [],
       "supply": [
         {
-          "amount": "52000726427752400",
+          "amount": "52000006426342986",
           "denom": "uarkeo"
         }
       ]
@@ -328,7 +266,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "0.220000000000000000",
+            "amount": "128526859.720000000000000000",
             "denom": "uarkeo"
           }
         ]
@@ -337,7 +275,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "6297852494.780000000000000000",
+              "amount": "6297816126.280000000000000000",
               "denom": "uarkeo"
             }
           ],
@@ -356,7 +294,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "629785249.478000000000000000",
+                "amount": "629781612.628000000000000000",
                 "denom": "uarkeo"
               }
             ]
@@ -370,7 +308,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "5668067245.302000000000000000",
+                "amount": "5668034513.652000000000000000",
                 "denom": "uarkeo"
               }
             ]
@@ -545,8 +483,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6760075900031454.898464351600071864",
-        "inflation": "0.129999946225874372"
+        "annual_provisions": "6759997899879145.760700882792909356",
+        "inflation": "0.129999946224851156"
       },
       "params": {
         "blocks_per_year": "6311520",

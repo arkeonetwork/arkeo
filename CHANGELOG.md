@@ -41,6 +41,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Removed unused module account
 - Disabled System Validator Rewards 
 - Default Mint params set to zero
+- Validator and Delegator rewards from Reserve Module
 
 ## Fixed 
 - Testnet binary generation using go build 

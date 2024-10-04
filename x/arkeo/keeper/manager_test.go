@@ -5,8 +5,6 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 
@@ -287,23 +285,7 @@ func TestParamsRewardsPercentage(t *testing.T) {
 
 	params := k.GetParams(ctx)
 
-	require.Equal(t, params.CommunityPoolPercentage, sdkmath.LegacyMustNewDecFromStr("0.100000000000000000"))
-}
-func TestCommunityPoolDistributionToFoundationCommunityPool(t *testing.T) {
-	ctx, k, sk := SetupKeeperWithStaking(t)
-	mgr := NewManager(k, sk)
-
-	require.NoError(t, k.MintToModule(ctx, disttypes.ModuleName, getCoin(common.Tokens(200000))))
-
-	err := mgr.keeper.MoveTokensFromDistributionToFoundationPoolAccount(ctx)
-	require.NoError(t, err)
-
-	address, err := sdk.AccAddressFromBech32(types.FoundationCommunityAccount)
-	require.NoError(t, err)
-
-	bal := mgr.keeper.GetBalance(ctx, address).AmountOf(configs.Denom)
-
-	require.Equal(t, bal, sdkmath.NewInt(10000))
+	require.Equal(t, params.BlockPerYear, uint64(6311520))
 }
 
 func TestBlockRewardCalculation(t *testing.T) {
@@ -407,7 +389,7 @@ func TestValidatorPayouts(t *testing.T) {
 	require.NoError(t, sk.SetDelegation(ctx, del3))
 
 	// Mint initial funds to the reserve
-	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(200000))))
+	require.NoError(t, k.MintToModule(ctx, types.ReserveName, getCoin(common.Tokens(200000))))
 
 	ctx = ctx.WithBlockHeight(mgr.FetchConfig(ctx, configs.ValidatorPayoutCycle))
 
@@ -424,49 +406,31 @@ func TestValidatorPayouts(t *testing.T) {
 			BlockIdFlag: 2,
 		}
 	}
-	balanceDistribution, err := mgr.keeper.MintAndDistributeTokens(ctx, blockReward)
-	if err != nil {
-		ctx.Logger().Error("unable to mint and distribute tokens", "error", err)
-	}
-	devAccountAddress, err := sdk.AccAddressFromBech32(types.FoundationDevAccount)
-	require.NoError(t, err)
 
-	grantAccountAddress, err := sdk.AccAddressFromBech32(types.FoundationGrantsAccount)
-	require.NoError(t, err)
-
-	communityAccountAddress, err := sdk.AccAddressFromBech32(types.FoundationCommunityAccount)
-	require.NoError(t, err)
-
-	devAccountBal := k.GetBalance(ctx, devAccountAddress).AmountOf(configs.Denom)
-	require.Equal(t, devAccountBal, sdkmath.NewInt(400000))
-
-	grantAccountBal := k.GetBalance(ctx, grantAccountAddress).AmountOf(configs.Denom)
-	require.Equal(t, grantAccountBal, sdkmath.NewInt(0))
-
-	communityAccountBal := k.GetBalance(ctx, communityAccountAddress).AmountOf(configs.Denom)
-	require.Equal(t, communityAccountBal, sdkmath.NewInt(200000))
-
-	moduleBalance := k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
+	moduleBalance := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
 
-	require.NoError(t, mgr.ValidatorPayout(ctx, votes, balanceDistribution))
+	reserveSupply, err := mgr.reserveSupply(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, mgr.ValidatorPayout(ctx, votes, reserveSupply))
 
 	totalBal := cosmos.ZeroInt()
 
 	// Check balances of validators 7
-	checkBalance(ctx, t, k, acc1, configs.Denom, 164541, &totalBal)
-	checkBalance(ctx, t, k, acc2, configs.Denom, 328753, &totalBal)
-	checkBalance(ctx, t, k, acc3, configs.Denom, 819411, &totalBal)
+	checkBalance(ctx, t, k, acc1, configs.Denom, 2350588235294, &totalBal)
+	checkBalance(ctx, t, k, acc2, configs.Denom, 4696470588235, &totalBal)
+	checkBalance(ctx, t, k, acc3, configs.Denom, 11705882352941, &totalBal)
 
 	// Check balances of delegates
-	checkBalance(ctx, t, k, delAcc1, configs.Denom, 16455, &totalBal)
-	checkBalance(ctx, t, k, delAcc2, configs.Denom, 32875, &totalBal)
-	checkBalance(ctx, t, k, delAcc3, configs.Denom, 32776, &totalBal)
+	checkBalance(ctx, t, k, delAcc1, configs.Denom, 235058823529, &totalBal)
+	checkBalance(ctx, t, k, delAcc2, configs.Denom, 469647058823, &totalBal)
+	checkBalance(ctx, t, k, delAcc3, configs.Denom, 468235294117, &totalBal)
 
-	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(1394811))
+	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(19925882352939))
 
-	moduleBalance = k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom)
-	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(20000000000000))
+	moduleBalance = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
+	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(0))
 }
 func checkBalance(ctx cosmos.Context, t *testing.T, k Keeper, acc cosmos.AccAddress, denom string, expectedAmt int64, total *sdkmath.Int) {
 	bal := k.GetBalance(ctx, acc)

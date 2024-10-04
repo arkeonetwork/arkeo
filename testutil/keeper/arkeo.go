@@ -80,6 +80,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 			stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
 			stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 			types.ModuleName:               {authtypes.Minter, authtypes.Burner},
+			types.ReserveName:              {authtypes.Minter, authtypes.Burner},
 			types.ProviderName:             {},
 			types.ContractName:             {},
 			minttypes.ModuleName:           {authtypes.Minter},

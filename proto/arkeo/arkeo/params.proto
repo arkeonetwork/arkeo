@@ -10,44 +10,6 @@ option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 // Params defines the parameters for the module.
 message Params { 
     option (gogoproto.goproto_stringer) = false; 
-    string  community_pool_percentage= 1 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-    string  dev_fund_percentage= 2 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-    string  grant_fund_percentage= 3 [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-    string inflation_change_percentage = 4  [
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
-    string inflation_min = 5 [
-      (cosmos_proto.scalar) = "cosmos.Dec",
-      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-      (gogoproto.nullable) = false
-    ];
-
-    string inflation_max = 6 [
-      (cosmos_proto.scalar) = "cosmos.Dec",
-      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-      (gogoproto.nullable) = false
-    ];
-
-    string goal_bonded = 7 [
-      (cosmos_proto.scalar) = "cosmos.Dec",
-      (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-      (gogoproto.nullable) = false
-    ];
-
     uint64 block_per_year = 8;
 
     uint64 emission_curve = 9;
