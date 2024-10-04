@@ -36,6 +36,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Documentation update and addition of validator setup documentation 
 - New accounts to handle rewards 
 - New Params to Arkeo Module 
+- Update validator distribution of rewards 
 
 ## Changed
 - Removed unused module account
