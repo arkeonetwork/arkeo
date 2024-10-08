@@ -8,6 +8,7 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	cmptm "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -286,8 +287,12 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 
 			intReward, remainder := delegateReward.TruncateInt(), delegateReward.Sub(cosmos.NewDec(delegateReward.TruncateInt().Int64()))
 			totalRemainder = totalRemainder.Add(remainder)
+			if err := mgr.keeper.SendFromModuleToModule(ctx, types.ReserveName, disttypes.ModuleName, cosmos.NewCoins(cosmos.NewCoin(blockReward.Denom, intReward))); err != nil {
+				mgr.keeper.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
+				continue
+			}
 
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, delegateAcc, cosmos.NewCoins(cosmos.NewCoin(blockReward.Denom, intReward))); err != nil {
+			if err := mgr.keeper.AllocateTokensToValidator(ctx, val, sdk.NewDecCoins(sdk.NewDecCoin(blockReward.Denom, intReward))); err != nil {
 				mgr.keeper.Logger().Error("unable to pay rewards to delegate", "delegate", delegate.DelegatorAddress, "error", err)
 				continue
 			}
@@ -297,7 +302,11 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 		if !validatorReward.IsZero() {
 			intValidatorReward, remainder := validatorReward.TruncateInt(), validatorReward.Sub(cosmos.NewDec(validatorReward.TruncateInt().Int64()))
 			totalRemainder = totalRemainder.Add(remainder)
-			if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ReserveName, acc, sdk.NewCoins(sdk.NewCoin(blockReward.Denom, intValidatorReward))); err != nil {
+			if err := mgr.keeper.SendFromModuleToModule(ctx, types.ReserveName, disttypes.ModuleName, cosmos.NewCoins(cosmos.NewCoin(blockReward.Denom, intValidatorReward))); err != nil {
+				mgr.keeper.Logger().Error("unable to pay rewards to delegate", "delegate", val.GetOperator(), "error", err)
+				continue
+			}
+			if err := mgr.keeper.AllocateTokensToValidator(ctx, val, sdk.NewDecCoins(sdk.NewDecCoin(blockReward.Denom, intValidatorReward))); err != nil {
 				mgr.keeper.Logger().Error("unable to pay rewards to validator", "validator", val.GetOperator(), "error", err)
 				continue
 			}
