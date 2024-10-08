@@ -43,6 +43,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Disabled System Validator Rewards 
 - Default Mint params set to zero
 - Validator and Delegator rewards from Reserve Module
+- Updated testnet seed and peer address
 
 ## Fixed 
 - Testnet binary generation using go build 
