@@ -60,14 +60,14 @@ Configure The Binary
 arkeod keys add <key-name>
 arkeod config set client node tcp://localhost:${ARKEO_PORT}57
 arkeod config set client keyring-backend test
-arkeod config set client chain-id arkeo
-arkeod init <your-custom-moniker> --chain-id arkeo
+arkeod config set client chain-id arkeo-testnet-3
+arkeod init <your-custom-moniker> --chain-id arkeo-testnet-3
 sudo ufw allow ${ARKEO_PORT}56/tcp
 ```
 
 ## Download Genesis 
 ```shell
-curl -s http://seed31.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json
+curl -s http://seed.innovationtheory.com:26657/genesis | jq '.result.genesis' > $HOME/.arkeo/config/genesis.json
 ```
 ## Configure Pruning, Minimum gas price , enable prometheus and disable indexing 
 
