@@ -44,6 +44,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Default Mint params set to zero
 - Validator and Delegator rewards from Reserve Module
 - Updated testnet seed and peer address
+- Updated testnet docs 
 
 ## Fixed 
 - Testnet binary generation using go build 
