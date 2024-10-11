@@ -37,6 +37,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - New accounts to handle rewards 
 - New Params to Arkeo Module 
 - Update validator distribution of rewards 
+- Testnet Genesis File
 
 ## Changed
 - Removed unused module account
@@ -59,6 +60,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - update module to implement APPModuleBasic and AppModule
 - Updated Tests on arkeo module keeper
 - version issue on begin blocker 
+- Fixed Genesis Url
 
 # v1.0.0-Prerelease
 

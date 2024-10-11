@@ -12,12 +12,32 @@ Becoming a validator involves running node and staking arkeo tokens to participa
 ```shell
 arkeod keys add <your-wallet-name>
 ```
+> For the new account balances wont be there if you're running a testnet validator please request tokens from the faucet 
+
+### Request Tokens From Faucet
+To receive test tokens, follow these steps:
+
+1. **Join the Discord Server**:
+   - Navigate to the official [Discord server](https://discord.com/invite/BfEHpm6uFc) for the testnet.
+
+2. **Find the Faucet Channel**:
+   - In the Discord server, go to the **TESTNET** branch and select the **faucet** channel.
+
+3. **Request Tokens**:
+   - In the **faucet** channel, type the following command:
+     ```
+     $request <YOUR_WALLET_ADDRESS>
+     ```
+   - Replace `<YOUR_WALLET_ADDRESS>` with the address you created in the previous step.
+     ![Faucet](../docs/img/faucet.png "Faucet")
+
+The faucet will send tokens to your wallet for use on the testnet.
+
 
 ### Check the balances 
 ```shell
 arkeod query bank balances $(arkeod keys show <your-wallet-name> -a)
 ```
-> For the new account balances wont be there if you're running a testnet validator please request tokens from the faucet 
 
 ## Create A Validator
 > Don’t change anything if you don’t understand what you’re doing.
@@ -76,12 +96,12 @@ arkeod tx staking delegate YOUR_VALOPER_ADDRESS <token amount to stake>uarkeo --
 Active validators list
 
 ```shell
-arkeod query staking validators -o json | jq -r '.validators[] | select(.status=="BOND_STATUS_BONDED") | [.operator_address, .status, (.tokens|tonumber / pow(10; 6)), .description.moniker] | @csv' | column -t -s"," | sort -k3 -n -r
+arkeod query staking validators -o json | jq -r '.validators[] | select(.status=="BOND_STATUS_BONDED") | [.operator_address, .status, (.tokens|tonumber / pow(10; 8)), .description.moniker] | @csv' | column -t -s"," | sort -k3 -n -r
 ```
 Inactive validators list
 
 ```shell
-arkeod query staking validators -o json | jq -r '.validators[] | select(.status=="BOND_STATUS_UNBONDED") | [.operator_address, .status, (.tokens|tonumber / pow(10; 6)), .description.moniker] | @csv' | column -t -s"," | sort -k3 -n -r
+arkeod query staking validators -o json | jq -r '.validators[] | select(.status=="BOND_STATUS_UNBONDED") | [.operator_address, .status, (.tokens|tonumber / pow(10; 8)), .description.moniker] | @csv' | column -t -s"," | sort -k3 -n -r
 ```
 
 ## Remove Node:
