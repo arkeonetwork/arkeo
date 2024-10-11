@@ -12,6 +12,7 @@ Becoming a validator involves running node and staking arkeo tokens to participa
 ```shell
 arkeod keys add <your-wallet-name>
 ```
+> For the new account balances wont be there if you're running a testnet validator please request tokens from the faucet 
 
 ### Request Tokens From Faucet
 To receive test tokens, follow these steps:
@@ -37,7 +38,6 @@ The faucet will send tokens to your wallet for use on the testnet.
 ```shell
 arkeod query bank balances $(arkeod keys show <your-wallet-name> -a)
 ```
-> For the new account balances wont be there if you're running a testnet validator please request tokens from the faucet 
 
 ## Create A Validator
 > Don’t change anything if you don’t understand what you’re doing.
