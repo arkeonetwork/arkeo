@@ -594,7 +594,6 @@
     "upgrade": {},
     "vesting": {}
   },
-  "app_version": "v1.0.0-prerelease",
   "chain_id": "arkeo",
   "consensus": {
     "params": {
