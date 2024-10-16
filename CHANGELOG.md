@@ -33,6 +33,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 ## Added 
 
 ## Changed
+- Updated thorchain claim server address handling
 
 ## Fixed 
 - Fixed Regression Test Version Issues 
