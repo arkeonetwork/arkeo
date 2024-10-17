@@ -44,6 +44,7 @@ func export(path string) error {
 	appState, _ := export["app_state"].(map[string]any)
 	claimArkeo, _ := appState["claimarkeo"].(map[string]any)
 	params, _ := claimArkeo["params"].(map[string]any)
+	delete(export, "app_version")
 	delete(params, "airdrop_start_time")
 	staking, _ := appState["staking"].(map[string]any)
 	validators, _ := staking["validators"].([]any)

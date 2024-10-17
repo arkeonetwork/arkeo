@@ -28,6 +28,16 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.2-Prerelease 
+
+## Added 
+
+## Changed
+- Updated thorchain claim server address handling
+
+## Fixed 
+- Fixed Regression Test Version Issues 
+
 # v1.0.1-Prerelease 
 
 ## Added 
@@ -61,6 +71,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Updated Tests on arkeo module keeper
 - version issue on begin blocker 
 - Fixed Genesis Url
+- Fixed thorchain claim server address mainnet
 
 # v1.0.0-Prerelease
 
