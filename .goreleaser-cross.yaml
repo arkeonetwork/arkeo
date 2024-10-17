@@ -134,7 +134,7 @@ archives:
       - none*
 
 checksum:
-  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
+  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{ end }}_cross_checksums.txt'
 
 dockers:
   - use: buildx
