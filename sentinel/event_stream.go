@@ -75,7 +75,8 @@ func (p Proxy) EventListener(host string) {
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'",
-		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgBondProvider OR /arkeo.arkeo.MsgModProvider' ",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgBondProvider'",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgModProvider'",
 	)
 
 	dispatchEvents := func(result tmCoreTypes.ResultEvent) {
