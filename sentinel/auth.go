@@ -224,7 +224,7 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 
 			if conf.PerUserRateLimit > 0 {
 				if ok := p.isRateLimited(contract.Id, remoteAddr, conf.PerUserRateLimit); ok {
-					http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
+					http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 					return
 				}
 			}

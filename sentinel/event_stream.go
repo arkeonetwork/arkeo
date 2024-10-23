@@ -11,6 +11,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
 
 	"github.com/cometbft/cometbft/libs/log"
 
@@ -74,6 +75,7 @@ func (p Proxy) EventListener(host string) {
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'",
+		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgBondProvider OR /arkeo.arkeo.MsgModProvider' ",
 	)
 
 	dispatchEvents := func(result tmCoreTypes.ResultEvent) {
@@ -89,6 +91,12 @@ func (p Proxy) EventListener(host string) {
 
 		case strings.Contains(result.Query, "MsgClaimContractIncome"):
 			p.handleContractSettlementEvent(result)
+
+		case strings.Contains(result.Query, "MsgModProvider"):
+			p.handleModProviderEvent(result)
+
+		case strings.Contains(result.Query, "MsgBondProvider"):
+			p.handleBondProviderEvent(result)
 
 		default:
 			logger.Error("Unknown Event Type", "Query", result.Query)
@@ -280,4 +288,95 @@ func parseTypedEvent(result tmCoreTypes.ResultEvent, eventType string) (proto.Me
 	}
 
 	return msg, fmt.Errorf("event %s not found", eventType)
+}
+
+func (p Proxy) handleBondProviderEvent(result tmCoreTypes.ResultEvent) {
+	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventBondProvider")
+	if err != nil {
+		p.logger.Error("failed to parse typed event", "error", err)
+		return
+	}
+
+	evt, ok := typedEvent.(*types.EventBondProvider)
+	if !ok {
+		p.logger.Error(fmt.Sprintf("failed to cast %T to EventOpenContract", typedEvent))
+		return
+	}
+
+	service := common.Service(common.ServiceLookup[evt.Service])
+	if !p.isMyPubKey(evt.Provider) {
+		return
+	}
+	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider)
+	if err != nil {
+		p.logger.Error("failed to get provider config, initializing new config", "error", err)
+		providerConfig = ProviderConfiguration{
+			PubKey:              evt.Provider,
+			Service:             service,
+			Bond:                evt.BondAbs,
+			BondRelative:        evt.BondRel,
+			MetadataUri:         "",
+			MetadataNonce:       0,
+			Status:              types.ProviderStatus(0),
+			MinContractDuration: 0,
+			MaxContractDuration: 0,
+			SubscriptionRate:    cosmos.Coins{},
+			PayAsYouGoRate:      cosmos.Coins{},
+			SettlementDuration:  0,
+		}
+	}
+
+	providerConfig.Bond = evt.BondAbs
+	providerConfig.BondRelative = evt.BondRel
+	err = p.ProviderConfigStore.Set(providerConfig)
+	if err != nil {
+		p.logger.Error("failed to update provider configuration", "error", err)
+		return
+	}
+	p.logger.Info("Provider configuration updated on bond provider event", "pubkey", evt.Provider.String(), "service", service.String())
+
+}
+func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
+	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventModProvider")
+	if err != nil {
+		p.logger.Error("failed to parse typed event", "error", err)
+		return
+	}
+
+	evt, ok := typedEvent.(*types.EventModProvider)
+	if !ok {
+		p.logger.Error(fmt.Sprintf("failed to cast %T to EventOpenContract", typedEvent))
+		return
+	}
+
+	service := common.Service(common.ServiceLookup[evt.Service])
+
+	if !p.isMyPubKey(evt.Provider) {
+		return
+	}
+
+	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider)
+	if err != nil {
+		p.logger.Error(fmt.Sprintf("failed to get provider %s", err))
+		return
+	}
+
+	providerConfig.Bond = evt.Bond
+	providerConfig.Service = service
+	providerConfig.MetadataUri = evt.MetadataUri
+	providerConfig.MetadataNonce = evt.MetadataNonce
+	providerConfig.Status = evt.Status
+	providerConfig.MinContractDuration = evt.MaxContractDuration
+	providerConfig.MaxContractDuration = evt.MaxContractDuration
+	providerConfig.SubscriptionRate = evt.SubscriptionRate
+	providerConfig.PayAsYouGoRate = evt.PayAsYouGoRate
+	providerConfig.SettlementDuration = evt.SettlementDuration
+
+	err = p.ProviderConfigStore.Set(providerConfig)
+	if err != nil {
+		p.logger.Error("failed to update provider configuration", "error", err)
+		return
+	}
+	p.logger.Info("Provider configuration updated on mod provider event", "pubkey", evt.Provider.String(), "service", service.String())
+
 }

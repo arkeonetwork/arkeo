@@ -29,7 +29,8 @@ func setUpTest(t *testing.T, pk1, pk2 common.PubKey) *httptest.Server {
 
 func TestHandleActiveContract(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
@@ -84,7 +85,8 @@ func TestHandleActiveContract(t *testing.T) {
 
 func TestHandleClaim(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
@@ -152,7 +154,8 @@ func TestHandleClaim(t *testing.T) {
 
 func TestHandleOpenClaims(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,

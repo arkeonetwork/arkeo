@@ -31,19 +31,28 @@ type Proxy struct {
 	MemStore            *MemStore
 	ClaimStore          *ClaimStore
 	ContractConfigStore *ContractConfigurationStore
+	ProviderConfigStore *ProviderConfigurationStore
 	logger              log.Logger
 	proxies             map[string]*url.URL
 }
 
-func NewProxy(config conf.Configuration) Proxy {
+func NewProxy(config conf.Configuration) (Proxy, error) {
 	logger := log.NewTMLogger(log.NewSyncWriter(os.Stdout))
 	claimStore, err := NewClaimStore(config.ClaimStoreLocation)
 	if err != nil {
-		panic(err)
+		logger.Error(fmt.Sprintf("failed to create claim store with error: %s", err))
+		return Proxy{}, fmt.Errorf("failed to create claim store with error: %s", err)
 	}
 	contractConfigStore, err := NewContractConfigurationStore(config.ContractConfigStoreLocation)
 	if err != nil {
-		panic(err)
+		logger.Error(fmt.Sprintf("failed to create contract config store with error: %s", err))
+		return Proxy{}, fmt.Errorf("failed to create contract config store with error: %s", err)
+	}
+
+	providerConfigStore, err := NewProviderConfigurationStore(config.ProviderConfigStoreLocation)
+	if err != nil {
+		logger.Error(fmt.Sprintf("failed to create provider config store with error: %s", err))
+		return Proxy{}, fmt.Errorf("failed to create provider config store with error: %s", err)
 	}
 
 	return Proxy{
@@ -54,7 +63,8 @@ func NewProxy(config conf.Configuration) Proxy {
 		ContractConfigStore: contractConfigStore,
 		proxies:             loadProxies(),
 		logger:              logger,
-	}
+		ProviderConfigStore: providerConfigStore,
+	}, nil
 }
 
 func loadProxies() map[string]*url.URL {
@@ -79,7 +89,7 @@ func loadProxies() map[string]*url.URL {
 		case "ltc-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://infra:password@litecoin-daemon:8332")
 		case "arkeo-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL("http://arkeo:1317")
+			proxies[serviceName] = common.MustParseURL("http://localhost:1317")
 		case "eth-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://ethereum-daemon:8545")
 		case "gaia-mainnet-grpc":
@@ -324,6 +334,7 @@ func (p Proxy) handleClaim(w http.ResponseWriter, r *http.Request) {
 
 	claim := NewClaim(contractId, nil, 0, "")
 	claim, err = p.ClaimStore.Get(claim.Key())
+	p.logger.Info(fmt.Sprintf("claim data %v", claim))
 	if err != nil {
 		p.logger.Error("fail to get claim from memstore", "error", err, "key", claim.Key())
 		respondWithError(w, fmt.Sprintf("fetch contract error: %s", err), http.StatusBadRequest)
@@ -415,6 +426,7 @@ func (p *Proxy) getRouter() *mux.Router {
 	router.HandleFunc(RoutesClaim, http.HandlerFunc(p.handleClaim)).Methods(http.MethodGet)
 	router.HandleFunc(RoutesOpenClaims, http.HandlerFunc(p.handleOpenClaims)).Methods(http.MethodGet)
 	router.HandleFunc(RouteManage, http.HandlerFunc(p.handleContract)).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc(RouteProviderData, http.HandlerFunc(p.handleProviderData)).Methods(http.MethodGet)
 	router.PathPrefix("/").Handler(
 		p.auth(
 			handlers.ProxyHeaders(
@@ -451,4 +463,18 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_, _ = w.Write(response)
+}
+
+func (p Proxy) handleProviderData(w http.ResponseWriter, r *http.Request) {
+	r.Header.Set("Content-Type", "application/json")
+
+	providerConfigData, err := p.ProviderConfigStore.Get(p.Config.ProviderPubKey)
+	if err != nil {
+		p.logger.Error("failed to get provider details", "error", err, "provider", p.Config.ProviderPubKey)
+		respondWithError(w, fmt.Sprintf("Invalid Provider: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	d, _ := json.Marshal(providerConfigData)
+	_, _ = w.Write(d)
 }
