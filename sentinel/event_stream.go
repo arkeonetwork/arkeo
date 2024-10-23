@@ -310,7 +310,7 @@ func (p Proxy) handleBondProviderEvent(result tmCoreTypes.ResultEvent) {
 	}
 	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider)
 	if err != nil {
-		p.logger.Error("failed to get provider config, initializing new config", "error", err)
+		p.logger.Info("failed to get provider config, initializing new config", "error", err)
 		providerConfig = ProviderConfiguration{
 			PubKey:              evt.Provider,
 			Service:             service,
