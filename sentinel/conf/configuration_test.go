@@ -19,6 +19,7 @@ func TestConfiguration(t *testing.T) {
 	os.Setenv("FREE_RATE_LIMIT", "99")
 	os.Setenv("CLAIM_STORE_LOCATION", "clammy")
 	os.Setenv("CONTRACT_CONFIG_STORE_LOCATION", "configy")
+	os.Setenv("PROVIDER_CONFIG_STORE_LOCATION", "providy")
 
 	config := NewConfiguration()
 
@@ -32,4 +33,5 @@ func TestConfiguration(t *testing.T) {
 	require.Equal(t, config.FreeTierRateLimit, 99)
 	require.Equal(t, config.ClaimStoreLocation, "clammy")
 	require.Equal(t, config.ContractConfigStoreLocation, "configy")
+	require.Equal(t, config.ProviderConfigStoreLocation, "providy")
 }
