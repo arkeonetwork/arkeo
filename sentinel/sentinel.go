@@ -89,7 +89,7 @@ func loadProxies() map[string]*url.URL {
 		case "ltc-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://infra:password@litecoin-daemon:8332")
 		case "arkeo-mainnet-fullnode":
-			proxies[serviceName] = common.MustParseURL("http://localhost:1317")
+			proxies[serviceName] = common.MustParseURL("http://arkeo:1317")
 		case "eth-mainnet-fullnode":
 			proxies[serviceName] = common.MustParseURL("http://ethereum-daemon:8545")
 		case "gaia-mainnet-grpc":
