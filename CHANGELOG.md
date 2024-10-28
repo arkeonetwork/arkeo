@@ -28,6 +28,16 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.3-Prerelease 
+
+## Added 
+
+## Changed
+- Updated sentinel to handle provider events
+
+## Fixed 
+- Fixed code lint
+
 # v1.0.2-Prerelease 
 
 ## Added 
