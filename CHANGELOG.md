@@ -37,6 +37,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ## Fixed 
 - Fixed code lint
+- Fixed ws client issue with event stream
 
 # v1.0.2-Prerelease 
 
