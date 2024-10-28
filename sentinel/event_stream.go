@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"cosmossdk.io/errors"
 	"github.com/gogo/protobuf/proto"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 
+	tmlog "github.com/cometbft/cometbft/libs/log"
 	tmclient "github.com/cometbft/cometbft/rpc/client/http"
 	tmCoreTypes "github.com/cometbft/cometbft/rpc/core/types"
 	tmtypes "github.com/cometbft/cometbft/types"
@@ -22,6 +24,8 @@ import (
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
+
+var numOfWebSocketClients = 2
 
 func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tmCoreTypes.ResultEvent {
 	out, err := client.Subscribe(context.Background(), "", query)
@@ -32,26 +36,46 @@ func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tm
 	return out
 }
 
+func NewTendermintClient(baseURL string) (*tmclient.HTTP, error) {
+	client, err := tmclient.New(baseURL, "/websocket")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error creating websocket client")
+	}
+	logger := tmlog.NewTMLogger(tmlog.NewSyncWriter(os.Stdout))
+	client.SetLogger(logger)
+
+	return client, nil
+}
+
 func (p Proxy) EventListener(host string) {
 	logger := p.logger
-	client, err := tmclient.New(fmt.Sprintf("tcp://%s", host), "/websocket")
-	if err != nil {
-		logger.Error("failure to create websocket client", "error", err)
-		panic(err)
-	}
-	client.SetLogger(logger)
-	err = client.Start()
-	if err != nil {
-		logger.Error("Failed to start a client", "err", err)
-		os.Exit(1)
-	}
-	defer client.Stop() // nolint
 
-	// create a unified channel for receiving events
+	logger.Info("starting realtime indexing using /websocket")
 
+	// as maximum allowed connection is 5 per ws client(cometbft) we split this into 2 client to handle 3 connection each
+	clients := make([]*tmclient.HTTP, numOfWebSocketClients)
+
+	for i := 0; i < numOfWebSocketClients; i++ {
+		client, err := NewTendermintClient(fmt.Sprintf("tcp://%s", host))
+		if err != nil {
+			panic(fmt.Sprintf("error creating tm client for %s: %+v", host, err))
+		}
+		if err = client.Start(); err != nil {
+			panic(fmt.Sprintf("error starting ws client: %s: %+v", host, err))
+		}
+		defer func() {
+			if err := client.Stop(); err != nil {
+				logger.Error("Failed to stop the client", "error", err)
+			}
+		}()
+		clients[i] = client
+	}
+
+	// Create a unified channel for receiving events
 	eventChan := make(chan tmCoreTypes.ResultEvent, 1000)
 
-	subscribeToEvents := func(queries ...string) {
+	// Function to subscribe to events for a given client
+	subscribeToEvents := func(client *tmclient.HTTP, queries ...string) {
 		for _, query := range queries {
 			out := subscribe(client, logger, query)
 
@@ -60,7 +84,6 @@ func (p Proxy) EventListener(host string) {
 					select {
 					case result := <-out:
 						eventChan <- result
-
 					case <-client.Quit():
 						return
 					}
@@ -69,11 +92,14 @@ func (p Proxy) EventListener(host string) {
 		}
 	}
 
-	// subscribe to events
-	go subscribeToEvents(
+	// Subscribe to events for each client
+	go subscribeToEvents(clients[0],
 		"tm.event = 'NewBlock'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgOpenContract'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgCloseContract'",
+	)
+
+	go subscribeToEvents(clients[1],
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgClaimContractIncome'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgBondProvider'",
 		"tm.event = 'Tx' AND message.action='/arkeo.arkeo.MsgModProvider'",
