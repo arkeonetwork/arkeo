@@ -334,7 +334,7 @@ func (p Proxy) handleBondProviderEvent(result tmCoreTypes.ResultEvent) {
 	if !p.isMyPubKey(evt.Provider) {
 		return
 	}
-	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider)
+	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider, service.String())
 	if err != nil {
 		p.logger.Info("failed to get provider config, initializing new config", "error", err)
 		providerConfig = ProviderConfiguration{
@@ -381,7 +381,7 @@ func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 
-	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider)
+	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider, service.String())
 	if err != nil {
 		p.logger.Error(fmt.Sprintf("failed to get provider %s", err))
 		return

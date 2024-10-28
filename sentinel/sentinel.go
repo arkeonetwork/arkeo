@@ -467,8 +467,15 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 func (p Proxy) handleProviderData(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	serviceString, ok := vars["service"]
+	if !ok {
+		respondWithError(w, "missing service in uri", http.StatusBadRequest)
+		return
+	}
+	service := common.Service(common.ServiceLookup[serviceString])
 
-	providerConfigData, err := p.ProviderConfigStore.Get(p.Config.ProviderPubKey)
+	providerConfigData, err := p.ProviderConfigStore.Get(p.Config.ProviderPubKey, service.String())
 	if err != nil {
 		p.logger.Error("failed to get provider details", "error", err, "provider", p.Config.ProviderPubKey)
 		respondWithError(w, fmt.Sprintf("Invalid Provider: %s", err), http.StatusBadRequest)

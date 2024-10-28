@@ -59,8 +59,8 @@ type ProviderConfiguration struct {
 }
 
 // GetProviderModOrBondConfig retrieves a ProviderConfiguration by its PubKey
-func (ps *ProviderConfigurationStore) Get(pubKey common.PubKey) (ProviderConfiguration, error) {
-	data, err := ps.db.Get([]byte(pubKey.String()), nil)
+func (ps *ProviderConfigurationStore) Get(pubKey common.PubKey, service string) (ProviderConfiguration, error) {
+	data, err := ps.db.Get([]byte(pubKey.String()+service), nil)
 	if err != nil {
 		return ProviderConfiguration{}, err
 	}
@@ -80,13 +80,13 @@ func (ps *ProviderConfigurationStore) Set(config ProviderConfiguration) error {
 		return err
 	}
 
-	err = ps.db.Put([]byte(config.PubKey.String()), data, nil)
+	err = ps.db.Put([]byte(config.PubKey.String()+config.Service.String()), data, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *ProviderConfigurationStore) Remove(key common.PubKey) error {
-	return p.db.Delete([]byte(key.String()), nil)
+func (p *ProviderConfigurationStore) Remove(pubKey common.PubKey, service string) error {
+	return p.db.Delete([]byte(pubKey.String()+service), nil)
 }

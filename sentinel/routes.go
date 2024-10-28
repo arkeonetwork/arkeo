@@ -6,5 +6,5 @@ const (
 	RoutesClaim          = "/claim/{id}"
 	RoutesOpenClaims     = "/open-claims"
 	RouteManage          = "/manage/contract/{id}"
-	RouteProviderData    = "/provider"
+	RouteProviderData    = "/provider/{service}"
 )

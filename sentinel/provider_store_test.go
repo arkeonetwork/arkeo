@@ -53,7 +53,7 @@ func TestProviderConfigurationStore_SetAndGet(t *testing.T) {
 	err = store.Set(config)
 	require.NoError(t, err, "expected no error when setting provider config")
 
-	retrievedConfig, err := store.Get(pubKey)
+	retrievedConfig, err := store.Get(pubKey, service.String())
 	require.NoError(t, err, "expected no error when getting provider config")
 	require.Equal(t, config, retrievedConfig, "expected the stored and retrieved configs to be the same")
 
@@ -85,10 +85,10 @@ func TestProviderConfigurationStore_Remove(t *testing.T) {
 	err = store.Set(config)
 	require.NoError(t, err, "expected no error when setting provider config")
 
-	err = store.Remove(pubKey)
+	err = store.Remove(pubKey, service.String())
 	require.NoError(t, err, "expected no error when removing provider config")
 
-	_, err = store.Get(pubKey)
+	_, err = store.Get(pubKey, service.String())
 	require.Error(t, err, "expected error when getting non-existent provider config")
 
 	err = store.db.Close()
