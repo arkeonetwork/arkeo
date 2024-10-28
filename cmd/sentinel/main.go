@@ -14,8 +14,8 @@ func main() {
 	c.SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
 
 	config := conf.NewConfiguration()
-	proxy , err := sentinel.NewProxy(config)
-	if err!=nil{
+	proxy, err := sentinel.NewProxy(config)
+	if err != nil {
 		fmt.Println(err)
 		return
 	}

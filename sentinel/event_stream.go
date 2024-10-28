@@ -335,7 +335,6 @@ func (p Proxy) handleBondProviderEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 	p.logger.Info("Provider configuration updated on bond provider event", "pubkey", evt.Provider.String(), "service", service.String())
-
 }
 func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 	typedEvent, err := parseTypedEvent(result, "arkeo.arkeo.EventModProvider")
@@ -379,5 +378,4 @@ func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 	p.logger.Info("Provider configuration updated on mod provider event", "pubkey", evt.Provider.String(), "service", service.String())
-
 }

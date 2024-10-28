@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/arkeonetwork/arkeo/common"
-	"github.com/arkeonetwork/arkeo/common/cosmos"
-	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+
+	"github.com/arkeonetwork/arkeo/common"
+	"github.com/arkeonetwork/arkeo/common/cosmos"
+	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
 type ProviderConfigurationStore struct {
@@ -19,7 +20,6 @@ type ProviderConfigurationStore struct {
 }
 
 func NewProviderConfigurationStore(levelDbFolder string) (*ProviderConfigurationStore, error) {
-
 	var db *leveldb.DB
 	var err error
 	if len(levelDbFolder) == 0 {
