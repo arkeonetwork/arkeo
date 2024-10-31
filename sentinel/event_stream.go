@@ -392,7 +392,7 @@ func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 	providerConfig.MetadataUri = evt.MetadataUri
 	providerConfig.MetadataNonce = evt.MetadataNonce
 	providerConfig.Status = evt.Status
-	providerConfig.MinContractDuration = evt.MaxContractDuration
+	providerConfig.MinContractDuration = evt.MinContractDuration
 	providerConfig.MaxContractDuration = evt.MaxContractDuration
 	providerConfig.SubscriptionRate = evt.SubscriptionRate
 	providerConfig.PayAsYouGoRate = evt.PayAsYouGoRate
