@@ -18,7 +18,7 @@ import (
 func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) error {
 	// validate address if valid based on chain
 	if !types.IsValidAddress(claimRecord.Address, claimRecord.Chain) {
-		return sdkerror.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address for chain %s", claimRecord.Chain.String())
+		return sdkerror.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address %s for chain %s", claimRecord.Address, claimRecord.Chain.String())
 	}
 
 	store := ctx.KVStore(k.storeKey)

@@ -35,6 +35,7 @@ FROM ubuntu:lunar
 # hadolint ignore=DL3008,DL4006
 RUN apt-get update -y && \
     apt-get upgrade -y && \
+    apt-get install -y bc && \
     apt-get install -y --no-install-recommends \
       jq curl htop vim ca-certificates && \
     apt-get clean && \

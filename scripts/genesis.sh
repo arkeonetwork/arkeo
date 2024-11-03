@@ -65,24 +65,24 @@ add_claim_records() {
 }
 
 set_fee_pool() {
-    local denom="$1"
-    local amount="$2"
+	local denom="$1"
+	local amount="$2"
 
-    jq --arg DENOM "$denom" --arg AMOUNT "$amount" '.app_state.distribution.fee_pool.community_pool = [{
+	jq --arg DENOM "$denom" --arg AMOUNT "$amount" '.app_state.distribution.fee_pool.community_pool = [{
         "denom": $DENOM,
         "amount": $AMOUNT
     }]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
-    mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
 disable_mint_params() {
-    jq '.app_state.mint.minter.inflation = "0.000000000000000000" |
+	jq '.app_state.mint.minter.inflation = "0.000000000000000000" |
         .app_state.mint.minter.annual_provisions = "0.000000000000000000" |
         .app_state.mint.params.inflation_rate_change = "0.000000000000000000" |
         .app_state.mint.params.inflation_max = "0.000000000000000000" |
         .app_state.mint.params.inflation_min = "0.000000000000000000"' \
-    <~/.arkeo/config/genesis.json >/tmp/genesis.json
-    mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+		<~/.arkeo/config/genesis.json >/tmp/genesis.json
+	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
 if [ ! -f ~/.arkeo/config/priv_validator_key.json ]; then
@@ -104,22 +104,18 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	disable_mint_params
 
 	if [ "$NET" = "mocknet" ] || [ "$NET" = "testnet" ]; then
-		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 2420000000000000 'arkeo-reserve' 
+		add_module tarkeo1d0m97ywk2y4vq58ud6q5e0r3q9khj9e3unfe4t $TOKEN 2420000000000000 'arkeo-reserve'
 		add_module tarkeo14tmx70mvve3u7hfmd45vle49kvylk6s2wllxny $TOKEN 3025000000000000 'claimarkeo'
 		add_module tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e $TOKEN 4840000000000000 'distribution'
-		# this is to handle the balance set to distribution as a community pool 
+		# this is to handle the balance set to distribution as a community pool
 		set_fee_pool $TOKEN 4840000000000000
 
-		
-
-		# Add Foundational Accounts            
+		# Add Foundational Accounts
 		# 	FoundationDevAccount       = "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q"
 		add_account "tarkeo1x978nttd8vgcgnv9wxut4dh7809lr0n2fhuh0q" $TOKEN 1210000000000000
 		#   FoundationGrantsAccount    = "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj"
 		add_account "tarkeo1a307z4a82mcyv9njdj9ajnd9xpp90kmeqwntxj" $TOKEN 605000000000000
-		                                                                   
-	
-	
+
 		# Thorchain derived test addresses
 		add_account "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" $TOKEN 1000000000000000 # bob, 10m
 		add_claim_records "ARKEO" "tarkeo1dllfyp57l4xj5umqfcqy6c2l3xfk0qk6zpc3t7" 1000 1000 1000 true
@@ -146,6 +142,8 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	# Update the supply field in genesis.json using jq
 	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+
+	source ./add-claim-records.sh
 
 	set -e
 	arkeod validate-genesis --trace
