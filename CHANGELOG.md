@@ -31,6 +31,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 # v1.0.3-Prerelease 
 
 ## Added 
+- Added sentinel setup docs
 
 ## Changed
 - Updated sentinel to handle provider events
