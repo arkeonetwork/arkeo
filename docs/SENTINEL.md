@@ -102,3 +102,32 @@ Once the Sentinel service is running, update the provider metadata by running:
 arkeod tx arkeo mod-provider <provider-pubkey> <service> "http://<sentineladdress>/metadata.json" <nonce> <status> <min-contract-duration> <max-contract-duration> <subscription-rates> <pay-as-you-go-rates> <settlement-duration> --from <provider-wallet> --keyring-backend  --fees 20uarkeo
 ```
 
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Provider
+    participant ARKEO_CLI
+    participant ARKEO
+    participant Sentinel
+
+    Provider->>ARKEO_CLI: Bond Provider (with bond amount and service)
+    ARKEO_CLI->>ARKEO: Validate and Execute Transaction
+    ARKEO-->>ARKEO_CLI: Tx hash returned to user
+    ARKEO_CLI-->>Provider: Verify Tx hash for success
+    ARKEO-->>ARKEO_CLI: Tx Result
+    ARKEO_CLI-->>Provider: Tx Result
+
+    Provider->>Sentinel: Starts Sentinel with Provider PubKey
+    Sentinel-->>Provider: URL for provider metadata and service data
+    Sentinel->>ARKEO: Listen to Events via Websockets
+    ARKEO->>Sentinel: Websocket Response
+
+    Provider->>ARKEO_CLI: Create Tx Mod Provider (with Sentinel Address)
+    ARKEO_CLI->>ARKEO: Validate and Execute Transaction
+    ARKEO-->>ARKEO_CLI: Tx hash
+    ARKEO-->>ARKEO_CLI: Tx Result
+    ARKEO_CLI-->>Provider: Verify Tx hash for success
+    ARKEO_CLI-->>Provider: Tx Result
+
+```
