@@ -21,10 +21,11 @@ type Configuration struct {
 	Description                 string           `json:"description"`
 	Location                    string           `json:"location"`
 	Port                        string           `json:"port"`
-	SourceChain                 string           `json:"source_chain"` // base url for arceo block chain
+	SourceChain                 string           `json:"source_chain"` // base url for arkeo block chain
 	EventStreamHost             string           `json:"event_stream_host"`
 	ClaimStoreLocation          string           `json:"claim_store_location"`           // file location where claims are stored
 	ContractConfigStoreLocation string           `json:"contract_config_store_location"` // file location where contract configurations are stored
+	ProviderConfigStoreLocation string           `json:"provider_config_store_location"` // file location where provider configurations are stored
 	ProviderPubKey              common.PubKey    `json:"provider_pubkey"`
 	FreeTierRateLimit           int              `json:"free_tier_rate_limit"`
 	TLS                         TLSConfiguration `json:"tls"`
@@ -95,6 +96,7 @@ func NewConfiguration() Configuration {
 		ClaimStoreLocation:          loadVarString("CLAIM_STORE_LOCATION"),
 		ContractConfigStoreLocation: loadVarString("CONTRACT_CONFIG_STORE_LOCATION"),
 		TLS:                         NewTLSConfiguration(),
+		ProviderConfigStoreLocation: loadVarString("PROVIDER_CONFIG_STORE_LOCATION"),
 	}
 }
 
@@ -113,5 +115,6 @@ func (c Configuration) Print() {
 	fmt.Fprintln(writer, "Claim Store Location\t", c.ClaimStoreLocation)
 	fmt.Fprintln(writer, "Contract Config Store Location\t", c.ContractConfigStoreLocation)
 	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per 1m", c.FreeTierRateLimit))
+	fmt.Fprintln(writer, "Provider Config Store Location\t", c.ProviderConfigStoreLocation)
 	writer.Flush()
 }

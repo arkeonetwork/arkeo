@@ -306,6 +306,7 @@ func run(path string) error {
 				"FREE_RATE_LIMIT=10",
 				"CLAIM_STORE_LOCATION=/regtest/.arkeo/claims",
 				"CONTRACT_CONFIG_STORE_LOCATION=/regtest/.arkeo/contract_configs",
+				"PROVIDER_CONFIG_STORE_LOCATION=/regtest/.arkeo/provider_configs",
 			},
 			sigkill: syscall.SIGKILL,
 		},

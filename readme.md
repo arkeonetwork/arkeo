@@ -63,10 +63,10 @@ ignite chain serve
 
 ## Local
 
-Build Binary
+Installing Arkeo Binary
 
 ```shell
-make proto-gen install
+make install
 ```
 
 Run
