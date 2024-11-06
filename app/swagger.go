@@ -3,9 +3,10 @@ package app
 import (
 	"net/http"
 
+	"github.com/cosmos/cosmos-sdk/server/api"
+
 	"github.com/arkeonetwork/arkeo/docs"
 	"github.com/arkeonetwork/arkeo/pkg/openapiconsole"
-	"github.com/cosmos/cosmos-sdk/server/api"
 )
 
 // RegisterSwaggerAPI provides a common function which registers swagger route with API Server
