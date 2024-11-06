@@ -1,0 +1,41 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Arkeo - gRPC Gateway docs",
+        "description": "A REST interface for state queries. \nUsing Cosmos SDK [{sdk-version}](https://github.com/cosmos/cosmos-sdk/releases/tag/{sdk-version})",
+        "version": "{arkeo-version}"
+    },
+    "apis": [
+       
+        {
+            "url": "./tmp-swagger-gen/arkeo/arkeo/query.swagger.json",
+            "tags": {
+                "add": ["Arkeo"]
+            },
+            "operationIds": {
+                "rename": {
+                    "Params": "ArkeoParams"
+                }
+            }
+        },
+        {
+            "url": "./tmp-swagger-gen/arkeo/claim/query.swagger.json",
+            "tags": {
+                "add": ["Claim"]
+            },
+            "operationIds": {
+                "rename": {
+                    "Params": "ClaimParams"
+                }
+            }
+        },
+        {
+            "url": "https://raw.githubusercontent.com/cosmos/cosmos-sdk/{sdk-version}/client/docs/swagger-ui/swagger.yaml",
+            "tags": {
+                "add": ["Cosmos"]
+            }
+        }
+
+       
+    ]
+}

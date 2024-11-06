@@ -22,7 +22,17 @@ cd ..
 # combine swagger files
 # uses nodejs package `swagger-combine`.
 # all the individual swagger files need to be configured in `config.json` for merging
-swagger-combine ./swagger/proto-config-gen.json -o ./swagger/swagger.yaml -f yaml --continueOnConflictingPaths true --includeDefinitions true
+
+arkeoTemplate="{arkeo-version}"
+arkeoVersion=$(echo $(git describe --tags) | sed 's/^v//')
+sed "s/$arkeoTemplate/$arkeoVersion/g" ./docs/proto/config.json > ./tmp-swagger-gen/config.json
+
+# Fetching the cosmos-sdk version to use the appropriate swagger file
+sdkTemplate="{sdk-version}"
+sdkVersion=$(go list -m -f '{{ .Version }}' github.com/cosmos/cosmos-sdk)
+sed -i "s/$sdkTemplate/$sdkVersion/g" ./tmp-swagger-gen/config.json
+
+swagger-combine ./tmp-swagger-gen/config.json -o ./docs/static/swagger.yaml -f yaml --includeDefinitions true
 
 # clean swagger files
 rm -rf ./tmp-swagger-gen
