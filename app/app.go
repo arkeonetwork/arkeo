@@ -6,7 +6,6 @@ package app
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
@@ -64,7 +63,6 @@ import (
 
 	"github.com/arkeonetwork/arkeo/app/keepers"
 	arekoappParams "github.com/arkeonetwork/arkeo/app/params"
-	"github.com/arkeonetwork/arkeo/docs"
 
 	// distrclient "github.com/cosmos/cosmos-sdk/x/distribution/client"
 	"cosmossdk.io/x/evidence"
@@ -963,8 +961,11 @@ func (app *ArkeoApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIC
 	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// register app's OpenAPI routes.
-	apiSvr.Router.Handle("/static/openapi.yml", http.FileServer(http.FS(docs.Docs)))
-	// apiSvr.Router.HandleFunc("/", openapiconsole.Handler(AppName, "/static/openapi.yml"))
+	if apiConfig.Swagger {
+		if err := RegisterSwaggerAPI(apiSvr); err != nil {
+			panic(err)
+		}
+	}
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
