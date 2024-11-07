@@ -1,0 +1,95 @@
+{{ template "default-state.yaml" }}
+---
+{{ template "provider.yaml" }}
+---
+{{ template "contract.yaml" }}
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# bond up a provider
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "mock"
+bond: "100000"
+---
+type: check
+description: ensure contract is created
+endpoint: http://localhost:1317/arkeo/contracts
+asserts:
+  - .contract | length == 3
+  - .contract[0].id | tonumber == 1
+---
+type: check
+description: ensure contract is available at specific endpoint
+endpoint: http://localhost:1317/arkeo/contract/1
+asserts:
+  - .contract.type == "SUBSCRIPTION"
+  - .contract.paid == "0"
+---
+########################################################################################
+# Validate Paid Request Until Rate Limit Exhaustion
+########################################################################################
+type: check-repeated
+description: Validate Paid Request Until Rate Limit Exhaustion
+endpoint: http://localhost:3636/ping
+headers:
+  arkservice: mock
+arkauth:
+  signer: cat
+  id: "1"
+  spender: {{ pubkey_cat}}
+  nonce: "1"
+repeat: 100
+inner_assert_headers:
+  Tier: "paid"
+inner_asserts:
+  - .ping == "pong"
+assert_headers:
+  Tier: "paid"
+asserts:
+  - .ping == "pong"
+
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# Validate Paid Request Rate Limit Exhaustion
+########################################################################################
+type: check-repeated
+description: Validate Paid Request Until Rate Limit Exhaustion
+endpoint: http://localhost:3636/ping
+headers:
+  arkservice: mock
+arkauth:
+  signer: cat
+  id: "2"
+  spender: {{ pubkey_cat}}
+  nonce: "1"
+repeat: 101
+inner_assert_headers:
+  Tier: "paid"
+inner_asserts:
+  - .ping == "pong"
+assert_headers:
+  Tier: "free"
+asserts:
+  - .ping == "pong"
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# Check Provider data can be retrieved from the sentinel for service
+########################################################################################
+type: check
+description: check provider data in endpoint
+endpoint: http://localhost:3636/provider/mock
+asserts:
+  - .pubkey == "{{ pubkey_fox }}"
+---

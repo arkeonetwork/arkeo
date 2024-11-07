@@ -60,6 +60,8 @@ func NewOperation(opMap map[string]any) Operation {
 		op = &OpState{}
 	case "check":
 		op = &OpCheck{}
+	case "check-repeated":
+		op = &OpCheckRepeated{}
 	case "check-websocket":
 		op = &OpCheckWebsocket{}
 	case "create-blocks":
@@ -93,7 +95,7 @@ func NewOperation(opMap map[string]any) Operation {
 
 	switch op.(type) {
 	// internal types have MarshalJSON methods necessary to decode
-	case *OpCheck, *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract, *OpTxClaimContract:
+	case *OpCheck, *OpCheckRepeated, *OpTxSend, *OpTxBondProvider, *OpTxModProvider, *OpTxOpenContract, *OpTxCloseContract, *OpTxClaimContract:
 		// encode as json
 		buf := bytes.NewBuffer(nil)
 		enc := json.NewEncoder(buf)
@@ -243,6 +245,24 @@ type OpCheck struct {
 	Status        int               `json:"status"`
 	AssertHeaders map[string]string `json:"assert_headers"`
 	Asserts       []string          `json:"asserts"`
+}
+
+type OpCheckRepeated struct {
+	OpBase             `yaml:",inline"`
+	Description        string            `json:"description"`
+	Endpoint           string            `json:"endpoint"`
+	Method             string            `json:"method"`
+	Body               string            `json:"body"`
+	Params             map[string]string `json:"params"`
+	Headers            map[string]string `json:"headers"`
+	ArkAuth            map[string]string `json:"arkauth"`
+	ContractAuth       map[string]string `json:"contractauth"`
+	Status             int               `json:"status"`
+	AssertHeaders      map[string]string `json:"assert_headers"`
+	InnerAssertHeaders map[string]string `json:"inner_assert_headers"`
+	Asserts            []string          `json:"asserts"`
+	InnerAsserts       []string          `json:"inner_asserts"`
+	Repeat             int               `json:"repeat"`
 }
 
 func createContractAuth(input map[string]string) (string, bool, error) {
@@ -455,6 +475,205 @@ func (op *OpCheck) Execute(_ *os.Process, logs chan string) error {
 			fmt.Println(string(buf) + "\n")
 
 			// log fatal on syntax errors and skip logs
+			if cmd.ProcessState.ExitCode() != 1 {
+				drainLogs(logs)
+				fmt.Println(ColorRed + string(out) + ColorReset)
+			}
+
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (op *OpCheckRepeated) Execute(_ *os.Process, logs chan string) error {
+	// Abort if no endpoint is set (empty check op is allowed for breakpoint convenience)
+	if op.Endpoint == "" {
+		return fmt.Errorf("check")
+	}
+
+	// Set default method to GET if not specified
+	if op.Method == "" {
+		op.Method = http.MethodGet
+	}
+
+	// Determine the number of times to repeat the request
+	repeatCount := 1
+	if op.Repeat > 0 {
+		repeatCount = op.Repeat
+	}
+
+	var lastResp *http.Response
+	var lastBuf []byte
+
+	for i := 0; i < repeatCount; i++ {
+		// Update nonce in ArkAuth for each iteration
+		if len(op.ArkAuth) != 0 {
+			initialNonce, err := strconv.ParseInt(op.ArkAuth["nonce"], 10, 64)
+			if err != nil {
+				return fmt.Errorf("invalid initial nonce: %s", err)
+			}
+			op.ArkAuth["nonce"] = strconv.FormatInt(initialNonce+int64(i), 10)
+		}
+
+		var body io.Reader
+		if len(op.Body) > 0 {
+			body = strings.NewReader(op.Body)
+		}
+
+		// Build the request
+		req, err := http.NewRequest(op.Method, op.Endpoint, body)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to build request")
+		}
+
+		// Set headers
+		for k, v := range op.Headers {
+			req.Header.Add(k, v)
+		}
+
+		// Add auth headers with updated nonce
+		arkauth, authOK, err := createAuth(op.ArkAuth)
+		if err != nil {
+			return err
+		}
+		if authOK {
+			req.Header.Add(sentinel.QueryArkAuth, arkauth)
+		}
+		contractAuth, contractAuthOK, err := createContractAuth(op.ContractAuth)
+		if err != nil {
+			return err
+		}
+		if contractAuthOK {
+			req.Header.Add(sentinel.QueryContract, contractAuth)
+		}
+
+		// Add query parameters
+		q := req.URL.Query()
+		for k, v := range op.Params {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+
+		// Send the request
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			log.Err(err).Msg("failed to send request")
+			return err
+		}
+
+		// Read response body
+		buf, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Err(err).Msg("failed to read response")
+			return err
+		}
+		defer resp.Body.Close()
+
+		// Store the response and body from the last request for assertions
+		lastResp = resp
+		lastBuf = buf
+
+		// Check status code for each request
+		if op.Status == 0 {
+			op.Status = 200 // Default to 200 if not specified
+		}
+		if resp.StatusCode != op.Status {
+			return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		}
+
+		// Inner Assertions on Intermediate Requests
+		if i < repeatCount-1 {
+			// Perform Inner Header assertions on each iteration except the last
+			for k, v := range op.InnerAssertHeaders {
+				if val, exists := resp.Header[k]; exists {
+					if !strings.EqualFold(val[0], v) {
+						return fmt.Errorf("inner header assertion failed on iteration %d: expected %s, got %s", i+1, v, val[0])
+					}
+				} else {
+					return fmt.Errorf("missing inner header %s on iteration %d", k, i+1)
+				}
+			}
+
+			// Perform Inner Response assertions on each iteration except the last
+			for _, a := range op.InnerAsserts {
+				tmpl := template.Must(template.Must(templates.Clone()).Parse(a))
+				expr := bytes.NewBuffer(nil)
+				err := tmpl.Execute(expr, nil)
+				if err != nil {
+					log.Fatal().Err(err).Msg("failed to render inner assert expression")
+				}
+				a = expr.String()
+
+				cmd := exec.Command("jq", "-e", a)
+				cmd.Stdin = bytes.NewReader(buf)
+				out, err := cmd.CombinedOutput()
+				if err != nil {
+					if cmd.ProcessState.ExitCode() == 1 {
+						// Log process output if assertion fails
+						fmt.Println(ColorPurple + "\nLogs:" + ColorReset)
+						dumpLogs(logs)
+					}
+
+					// Output for debugging
+					fmt.Println(ColorPurple + "\nOperation:" + ColorReset)
+					_ = yaml.NewEncoder(os.Stdout).Encode(op)
+					fmt.Println(ColorPurple + "\nFailed Inner Assert: " + ColorReset + expr.String())
+					fmt.Println(ColorPurple + "\nEndpoint Response:" + ColorReset)
+					fmt.Println(string(buf) + "\n")
+
+					// Log error details
+					if cmd.ProcessState.ExitCode() != 1 {
+						drainLogs(logs)
+						fmt.Println(ColorRed + string(out) + ColorReset)
+					}
+
+					return err
+				}
+			}
+		}
+	}
+
+	// Final Header Assertions on the Last Response
+	for k, v := range op.AssertHeaders {
+		if val, exists := lastResp.Header[k]; exists {
+			if !strings.EqualFold(val[0], v) {
+				return fmt.Errorf("final header assertion failed: expected %s, got %s", v, val[0])
+			}
+		} else {
+			return fmt.Errorf("missing final header %s", k)
+		}
+	}
+
+	// Final Response Assertions on the Last Response Body
+	for _, a := range op.Asserts {
+		tmpl := template.Must(template.Must(templates.Clone()).Parse(a))
+		expr := bytes.NewBuffer(nil)
+		err := tmpl.Execute(expr, nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to render assert expression")
+		}
+		a = expr.String()
+
+		cmd := exec.Command("jq", "-e", a)
+		cmd.Stdin = bytes.NewReader(lastBuf)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			if cmd.ProcessState.ExitCode() == 1 {
+				// Log process output if assertion fails
+				fmt.Println(ColorPurple + "\nLogs:" + ColorReset)
+				dumpLogs(logs)
+			}
+
+			// Output for debugging
+			fmt.Println(ColorPurple + "\nOperation:" + ColorReset)
+			_ = yaml.NewEncoder(os.Stdout).Encode(op)
+			fmt.Println(ColorPurple + "\nFailed Final Assert: " + ColorReset + expr.String())
+			fmt.Println(ColorPurple + "\nEndpoint Response:" + ColorReset)
+			fmt.Println(string(lastBuf) + "\n")
+
+			// Log error details
 			if cmd.ProcessState.ExitCode() != 1 {
 				drainLogs(logs)
 				fmt.Println(ColorRed + string(out) + ColorReset)
