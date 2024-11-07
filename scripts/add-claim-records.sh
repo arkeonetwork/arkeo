@@ -26,7 +26,7 @@ add_claim_records() {
     records="["
 
     # Loop through each line in the CSV file (skip the header)
-    tail -n +2 "$csv_file" | while IFS=, read -r address amount; do
+    while IFS=, read -r address amount; do
         # Multiply the amount by 10^9
         amount_claim=$(echo "scale=0; $amount * 100000000 / 3" | bc)
         amount_vote=$(echo "scale=0; $amount * 100000000 / 3" | bc)
@@ -36,13 +36,16 @@ add_claim_records() {
         records+=$(jq -n --arg chain "$chain_name" --arg address "$address" --arg amount_claim "$amount_claim" --arg amount_vote "$amount_vote" --arg amount_delegate "$amount_delegate" \
             '{chain: $chain, address: $address, amount_claim: {denom: "uarkeo", amount: $amount_claim}, amount_vote: {denom: "uarkeo", amount: $amount_vote}, amount_delegate: {denom: "uarkeo", amount: $amount_delegate}, is_transferable: true}')
         records+=","
-    done
+    done < <(tail -n +2 "$csv_file")
 
     # Remove the trailing comma and close the JSON array
     records="${records%,}]"
 
+    echo "Final JSON Records Array: $records"
+
     # Add the batch of records to the genesis.json in one operation
-    jq --argjson new_records "$records" '.app_state.claimarkeo.claim_records += $new_records' "$GENESIS_FILE" >"$TEMP_FILE" && mv "$TEMP_FILE" "$GENESIS_FILE"
+    jq --argjson new_records "$records" '.app_state.claimarkeo.claim_records += $new_records' <~/.arkeo/config/genesis.json >/tmp/genesis.json
+    mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 }
 
 # Process CSV files for each chain

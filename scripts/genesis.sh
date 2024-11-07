@@ -131,6 +131,8 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 		# enable CORs on testnet/localnet
 		sed -i 's/enabled-unsafe-cors = false/enabled-unsafe-cors = true/g' ~/.arkeo/config/app.toml
 		sed -i 's/cors_allowed_origins = \[\]/cors_allowed_origins = \["*"\]/g' ~/.arkeo/config/config.toml
+	else
+		source ./add-claim-records.sh
 	fi
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
@@ -142,8 +144,6 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	# Update the supply field in genesis.json using jq
 	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
-
-	source ./add-claim-records.sh
 
 	set -e
 	arkeod validate-genesis --trace
