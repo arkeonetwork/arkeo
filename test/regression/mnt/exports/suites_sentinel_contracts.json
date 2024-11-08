@@ -3,95 +3,48 @@
   "app_name": "arkeo",
   "app_state": {
     "arkeo": {
-      "contract_expiration_sets": [],
+      "contract_expiration_sets": [
+        {
+          "contract_set": {
+            "contract_ids": [
+              "1"
+            ]
+          },
+          "height": "12"
+        }
+      ],
       "contracts": [
         {
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "delegate": "",
           "deposit": "100",
-          "duration": "1000000000000",
-          "height": "1",
+          "duration": "10",
+          "height": "2",
           "id": "1",
           "nonce": "0",
-          "paid": "0",
+          "paid": "100",
           "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "queries_per_minute": "100",
+          "queries_per_minute": "1",
           "rate": {
-            "amount": "1",
+            "amount": "10",
             "denom": "uarkeo"
           },
           "service": 1,
-          "settlement_duration": "0",
-          "settlement_height": "0",
-          "type": "SUBSCRIPTION"
-        },
-        {
-          "authorization": "STRICT",
-          "client": "tarkeopub1addwnpepqwqyxlhy8jkhmcw56augeewn9mmg32e93ljnnwyd3sjrgmsz499rqg360pk",
-          "delegate": "",
-          "deposit": "100",
-          "duration": "1000000000000",
-          "height": "1",
-          "id": "2",
-          "nonce": "0",
-          "paid": "0",
-          "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "queries_per_minute": "100",
-          "rate": {
-            "amount": "1",
-            "denom": "uarkeo"
-          },
-          "service": 1,
-          "settlement_duration": "0",
-          "settlement_height": "0",
-          "type": "SUBSCRIPTION"
-        },
-        {
-          "authorization": "STRICT",
-          "client": "tarkeopub1addwnpepqv26g6avmnhfkr4a2ds03mj36kuanmua5d95xwelypkd936hea5eyhzg6hd",
-          "delegate": "",
-          "deposit": "100",
-          "duration": "10",
-          "height": "1",
-          "id": "3",
-          "nonce": "0",
-          "paid": "0",
-          "provider": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "queries_per_minute": "100",
-          "rate": {
-            "amount": "1",
-            "denom": "uarkeo"
-          },
-          "service": 1,
-          "settlement_duration": "0",
-          "settlement_height": "0",
+          "settlement_duration": "11",
+          "settlement_height": "12",
           "type": "SUBSCRIPTION"
         }
       ],
-      "next_contract_id": "1",
+      "next_contract_id": "2",
       "params": {
         "block_per_year": "6311520",
         "emission_curve": "6"
       },
       "providers": [
         {
-          "bond": "100000",
-          "last_update": "5",
-          "max_contract_duration": "0",
-          "metadata_nonce": "0",
-          "metadata_uri": "",
-          "min_contract_duration": "0",
-          "pay_as_you_go_rate": [],
-          "pub_key": "tarkeopub1addwnpepqtsg8syrpcn60t2nnvnhtk6psr8qxlrtwjk8rmpkhxk9vy9wkd8ewmqv7rh",
-          "service": 10,
-          "settlement_duration": "0",
-          "status": "OFFLINE",
-          "subscription_rate": []
-        },
-        {
-          "bond": "1000000100000",
-          "last_update": "2",
+          "bond": "1000000000000",
+          "last_update": "1",
           "max_contract_duration": "10",
           "metadata_nonce": "0",
           "metadata_uri": "localhost:3636",
@@ -119,17 +72,6 @@
     },
     "auth": {
       "accounts": [
-        {
-          "@type": "/cosmos.auth.v1beta1.ModuleAccount",
-          "base_account": {
-            "account_number": "9",
-            "address": "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k",
-            "pub_key": null,
-            "sequence": "0"
-          },
-          "name": "providers",
-          "permissions": []
-        },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
@@ -162,11 +104,8 @@
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "account_number": "2",
           "address": "tarkeo1v0n7wer498vqq6yddkr4clg3lck7kaw9lstp4k",
-          "pub_key": {
-            "@type": "/cosmos.crypto.secp256k1.PubKey",
-            "key": "AuCDwIMOJ6etU5snddtBgM4DfGt0rHHsNrmsVhCus0+X"
-          },
-          "sequence": "2"
+          "pub_key": null,
+          "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -195,6 +134,28 @@
           ]
         },
         {
+          "@type": "/cosmos.auth.v1beta1.ModuleAccount",
+          "base_account": {
+            "account_number": "10",
+            "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
+            "pub_key": null,
+            "sequence": "0"
+          },
+          "name": "contracts",
+          "permissions": []
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.ModuleAccount",
+          "base_account": {
+            "account_number": "9",
+            "address": "tarkeo1k8925g52vwe5jgfp4nqr7ljuhs7nzu2f8g0za5",
+            "pub_key": null,
+            "sequence": "0"
+          },
+          "name": "arkeo",
+          "permissions": []
+        },
+        {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "account_number": "0",
           "address": "tarkeo1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyvls9rz",
@@ -221,8 +182,11 @@
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "account_number": "1",
           "address": "tarkeo1uhapc6jjq6ns0ydnk7zld5x7f5kl2ukemjw5fg",
-          "pub_key": null,
-          "sequence": "0"
+          "pub_key": {
+            "@type": "/cosmos.crypto.secp256k1.PubKey",
+            "key": "AoeYaXx+/R5+1IZCgOkRJH0MXSgmzEOLX4/x49vS4Xla"
+          },
+          "sequence": "1"
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -253,7 +217,7 @@
           "address": "tarkeo1rcvm4v5mcepj53fh2526uve0tly4grdsx5yw7k",
           "coins": [
             {
-              "amount": "1000000200000",
+              "amount": "1000000000000",
               "denom": "uarkeo"
             }
           ]
@@ -271,7 +235,7 @@
           "address": "tarkeo1v0n7wer498vqq6yddkr4clg3lck7kaw9lstp4k",
           "coins": [
             {
-              "amount": "999999999800000",
+              "amount": "1000000000000090",
               "denom": "uarkeo"
             }
           ]
@@ -280,16 +244,16 @@
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
-              "amount": "5355388937",
+              "amount": "16066162928",
               "denom": "uarkeo"
             }
           ]
         },
         {
-          "address": "tarkeo1kz2dkl8zlxwte008astc5e65htrxdcse6x3h3h",
+          "address": "tarkeo1k8925g52vwe5jgfp4nqr7ljuhs7nzu2f8g0za5",
           "coins": [
             {
-              "amount": "300",
+              "amount": "100000010",
               "denom": "uarkeo"
             }
           ]
@@ -298,7 +262,7 @@
           "address": "tarkeo1uhapc6jjq6ns0ydnk7zld5x7f5kl2ukemjw5fg",
           "coins": [
             {
-              "amount": "1000000000000000",
+              "amount": "999999899999900",
               "denom": "uarkeo"
             }
           ]
@@ -312,7 +276,7 @@
       "send_enabled": [],
       "supply": [
         {
-          "amount": "52001005355389237",
+          "amount": "52001016066162928",
           "denom": "uarkeo"
         }
       ]
@@ -387,7 +351,7 @@
       "fee_pool": {
         "community_pool": [
           {
-            "amount": "107107778.740000000000000000",
+            "amount": "321323258.560000000000000000",
             "denom": "uarkeo"
           }
         ]
@@ -396,7 +360,7 @@
         {
           "outstanding_rewards": [
             {
-              "amount": "5248281158.260000000000000000",
+              "amount": "15744839669.440000000000000000",
               "denom": "uarkeo"
             }
           ],
@@ -415,7 +379,7 @@
           "accumulated": {
             "commission": [
               {
-                "amount": "524828115.826000000000000000",
+                "amount": "1574483966.944000000000000000",
                 "denom": "uarkeo"
               }
             ]
@@ -429,7 +393,7 @@
             "period": "2",
             "rewards": [
               {
-                "amount": "4723453042.434000000000000000",
+                "amount": "14170355702.496000000000000000",
                 "denom": "uarkeo"
               }
             ]
@@ -533,7 +497,7 @@
             "client_state": {
               "@type": "/ibc.lightclients.localhost.v2.ClientState",
               "latest_height": {
-                "revision_height": "5",
+                "revision_height": "15",
                 "revision_number": "0"
               }
             }
@@ -604,8 +568,8 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6760128226806767.123600604707123169",
-        "inflation": "0.129999955190216673"
+        "annual_provisions": "6760124958900879.440734825593079684",
+        "inflation": "0.129999865570695682"
       },
       "params": {
         "blocks_per_year": "6311520",
@@ -635,7 +599,7 @@
           "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
           "validator_signing_info": {
             "address": "tarkeovalcons1tjy86luccxcq0d76ntqcpkaeuehnca5qjfnfpa",
-            "index_offset": "4",
+            "index_offset": "14",
             "jailed_until": "1970-01-01T00:00:00Z",
             "missed_blocks_counter": "0",
             "start_height": "0",
@@ -751,5 +715,5 @@
       }
     ]
   },
-  "initial_height": 6
+  "initial_height": 16
 }

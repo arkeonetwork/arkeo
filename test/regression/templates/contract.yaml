@@ -42,7 +42,7 @@ genesis:
           client: {{ pubkey_dog }}
           type: 1
           height: 1
-          duration: 1000000000000
+          duration: 10
           rate: 
             denom: "uarkeo"
             amount: "1"

@@ -52,7 +52,7 @@
           "client": "tarkeopub1addwnpepqv26g6avmnhfkr4a2ds03mj36kuanmua5d95xwelypkd936hea5eyhzg6hd",
           "delegate": "",
           "deposit": "100",
-          "duration": "1000000000000",
+          "duration": "10",
           "height": "1",
           "id": "3",
           "nonce": "0",

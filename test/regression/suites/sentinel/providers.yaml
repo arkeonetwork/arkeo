@@ -93,3 +93,48 @@ endpoint: http://localhost:3636/provider/mock
 asserts:
   - .pubkey == "{{ pubkey_fox }}"
 ---
+########################################################################################
+# check Free tier rate limit if set 
+########################################################################################
+type: check-repeated
+description: check free tier rate limit
+endpoint: http://localhost:3636/ping
+headers:
+  arkservice: mock
+status: 200
+repeat: 9
+asserts:
+  - .ping == "pong"
+---
+type: check
+description: check free tier rate limit
+endpoint: http://localhost:3636/ping
+headers:
+  arkservice: mock
+status: 429
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# bond up a provider with btc service
+########################################################################################
+type: tx-bond-provider
+signer: {{ addr_fox }}
+creator: {{ addr_fox }}
+provider: {{ pubkey_fox }}
+service: "btc-mainnet-fullnode"
+bond: "100000"
+---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# Check Provider data can be retrieved from the sentinel for service
+########################################################################################
+type: check
+description: check provider data in endpoint
+endpoint: http://localhost:3636/provider/btc-mainnet-fullnode
+asserts:
+  - .pubkey == "{{ pubkey_fox }}"
+---
