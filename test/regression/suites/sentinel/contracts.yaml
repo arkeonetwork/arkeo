@@ -67,6 +67,38 @@ asserts:
   - .balances|length == 1
   - .balances[]|select(.denom == "uarkeo")|.amount|tonumber == 999999899999900
 ---
+type: create-blocks
+count: 1
+---
+########################################################################################
+# open subscription contract Without Funds should not be created 
+########################################################################################
+type: tx-open-contract
+signer: {{ addr_pig }}
+creator: {{ addr_pig }}
+provider: {{ pubkey_fox }}
+service: "mock"
+client: {{ addr_pig }}
+contract_type: "PAY_AS_YOU_GO"
+queries_per_minute: 1
+settlement_duration: 11
+duration: 10
+rate:
+  denom: "uarkeo"
+  amount: "10"
+deposit: "100"
+authorization: "STRICT"
+---
+type: create-blocks
+count: 1
+---
+type: check
+description: ensure contract is created
+endpoint: http://localhost:1317/arkeo/contracts
+asserts:
+  - .contract | length == 1
+  - .contract[0].id | tonumber == 1
+---
 ########################################################################################
 # check can make a paid request
 ########################################################################################
