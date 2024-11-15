@@ -127,30 +127,33 @@ release:
 
 archives:
   - id: w/version
+    allow_different_binary_count: true
     builds:
       - directory_api_darwin
       - directory_indexer_darwin
+      - directory_darwin_all
       - directory_api_linux_arm64
       - directory_indexer_linux_arm64
-      - directory_darwin_all
     name_template: "directory_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: wo/version
+    allow_different_binary_count: true
     builds:
       - directory_api_darwin
       - directory_indexer_darwin
+      - directory_darwin_all
       - directory_api_linux_arm64
       - directory_indexer_linux_arm64
-      - directory_darwin_all
     name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: binary
+    allow_different_binary_count: true
     builds:
       - directory_api_darwin
       - directory_indexer_darwin
