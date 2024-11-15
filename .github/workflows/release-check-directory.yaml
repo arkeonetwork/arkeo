@@ -26,15 +26,15 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      
-      - name: GoReleaser Sentinel Cross
-        run: make sentinel-release-dry-run-cross
+
+      - name: GoReleaser Directory Cross
+        run: make directory-release-dry-run-cross
         env:
           RELEASE: false
           GITHUB_TOKEN: ""
-
-      - name: GoReleaser Sentinel 
-        run: make sentinel-release-dry-run
+  
+      - name: GoReleaser Directory 
+        run: make directory-release-dry-run
         env:
           RELEASE: false
           GITHUB_TOKEN: ""
