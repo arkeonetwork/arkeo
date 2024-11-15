@@ -6,7 +6,7 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: arkeod-linux-amd64
+  - id: arkeod_linux_amd64
     binary: arkeod
     main: ./cmd/arkeod
     goos:
@@ -37,30 +37,30 @@ release:
 archives:
   - id: w/version
     builds:
-      - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
+      - arkeod_linux_amd64
+    name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: wo/version
     builds:
-      - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
+      - arkeod_linux_amd64
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: binary
     builds:
-      - arkeod-linux-amd64
-    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}-testnet{{ end }}'
+      - arkeod_linux_amd64
+    name_template: '{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
     wrap_in_directory: false
     format: binary
     files:
       - none*
 checksum:
-  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{ end }}_checksums.txt'
+  name_template: '{{ .ProjectName }}d_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_checksums.txt'
 dockers:
   - use: buildx
     goos: linux

@@ -93,7 +93,7 @@ universal_binaries:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
     replace: false
-    name_template: "{{ .ProjectName }}d{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    name_template: "{{ .ProjectName }}d{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
 
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
@@ -105,7 +105,7 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    name_template: "{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
@@ -116,7 +116,7 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
@@ -127,14 +127,14 @@ archives:
       - arkeod-darwin-amd64
       - arkeod-darwin-arm64
       - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: binary
     files:
       - none*
 
 checksum:
-  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{ end }}_cross_checksums.txt'
+  name_template: '{{ .ProjectName }}d_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
 
 dockers:
   - use: buildx

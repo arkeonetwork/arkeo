@@ -125,6 +125,7 @@ docker-build-cross:
 		-e CGO_ENABLED=1 \
 		-e BUILD_TAG=$(TAG) \
 		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
 		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v `pwd`:/go/src/$(PACKAGE_NAME) \
@@ -308,6 +309,10 @@ sysroot-pack:
 sysroot-unpack:
 	@pv $(SYSROOT_ARCHIVE) | pbzip2 -cd | tar -xf -
 
+########################################################################################
+#         Dry Run			  
+########################################################################################
+
 .PHONY: release-dry-run
 release-dry-run-cross:
 	$(DOCKER) run \
@@ -337,6 +342,75 @@ release-dry-run:
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
 		--clean --skip=validate --skip=publish
+
+sentinel-release-dry-run-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-sentinel-cross.yaml \
+		--clean --skip=validate --skip=publish
+
+sentinel-release-dry-run:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-sentinel.yaml \
+		--clean --skip=validate --skip=publish
+
+directory-release-dry-run-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-directory-cross.yaml \
+		--clean --skip=validate --skip=publish
+
+directory-release-dry-run:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-directory.yaml \
+		--clean --skip=validate --skip=publish
+
+
+########################################################################################
+#     Mainnet Releases		 
+########################################################################################
 
 .PHONY: releases
 release:
@@ -372,6 +446,82 @@ release-cross:
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
 
+
+sentinel-release-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-sentinel-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+sentinel-release:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-sentinel.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+directory-release-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-directory-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+directory-release:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG=$(TAG) \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-directory.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+
+########################################################################################
+#     Testnet Releases		  
+########################################################################################
+
 release-testnet:
 	$(DOCKER) run \
 		--rm \
@@ -401,6 +551,77 @@ release-testnet-cross:
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
 		-f .goreleaser-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+
+sentinel-testnet-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-sentinel-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+sentinel-testnet-release:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e SENTINEL_VERSION=$(SENTINEL_VERSION)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-sentinel.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+directory-testnet-cross:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
+		-f .goreleaser-directory-cross.yaml \
+		--clean \
+		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
+		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
+
+directory-testnet:
+	$(DOCKER) run \
+		--rm \
+		-e CGO_ENABLED=1 \
+		-e BUILD_TAG="testnet" \
+		-e RELEASE=$(RELEASE)\
+		-e GITHUB_TOKEN="$(GITHUB_TOKEN)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v `pwd`:/go/src/$(PACKAGE_NAME) \
+		-v `pwd`/sysroot:/sysroot \
+		-w /go/src/$(PACKAGE_NAME) \
+		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f .goreleaser-directory.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
