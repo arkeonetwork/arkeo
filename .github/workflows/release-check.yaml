@@ -1,4 +1,4 @@
-name: Release Check 
+name: Release Check Arkeo
 
 on:
   push:
