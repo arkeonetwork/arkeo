@@ -116,6 +116,7 @@ docker-build:
 		-v `pwd`:/go/src/github.com/arkeonetwork/arkeo \
 		-w /go/src/github.com/arkeonetwork/arkeo \
 		ghcr.io/goreleaser/goreleaser:$(GORELEASER_VERSION) \
+		-f releaser/.goreleaser-cross.yaml \
 		--clean \
 		--snapshot
 
@@ -132,19 +133,19 @@ docker-build-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-cross.yaml \
+		-f releaser/.goreleaser-cross.yaml \
 		--clean \
 		--snapshot 
 
 build-docker-localnet:
-	@docker build . --file Dockerfile.localnet -t ${IMAGE}:${TAG}
+	@docker build . --file docker/Dockerfile.localnet -t ${IMAGE}:${TAG}
 
 # localnet: build-docker
 # 	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
 
 
 localnet: build-docker-localnet
-	IMAGE_TAG=${IMAGE}:${TAG} docker-compose -f docker-compose-localnet.yaml  up
+	IMAGE_TAG=${IMAGE}:${TAG} docker-compose -f docker/docker-compose-localnet.yaml  up
 # ------------------------------    Testnet   ------------------------------
 
 install-testnet-binary:

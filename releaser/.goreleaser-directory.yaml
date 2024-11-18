@@ -90,3 +90,41 @@ archives:
       - none*
 checksum:
   name_template: 'directory_v{{.Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_checksums.txt'
+
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.api
+    image_templates:
+      - 'ghcr.io/arkeonetwork/api:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.description={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version=v{{ .Version }}"
+      - "--label=org.opencontainers.image.url=https://arkeo.network/"
+      - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    dockerfile: docker/Dockerfile.indexer
+    image_templates:
+      - 'ghcr.io/arkeonetwork/indexer:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.description={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version=v{{ .Version }}"
+      - "--label=org.opencontainers.image.url=https://arkeo.network/"
+      - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+

@@ -168,3 +168,51 @@ archives:
 
 checksum:
   name_template: 'directory_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
+
+
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: docker/Dockerfile.api
+    image_templates:
+      - 'ghcr.io/arkeonetwork/api:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=sentinel"
+      - "--label=org.opencontainers.image.description=sentinel"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
+      - "--label=org.opencontainers.image.url=https://arkeo.network/"
+      - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+  
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: docker/Dockerfile.indexer
+    image_templates:
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=sentinel"
+      - "--label=org.opencontainers.image.description=sentinel"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version=v{{.Version}}"
+      - "--label=org.opencontainers.image.url=https://arkeo.network/"
+      - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
+docker_manifests:
+  - name_template: 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
+    create_flags:
+      - --insecure
+    push_flags:
+      - --insecure
+    image_templates:
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
