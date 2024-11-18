@@ -1,0 +1,8 @@
+FROM scratch
+
+COPY ./api /usr/bin/api
+
+WORKDIR /root/.arkeo
+
+
+ENTRYPOINT [ "/usr/bin/api" ]

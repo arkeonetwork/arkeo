@@ -326,7 +326,7 @@ release-dry-run-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-cross.yaml \
+		-f releaser/.goreleaser-cross.yaml \
 		--clean --skip=validate --skip=publish
 
 release-dry-run:
@@ -341,6 +341,7 @@ release-dry-run:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f /releaser/.goreleaser.yaml \
 		--clean --skip=validate --skip=publish
 
 sentinel-release-dry-run-cross:
@@ -356,7 +357,7 @@ sentinel-release-dry-run-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-sentinel-cross.yaml \
+		-f releaser/.goreleaser-sentinel-cross.yaml \
 		--clean --skip=validate --skip=publish
 
 sentinel-release-dry-run:
@@ -372,7 +373,7 @@ sentinel-release-dry-run:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-sentinel.yaml \
+		-f releaser/.goreleaser-sentinel.yaml \
 		--clean --skip=validate --skip=publish
 
 directory-release-dry-run-cross:
@@ -388,7 +389,7 @@ directory-release-dry-run-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-directory-cross.yaml \
+		-f releaser/.goreleaser-directory-cross.yaml \
 		--clean --skip=validate --skip=publish
 
 directory-release-dry-run:
@@ -404,7 +405,7 @@ directory-release-dry-run:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-directory.yaml \
+		-f releaser/.goreleaser-directory.yaml \
 		--clean --skip=validate --skip=publish
 
 
@@ -425,6 +426,7 @@ release:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f releaser/.goreleaser.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -441,7 +443,7 @@ release-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-cross.yaml \
+		-f releaser/.goreleaser-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -460,7 +462,7 @@ sentinel-release-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-sentinel-cross.yaml \
+		-f releaser/.goreleaser-sentinel-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -478,7 +480,7 @@ sentinel-release:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-sentinel.yaml \
+		-f releaser/.goreleaser-sentinel.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -495,7 +497,7 @@ directory-release-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-directory-cross.yaml \
+		-f releaser/.goreleaser-directory-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -512,7 +514,7 @@ directory-release:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-directory.yaml \
+		-f releaser/.goreleaser-directory.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -534,6 +536,7 @@ release-testnet:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
+		-f releaser/.goreleaser.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -550,7 +553,7 @@ release-testnet-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-cross.yaml \
+		-f releaser/.goreleaser-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -569,7 +572,7 @@ sentinel-testnet-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-sentinel-cross.yaml \
+		-f releaser/.goreleaser-sentinel-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -587,7 +590,7 @@ sentinel-testnet-release:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-sentinel.yaml \
+		-f releaser/.goreleaser-sentinel.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -604,7 +607,7 @@ directory-testnet-cross:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser-cross:${GOLANG_CROSS_VERSION} \
-		-f .goreleaser-directory-cross.yaml \
+		-f releaser/.goreleaser-directory-cross.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)
@@ -621,7 +624,7 @@ directory-testnet:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f .goreleaser-directory.yaml \
+		-f releaser/.goreleaser-directory.yaml \
 		--clean \
 		--skip-validate=$(GORELEASER_SKIP_VALIDATE) \
 		--skip-publish=$(GORELEASER_SKIP_PUBLISH)

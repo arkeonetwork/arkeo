@@ -1,0 +1,92 @@
+before:
+  hooks:
+    - go mod tidy
+
+env:
+  - CGO_ENABLED=1
+
+builds:
+  - id: directory_api_linux_amd64
+    binary: api
+    main: ./cmd/directory/api
+    goos:
+      - linux
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+  
+  - id: directory_indexer_linux_amd64
+    binary: indexer
+    main: ./cmd/directory/indexer
+    goos:
+      - linux
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+
+release:
+  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+archives:
+  - id: w/version
+    builds:
+      - directory_api_linux_amd64
+      - directory_indexer_linux_amd64
+    name_template: 'directory_v{{.Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: wo/version
+    builds:
+      - directory_api_linux_amd64
+      - directory_indexer_linux_amd64
+    name_template: 'directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: binary
+    builds:
+      - directory_api_linux_amd64
+      - directory_indexer_linux_amd64
+    name_template: 'directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}'
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+checksum:
+  name_template: 'directory_v{{.Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_checksums.txt'

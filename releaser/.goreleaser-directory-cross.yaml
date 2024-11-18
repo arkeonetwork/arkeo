@@ -1,0 +1,170 @@
+before:
+  hooks:
+    - go mod tidy
+
+env:
+  - CGO_ENABLED=1
+
+builds:
+  - id: directory_api_darwin
+    binary: api
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/directory/api
+    goos:
+      - darwin
+    goarch:
+      - arm64
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+
+  - id: directory_indexer_darwin
+    binary: indexer
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/directory/indexer
+    goos:
+      - darwin
+    goarch:
+      - arm64
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+
+  - id: directory_api_linux_arm64
+    binary: api
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    main: ./cmd/directory/api
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+  
+  - id: directory_indexer_linux_arm64
+    binary: indexer
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    main: ./cmd/directory/indexer
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+
+universal_binaries:
+  - id: directory_darwin_all
+    ids:
+      - directory_api_darwin
+      - directory_indexer_darwin
+    replace: false
+    name_template: "directory{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
+
+release:
+  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+
+archives:
+  - id: w/version
+    allow_different_binary_count: true
+    builds:
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_darwin_all
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+    name_template: "directory_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: wo/version
+    allow_different_binary_count: true
+    builds:
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_darwin_all
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+  - id: binary
+    allow_different_binary_count: true
+    builds:
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+      - directory_darwin_all
+    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+
+checksum:
+  name_template: 'directory_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
