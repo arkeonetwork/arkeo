@@ -341,7 +341,7 @@ release-dry-run:
 		-v `pwd`/sysroot:/sysroot \
 		-w /go/src/$(PACKAGE_NAME) \
 		ghcr.io/goreleaser/goreleaser:${GORELEASER_VERSION} \
-		-f /releaser/.goreleaser.yaml \
+		-f releaser/.goreleaser.yaml \
 		--clean --skip=validate --skip=publish
 
 sentinel-release-dry-run-cross:
