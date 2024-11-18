@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: ["release", "release-cross","release-testnet","release-testnet-cross","sentinel-release-cross","sentinel-testnet-cross","sentinel-release","sentinel-testnet-release","directory-release-cross","directory-testnet-cross","directory-release","directory-testnet"]
+        release: ["release", "release-cross","release-testnet","release-testnet-cross","sentinel-release","sentinel-release-cross","sentinel-testnet-release","sentinel-testnet-cross","directory-release","directory-release-cross","directory-testnet","directory-testnet-cross"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
