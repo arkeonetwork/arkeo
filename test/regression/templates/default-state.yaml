@@ -18,6 +18,11 @@ genesis:
           address: {{ addr_fox }}
           pub_key: ~
           sequence: "0"
+        - "@type": /cosmos.auth.v1beta1.BaseAccount
+          account_number: "3"
+          address: {{ addr_pig }}
+          pub_key: ~
+          sequence: "0"
     bank:
       balances:
         - address: {{ addr_dog }}
@@ -31,6 +36,10 @@ genesis:
         - address: {{ addr_fox }}
           coins:
             - amount: "1000000000000000"
+              denom: uarkeo
+        - address: {{ addr_pig }}
+          coins:
+            - amount: "100"
               denom: uarkeo
     genutil:
       gen_txs:
