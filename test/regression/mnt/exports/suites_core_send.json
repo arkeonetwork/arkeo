@@ -19,7 +19,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "5",
+            "account_number": "6",
             "address": "tarkeo1fl48vsnmsdzcv85q5d2q4z5ajdha8yu3e79s43",
             "pub_key": null,
             "sequence": "0"
@@ -33,7 +33,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "6",
+            "account_number": "7",
             "address": "tarkeo1tygms3xhhs3yv487phx3dw4a95jn7t7ld7epr9",
             "pub_key": null,
             "sequence": "0"
@@ -52,9 +52,16 @@
           "sequence": "0"
         },
         {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "account_number": "3",
+          "address": "tarkeo1w8ng7dxc3dezqxk8jt3f3nvl4rcwf8ds43v0lr",
+          "pub_key": null,
+          "sequence": "0"
+        },
+        {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "7",
+            "account_number": "8",
             "address": "tarkeo10d07y265gmmuvt4z0w9aw880jnsr700jk8l664",
             "pub_key": null,
             "sequence": "0"
@@ -67,7 +74,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "4",
+            "account_number": "5",
             "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
             "pub_key": null,
             "sequence": "0"
@@ -90,7 +97,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "8",
+            "account_number": "9",
             "address": "tarkeo1m3h30wlvsf8llruxtpukdvsy0km2kum8y5t8tx",
             "pub_key": null,
             "sequence": "0"
@@ -113,7 +120,7 @@
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
           "base_account": {
-            "account_number": "3",
+            "account_number": "4",
             "address": "tarkeo17xpfvakm2amg962yls6f84z3kell8c5luu0l8m",
             "pub_key": null,
             "sequence": "0"
@@ -154,6 +161,15 @@
           ]
         },
         {
+          "address": "tarkeo1w8ng7dxc3dezqxk8jt3f3nvl4rcwf8ds43v0lr",
+          "coins": [
+            {
+              "amount": "100",
+              "denom": "uarkeo"
+            }
+          ]
+        },
+        {
           "address": "tarkeo1jv65s3grqf6v6jl3dp4t6c9t9rk99cd8t6gr9e",
           "coins": [
             {
@@ -180,7 +196,7 @@
       "send_enabled": [],
       "supply": [
         {
-          "amount": "52000003213171726",
+          "amount": "52000003213171826",
           "denom": "uarkeo"
         }
       ]
@@ -472,7 +488,7 @@
     },
     "mint": {
       "minter": {
-        "annual_provisions": "6759998880320819.659730123458173168",
+        "annual_provisions": "6759998880320832.659727434700456968",
         "inflation": "0.129999973112422838"
       },
       "params": {
