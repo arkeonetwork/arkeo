@@ -6,15 +6,16 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: arkeod-darwin-amd64
-    binary: arkeod
+  - id: directory_api_darwin
+    binary: api
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
-    main: ./cmd/arkeod
+    main: ./cmd/directory/api
     goos:
       - darwin
     goarch:
+      - arm64
       - amd64
     flags:
       - -mod=readonly
@@ -34,16 +35,17 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
 
-  - id: arkeod-darwin-arm64
-    binary: arkeod
+  - id: directory_indexer_darwin
+    binary: indexer
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
-    main: ./cmd/arkeod
+    main: ./cmd/directory/indexer
     goos:
       - darwin
     goarch:
       - arm64
+      - amd64
     flags:
       - -mod=readonly
       - -trimpath
@@ -62,12 +64,37 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
 
-  - id: arkeod-linux-arm64
-    binary: arkeod
+  - id: directory_api_linux_arm64
+    binary: api
     env:
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
-    main: ./cmd/arkeod
+    main: ./cmd/directory/api
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - '{{ .Env.BUILD_TAG }}'
+  
+  - id: directory_indexer_linux_arm64
+    binary: indexer
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    main: ./cmd/directory/indexer
     goos:
       - linux
     goarch:
@@ -88,83 +115,92 @@ builds:
       - '{{ .Env.BUILD_TAG }}'
 
 universal_binaries:
-  - id: arkeod-darwin-all
+  - id: directory_darwin_all
     ids:
-      - arkeod-darwin-amd64
-      - arkeod-darwin-arm64
+      - directory_api_darwin
+      - directory_indexer_darwin
     replace: false
-    name_template: "{{ .ProjectName }}d{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+    name_template: "directory{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
 
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
 
 archives:
   - id: w/version
+    allow_different_binary_count: true
     builds:
-      - arkeod-linux-arm64
-      - arkeod-darwin-amd64
-      - arkeod-darwin-arm64
-      - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_darwin_all
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+    name_template: "directory_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: wo/version
+    allow_different_binary_count: true
     builds:
-      - arkeod-linux-arm64
-      - arkeod-darwin-amd64
-      - arkeod-darwin-arm64
-      - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_darwin_all
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: zip
     files:
       - none*
   - id: binary
+    allow_different_binary_count: true
     builds:
-      - arkeod-linux-arm64
-      - arkeod-darwin-amd64
-      - arkeod-darwin-arm64
-      - arkeod-darwin-all
-    name_template: "{{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+      - directory_api_darwin
+      - directory_indexer_darwin
+      - directory_api_linux_arm64
+      - directory_indexer_linux_arm64
+      - directory_darwin_all
+    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
     wrap_in_directory: false
     format: binary
     files:
       - none*
 
 checksum:
-  name_template: '{{ .ProjectName }}d_v{{ .Version }}_{{ if eq .Env.BUILD_TAG "testnet" }}testnet{{ end }}_cross_checksums.txt'
+  name_template: 'directory_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
+
 
 dockers:
   - use: buildx
     goos: linux
     goarch: arm64
+    dockerfile: docker/Dockerfile.api
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+      - 'ghcr.io/arkeonetwork/api:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}d"
-      - "--label=org.opencontainers.image.description={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.title=sentinel"
+      - "--label=org.opencontainers.image.description=sentinel"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version=v{{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
+  
   - use: buildx
     goos: linux
     goarch: arm64
-    dockerfile: Dockerfile.dev
+    dockerfile: docker/Dockerfile.indexer
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title={{.ProjectName}}d"
-      - "--label=org.opencontainers.image.description={{.ProjectName}}d"
+      - "--label=org.opencontainers.image.title=sentinel"
+      - "--label=org.opencontainers.image.description=sentinel"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version=v{{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
@@ -172,19 +208,11 @@ dockers:
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
-    image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'

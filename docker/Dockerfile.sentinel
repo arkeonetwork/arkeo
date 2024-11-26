@@ -1,0 +1,7 @@
+FROM scratch
+
+COPY ./sentinel /usr/bin/sentinel
+
+WORKDIR /root/.arkeo
+
+ENTRYPOINT [ "/usr/bin/sentinel" ]

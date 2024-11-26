@@ -33,6 +33,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 ## Added 
 - Added sentinel setup docs
 - Added sentinel regression test
+- Added go releaser for sentinel and directory service
+
 
 ## Changed
 - Updated sentinel to handle provider events
