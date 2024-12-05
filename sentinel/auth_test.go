@@ -64,7 +64,8 @@ func TestFreeTier(t *testing.T) {
 	config := conf.Configuration{
 		FreeTierRateLimit: 1,
 	}
-	proxy := NewProxy(config)
+	proxy, err := NewProxy(config)
+	require.NoError(t, err)
 
 	remoteAddr := "127.0.0.1:8000"
 
@@ -107,7 +108,8 @@ func TestPaidTier(t *testing.T) {
 		ProviderPubKey:    pubkey,
 		FreeTierRateLimit: 1,
 	}
-	proxy := NewProxy(config)
+	proxy, err := NewProxy(config)
+	require.NoError(t, err)
 
 	contract := types.NewContract(pubkey, common.BTCService, pk)
 	contract.Height = 5

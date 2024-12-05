@@ -19,7 +19,7 @@ import (
 
 var ModuleBasics = module.NewBasicManager()
 
-// TODO: this should receive events from arceo chain to update its database
+// TODO: this should receive events from arkeo chain to update its database
 // TODO: clean up contracts from memory after they expire
 type MemStore struct {
 	storeLock   *sync.Mutex

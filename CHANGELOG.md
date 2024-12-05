@@ -28,6 +28,22 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.3-Prerelease 
+
+## Added 
+- Added sentinel setup docs
+- Added sentinel regression test
+- Added go releaser for sentinel and directory service
+
+
+## Changed
+- Updated sentinel to handle provider events
+
+## Fixed 
+- Fixed code lint
+- Fixed ws client issue with event stream
+- Fixed swagger issue
+
 # v1.0.2-Prerelease 
 
 ## Added 

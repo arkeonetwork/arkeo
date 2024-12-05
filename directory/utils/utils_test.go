@@ -96,11 +96,12 @@ func TestDownloadProviderMetadata(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-
+	// nolint:staticcheck
 	if metadata == nil {
 		t.FailNow()
 	}
 
+	// nolint:staticcheck
 	if metadata.Version == "" {
 		t.FailNow()
 	}

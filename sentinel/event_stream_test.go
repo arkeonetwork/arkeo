@@ -36,7 +36,8 @@ func newTestConfig() conf.Configuration {
 
 func TestHandleOpenContractEvent(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
@@ -108,7 +109,8 @@ func TestHandleOpenContractEvent(t *testing.T) {
 
 func TestHandleCloseContractEvent(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
@@ -158,7 +160,8 @@ func TestHandleCloseContractEvent(t *testing.T) {
 
 func TestHandleHandleContractSettlementEvent(t *testing.T) {
 	testConfig := newTestConfig()
-	proxy := NewProxy(testConfig)
+	proxy, err := NewProxy(testConfig)
+	require.NoError(t, err)
 	inputContract := types.Contract{
 		Provider:           testConfig.ProviderPubKey,
 		Service:            common.BTCService,
