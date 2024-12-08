@@ -57,6 +57,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 # v1.0.1-Prerelease 
 
 ## Added 
+- Add claim record scripts
 - Thorchain Claims Proto Updates
 - Documentation of Testnet Setup using local build and Cosmovisor
 - Documentation update and addition of validator setup documentation 
