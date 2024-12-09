@@ -43,6 +43,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed code lint
 - Fixed ws client issue with event stream
 - Fixed swagger issue
+- Docker files and scripts
 
 # v1.0.2-Prerelease 
 
