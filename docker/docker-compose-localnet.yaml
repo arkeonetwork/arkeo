@@ -4,8 +4,8 @@ services:
   node:
     image: ${IMAGE_TAG}
     build:
-      context: .
-      dockerfile: Dockerfile.localnet  # Ensure the Dockerfile is correctly referenced
+      context: ..
+      dockerfile: docker/Dockerfile.localnet
     entrypoint:
       - bash
       - -c
@@ -17,5 +17,5 @@ services:
       - 26657:26657
       - 26656:26656
     volumes:
-      - ./scripts:/scripts:z
+      - ../scripts:/scripts:z
     working_dir: /scripts
