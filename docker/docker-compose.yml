@@ -4,35 +4,43 @@ services:
     hostname: arkeod
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile.localnet
     ports:
       - "1317:1317"
       - "26656:26656"
       - "26657:26657"
     volumes:
       - ".arkeo:/root/.arkeo:rw"
+      - ../scripts:/scripts:z
     environment:
-      NET: "mocknet"
-    entrypoint: /scripts/genesis.sh
-    command: arkeod start --pruning nothing
+      - NET=mocknet
+    
+    entrypoint: ["/bin/bash", "/scripts/genesis.sh"]
 
   arkeod-1:
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile.localnet
     ports:
       - "1317"
       - "26657"
     environment:
       NET: "mocknet"
       PEER: arkeod
+      RPC: arkeod:26657
+      SEED: arkeod:26656
+    volumes:
+      - ../scripts:/scripts:z
     entrypoint: /scripts/validator.sh
     command: arkeod start
 
   sentinel:
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./Dockerfile.sentinel
     depends_on:
       - "arkeod"
     ports:
@@ -50,11 +58,12 @@ services:
       FREE_RATE_LIMIT_DURATION: "1m"
       CLAIM_STORE_LOCATION: "/root/.arkeo/claims"
       CONTRACT_CONFIG_STORE_LOCATION: "/root/.arkeo/contract_configs"
+      PROVIDER_CONFIG_STORE_LOCATION: "/root/.arkeo/provider_configs"
     entrypoint: "/scripts/sentinel.sh"
     command: sentinel
     volumes:
       - ".sentinel:/root/.arkeo:rw"
-      - "./scripts:/scripts"
+      - ../scripts:/scripts:z
 
   directory-postgres:
     image: postgres:15.1-alpine
@@ -76,7 +85,8 @@ services:
   init-directory-db:
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./Dockerfile.indexer
     entrypoint: []
     command:
       - "tern"
@@ -88,7 +98,7 @@ services:
     env_file:
       - ./docker-directory.env
     volumes:
-      - ./directory/tern:/directory/tern
+      - ../directory/tern:/directory/tern
     depends_on:
       directory-postgres:
         condition: service_healthy
@@ -96,7 +106,8 @@ services:
   directory-indexer:
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./Dockerfile.indexer
     entrypoint: []
     command:
       - "indexer"
@@ -109,7 +120,8 @@ services:
   directory-api:
     image: arkeo
     build:
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./Dockerfile.api
     entrypoint: []
     command:
       - "api"
