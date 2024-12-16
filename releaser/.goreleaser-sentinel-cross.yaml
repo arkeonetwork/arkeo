@@ -113,7 +113,7 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.sentinel
     image_templates:
-      - 'ghcr.io/arkeonetwork/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -127,11 +127,11 @@ dockers:
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Env.SENTINEL_VERSION }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Env.SENTINEL_VERSION }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
     create_flags:
       - --insecure
     push_flags:
       - --insecure
     image_templates:
-      - 'ghcr.io/arkeonetwork/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
