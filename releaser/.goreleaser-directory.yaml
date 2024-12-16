@@ -97,7 +97,7 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.api
     image_templates:
-      - 'ghcr.io/arkeonetwork/api:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
@@ -115,7 +115,7 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.indexer
     image_templates:
-      - 'ghcr.io/arkeonetwork/indexer:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Version  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"

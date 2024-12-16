@@ -69,7 +69,7 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.sentinel
     image_templates:
-      - 'ghcr.io/arkeonetwork/sentinel:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Env.SENTINEL_VERSION  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{ else }}{{ if eq .Env.RELEASE "true" }}v{{ .Env.SENTINEL_VERSION  }}-amd64{{ else }}{{ .ShortCommit }}-amd64{{ end }}{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
