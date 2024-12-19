@@ -171,8 +171,8 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.api
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-latest-arm64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-{{ .Version }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-arm64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -190,8 +190,8 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.indexer
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-latest-arm64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-{{ .Version }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}-arm64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
@@ -205,25 +205,25 @@ dockers:
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-latest'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-arm64'
 
-  - name_template: ghcr.io/arkeonetwork/{{ .ProjectName }}:api-{{ .Version }}'
+  - name_template: ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-{{ .Version }}-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-{{ .Version }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-arm64'
 
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-latest'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest-arm64'
 
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-{{ .Version }}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-{{ .Version }}-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-{{ .Version }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}-arm64'
 
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
