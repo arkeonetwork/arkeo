@@ -6,8 +6,8 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: sentinel-linux-amd64
-    binary: sentinel
+  - id: sentinel-testnet-linux-amd64
+    binary: sentinel-testnet
     main: ./cmd/sentinel
     goos:
       - linux
@@ -23,7 +23,7 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
       - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=mainnet
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
@@ -31,14 +31,14 @@ builds:
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
     tags:
-      - 'mainnet'
+      - 'testnet'
 
 archives:
   - id: archive-versioned
     builds:
-      - sentinel-linux-amd64
+      - sentinel-testnet-linux-amd64
     name_template: >-
-      sentinel_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
+      sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: zip
     files:
@@ -46,9 +46,9 @@ archives:
 
   - id: archive-binary
     builds:
-      - sentinel-linux-amd64
+      - sentinel-testnet-linux-amd64
     name_template: >-
-      sentinel_{{ .Os }}_{{ .Arch }}
+      sentinel-testnet_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:
@@ -56,7 +56,7 @@ archives:
 
 checksum:
   name_template: >-
-    sentinel_{{ .Env.SENTINEL_VERSION }}_checksums.txt
+    sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_checksums.txt
 
 dockers:
   - use: buildx
@@ -64,14 +64,14 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.sentinel
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:{{ .Env.SENTINEL_VERSION }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=sentinel"
-      - "--label=org.opencontainers.image.description=Arkeo Sentinel Service"
+      - "--label=org.opencontainers.image.title=sentinel-testnet"
+      - "--label=org.opencontainers.image.description=Arkeo Sentinel Service Testnet"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Env.SENTINEL_VERSION}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"

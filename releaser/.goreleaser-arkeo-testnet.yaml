@@ -6,8 +6,8 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: arkeod-linux-amd64
-    binary: arkeod
+  - id: arkeod-testnet-linux-amd64
+    binary: arkeod-testnet
     main: ./cmd/arkeod
     goos:
       - linux
@@ -23,22 +23,21 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
       - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags={{ .Env.BUILD_TAG }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
     tags:
-      - '{{ .Env.BUILD_TAG }}'
+      - 'testnet'
 
 archives:
   - id: archive-versioned
     builds:
-      - arkeod-linux-amd64
+      - arkeod-testnet-linux-amd64
     name_template: >-
-      {{ .ProjectName }}d_{{ .Version }}_{{ .Os }}_{{ .Arch }}
-      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
+      arkeod-testnet_{{ .Version }}_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: zip
     files:
@@ -46,10 +45,9 @@ archives:
 
   - id: archive-binary
     builds:
-      - arkeod-linux-amd64
+      - arkeod-testnet-linux-amd64
     name_template: >-
-      {{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}
-      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
+      arkeod-testnet_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:
@@ -57,9 +55,7 @@ archives:
 
 checksum:
   name_template: >-
-    {{ .ProjectName }}d_{{ .Version }}
-    {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
-    {{- "_checksums.txt" }}
+    arkeod-testnet_{{ .Version }}_checksums.txt
 
 dockers:
   - use: buildx
@@ -67,19 +63,14 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile
     image_templates:
-      # Latest tag
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:latest-amd64'
-      # Version tag
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{ .Version }}-amd64'
-      # Testnet tags if applicable
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}:testnet-latest-amd64{{ end }}'
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}:testnet-{{ .Version }}-amd64{{ end }}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=arkeod"
-      - "--label=org.opencontainers.image.description=Arkeo Daemon"
+      - "--label=org.opencontainers.image.title=arkeod-testnet"
+      - "--label=org.opencontainers.image.description=Arkeo Daemon Testnet"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
@@ -91,19 +82,14 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.dev
     image_templates:
-      # Dev latest tag
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:latest-amd64'
-      # Dev version tag
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{ .Version }}-amd64'
-      # Testnet tags if applicable
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:testnet-latest-amd64{{ end }}'
-      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:testnet-{{ .Version }}-amd64{{ end }}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet-dev:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet-dev:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=arkeod-dev"
-      - "--label=org.opencontainers.image.description=Arkeo Daemon Development Build"
+      - "--label=org.opencontainers.image.title=arkeod-testnet-dev"
+      - "--label=org.opencontainers.image.description=Arkeo Daemon Testnet Development Build"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"

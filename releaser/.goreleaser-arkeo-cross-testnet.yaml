@@ -1,0 +1,162 @@
+before:
+  hooks:
+    - go mod tidy
+
+env:
+  - CGO_ENABLED=1
+
+builds:
+  - id: arkeod-testnet-darwin-amd64
+    binary: arkeod-testnet
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/arkeod
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - 'testnet'
+
+  - id: arkeod-testnet-darwin-arm64
+    binary: arkeod-testnet
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    main: ./cmd/arkeod
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - 'testnet'
+
+  - id: arkeod-testnet-linux-arm64
+    binary: arkeod-testnet
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    main: ./cmd/arkeod
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.commit={{.Commit}}
+      - -X main.date={{ .CommitDate }}
+      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
+      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - 'testnet'
+
+universal_binaries:
+  - id: arkeod-testnet-darwin-universal
+    ids:
+      - arkeod-testnet-darwin-amd64
+      - arkeod-testnet-darwin-arm64
+    replace: false
+    name_template: >-
+      {{ .ProjectName }}d-testnet_{{ .Version }}_darwin_universal
+
+archives:
+  - id: archive-versioned
+    builds:
+      - arkeod-testnet-linux-arm64
+      - arkeod-testnet-darwin-amd64
+      - arkeod-testnet-darwin-arm64
+      - arkeod-testnet-darwin-universal
+    name_template: >-
+      {{ .ProjectName }}d-testnet_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    wrap_in_directory: false
+    format: zip
+    files:
+      - none*
+
+  - id: archive-binary
+    builds:
+      - arkeod-testnet-linux-arm64
+      - arkeod-testnet-darwin-amd64
+      - arkeod-testnet-darwin-arm64
+      - arkeod-testnet-darwin-universal
+    name_template: >-
+      {{ .ProjectName }}d-testnet_{{ .Os }}_{{ .Arch }}
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+
+checksum:
+  name_template: >-
+    {{ .ProjectName }}d-testnet_{{ .Version }}_checksums.txt
+
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: docker/Dockerfile
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:{{ .Version }}-arm64'
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=arkeod-testnet"
+      - "--label=org.opencontainers.image.description=Arkeo Daemon Testnet"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.url=https://arkeo.network/"
+      - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
+docker_manifests:
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:latest'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:{{ .Version }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-testnet:{{ .Version }}-arm64'
+
+release:
+  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'

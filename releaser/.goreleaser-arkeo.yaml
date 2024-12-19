@@ -6,35 +6,9 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: api-linux-amd64
-    binary: api
-    main: ./cmd/directory/api
-    goos:
-      - linux
-    goarch:
-      - amd64
-    flags:
-      - -mod=readonly
-      - -trimpath
-    ldflags:
-      - -s -w
-      - -X main.commit={{.Commit}}
-      - -X main.date={{ .CommitDate }}
-      - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
-      - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=mainnet
-      - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
-      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
-      - -linkmode=external
-      - -extldflags '-Wl,-z,muldefs --static -lm'
-    tags:
-      - 'mainnet'
-  
-  - id: indexer-linux-amd64
-    binary: indexer
-    main: ./cmd/directory/indexer
+  - id: arkeod-linux-amd64
+    binary: arkeod
+    main: ./cmd/arkeod
     goos:
       - linux
     goarch:
@@ -61,10 +35,9 @@ builds:
 archives:
   - id: archive-versioned
     builds:
-      - api-linux-amd64
-      - indexer-linux-amd64
+      - arkeod-linux-amd64
     name_template: >-
-      directory_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+      {{ .ProjectName }}d_{{ .Version }}_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: zip
     files:
@@ -72,10 +45,9 @@ archives:
 
   - id: archive-binary
     builds:
-      - api-linux-amd64
-      - indexer-linux-amd64
+      - arkeod-linux-amd64
     name_template: >-
-      directory_{{ .Os }}_{{ .Arch }}
+      {{ .ProjectName }}d_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:
@@ -83,22 +55,22 @@ archives:
 
 checksum:
   name_template: >-
-    directory_{{ .Version }}_checksums.txt
+    {{ .ProjectName }}d_{{ .Version }}_checksums.txt
 
 dockers:
   - use: buildx
     goos: linux
     goarch: amd64
-    dockerfile: docker/Dockerfile.api
+    dockerfile: docker/Dockerfile
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=directory-api"
-      - "--label=org.opencontainers.image.description=Arkeo Directory API Service"
+      - "--label=org.opencontainers.image.title=arkeod"
+      - "--label=org.opencontainers.image.description=Arkeo Daemon"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
@@ -108,16 +80,16 @@ dockers:
   - use: buildx
     goos: linux
     goarch: amd64
-    dockerfile: docker/Dockerfile.indexer
+    dockerfile: docker/Dockerfile.dev
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}-dev:{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=directory-indexer"
-      - "--label=org.opencontainers.image.description=Arkeo Directory Indexer Service"
+      - "--label=org.opencontainers.image.title=arkeod-dev"
+      - "--label=org.opencontainers.image.description=Arkeo Daemon Development Build"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
