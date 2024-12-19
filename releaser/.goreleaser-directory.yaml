@@ -100,8 +100,8 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.api
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:api-{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
@@ -119,8 +119,8 @@ dockers:
     goarch: amd64
     dockerfile: docker/Dockerfile.indexer
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}:indexer-{{ .Version }}-amd64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/amd64"
