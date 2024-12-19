@@ -1,0 +1,34 @@
+name: Test Release
+
+# Run on every master merge and on all PRs.
+on:
+  push:
+    branches: [main]
+    tags: [v*]
+
+  pull_request:
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-test:
+    runs-on: ubuntu-latest # Specify the runner environment
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: Test Docker login
+        run: |
+          echo "Testing Docker login..."
+          docker info | grep -q "ghcr.io" && echo "Login successful!" || echo "Login failed!"
