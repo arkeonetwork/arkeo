@@ -44,6 +44,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed ws client issue with event stream
 - Fixed swagger issue
 - Docker files and scripts
+- Go releaser for binary and docker
 
 # v1.0.2-Prerelease 
 

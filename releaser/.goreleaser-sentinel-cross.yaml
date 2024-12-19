@@ -6,7 +6,7 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: sentinel_darwin
+  - id: sentinel-darwin
     binary: sentinel
     env:
       - CC=o64-clang
@@ -36,7 +36,7 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
 
-  - id: sentinel_linux_arm64
+  - id: sentinel-linux-arm64
     binary: sentinel
     env:
       - CC=aarch64-linux-gnu-gcc
@@ -63,49 +63,46 @@ builds:
       - '{{ .Env.BUILD_TAG }}'
 
 universal_binaries:
-  - id: sentinel_darwin_all
+  - id: sentinel-darwin-universal
     ids:
-      - sentinel_darwin
+      - sentinel-darwin
     replace: false
-    name_template: "sentinel{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
-
-release:
-  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+    name_template: >-
+      sentinel_{{ .Version }}_darwin_universal
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
 
 archives:
-  - id: w/version
+  - id: archive-versioned
     builds:
-      - sentinel_darwin
-      - sentinel_linux_arm64
-      - sentinel_darwin_all
-    name_template: "sentinel_v{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+      - sentinel-darwin
+      - sentinel-linux-arm64
+      - sentinel-darwin-universal
+    name_template: >-
+      sentinel_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
     wrap_in_directory: false
     format: zip
     files:
       - none*
-  - id: wo/version
+
+  - id: archive-binary
     builds:
       - sentinel-darwin
       - sentinel-linux-arm64
-      - sentinel-darwin-all
-    name_template: "sentinel_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
-    wrap_in_directory: false
-    format: zip
-    files:
-      - none*
-  - id: binary
-    builds:
-      - sentinel-darwin
-      - sentinel-linux-arm64
-      - sentinel-darwin-all
-    name_template: "sentinel_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
+      - sentinel-darwin-universal
+    name_template: >-
+      sentinel_{{ .Os }}_{{ .Arch }}
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
     wrap_in_directory: false
     format: binary
     files:
       - none*
 
 checksum:
-  name_template: 'sentinel_v{{ .Env.SENTINEL_VERSION }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
+  name_template: >-
+    sentinel_{{ .Env.SENTINEL_VERSION }}
+    {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
+    {{- "_cross_checksums.txt" }}
 
 dockers:
   - use: buildx
@@ -113,25 +110,47 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.sentinel
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+      # Latest tag
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-arm64'
+      # Version tag
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-arm64'
+      # Testnet tags if applicable
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-latest-arm64{{ end }}'
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-{{ .Env.SENTINEL_VERSION }}-arm64{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=sentinel"
-      - "--label=org.opencontainers.image.description=sentinel"
+      - "--label=org.opencontainers.image.description=Arkeo Sentinel Service"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version=v{{.Env.SENTINEL_VERSION}}"
+      - "--label=org.opencontainers.image.version={{.Env.SENTINEL_VERSION}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Env.SENTINEL_VERSION }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{if eq .Env.RELEASE "true"}}v{{ .Env.SENTINEL_VERSION }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-latest'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-{{ .Env.SENTINEL_VERSION }}'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-{{ .Env.SENTINEL_VERSION }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:testnet-{{ .Env.SENTINEL_VERSION }}-arm64'
+
+release:
+  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
