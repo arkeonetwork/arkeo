@@ -1,4 +1,4 @@
-name: Release
+name: Mainnet Release
 
 on:
   release:
