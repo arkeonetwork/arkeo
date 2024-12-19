@@ -6,8 +6,8 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: sentinel-darwin
-    binary: sentinel
+  - id: sentinel-testnet-darwin
+    binary: sentinel-testnet
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
@@ -27,17 +27,17 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
       - -X github.com/cosmos/cosmos-sdk/version.Version=v{{ .Version }}
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=mainnet
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
       - -X github.com/arkeonetwork/arkeo/sentinel.Version={{ .Env.SENTINEL_VERSION }}
       - -w -s
       - -linkmode=external
     tags:
-      - 'mainnet'
+      - 'testnet'
 
-  - id: sentinel-linux-arm64
-    binary: sentinel
+  - id: sentinel-testnet-linux-arm64
+    binary: sentinel-testnet
     env:
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
@@ -52,7 +52,7 @@ builds:
       - -X main.date={{ .CommitDate }}
       - -X github.com/cosmos/cosmos-sdk/version.Name=Arkeo
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
-      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=mainnet
+      - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
       - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
@@ -60,24 +60,24 @@ builds:
       - -linkmode=external
       - -extldflags '-Wl,-z,muldefs --static -lm'
     tags:
-      - 'mainnet'
+      - 'testnet'
 
 universal_binaries:
-  - id: sentinel-darwin-universal
+  - id: sentinel-testnet-darwin-universal
     ids:
-      - sentinel-darwin
+      - sentinel-testnet-darwin
     replace: false
     name_template: >-
-      sentinel_{{ .Version }}_darwin_universal
+      sentinel-testnet_{{ .Version }}_darwin_universal
 
 archives:
   - id: archive-versioned
     builds:
-      - sentinel-darwin
-      - sentinel-linux-arm64
-      - sentinel-darwin-universal
+      - sentinel-testnet-darwin
+      - sentinel-testnet-linux-arm64
+      - sentinel-testnet-darwin-universal
     name_template: >-
-      sentinel_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
+      sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: zip
     files:
@@ -85,11 +85,11 @@ archives:
 
   - id: archive-binary
     builds:
-      - sentinel-darwin
-      - sentinel-linux-arm64
-      - sentinel-darwin-universal
+      - sentinel-testnet-darwin
+      - sentinel-testnet-linux-arm64
+      - sentinel-testnet-darwin-universal
     name_template: >-
-      sentinel_{{ .Os }}_{{ .Arch }}
+      sentinel-testnet_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:
@@ -97,7 +97,7 @@ archives:
 
 checksum:
   name_template: >-
-    sentinel_{{ .Env.SENTINEL_VERSION }}_checksums.txt
+    sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_checksums.txt
 
 dockers:
   - use: buildx
@@ -105,14 +105,14 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.sentinel
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-arm64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:{{ .Env.SENTINEL_VERSION }}-arm64'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=sentinel"
-      - "--label=org.opencontainers.image.description=Arkeo Sentinel Service"
+      - "--label=org.opencontainers.image.title=sentinel-testnet"
+      - "--label=org.opencontainers.image.description=Arkeo Sentinel Service Testnet"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Env.SENTINEL_VERSION}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
@@ -120,15 +120,15 @@ dockers:
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:latest'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:latest-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:latest-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:latest-arm64'
 
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:{{ .Env.SENTINEL_VERSION }}'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-amd64'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel:{{ .Env.SENTINEL_VERSION }}-arm64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:{{ .Env.SENTINEL_VERSION }}-amd64'
+      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/sentinel-testnet:{{ .Env.SENTINEL_VERSION }}-arm64'
 
 release:
   skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
