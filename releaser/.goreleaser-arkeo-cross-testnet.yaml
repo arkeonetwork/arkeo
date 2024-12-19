@@ -125,7 +125,7 @@ archives:
 
 checksum:
   name_template: >-
-    arkeod_{{ .Version }}_testnet_checksums.txt
+    arkeod_{{ .Version }}_cross_testnet_checksums.txt
 
 dockers:
   - use: buildx

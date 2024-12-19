@@ -97,7 +97,7 @@ archives:
 
 checksum:
   name_template: >-
-    sentinel_{{ .Env.SENTINEL_VERSION }}_checksums.txt
+    sentinel_{{ .Env.SENTINEL_VERSION }}_cross_checksums.txt
 
 dockers:
   - use: buildx
