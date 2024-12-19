@@ -39,5 +39,5 @@ jobs:
       - name: ${{ matrix.release }}
         env:
           RELEASE: true
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: make ${{ matrix.release }}
