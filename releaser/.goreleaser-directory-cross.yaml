@@ -6,7 +6,7 @@ env:
   - CGO_ENABLED=1
 
 builds:
-  - id: directory_api_darwin
+  - id: api-darwin
     binary: api
     env:
       - CC=o64-clang
@@ -35,7 +35,7 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
 
-  - id: directory_indexer_darwin
+  - id: indexer-darwin
     binary: indexer
     env:
       - CC=o64-clang
@@ -64,7 +64,7 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
 
-  - id: directory_api_linux_arm64
+  - id: api-linux-arm64
     binary: api
     env:
       - CC=aarch64-linux-gnu-gcc
@@ -89,7 +89,7 @@ builds:
     tags:
       - '{{ .Env.BUILD_TAG }}'
   
-  - id: directory_indexer_linux_arm64
+  - id: indexer-linux-arm64
     binary: indexer
     env:
       - CC=aarch64-linux-gnu-gcc
@@ -115,60 +115,53 @@ builds:
       - '{{ .Env.BUILD_TAG }}'
 
 universal_binaries:
-  - id: directory_darwin_all
+  - id: directory-darwin-universal
     ids:
-      - directory_api_darwin
-      - directory_indexer_darwin
+      - api-darwin
+      - indexer-darwin
     replace: false
-    name_template: "directory{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
-
-release:
-  skip_upload: '{{ if eq .Env.RELEASE "true" }}false{{else}}true{{end}}'
+    name_template: >-
+      directory_{{ .Version }}_darwin_universal
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
 
 archives:
-  - id: w/version
+  - id: archive-versioned
     allow_different_binary_count: true
     builds:
-      - directory_api_darwin
-      - directory_indexer_darwin
-      - directory_darwin_all
-      - directory_api_linux_arm64
-      - directory_indexer_linux_arm64
-    name_template: "directory_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}-testnet{{ end }}"
+      - api-darwin
+      - indexer-darwin
+      - directory-darwin-universal
+      - api-linux-arm64
+      - indexer-linux-arm64
+    name_template: >-
+      directory_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
     wrap_in_directory: false
     format: zip
     files:
       - none*
-  - id: wo/version
+
+  - id: archive-binary
     allow_different_binary_count: true
     builds:
-      - directory_api_darwin
-      - directory_indexer_darwin
-      - directory_darwin_all
-      - directory_api_linux_arm64
-      - directory_indexer_linux_arm64
-    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
-    wrap_in_directory: false
-    format: zip
-    files:
-      - none*
-  - id: binary
-    allow_different_binary_count: true
-    builds:
-      - directory_api_darwin
-      - directory_indexer_darwin
-      - directory_api_linux_arm64
-      - directory_indexer_linux_arm64
-      - directory_darwin_all
-    name_template: "directory_{{ .Os }}_{{ .Arch }}{{ if eq .Env.BUILD_TAG \"testnet\" }}_testnet{{ end }}"
+      - api-darwin
+      - indexer-darwin
+      - api-linux-arm64
+      - indexer-linux-arm64
+      - directory-darwin-universal
+    name_template: >-
+      directory_{{ .Os }}_{{ .Arch }}
+      {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
     wrap_in_directory: false
     format: binary
     files:
       - none*
 
 checksum:
-  name_template: 'directory_v{{ .Version }}{{ if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}_cross_checksums.txt'
-
+  name_template: >-
+    directory_{{ .Version }}
+    {{- if eq .Env.BUILD_TAG "testnet" }}_testnet{{ end }}
+    {{- "_cross_checksums.txt" }}
 
 dockers:
   - use: buildx
@@ -176,15 +169,21 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.api
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+      # Latest API tag
+      - 'ghcr.io/arkeonetwork/directory/api:latest-arm64'
+      # Version API tag
+      - 'ghcr.io/arkeonetwork/directory/api:{{ .Version }}-arm64'
+      # Testnet tags if applicable
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/directory/api:testnet-latest-arm64{{ end }}'
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/directory/api:testnet-{{ .Version }}-arm64{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=sentinel"
-      - "--label=org.opencontainers.image.description=sentinel"
+      - "--label=org.opencontainers.image.title=directory-api"
+      - "--label=org.opencontainers.image.description=Arkeo Directory API Service"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version=v{{.Version}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
@@ -194,25 +193,68 @@ dockers:
     goarch: arm64
     dockerfile: docker/Dockerfile.indexer
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}{{end}}'
+      # Latest indexer tag
+      - 'ghcr.io/arkeonetwork/directory/indexer:latest-arm64'
+      # Version indexer tag
+      - 'ghcr.io/arkeonetwork/directory/indexer:{{ .Version }}-arm64'
+      # Testnet tags if applicable
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/directory/indexer:testnet-latest-arm64{{ end }}'
+      - '{{ if eq .Env.BUILD_TAG "testnet" }}ghcr.io/arkeonetwork/directory/indexer:testnet-{{ .Version }}-arm64{{ end }}'
     build_flag_templates:
       - "--pull"
       - "--platform=linux/arm64"
       - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.title=sentinel"
-      - "--label=org.opencontainers.image.description=sentinel"
+      - "--label=org.opencontainers.image.title=directory-indexer"
+      - "--label=org.opencontainers.image.description=Arkeo Directory Indexer Service"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version=v{{.Version}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://arkeo.network/"
       - "--label=org.opencontainers.image.source=https://github.com/arkeonetwork/arkeo"
       - "--label=org.opencontainers.image.licenses=Apache-2.0"
 
 docker_manifests:
-  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{if eq .Env.BUILD_TAG "testnet" }}testnet-{{.ShortCommit}}{{else}}{{if eq .Env.RELEASE "true" }}v{{ .Version }}{{else}}{{ .ShortCommit }}{{end}}{{end}}'
-    create_flags:
-      - --insecure
-    push_flags:
-      - --insecure
+  # API manifests
+  - name_template: 'ghcr.io/arkeonetwork/directory/api:latest'
     image_templates:
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-amd64{{else}}{{ .ShortCommit }}-amd64{{end}}'
-      - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/indexer:{{if eq .Env.RELEASE "true"}}v{{ .Version }}-arm64{{else}}{{ .ShortCommit }}-arm64{{end}}'
+      - 'ghcr.io/arkeonetwork/directory/api:latest-amd64'
+      - 'ghcr.io/arkeonetwork/directory/api:latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/api:{{ .Version }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/api:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/directory/api:{{ .Version }}-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/api:testnet-latest'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/api:testnet-latest-amd64'
+      - 'ghcr.io/arkeonetwork/directory/api:testnet-latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/api:testnet-{{ .Version }}'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/api:testnet-{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/directory/api:testnet-{{ .Version }}-arm64'
+
+  # Indexer manifests
+  - name_template: 'ghcr.io/arkeonetwork/directory/indexer:latest'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/indexer:latest-amd64'
+      - 'ghcr.io/arkeonetwork/directory/indexer:latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/indexer:{{ .Version }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/indexer:{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/directory/indexer:{{ .Version }}-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/indexer:testnet-latest'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/indexer:testnet-latest-amd64'
+      - 'ghcr.io/arkeonetwork/directory/indexer:testnet-latest-arm64'
+
+  - name_template: 'ghcr.io/arkeonetwork/directory/indexer:testnet-{{ .Version }}'
+    skip_push: '{{ ne .Env.BUILD_TAG "testnet" }}'
+    image_templates:
+      - 'ghcr.io/arkeonetwork/directory/indexer:testnet-{{ .Version }}-amd64'
+      - 'ghcr.io/arkeonetwork/directory/indexer:testnet-{{ .Version }}-arm64'
