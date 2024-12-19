@@ -139,16 +139,23 @@ archives:
     files:
       - none*
 
-  - id: archive-binary
-    allow_different_binary_count: true
+  - id: archive-binary-api
     builds:
       - api-darwin
-      - indexer-darwin
       - api-linux-arm64
-      - indexer-linux-arm64
-      - directory-darwin-universal
     name_template: >-
-      directory_{{ .Os }}_{{ .Arch }}
+      directory_api_{{ .Os }}_{{ .Arch }}
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+
+  - id: archive-binary-indexer
+    builds:
+      - indexer-darwin
+      - indexer-linux-arm64
+    name_template: >-
+      directory_indexer_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:

@@ -7,7 +7,7 @@ env:
 
 builds:
   - id: api-testnet-darwin
-    binary: api-testnet
+    binary: api
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
@@ -36,7 +36,7 @@ builds:
       - 'testnet'
 
   - id: indexer-testnet-darwin
-    binary: indexer-testnet
+    binary: indexer
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
@@ -65,7 +65,7 @@ builds:
       - 'testnet'
 
   - id: api-testnet-linux-arm64
-    binary: api-testnet
+    binary: api
     env:
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
@@ -90,7 +90,7 @@ builds:
       - 'testnet'
   
   - id: indexer-testnet-linux-arm64
-    binary: indexer-testnet
+    binary: indexer
     env:
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
@@ -107,9 +107,13 @@ builds:
       - -X github.com/cosmos/cosmos-sdk/version.AppName=arkeo
       - -X github.com/cosmos/cosmos-sdk/version.BuildTags=testnet
       - -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }}
-      - -X github.
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.Version=v{{ .Version }}
+      - -X github.com/arkeonetwork/arkeo/x/arkeo/configs.GitCommit={{ .Commit }}
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - 'testnet'
 
-  
 universal_binaries:
   - id: directory-testnet-darwin-universal
     ids:
@@ -135,16 +139,23 @@ archives:
     files:
       - none*
 
-  - id: archive-binary
-    allow_different_binary_count: true
+  - id: archive-binary-api
     builds:
       - api-testnet-darwin
-      - indexer-testnet-darwin
       - api-testnet-linux-arm64
-      - indexer-testnet-linux-arm64
-      - directory-testnet-darwin-universal
     name_template: >-
-      directory-testnet_{{ .Os }}_{{ .Arch }}
+      directory-testnet_api_{{ .Os }}_{{ .Arch }}
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+
+  - id: archive-binary-indexer
+    builds:
+      - indexer-testnet-darwin
+      - indexer-testnet-linux-arm64
+    name_template: >-
+      directory-testnet_indexer_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:

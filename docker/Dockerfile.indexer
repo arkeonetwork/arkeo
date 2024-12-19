@@ -1,8 +1,8 @@
 FROM scratch
 
-COPY ./api /usr/bin/api
+COPY ./indexer /usr/bin/indexer
 
 WORKDIR /root/.arkeo
 
 
-ENTRYPOINT [ "/usr/bin/api" ]
+ENTRYPOINT [ "/usr/bin/indexer" ]

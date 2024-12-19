@@ -7,7 +7,7 @@ env:
 
 builds:
   - id: sentinel-testnet-darwin
-    binary: sentinel-testnet
+    binary: sentinel
     env:
       - CC=o64-clang
       - CGO_LDFLAGS=-L/lib
@@ -37,7 +37,7 @@ builds:
       - 'testnet'
 
   - id: sentinel-testnet-linux-arm64
-    binary: sentinel-testnet
+    binary: sentinel
     env:
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
@@ -68,7 +68,7 @@ universal_binaries:
       - sentinel-testnet-darwin
     replace: false
     name_template: >-
-      sentinel-testnet_{{ .Version }}_darwin_universal
+      sentinel_{{ .Version }}_darwin_universal_testnet
 
 archives:
   - id: archive-versioned
@@ -77,7 +77,7 @@ archives:
       - sentinel-testnet-linux-arm64
       - sentinel-testnet-darwin-universal
     name_template: >-
-      sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}
+      sentinel_{{ .Env.SENTINEL_VERSION }}_{{ .Os }}_{{ .Arch }}_testnet
     wrap_in_directory: false
     format: zip
     files:
@@ -89,7 +89,7 @@ archives:
       - sentinel-testnet-linux-arm64
       - sentinel-testnet-darwin-universal
     name_template: >-
-      sentinel-testnet_{{ .Os }}_{{ .Arch }}
+      sentinel_{{ .Os }}_{{ .Arch }}_testnet
     wrap_in_directory: false
     format: binary
     files:
@@ -97,7 +97,7 @@ archives:
 
 checksum:
   name_template: >-
-    sentinel-testnet_{{ .Env.SENTINEL_VERSION }}_checksums.txt
+    sentinel_{{ .Env.SENTINEL_VERSION }}_testnet_checksums.txt
 
 dockers:
   - use: buildx

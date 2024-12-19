@@ -70,12 +70,21 @@ archives:
     files:
       - none*
 
-  - id: archive-binary
+  - id: archive-binary-api
     builds:
       - api-linux-amd64
+    name_template: >-
+      directory_api_{{ .Os }}_{{ .Arch }}
+    wrap_in_directory: false
+    format: binary
+    files:
+      - none*
+
+  - id: archive-binary-indexer
+    builds:
       - indexer-linux-amd64
     name_template: >-
-      directory_{{ .Os }}_{{ .Arch }}
+      directory_indexer_{{ .Os }}_{{ .Arch }}
     wrap_in_directory: false
     format: binary
     files:
