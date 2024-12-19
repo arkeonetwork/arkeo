@@ -210,7 +210,7 @@ docker_manifests:
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-amd64'
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:latest-arm64'
 
-  - name_template: ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}'
+  - name_template: 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}'
     image_templates:
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-amd64'
       - 'ghcr.io/arkeonetwork/{{ .ProjectName }}/api:{{ .Version }}-arm64'
