@@ -28,6 +28,9 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+### Fixed
+- Updated event labels on TC delegate events
+
 # v1.0.3-Prerelease 
 
 ## Added 
