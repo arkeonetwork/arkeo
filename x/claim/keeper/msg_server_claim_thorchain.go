@@ -63,8 +63,8 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeThorchainDelegate,
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.FromAddress),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.ToAddress),
+			sdk.NewAttribute(types.AttributeKeyFromAddress, msg.FromAddress),
+			sdk.NewAttribute(types.AttributeKeyToAddress, msg.ToAddress),
 		),
 	})
 

@@ -105,7 +105,6 @@ func main() {
 
 	// Module address generation operation
 	if *moduleName != "" {
-
 		moduleAddr := GetModuleAddress(*moduleName)
 
 		fmt.Printf("Generated address for module '%s': %s\n", *moduleName, moduleAddr)
