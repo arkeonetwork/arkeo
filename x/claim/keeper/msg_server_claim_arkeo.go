@@ -26,5 +26,10 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
 	}
 
-	return &types.MsgClaimArkeoResponse{}, nil
+	claimedAmount := arkeoClaimRecord.AmountClaim
+
+	return &types.MsgClaimArkeoResponse{
+		Address: msg.Creator,
+		Amount:  claimedAmount.Amount.Int64(),
+	}, nil
 }

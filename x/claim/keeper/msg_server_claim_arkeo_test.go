@@ -36,8 +36,11 @@ func TestClaimArkeo(t *testing.T) {
 	claimMessage := types.MsgClaimArkeo{
 		Creator: addrArkeo.String(),
 	}
-	_, err = msgServer.ClaimArkeo(ctx, &claimMessage)
+	response, err := msgServer.ClaimArkeo(ctx, &claimMessage)
 	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.Equal(t, addrArkeo.String(), response.Address)
+	require.Greater(t, response.Amount, int64(0))
 
 	// check if claimrecord is updated
 	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)
