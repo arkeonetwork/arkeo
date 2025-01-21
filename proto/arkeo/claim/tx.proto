@@ -30,7 +30,12 @@ message MsgClaimEth {
   string signature = 3; // EIP712 signature that has to be signed by ethAddress
 }
 
-message MsgClaimEthResponse {}
+message MsgClaimEthResponse {
+  string ethAddress = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string arkeoAddress = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  int64 ethClaimAmount = 3 [(cosmos_proto.scalar) = "cosmos.Int"];
+  int64 arkeoClaimAmount = 4 [(cosmos_proto.scalar) = "cosmos.Int"];
+}
 
 message MsgClaimArkeo {
   option (cosmos.msg.v1.signer) = "creator";
@@ -71,4 +76,7 @@ message MsgClaimThorchain {
   string to_address = 3; // the address to delegate the claim to
 }
 
-message MsgClaimThorchainResponse {}
+message MsgClaimThorchainResponse {
+  string from_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string to_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}

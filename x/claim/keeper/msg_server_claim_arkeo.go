@@ -33,6 +33,5 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 		Amount:  claimedAmount.Amount.Int64(),
 	}
 
-	k.Logger(ctx).Info("Generated response", "response", response)
 	return response, nil
 }

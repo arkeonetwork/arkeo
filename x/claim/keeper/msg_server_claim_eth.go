@@ -25,7 +25,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
-		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
+		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.EthAddress)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
 
@@ -87,7 +87,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
 	}
 
-	return &types.MsgClaimEthResponse{}, nil
+	return &types.MsgClaimEthResponse{
+		EthAddress:       msg.EthAddress,
+		ArkeoAddress:     msg.Creator,
+		EthClaimAmount:   ethClaim.AmountClaim.Amount.Int64(),
+		ArkeoClaimAmount: arkeoClaim.AmountClaim.Amount.Int64(),
+	}, nil
 }
 
 func GenerateClaimTypedDataBytes(ethAddress, arkeoAddress, amount string) ([]byte, error) {
