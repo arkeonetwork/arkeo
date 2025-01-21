@@ -131,8 +131,11 @@ func TestClaimThorchainMainnetAddress(t *testing.T) {
 		FromAddress: fromAddr.String(),
 		ToAddress:   toAddr.String(),
 	}
-	_, err = msgServer.ClaimThorchain(ctx, &claimMessage)
+	response, err := msgServer.ClaimThorchain(ctx, &claimMessage)
 	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.Equal(t, fromAddr.String(), response.FromAddress)
+	require.Equal(t, toAddr.String(), response.ToAddress)
 
 	// check if claimrecord is updated
 	claimRecordFrom, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, fromAddr.String(), types.ARKEO)
