@@ -30,6 +30,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ### Fixed
 - Updated event labels on TC delegate events
+- Added Response to claim functions
 
 # v1.0.3-Prerelease 
 

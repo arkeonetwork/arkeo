@@ -74,8 +74,8 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.Creator)
 	}
 
-	existingArkeoClaimAmount := arkeoClaim.AmountClaim.Amount.Int64();
-	
+	existingArkeoClaimAmount := existingArkeoClaim.AmountClaim.Amount.Int64()
+
 	arkeoClaim, err = mergeClaimRecords(existingArkeoClaim, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to merge claim records for %s", msg.Creator)
