@@ -37,10 +37,12 @@ func TestClaimArkeo(t *testing.T) {
 		Creator: addrArkeo.String(),
 	}
 	response, err := msgServer.ClaimArkeo(ctx, &claimMessage)
+	
+	t.Logf("Claim response: %+v", response)
 	require.NoError(t, err)
 	require.NotNil(t, response)
 	require.Equal(t, addrArkeo.String(), response.Address)
-	require.Greater(t, response.Amount, int64(0))
+	require.Equal(t, int64(100), response.Amount) // explicitly check the expected amount
 
 	// check if claimrecord is updated
 	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrArkeo.String(), types.ARKEO)

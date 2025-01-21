@@ -28,8 +28,11 @@ func (k msgServer) ClaimArkeo(goCtx context.Context, msg *types.MsgClaimArkeo) (
 
 	claimedAmount := arkeoClaimRecord.AmountClaim
 
-	return &types.MsgClaimArkeoResponse{
+	response := &types.MsgClaimArkeoResponse{
 		Address: msg.Creator,
 		Amount:  claimedAmount.Amount.Int64(),
-	}, nil
+	}
+
+	k.Logger(ctx).Info("Generated response", "response", response)
+	return response, nil
 }
