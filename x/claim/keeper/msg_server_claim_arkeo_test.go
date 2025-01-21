@@ -37,7 +37,7 @@ func TestClaimArkeo(t *testing.T) {
 		Creator: addrArkeo.String(),
 	}
 	response, err := msgServer.ClaimArkeo(ctx, &claimMessage)
-	
+
 	t.Logf("Claim response: %+v", response)
 	require.NoError(t, err)
 	require.NotNil(t, response)
