@@ -28,6 +28,9 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+### Added
+- Arkeo testnet validator addresses to airdrop
+
 ### Fixed
 - Updated event labels on TC delegate events
 - Added Response to claim functions
