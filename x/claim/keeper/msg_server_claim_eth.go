@@ -25,9 +25,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 	}
 
 	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
-		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
+		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.EthAddress)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
+
+	// Store the amounts before we modify the claims
+	ethClaimAmount := ethClaim.AmountClaim.Amount.Int64()
 
 	// validate signature
 	isValid, err := IsValidClaimSignature(msg.EthAddress, msg.Creator,
@@ -71,6 +74,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to get arkeo claim record for %s", msg.Creator)
 	}
 
+	// Get existing claim amount, defaulting to 0 if no existing claim
+	existingArkeoClaimAmount := int64(0)
+	if !existingArkeoClaim.IsEmpty() && !existingArkeoClaim.AmountClaim.IsZero() {
+		existingArkeoClaimAmount = existingArkeoClaim.AmountClaim.Amount.Int64()
+	}
+
 	arkeoClaim, err = mergeClaimRecords(existingArkeoClaim, arkeoClaim)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to merge claim records for %s", msg.Creator)
@@ -87,7 +96,12 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to claim coins for %s", msg.Creator)
 	}
 
-	return &types.MsgClaimEthResponse{}, nil
+	return &types.MsgClaimEthResponse{
+		EthAddress:       msg.EthAddress,
+		ArkeoAddress:     msg.Creator,
+		EthClaimAmount:   ethClaimAmount,
+		ArkeoClaimAmount: existingArkeoClaimAmount,
+	}, nil
 }
 
 func GenerateClaimTypedDataBytes(ethAddress, arkeoAddress, amount string) ([]byte, error) {

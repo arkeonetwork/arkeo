@@ -47,8 +47,13 @@ func TestClaimEth(t *testing.T) {
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
-	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+	response, err := msgServer.ClaimEth(ctx, &claimMessage)
 	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.Equal(t, addrEth, response.EthAddress)
+	require.Equal(t, addrArkeo.String(), response.ArkeoAddress)
+	require.Equal(t, int64(100), response.EthClaimAmount)
+	require.Equal(t, int64(0), response.ArkeoClaimAmount)
 
 	// check if claimrecord is updated
 	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)
@@ -151,8 +156,14 @@ func TestClaimEthWithArkeoClaimRecord(t *testing.T) {
 		EthAddress: addrEth,
 		Signature:  sigString,
 	}
-	_, err = msgServer.ClaimEth(ctx, &claimMessage)
+
+	response, err := msgServer.ClaimEth(ctx, &claimMessage)
 	require.NoError(t, err)
+	require.NotNil(t, response)
+	require.Equal(t, addrEth, response.EthAddress)
+	require.Equal(t, addrArkeo.String(), response.ArkeoAddress)
+	require.Equal(t, int64(200), response.EthClaimAmount)
+	require.Equal(t, int64(200), response.ArkeoClaimAmount)
 
 	// check if claimrecord is updated
 	claimRecord, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, addrEth, types.ETHEREUM)

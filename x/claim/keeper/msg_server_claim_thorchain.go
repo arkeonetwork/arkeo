@@ -68,5 +68,8 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 		),
 	})
 
-	return &types.MsgClaimThorchainResponse{}, nil
+	return &types.MsgClaimThorchainResponse{
+		FromAddress: msg.FromAddress,
+		ToAddress:   msg.ToAddress,
+	}, nil
 }
