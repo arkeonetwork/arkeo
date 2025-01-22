@@ -1,8 +1,11 @@
-FROM scratch
+FROM alpine:latest
 
 COPY ./api /usr/bin/api
 
 WORKDIR /root/.arkeo
 
+RUN apk add --no-cache bash coreutils jq
 
-ENTRYPOINT [ "/usr/bin/api" ]
+ENTRYPOINT [ "/bin/sh" ]
+
+CMD [ "/usr/bin/api" ]

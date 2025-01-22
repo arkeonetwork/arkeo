@@ -1,7 +1,11 @@
-FROM scratch
+FROM alpine:latest
 
 COPY ./sentinel /usr/bin/sentinel
 
 WORKDIR /root/.arkeo
 
-ENTRYPOINT [ "/usr/bin/sentinel" ]
+RUN apk add --no-cache bash coreutils libc6-compat
+
+ENTRYPOINT [ "/bin/sh" ]
+
+CMD [ "/usr/bin/sentinel" ]

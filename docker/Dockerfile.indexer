@@ -1,8 +1,11 @@
-FROM scratch
+FROM alpine:latest
 
 COPY ./indexer /usr/bin/indexer
 
 WORKDIR /root/.arkeo
 
+RUN apk add --no-cache bash coreutils jq
 
-ENTRYPOINT [ "/usr/bin/indexer" ]
+ENTRYPOINT [ "/bin/sh" ]
+
+CMD [ "/usr/bin/indexer","help" ]

@@ -12,6 +12,6 @@ EXPOSE 26656
 
 EXPOSE 26657
 
-ENTRYPOINT [ "/usr/bin/arkeod" ]
+ENTRYPOINT [ "/bin/sh" ]
 
-CMD [ "help" ]
+CMD [ "/usr/bin/arkeod" ,"help"]
