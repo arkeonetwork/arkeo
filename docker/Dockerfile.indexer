@@ -4,7 +4,12 @@ COPY ./indexer /usr/bin/indexer
 
 WORKDIR /root/.arkeo
 
-RUN apk add --no-cache bash coreutils jq
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    jq \
+    ca-certificates \
+    curl
 
 ENTRYPOINT [ "/bin/sh" ]
 

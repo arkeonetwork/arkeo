@@ -4,7 +4,12 @@ COPY ./sentinel /usr/bin/sentinel
 
 WORKDIR /root/.arkeo
 
-RUN apk add --no-cache bash coreutils libc6-compat
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    jq \
+    ca-certificates \
+    curl
 
 ENTRYPOINT [ "/bin/sh" ]
 

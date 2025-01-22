@@ -4,7 +4,12 @@ COPY ./arkeod /usr/bin/arkeod
 
 WORKDIR /root/.arkeo
 
-RUN apk add --no-cache bash jq
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    jq \
+    ca-certificates \
+    curl
 
 EXPOSE 1317
 

@@ -28,12 +28,21 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
+
+## Changed
+- Updated docker images
 
 ### Fixed
 - Updated event labels on TC delegate events
 - Added Response to claim functions
+
+# v1.0.4-Prerelease 
+
+## Changed
+- Updated docker images
 
 # v1.0.3-Prerelease 
 
