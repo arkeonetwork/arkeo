@@ -394,7 +394,6 @@ func TestEndBlockerTransferToReserve(t *testing.T) {
 	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(initialModuleBalance)) // add more coins to claim module account
 	require.NoError(t, err)
 
-
 	keepers.ClaimKeeper.EndBlocker(sdkCtx)
 	reserveModuleBalanceFinal := keepers.BankKeeper.GetBalance(sdkCtx, keepers.AccountKeeper.GetModuleAddress(reserveModuleName), types.DefaultClaimDenom)
 	require.Equal(t, initialModuleBalance, reserveModuleBalanceFinal)
