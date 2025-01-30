@@ -14,6 +14,11 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k.Logger(ctx).Info(msg.Creator)
 
+	// Add check for matching addresses
+	if msg.FromAddress == msg.ToAddress {
+		return nil, errors.Wrapf(types.ErrInvalidAddress, "from address and to address cannot be the same: %s", msg.FromAddress)
+	}
+
 	// only allow thorchain claim server address to call this function
 	if msg.Creator != "tarkeo1z02ke8639m47g9dfrheegr2u9zecegt5qvtj00" && msg.Creator != "arkeo1z02ke8639m47g9dfrheegr2u9zecegt50fjg7v" {
 		return nil, errors.Wrapf(types.ErrInvalidCreator, "Invalid Creator %s", msg.Creator)
@@ -23,7 +28,7 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.FromAddress)
 	}
-	if fromAddressClaimRecord.IsEmpty() || fromAddressClaimRecord.AmountClaim.IsZero() {
+	if fromAddressClaimRecord.IsEmpty() || (fromAddressClaimRecord.AmountClaim.IsZero() && fromAddressClaimRecord.AmountVote.IsZero() && fromAddressClaimRecord.AmountDelegate.IsZero()) {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.FromAddress)
 	}
 
