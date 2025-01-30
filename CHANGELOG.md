@@ -28,6 +28,9 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+### Fixed
+- Fix bug that would allow doubling claims with thorchain claims
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
