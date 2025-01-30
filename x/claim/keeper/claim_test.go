@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"testing"
+	"time"
 
 	testkeeper "github.com/arkeonetwork/arkeo/testutil/keeper"
 	"github.com/arkeonetwork/arkeo/testutil/utils"
@@ -356,4 +357,45 @@ func TestClaimDecay(t *testing.T) {
 	// confirm balance increased by expected amount. Should get 0!
 	balanceAfter3 := keepers.BankKeeper.GetBalance(sdkCtx, addrArkeo3, types.DefaultClaimDenom)
 	require.Equal(t, balanceAfter3.Sub(balanceBefore3), sdk.NewInt64Coin(types.DefaultClaimDenom, 0))
+}
+
+func TestEndBlockerTransferToReserve(t *testing.T) {
+	reserveModuleName := "arkeo-reserve"
+	_, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Setup initial claim module balance
+	initialModuleBalance := sdk.NewInt64Coin(types.DefaultClaimDenom, 1000)
+	err := keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(initialModuleBalance))
+	require.NoError(t, err)
+
+	// Verify initial balances
+	claimModuleBalance := keepers.BankKeeper.GetBalance(sdkCtx, keepers.ClaimKeeper.GetModuleAccountAddress(sdkCtx), types.DefaultClaimDenom)
+	require.Equal(t, initialModuleBalance, claimModuleBalance)
+
+	reserveModuleBalance := keepers.BankKeeper.GetBalance(sdkCtx, keepers.AccountKeeper.GetModuleAddress(reserveModuleName), types.DefaultClaimDenom)
+	require.True(t, reserveModuleBalance.IsZero())
+
+	// Set time to after airdrop end
+	params := keepers.ClaimKeeper.GetParams(sdkCtx)
+	sdkCtx = sdkCtx.WithBlockTime(params.AirdropStartTime.Add(params.DurationUntilDecay).Add(params.DurationOfDecay).Add(time.Second))
+
+	// Trigger end blocker
+	keepers.ClaimKeeper.EndBlocker(sdkCtx)
+
+	// Verify balances after transfer
+	claimModuleBalanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, keepers.ClaimKeeper.GetModuleAccountAddress(sdkCtx), types.DefaultClaimDenom)
+	require.True(t, claimModuleBalanceAfter.IsZero())
+
+	reserveModuleBalanceAfter := keepers.BankKeeper.GetBalance(sdkCtx, keepers.AccountKeeper.GetModuleAddress(reserveModuleName), types.DefaultClaimDenom)
+	require.Equal(t, initialModuleBalance, reserveModuleBalanceAfter)
+
+	// Verify that running EndBlocker again doesn't transfer more tokens
+	err = keepers.BankKeeper.MintCoins(sdkCtx, types.ModuleName, sdk.NewCoins(initialModuleBalance)) // add more coins to claim module account
+	require.NoError(t, err)
+
+
+	keepers.ClaimKeeper.EndBlocker(sdkCtx)
+	reserveModuleBalanceFinal := keepers.BankKeeper.GetBalance(sdkCtx, keepers.AccountKeeper.GetModuleAddress(reserveModuleName), types.DefaultClaimDenom)
+	require.Equal(t, initialModuleBalance, reserveModuleBalanceFinal)
 }
