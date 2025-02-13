@@ -28,11 +28,20 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+
+# v1.0.6-fix
+### Added
+
+### Changed
+
+### Fixed
+- Fixed fee stuck in arkeo module by moving fees to arkeo-reserve
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
 
-## Changed
+### Changed
 - Updated docker images
 
 ### Fixed
