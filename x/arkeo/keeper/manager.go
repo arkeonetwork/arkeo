@@ -372,7 +372,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, debt))); err != nil {
 			return contract, err
 		}
-		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ModuleName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome.RoundInt()))); err != nil {
+		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome.RoundInt()))); err != nil {
 			return contract, err
 		}
 	}
