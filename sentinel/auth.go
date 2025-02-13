@@ -35,23 +35,25 @@ type ContractAuth struct {
 }
 
 type ArkAuth struct {
-	ContractId uint64
-	Spender    common.PubKey
-	Nonce      int64
-	Signature  []byte
+	ContractId     uint64
+	Spender        common.PubKey
+	Nonce          int64
+	Signature      []byte
+	ChainId        string
+	ExpiresAtBlock int64
 }
 
 // String implement fmt.Stringer
 func (aa ArkAuth) String() string {
-	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature)
+	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature, aa.ChainId, aa.ExpiresAtBlock)
 }
 
-func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce), hex.EncodeToString(signature))
+func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte, chainId string, expiresAtBlock int64) string {
+	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce, chainId, expiresAtBlock), hex.EncodeToString(signature))
 }
 
-func GenerateMessageToSign(contractId uint64, nonce int64) string {
-	return fmt.Sprintf("%d:%d", contractId, nonce)
+func GenerateMessageToSign(contractId uint64, nonce int64, chainId string, expiresAtBlock int64) string {
+	return fmt.Sprintf("%d:%d:%s:%d", contractId, nonce, chainId, expiresAtBlock)
 }
 
 func parseContractAuth(raw string) (ContractAuth, error) {
@@ -117,7 +119,7 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	if err != nil {
 		return fmt.Errorf("internal server error: %w", err)
 	}
-	msg := types.NewMsgClaimContractIncome(creator, aa.ContractId, aa.Nonce, aa.Signature)
+	msg := types.NewMsgClaimContractIncome(creator, aa.ContractId, aa.Nonce, aa.Signature, aa.ChainId, aa.ExpiresAtBlock)
 	err = msg.ValidateBasic()
 	return err
 }

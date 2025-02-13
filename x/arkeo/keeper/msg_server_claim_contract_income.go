@@ -37,9 +37,20 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 	}
 
 	contract, err := k.GetContract(ctx, msg.ContractId)
-
 	if err != nil {
 		return err
+	}
+
+	if msg.ChainId != ctx.ChainID() {
+		return errors.Wrapf(types.ErrInvalidChainID, "expected %s, got %s", ctx.ChainID(), msg.ChainId)
+
+	}
+
+	if msg.SignatureExpiresAtBlock <= ctx.BlockHeight() {
+		return errors.Wrapf(types.ErrSignatureExpired,
+			"current block height %d is greater than or equal to expiration block %d",
+			ctx.BlockHeight(),
+			msg.SignatureExpiresAtBlock)
 	}
 
 	if contract.Nonce >= msg.Nonce {
@@ -62,7 +73,6 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 	}
 
 	// excute settlement
-
 	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
 	if err != nil {
 		return err

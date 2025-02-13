@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"encoding/hex"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -14,7 +15,7 @@ import (
 
 func CmdClaimContractIncome() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-contract-income [contract-id] [nonce] [signature]",
+		Use:   "claim-contract-income [contract-id] [nonce] [signature] [chain-id]",
 		Short: "Broadcast message claimContractIncome",
 		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -32,15 +33,41 @@ func CmdClaimContractIncome() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
 			signature, err := hex.DecodeString(args[2])
 			if err != nil {
 				return err
 			}
+
+			chainID := args[3]
+
+			node, err := clientCtx.GetNode()
+			if err != nil {
+				return err
+			}
+
+			status, err := node.Status(context.Background())
+			if err != nil {
+				return err
+			}
+			currentBlock := status.SyncInfo.LatestBlockHeight
+
+			// Get expiration delta from flags (default to 50 blocks if not specified)
+			expirationDelta, err := cmd.Flags().GetInt64("expiration-delta")
+			if err != nil {
+				expirationDelta = 50
+			}
+
+			// Calculate expiration block
+			expiresAtBlock := currentBlock + expirationDelta
+
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress(),
 				argContractId,
 				argNonce,
 				signature,
+				chainID,
+				expiresAtBlock,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -50,6 +77,7 @@ func CmdClaimContractIncome() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+	cmd.Flags().Int64("expiration-delta", 50, "number of blocks until expiration")
 
 	return cmd
 }

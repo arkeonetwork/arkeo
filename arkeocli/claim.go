@@ -1,6 +1,7 @@
 package arkeocli
 
 import (
+	"context"
 	"strconv"
 
 	"cosmossdk.io/errors"
@@ -35,6 +36,18 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
+
+	node, err := clientCtx.GetNode()
+	if err != nil {
+		return errors.Wrapf(err, "failed to get node")
+	}
+	status, err := node.Status(context.Background())
+	if err != nil {
+		return errors.Wrapf(err, "failed to get node status")
+	}
+	currentBlock := status.SyncInfo.LatestBlockHeight
+
+	expiresAtBlock := currentBlock + types.DefaultSignatureExpiration
 
 	key, err := ensureKeys(cmd)
 	if err != nil {
@@ -80,7 +93,18 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	signBytes := types.GetBytesToSign(contract.Id, nonce)
+	chainId, err := cmd.Flags().GetString("chain-id")
+	if err != nil {
+		return errors.Wrapf(err, "chain-id should be specified")
+	}
+	if chainId == "" {
+		chainId, err = promptForArg(cmd, "Specify Chain ID: ")
+		if err != nil {
+			return err
+		}
+	}
+
+	signBytes := types.GetBytesToSign(contract.Id, nonce, chainId, expiresAtBlock)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes, signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
@@ -91,6 +115,8 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		contract.Id,
 		nonce,
 		signature,
+		chainId,
+		expiresAtBlock,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

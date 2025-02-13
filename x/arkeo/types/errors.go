@@ -41,4 +41,6 @@ var (
 	ErrInvariantMaxSupply                     = errors.Register(ModuleName, 32, "max supply invariant")
 	ErrInvalidAuthorization                   = errors.Register(ModuleName, 33, "invalid authorization")
 	ErrInvalidVersion                         = errors.Register(ModuleName, 34, "version cannot be zero or lower")
+	ErrInvalidChainID                         = errors.Register(ModuleName, 35, "invalid chain ID")
+	ErrSignatureExpired                       = errors.Register(ModuleName, 36, "signature expired")
 )

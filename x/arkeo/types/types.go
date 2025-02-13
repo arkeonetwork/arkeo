@@ -11,6 +11,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 )
 
+const DefaultSignatureExpiration = int64(50) // SIGNATURE EXPIRES AFTER 50 Blocks
+
 // GetRandomBech32Addr is an account address used for test
 func GetRandomBech32Addr() cosmos.AccAddress {
 	name := common.RandStringBytesMask(10)

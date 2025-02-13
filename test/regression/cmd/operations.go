@@ -279,6 +279,12 @@ func createContractAuth(input map[string]string) (string, bool, error) {
 	if len(input["timestamp"]) == 0 {
 		return "", true, fmt.Errorf("missing required field: timestamp")
 	}
+	if len(input["chain_id"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: chain_id")
+	}
+	if len(input["expires_at_block"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: expires_at_block")
+	}
 
 	id, err := strconv.ParseUint(input["id"], 10, 64)
 	if err != nil {
@@ -289,8 +295,13 @@ func createContractAuth(input map[string]string) (string, bool, error) {
 		return "", true, fmt.Errorf("failed to parse timestamp: %s", err)
 	}
 
+	expiresAtBlock, err := strconv.ParseInt(input["expires_at_block"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse timestamp: %s", err)
+	}
+
 	// sign our msg
-	msg := sentinel.GenerateMessageToSign(id, timestamp)
+	msg := sentinel.GenerateMessageToSign(id, timestamp, input["chain_id"], expiresAtBlock)
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }
@@ -315,6 +326,18 @@ func createAuth(input map[string]string) (string, bool, error) {
 		return "", true, fmt.Errorf("missing required field: nonce")
 	}
 
+	if len(input["chain_id"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: chain_id")
+	}
+	if len(input["expires_at_block"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: expires_at_block")
+	}
+
+	expiresAtBlock, err := strconv.ParseInt(input["expires_at_block"], 10, 64)
+	if err != nil {
+		return "", true, fmt.Errorf("failed to parse timestamp: %s", err)
+	}
+
 	id, err := strconv.ParseUint(input["id"], 10, 64)
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse id: %s", err)
@@ -323,7 +346,7 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
 	}
-	msg := sentinel.GenerateMessageToSign(id, nonce)
+	msg := sentinel.GenerateMessageToSign(id, nonce, input["chain_id"], expiresAtBlock)
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }

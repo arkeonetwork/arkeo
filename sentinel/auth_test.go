@@ -40,6 +40,9 @@ func TestArkAuth(t *testing.T) {
 	pk, err := common.NewPubKeyFromCrypto(pub)
 	require.NoError(t, err)
 
+	chaindId := "arkeo-1"
+	expiresAtBlock := int64(10)
+
 	var signature []byte
 	nonce := int64(3)
 	service := common.BTCService
@@ -50,13 +53,13 @@ func TestArkAuth(t *testing.T) {
 	require.NoError(t, err)
 
 	// happy path
-	raw := GenerateArkAuthString(contractId, nonce, signature)
+	raw := GenerateArkAuthString(contractId, nonce, signature, chaindId, expiresAtBlock)
 	_, err = parseArkAuth(raw)
 	require.NoError(t, err)
 
 	// bad signature
-	raw = GenerateArkAuthString(contractId, nonce, signature)
-	_, err = parseArkAuth(raw + "randome not hex!")
+	raw = GenerateArkAuthString(contractId, nonce, signature, chaindId, expiresAtBlock)
+	_, err = parseArkAuth(raw + "random not hex!")
 	require.Error(t, err)
 }
 
