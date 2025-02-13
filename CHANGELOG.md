@@ -28,6 +28,14 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+# v1.0.6-fix
+### Added
+
+### Changed
+
+### Fixed
+- Fixed signatures not to be replayed across different networks
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
