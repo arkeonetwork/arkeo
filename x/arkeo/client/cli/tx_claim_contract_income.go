@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"context"
 	"encoding/hex"
+
+	"cosmossdk.io/errors"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
@@ -14,9 +17,9 @@ import (
 
 func CmdClaimContractIncome() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim-contract-income [contract-id] [nonce] [signature]",
+		Use:   "claim-contract-income [contract-id] [nonce] [signature] [chain-id]",
 		Short: "Broadcast message claimContractIncome",
-		Args:  cobra.ExactArgs(4),
+		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -36,11 +39,28 @@ func CmdClaimContractIncome() *cobra.Command {
 			if err != nil {
 				return err
 			}
+
+			chainId := args[3]
+
+			node, err := clientCtx.GetNode()
+			if err != nil {
+				return errors.Wrapf(err, "failed to get node")
+			}
+
+			status, err := node.Status(context.Background())
+			if err != nil {
+				return errors.Wrapf(err, "failed to get node status")
+			}
+
+			signatureExpiry := status.SyncInfo.LatestBlockHeight + types.ExpirationDelta
+
 			msg := types.NewMsgClaimContractIncome(
 				clientCtx.GetFromAddress(),
 				argContractId,
 				argNonce,
 				signature,
+				chainId,
+				signatureExpiry,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

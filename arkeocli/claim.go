@@ -105,7 +105,7 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 
 	signatureExpiry := status.SyncInfo.LatestBlockHeight + types.ExpirationDelta
 
-	signBytes := types.GetBytesToSign(contract.Id, nonce, chainId, signatureExpiry)
+	signBytes := types.GetBytesToSign(contract.Id, nonce, chainId)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes, signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")

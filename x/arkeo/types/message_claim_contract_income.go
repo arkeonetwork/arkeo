@@ -47,11 +47,11 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 }
 
 func (msg *MsgClaimContractIncome) GetBytesToSign() []byte {
-	return GetBytesToSign(msg.ContractId, msg.Nonce, msg.ChainId, msg.SignatureExpiresAt)
+	return GetBytesToSign(msg.ContractId, msg.Nonce, msg.ChainId)
 }
 
-func GetBytesToSign(contractId uint64, nonce int64, chainId string, signatureExpiry int64) []byte {
-	return []byte(fmt.Sprintf("%d:%d:%s:%d", contractId, nonce, chainId, signatureExpiry))
+func GetBytesToSign(contractId uint64, nonce int64, chainId string) []byte {
+	return []byte(fmt.Sprintf("%d:%d:%s", contractId, nonce, chainId))
 }
 
 func (msg *MsgClaimContractIncome) ValidateBasic() error {

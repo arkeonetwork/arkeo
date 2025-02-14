@@ -86,6 +86,8 @@ arkauth:
   id: "1"
   spender: {{ pubkey_cat }}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 headers:
   Tier: "paid"
   Access-Control-Allow-Origin: "foo, bar, baz"
@@ -106,6 +108,8 @@ arkauth:
   id: "1"
   spender: {{ pubkey_cat }}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 status: 429
 ---
 ########################################################################################
@@ -133,5 +137,7 @@ arkauth:
   id: "1"
   spender: {{ pubkey_cat }}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 status: 403
 ---

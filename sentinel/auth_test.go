@@ -44,18 +44,19 @@ func TestArkAuth(t *testing.T) {
 	nonce := int64(3)
 	service := common.BTCService
 	contractId := uint64(50)
+	chainId := "arkeo"
 
 	message := []byte(fmt.Sprintf("%s:%s:%s:%d", pubkey.String(), service, pk, nonce))
 	signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
 	// happy path
-	raw := GenerateArkAuthString(contractId, nonce, signature)
+	raw := GenerateArkAuthString(contractId, nonce, signature, chainId)
 	_, err = parseArkAuth(raw)
 	require.NoError(t, err)
 
 	// bad signature
-	raw = GenerateArkAuthString(contractId, nonce, signature)
+	raw = GenerateArkAuthString(contractId, nonce, signature, chainId)
 	_, err = parseArkAuth(raw + "randome not hex!")
 	require.Error(t, err)
 }
