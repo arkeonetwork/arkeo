@@ -90,6 +90,8 @@ message MsgClaimContractIncome {
   uint64 contract_id = 2;
   bytes  signature   = 4;
   int64  nonce       = 5;
+  string chain_id = 6;
+  int64 signature_expires_at = 7;
 }
 
 message MsgClaimContractIncomeResponse {}
