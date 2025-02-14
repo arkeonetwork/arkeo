@@ -81,7 +81,6 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	clientPubkey := contract.GetDelegate()

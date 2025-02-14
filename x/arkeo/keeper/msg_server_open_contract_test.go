@@ -340,9 +340,11 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 	// confirm contract income can be claimed while the first contract is in the
 	// settlement period.
 	claimMsg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    clientAddress.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            clientAddress.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 112,
 	}
 	message := claimMsg.GetBytesToSign()
 	claimMsg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
