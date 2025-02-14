@@ -1,6 +1,7 @@
 package arkeocli
 
 import (
+	"context"
 	"strconv"
 
 	"cosmossdk.io/errors"
@@ -70,6 +71,19 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
+	chainId, err := cmd.Flags().GetString("chain-id")
+	if err != nil {
+		return err
+	}
+
+	if len(chainId) == 0 {
+		chainId, err = promptForArg(cmd, "specify the chain id:")
+		if err != nil {
+			return err
+		}
+
+	}
+
 	clientPubkey := contract.GetDelegate()
 	if clientPubkey.IsEmpty() {
 		clientPubkey = contract.GetClient()
@@ -80,7 +94,19 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	signBytes := types.GetBytesToSign(contract.Id, nonce)
+	node, err := clientCtx.GetNode()
+	if err != nil {
+		return errors.Wrapf(err, "failed to get node")
+	}
+
+	status, err := node.Status(context.Background())
+	if err != nil {
+		return errors.Wrapf(err, "failed to get node status")
+	}
+
+	signatureExpiry := status.SyncInfo.LatestBlockHeight + types.ExpirationDelta
+
+	signBytes := types.GetBytesToSign(contract.Id, nonce, chainId, signatureExpiry)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes, signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")
@@ -91,6 +117,8 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		contract.Id,
 		nonce,
 		signature,
+		chainId,
+		signatureExpiry,
 	)
 	if err := msg.ValidateBasic(); err != nil {
 		return err

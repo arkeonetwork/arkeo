@@ -14,12 +14,14 @@ const TypeMsgClaimContractIncome = "claim_contract_income"
 
 var _ sdk.Msg = &MsgClaimContractIncome{}
 
-func NewMsgClaimContractIncome(creator cosmos.AccAddress, contractId uint64, nonce int64, sig []byte) *MsgClaimContractIncome {
+func NewMsgClaimContractIncome(creator cosmos.AccAddress, contractId uint64, nonce int64, sig []byte, chainId string, signatureExpiry int64) *MsgClaimContractIncome {
 	return &MsgClaimContractIncome{
-		Creator:    creator.String(),
-		ContractId: contractId,
-		Nonce:      nonce,
-		Signature:  sig,
+		Creator:            creator.String(),
+		ContractId:         contractId,
+		Nonce:              nonce,
+		Signature:          sig,
+		ChainId:            chainId,
+		SignatureExpiresAt: signatureExpiry,
 	}
 }
 
@@ -45,11 +47,11 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 }
 
 func (msg *MsgClaimContractIncome) GetBytesToSign() []byte {
-	return GetBytesToSign(msg.ContractId, msg.Nonce)
+	return GetBytesToSign(msg.ContractId, msg.Nonce, msg.ChainId, msg.SignatureExpiresAt)
 }
 
-func GetBytesToSign(contractId uint64, nonce int64) []byte {
-	return []byte(fmt.Sprintf("%d:%d", contractId, nonce))
+func GetBytesToSign(contractId uint64, nonce int64, chainId string, signatureExpiry int64) []byte {
+	return []byte(fmt.Sprintf("%d:%d:%s:%d", contractId, nonce, chainId, signatureExpiry))
 }
 
 func (msg *MsgClaimContractIncome) ValidateBasic() error {
@@ -63,5 +65,12 @@ func (msg *MsgClaimContractIncome) ValidateBasic() error {
 		return errors.Wrap(ErrClaimContractIncomeBadNonce, "")
 	}
 
+	if len(msg.ChainId) == 0 {
+		return errors.Wrap(ErrInvalidChainId, "chain id is not specified")
+	}
+
+	if msg.SignatureExpiresAt <= 0 {
+		return errors.Wrap(ErrSignatureExpired, "expiry on signature is not set")
+	}
 	return nil
 }
