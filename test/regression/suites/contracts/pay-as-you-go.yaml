@@ -74,6 +74,8 @@ arkauth:
   signer: cat
   id: "1"
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 assert_headers:
   Tier: "paid"
 asserts:
@@ -101,7 +103,7 @@ description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/open-claims
 asserts:
   - length == 1
-  - .[0].signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
+  - .[0].signature == "f0d259e16745850a35e602ed40a60f9f83da4249f31718e411bd5c6ac6fc9b7b6fc336e28b109e19e2a4e1422d6739fd1988ca4344d8c6ca84383e31c9104828"
   - .[0].claimed == false
 ---
 ########################################################################################
@@ -143,7 +145,7 @@ type: check
 description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/claim/1
 asserts:
-  - .signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
+  - .signature == "f0d259e16745850a35e602ed40a60f9f83da4249f31718e411bd5c6ac6fc9b7b6fc336e28b109e19e2a4e1422d6739fd1988ca4344d8c6ca84383e31c9104828"
   - .claimed == false
   - .contract_id == 1
 ---
@@ -159,6 +161,8 @@ arkauth:
   signer: cat
   id: "1"
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 ---
 type: create-blocks
 count: 1
@@ -199,6 +203,8 @@ arkauth:
   signer: cat
   id: "1"
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 ---
 type: create-blocks
 count: 1

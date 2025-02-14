@@ -16,28 +16,14 @@ import (
 )
 
 var (
-	md_Params                             protoreflect.MessageDescriptor
-	fd_Params_community_pool_percentage   protoreflect.FieldDescriptor
-	fd_Params_dev_fund_percentage         protoreflect.FieldDescriptor
-	fd_Params_grant_fund_percentage       protoreflect.FieldDescriptor
-	fd_Params_inflation_change_percentage protoreflect.FieldDescriptor
-	fd_Params_inflation_min               protoreflect.FieldDescriptor
-	fd_Params_inflation_max               protoreflect.FieldDescriptor
-	fd_Params_goal_bonded                 protoreflect.FieldDescriptor
-	fd_Params_block_per_year              protoreflect.FieldDescriptor
-	fd_Params_emission_curve              protoreflect.FieldDescriptor
+	md_Params                protoreflect.MessageDescriptor
+	fd_Params_block_per_year protoreflect.FieldDescriptor
+	fd_Params_emission_curve protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_arkeo_arkeo_params_proto_init()
 	md_Params = File_arkeo_arkeo_params_proto.Messages().ByName("Params")
-	fd_Params_community_pool_percentage = md_Params.Fields().ByName("community_pool_percentage")
-	fd_Params_dev_fund_percentage = md_Params.Fields().ByName("dev_fund_percentage")
-	fd_Params_grant_fund_percentage = md_Params.Fields().ByName("grant_fund_percentage")
-	fd_Params_inflation_change_percentage = md_Params.Fields().ByName("inflation_change_percentage")
-	fd_Params_inflation_min = md_Params.Fields().ByName("inflation_min")
-	fd_Params_inflation_max = md_Params.Fields().ByName("inflation_max")
-	fd_Params_goal_bonded = md_Params.Fields().ByName("goal_bonded")
 	fd_Params_block_per_year = md_Params.Fields().ByName("block_per_year")
 	fd_Params_emission_curve = md_Params.Fields().ByName("emission_curve")
 }
@@ -107,48 +93,6 @@ func (x *fastReflection_Params) Interface() protoreflect.ProtoMessage {
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.CommunityPoolPercentage != "" {
-		value := protoreflect.ValueOfString(x.CommunityPoolPercentage)
-		if !f(fd_Params_community_pool_percentage, value) {
-			return
-		}
-	}
-	if x.DevFundPercentage != "" {
-		value := protoreflect.ValueOfString(x.DevFundPercentage)
-		if !f(fd_Params_dev_fund_percentage, value) {
-			return
-		}
-	}
-	if x.GrantFundPercentage != "" {
-		value := protoreflect.ValueOfString(x.GrantFundPercentage)
-		if !f(fd_Params_grant_fund_percentage, value) {
-			return
-		}
-	}
-	if x.InflationChangePercentage != "" {
-		value := protoreflect.ValueOfString(x.InflationChangePercentage)
-		if !f(fd_Params_inflation_change_percentage, value) {
-			return
-		}
-	}
-	if x.InflationMin != "" {
-		value := protoreflect.ValueOfString(x.InflationMin)
-		if !f(fd_Params_inflation_min, value) {
-			return
-		}
-	}
-	if x.InflationMax != "" {
-		value := protoreflect.ValueOfString(x.InflationMax)
-		if !f(fd_Params_inflation_max, value) {
-			return
-		}
-	}
-	if x.GoalBonded != "" {
-		value := protoreflect.ValueOfString(x.GoalBonded)
-		if !f(fd_Params_goal_bonded, value) {
-			return
-		}
-	}
 	if x.BlockPerYear != uint64(0) {
 		value := protoreflect.ValueOfUint64(x.BlockPerYear)
 		if !f(fd_Params_block_per_year, value) {
@@ -176,20 +120,6 @@ func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, proto
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		return x.CommunityPoolPercentage != ""
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		return x.DevFundPercentage != ""
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		return x.GrantFundPercentage != ""
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		return x.InflationChangePercentage != ""
-	case "arkeo.arkeo.Params.inflation_min":
-		return x.InflationMin != ""
-	case "arkeo.arkeo.Params.inflation_max":
-		return x.InflationMax != ""
-	case "arkeo.arkeo.Params.goal_bonded":
-		return x.GoalBonded != ""
 	case "arkeo.arkeo.Params.block_per_year":
 		return x.BlockPerYear != uint64(0)
 	case "arkeo.arkeo.Params.emission_curve":
@@ -210,20 +140,6 @@ func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		x.CommunityPoolPercentage = ""
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		x.DevFundPercentage = ""
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		x.GrantFundPercentage = ""
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		x.InflationChangePercentage = ""
-	case "arkeo.arkeo.Params.inflation_min":
-		x.InflationMin = ""
-	case "arkeo.arkeo.Params.inflation_max":
-		x.InflationMax = ""
-	case "arkeo.arkeo.Params.goal_bonded":
-		x.GoalBonded = ""
 	case "arkeo.arkeo.Params.block_per_year":
 		x.BlockPerYear = uint64(0)
 	case "arkeo.arkeo.Params.emission_curve":
@@ -244,27 +160,6 @@ func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		value := x.CommunityPoolPercentage
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		value := x.DevFundPercentage
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		value := x.GrantFundPercentage
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		value := x.InflationChangePercentage
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.inflation_min":
-		value := x.InflationMin
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.inflation_max":
-		value := x.InflationMax
-		return protoreflect.ValueOfString(value)
-	case "arkeo.arkeo.Params.goal_bonded":
-		value := x.GoalBonded
-		return protoreflect.ValueOfString(value)
 	case "arkeo.arkeo.Params.block_per_year":
 		value := x.BlockPerYear
 		return protoreflect.ValueOfUint64(value)
@@ -291,20 +186,6 @@ func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) pro
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		x.CommunityPoolPercentage = value.Interface().(string)
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		x.DevFundPercentage = value.Interface().(string)
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		x.GrantFundPercentage = value.Interface().(string)
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		x.InflationChangePercentage = value.Interface().(string)
-	case "arkeo.arkeo.Params.inflation_min":
-		x.InflationMin = value.Interface().(string)
-	case "arkeo.arkeo.Params.inflation_max":
-		x.InflationMax = value.Interface().(string)
-	case "arkeo.arkeo.Params.goal_bonded":
-		x.GoalBonded = value.Interface().(string)
 	case "arkeo.arkeo.Params.block_per_year":
 		x.BlockPerYear = value.Uint()
 	case "arkeo.arkeo.Params.emission_curve":
@@ -329,20 +210,6 @@ func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value proto
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_Params) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		panic(fmt.Errorf("field community_pool_percentage of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		panic(fmt.Errorf("field dev_fund_percentage of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		panic(fmt.Errorf("field grant_fund_percentage of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		panic(fmt.Errorf("field inflation_change_percentage of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.inflation_min":
-		panic(fmt.Errorf("field inflation_min of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.inflation_max":
-		panic(fmt.Errorf("field inflation_max of message arkeo.arkeo.Params is not mutable"))
-	case "arkeo.arkeo.Params.goal_bonded":
-		panic(fmt.Errorf("field goal_bonded of message arkeo.arkeo.Params is not mutable"))
 	case "arkeo.arkeo.Params.block_per_year":
 		panic(fmt.Errorf("field block_per_year of message arkeo.arkeo.Params is not mutable"))
 	case "arkeo.arkeo.Params.emission_curve":
@@ -360,20 +227,6 @@ func (x *fastReflection_Params) Mutable(fd protoreflect.FieldDescriptor) protore
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_Params) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "arkeo.arkeo.Params.community_pool_percentage":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.dev_fund_percentage":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.grant_fund_percentage":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.inflation_change_percentage":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.inflation_min":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.inflation_max":
-		return protoreflect.ValueOfString("")
-	case "arkeo.arkeo.Params.goal_bonded":
-		return protoreflect.ValueOfString("")
 	case "arkeo.arkeo.Params.block_per_year":
 		return protoreflect.ValueOfUint64(uint64(0))
 	case "arkeo.arkeo.Params.emission_curve":
@@ -447,34 +300,6 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		l = len(x.CommunityPoolPercentage)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.DevFundPercentage)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.GrantFundPercentage)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.InflationChangePercentage)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.InflationMin)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.InflationMax)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
-		l = len(x.GoalBonded)
-		if l > 0 {
-			n += 1 + l + runtime.Sov(uint64(l))
-		}
 		if x.BlockPerYear != 0 {
 			n += 1 + runtime.Sov(uint64(x.BlockPerYear))
 		}
@@ -519,55 +344,6 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.BlockPerYear))
 			i--
 			dAtA[i] = 0x40
-		}
-		if len(x.GoalBonded) > 0 {
-			i -= len(x.GoalBonded)
-			copy(dAtA[i:], x.GoalBonded)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.GoalBonded)))
-			i--
-			dAtA[i] = 0x3a
-		}
-		if len(x.InflationMax) > 0 {
-			i -= len(x.InflationMax)
-			copy(dAtA[i:], x.InflationMax)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.InflationMax)))
-			i--
-			dAtA[i] = 0x32
-		}
-		if len(x.InflationMin) > 0 {
-			i -= len(x.InflationMin)
-			copy(dAtA[i:], x.InflationMin)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.InflationMin)))
-			i--
-			dAtA[i] = 0x2a
-		}
-		if len(x.InflationChangePercentage) > 0 {
-			i -= len(x.InflationChangePercentage)
-			copy(dAtA[i:], x.InflationChangePercentage)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.InflationChangePercentage)))
-			i--
-			dAtA[i] = 0x22
-		}
-		if len(x.GrantFundPercentage) > 0 {
-			i -= len(x.GrantFundPercentage)
-			copy(dAtA[i:], x.GrantFundPercentage)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.GrantFundPercentage)))
-			i--
-			dAtA[i] = 0x1a
-		}
-		if len(x.DevFundPercentage) > 0 {
-			i -= len(x.DevFundPercentage)
-			copy(dAtA[i:], x.DevFundPercentage)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.DevFundPercentage)))
-			i--
-			dAtA[i] = 0x12
-		}
-		if len(x.CommunityPoolPercentage) > 0 {
-			i -= len(x.CommunityPoolPercentage)
-			copy(dAtA[i:], x.CommunityPoolPercentage)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.CommunityPoolPercentage)))
-			i--
-			dAtA[i] = 0xa
 		}
 		if input.Buf != nil {
 			input.Buf = append(input.Buf, dAtA...)
@@ -618,230 +394,6 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: Params: illegal tag %d (wire type %d)", fieldNum, wire)
 			}
 			switch fieldNum {
-			case 1:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field CommunityPoolPercentage", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.CommunityPoolPercentage = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 2:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field DevFundPercentage", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.DevFundPercentage = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 3:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field GrantFundPercentage", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.GrantFundPercentage = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 4:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field InflationChangePercentage", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.InflationChangePercentage = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 5:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field InflationMin", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.InflationMin = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 6:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field InflationMax", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.InflationMax = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
-			case 7:
-				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field GoalBonded", wireType)
-				}
-				var stringLen uint64
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				postIndex := iNdEx + intStringLen
-				if postIndex < 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
-				}
-				if postIndex > l {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-				}
-				x.GoalBonded = string(dAtA[iNdEx:postIndex])
-				iNdEx = postIndex
 			case 8:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field BlockPerYear", wireType)
@@ -934,15 +486,8 @@ type Params struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CommunityPoolPercentage   string `protobuf:"bytes,1,opt,name=community_pool_percentage,json=communityPoolPercentage,proto3" json:"community_pool_percentage,omitempty"`
-	DevFundPercentage         string `protobuf:"bytes,2,opt,name=dev_fund_percentage,json=devFundPercentage,proto3" json:"dev_fund_percentage,omitempty"`
-	GrantFundPercentage       string `protobuf:"bytes,3,opt,name=grant_fund_percentage,json=grantFundPercentage,proto3" json:"grant_fund_percentage,omitempty"`
-	InflationChangePercentage string `protobuf:"bytes,4,opt,name=inflation_change_percentage,json=inflationChangePercentage,proto3" json:"inflation_change_percentage,omitempty"`
-	InflationMin              string `protobuf:"bytes,5,opt,name=inflation_min,json=inflationMin,proto3" json:"inflation_min,omitempty"`
-	InflationMax              string `protobuf:"bytes,6,opt,name=inflation_max,json=inflationMax,proto3" json:"inflation_max,omitempty"`
-	GoalBonded                string `protobuf:"bytes,7,opt,name=goal_bonded,json=goalBonded,proto3" json:"goal_bonded,omitempty"`
-	BlockPerYear              uint64 `protobuf:"varint,8,opt,name=block_per_year,json=blockPerYear,proto3" json:"block_per_year,omitempty"`
-	EmissionCurve             uint64 `protobuf:"varint,9,opt,name=emission_curve,json=emissionCurve,proto3" json:"emission_curve,omitempty"`
+	BlockPerYear  uint64 `protobuf:"varint,8,opt,name=block_per_year,json=blockPerYear,proto3" json:"block_per_year,omitempty"`
+	EmissionCurve uint64 `protobuf:"varint,9,opt,name=emission_curve,json=emissionCurve,proto3" json:"emission_curve,omitempty"`
 }
 
 func (x *Params) Reset() {
@@ -963,55 +508,6 @@ func (*Params) ProtoMessage() {}
 // Deprecated: Use Params.ProtoReflect.Descriptor instead.
 func (*Params) Descriptor() ([]byte, []int) {
 	return file_arkeo_arkeo_params_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Params) GetCommunityPoolPercentage() string {
-	if x != nil {
-		return x.CommunityPoolPercentage
-	}
-	return ""
-}
-
-func (x *Params) GetDevFundPercentage() string {
-	if x != nil {
-		return x.DevFundPercentage
-	}
-	return ""
-}
-
-func (x *Params) GetGrantFundPercentage() string {
-	if x != nil {
-		return x.GrantFundPercentage
-	}
-	return ""
-}
-
-func (x *Params) GetInflationChangePercentage() string {
-	if x != nil {
-		return x.InflationChangePercentage
-	}
-	return ""
-}
-
-func (x *Params) GetInflationMin() string {
-	if x != nil {
-		return x.InflationMin
-	}
-	return ""
-}
-
-func (x *Params) GetInflationMax() string {
-	if x != nil {
-		return x.InflationMax
-	}
-	return ""
-}
-
-func (x *Params) GetGoalBonded() string {
-	if x != nil {
-		return x.GoalBonded
-	}
-	return ""
 }
 
 func (x *Params) GetBlockPerYear() uint64 {
@@ -1038,65 +534,22 @@ var file_arkeo_arkeo_params_proto_rawDesc = []byte{
 	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2f, 0x62, 0x61, 0x73, 0x65, 0x2f, 0x76, 0x31, 0x62, 0x65, 0x74,
 	0x61, 0x31, 0x2f, 0x63, 0x6f, 0x69, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x19, 0x63,
 	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x63, 0x6f, 0x73, 0x6d,
-	0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x8b, 0x06, 0x0a, 0x06, 0x50, 0x61, 0x72,
-	0x61, 0x6d, 0x73, 0x12, 0x6d, 0x0a, 0x19, 0x63, 0x6f, 0x6d, 0x6d, 0x75, 0x6e, 0x69, 0x74, 0x79,
-	0x5f, 0x70, 0x6f, 0x6f, 0x6c, 0x5f, 0x70, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74,
-	0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x17, 0x63, 0x6f, 0x6d, 0x6d, 0x75,
-	0x6e, 0x69, 0x74, 0x79, 0x50, 0x6f, 0x6f, 0x6c, 0x50, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61,
-	0x67, 0x65, 0x12, 0x61, 0x0a, 0x13, 0x64, 0x65, 0x76, 0x5f, 0x66, 0x75, 0x6e, 0x64, 0x5f, 0x70,
-	0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42,
-	0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73,
-	0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63,
-	0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44,
-	0x65, 0x63, 0x52, 0x11, 0x64, 0x65, 0x76, 0x46, 0x75, 0x6e, 0x64, 0x50, 0x65, 0x72, 0x63, 0x65,
-	0x6e, 0x74, 0x61, 0x67, 0x65, 0x12, 0x65, 0x0a, 0x15, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x5f, 0x66,
-	0x75, 0x6e, 0x64, 0x5f, 0x70, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f,
-	0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e,
-	0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73,
-	0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x13, 0x67, 0x72, 0x61, 0x6e, 0x74, 0x46, 0x75,
-	0x6e, 0x64, 0x50, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65, 0x12, 0x71, 0x0a, 0x1b,
-	0x69, 0x6e, 0x66, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x63, 0x68, 0x61, 0x6e, 0x67, 0x65,
-	0x5f, 0x70, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67,
-	0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
-	0x2e, 0x44, 0x65, 0x63, 0x52, 0x19, 0x69, 0x6e, 0x66, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43,
-	0x68, 0x61, 0x6e, 0x67, 0x65, 0x50, 0x65, 0x72, 0x63, 0x65, 0x6e, 0x74, 0x61, 0x67, 0x65, 0x12,
-	0x56, 0x0a, 0x0d, 0x69, 0x6e, 0x66, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x6d, 0x69, 0x6e,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b,
-	0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74,
-	0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63,
-	0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x0c, 0x69, 0x6e, 0x66, 0x6c, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x69, 0x6e, 0x12, 0x56, 0x0a, 0x0d, 0x69, 0x6e, 0x66, 0x6c, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x6d, 0x61, 0x78, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x42, 0x31,
-	0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64,
-	0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e, 0x4c, 0x65, 0x67, 0x61, 0x63, 0x79,
-	0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65,
-	0x63, 0x52, 0x0c, 0x69, 0x6e, 0x66, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4d, 0x61, 0x78, 0x12,
-	0x52, 0x0a, 0x0b, 0x67, 0x6f, 0x61, 0x6c, 0x5f, 0x62, 0x6f, 0x6e, 0x64, 0x65, 0x64, 0x18, 0x07,
-	0x20, 0x01, 0x28, 0x09, 0x42, 0x31, 0xc8, 0xde, 0x1f, 0x00, 0xda, 0xde, 0x1f, 0x1b, 0x63, 0x6f,
-	0x73, 0x6d, 0x6f, 0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x6d, 0x61, 0x74, 0x68, 0x2e,
-	0x4c, 0x65, 0x67, 0x61, 0x63, 0x79, 0x44, 0x65, 0x63, 0xd2, 0xb4, 0x2d, 0x0a, 0x63, 0x6f, 0x73,
-	0x6d, 0x6f, 0x73, 0x2e, 0x44, 0x65, 0x63, 0x52, 0x0a, 0x67, 0x6f, 0x61, 0x6c, 0x42, 0x6f, 0x6e,
-	0x64, 0x65, 0x64, 0x12, 0x24, 0x0a, 0x0e, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x70, 0x65, 0x72,
-	0x5f, 0x79, 0x65, 0x61, 0x72, 0x18, 0x08, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x62, 0x6c, 0x6f,
-	0x63, 0x6b, 0x50, 0x65, 0x72, 0x59, 0x65, 0x61, 0x72, 0x12, 0x25, 0x0a, 0x0e, 0x65, 0x6d, 0x69,
-	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x63, 0x75, 0x72, 0x76, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x0d, 0x65, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x75, 0x72, 0x76, 0x65,
-	0x3a, 0x04, 0x98, 0xa0, 0x1f, 0x00, 0x42, 0x89, 0x01, 0x0a, 0x0f, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
-	0x72, 0x6b, 0x65, 0x6f, 0x2e, 0x61, 0x72, 0x6b, 0x65, 0x6f, 0x42, 0x0b, 0x50, 0x61, 0x72, 0x61,
-	0x6d, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x1c, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x72, 0x6b, 0x65,
-	0x6f, 0x2f, 0x61, 0x72, 0x6b, 0x65, 0x6f, 0xa2, 0x02, 0x03, 0x41, 0x41, 0x58, 0xaa, 0x02, 0x0b,
-	0x41, 0x72, 0x6b, 0x65, 0x6f, 0x2e, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0xca, 0x02, 0x0b, 0x41, 0x72,
-	0x6b, 0x65, 0x6f, 0x5c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0xe2, 0x02, 0x17, 0x41, 0x72, 0x6b, 0x65,
-	0x6f, 0x5c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0xea, 0x02, 0x0c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0x3a, 0x3a, 0x41, 0x72, 0x6b,
-	0x65, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6f, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x5b, 0x0a, 0x06, 0x50, 0x61, 0x72, 0x61,
+	0x6d, 0x73, 0x12, 0x24, 0x0a, 0x0e, 0x62, 0x6c, 0x6f, 0x63, 0x6b, 0x5f, 0x70, 0x65, 0x72, 0x5f,
+	0x79, 0x65, 0x61, 0x72, 0x18, 0x08, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0c, 0x62, 0x6c, 0x6f, 0x63,
+	0x6b, 0x50, 0x65, 0x72, 0x59, 0x65, 0x61, 0x72, 0x12, 0x25, 0x0a, 0x0e, 0x65, 0x6d, 0x69, 0x73,
+	0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x63, 0x75, 0x72, 0x76, 0x65, 0x18, 0x09, 0x20, 0x01, 0x28, 0x04,
+	0x52, 0x0d, 0x65, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x75, 0x72, 0x76, 0x65, 0x3a,
+	0x04, 0x98, 0xa0, 0x1f, 0x00, 0x42, 0x89, 0x01, 0x0a, 0x0f, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x72,
+	0x6b, 0x65, 0x6f, 0x2e, 0x61, 0x72, 0x6b, 0x65, 0x6f, 0x42, 0x0b, 0x50, 0x61, 0x72, 0x61, 0x6d,
+	0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x1c, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x73, 0x64, 0x6b, 0x2e, 0x69, 0x6f, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x61, 0x72, 0x6b, 0x65, 0x6f,
+	0x2f, 0x61, 0x72, 0x6b, 0x65, 0x6f, 0xa2, 0x02, 0x03, 0x41, 0x41, 0x58, 0xaa, 0x02, 0x0b, 0x41,
+	0x72, 0x6b, 0x65, 0x6f, 0x2e, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0xca, 0x02, 0x0b, 0x41, 0x72, 0x6b,
+	0x65, 0x6f, 0x5c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0xe2, 0x02, 0x17, 0x41, 0x72, 0x6b, 0x65, 0x6f,
+	0x5c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0xea, 0x02, 0x0c, 0x41, 0x72, 0x6b, 0x65, 0x6f, 0x3a, 0x3a, 0x41, 0x72, 0x6b, 0x65,
+	0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (

@@ -60,9 +60,11 @@ func TestValidate(t *testing.T) {
 	// happy path
 
 	msg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	message := msg.GetBytesToSign()
@@ -73,9 +75,11 @@ func TestValidate(t *testing.T) {
 	// check closed contract
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + contract.Duration)
 	msg = types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      21,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              21,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 	err = s.HandlerClaimContractIncome(ctx, &msg)
 	require.ErrorIs(t, err, types.ErrClaimContractIncomeClosed)
@@ -122,9 +126,11 @@ func TestHandlePayAsYouGo(t *testing.T) {
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	message := msg.GetBytesToSign()
@@ -138,9 +144,11 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999020))
 
 	msg = types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      21,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              21,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	message = msg.GetBytesToSign()
@@ -218,9 +226,11 @@ func TestHandleSubscription(t *testing.T) {
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
 
@@ -229,9 +239,11 @@ func TestHandleSubscription(t *testing.T) {
 	require.Equal(t, k.GetBalanceOfModule(ctx, types.ModuleName, configs.Denom).Int64(), int64(999999999010))
 
 	msg = types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      21,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              21,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 120,
 	}
 	// repeat the same thing and ensure we don't pay providers twice
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -306,9 +318,11 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	message := msg.GetBytesToSign()
@@ -373,11 +387,85 @@ func TestClaimContractIncomeHandlerSignatureVerification(t *testing.T) {
 
 	// happy path
 	msg := types.MsgClaimContractIncome{
-		ContractId: contract.Id,
-		Creator:    acc.String(),
-		Nonce:      20,
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	err = s.HandlerClaimContractIncome(ctx, &msg)
 	require.Error(t, err, types.ErrClaimContractIncomeInvalidSignature)
+}
+
+func TestSignatureVerification(t *testing.T) {
+	var err error
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(20)
+
+	s := newMsgServer(k, sk)
+
+	// setup
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
+	types.RegisterInterfaces(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+
+	pubkey := types.GetRandomPubKey()
+	acc, err := pubkey.GetMyAddress()
+	require.NoError(t, err)
+	service := common.BTCService
+	kb := cKeys.NewInMemory(cdc)
+	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
+	require.NoError(t, err)
+	pk, err := info.GetPubKey()
+	require.NoError(t, err)
+	client, err := common.NewPubKeyFromCrypto(pk)
+	require.NoError(t, err)
+	require.NoError(t, k.MintToModule(ctx, types.ModuleName, getCoin(common.Tokens(10000))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ModuleName, types.ContractName, getCoins(1000)))
+	rate, err := cosmos.ParseCoin("10uarkeo")
+	require.NoError(t, err)
+
+	contract := types.NewContract(pubkey, service, client)
+	contract.Duration = 100
+	contract.Rate = rate
+	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
+	contract.Id = 2
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	// happy path
+	msg := types.MsgClaimContractIncome{
+		ContractId:         contract.Id,
+		Creator:            acc.String(),
+		Nonce:              20,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 21,
+	}
+
+	message := msg.GetBytesToSign()
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
+	require.NoError(t, err)
+
+	err = s.HandlerClaimContractIncome(ctx, &msg)
+	require.NoError(t, err)
+
+	msg.Nonce = 21
+
+	ctx = ctx.WithBlockHeight(21)
+	err = s.HandlerClaimContractIncome(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrSignatureExpired)
+
+	msg.Nonce = 22
+	msg.SignatureExpiresAt = 23
+	message = msg.GetBytesToSign()
+	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
+	require.NoError(t, err)
+
+	msg.ChainId = "somechainid"
+
+	err = s.HandlerClaimContractIncome(ctx, &msg)
+	require.ErrorIs(t, err, types.ErrInvalidChainId)
 }

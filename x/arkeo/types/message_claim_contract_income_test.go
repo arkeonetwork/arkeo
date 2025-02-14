@@ -37,9 +37,11 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := MsgClaimContractIncome{
-		Creator:    acct.String(),
-		ContractId: 1,
-		Nonce:      24,
+		Creator:            acct.String(),
+		ContractId:         1,
+		Nonce:              24,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 
 	message := msg.GetBytesToSign()
@@ -63,9 +65,11 @@ func TestValidateSignature(t *testing.T) {
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 
 	msg := MsgClaimContractIncome{
-		Creator:    acct.String(),
-		Nonce:      48,
-		ContractId: 500,
+		Creator:            acct.String(),
+		Nonce:              48,
+		ContractId:         500,
+		ChainId:            "arkeo",
+		SignatureExpiresAt: 100,
 	}
 	err = msg.ValidateBasic()
 	require.NoError(t, err)

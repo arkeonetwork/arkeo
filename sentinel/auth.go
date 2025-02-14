@@ -35,22 +35,28 @@ type ContractAuth struct {
 }
 
 type ArkAuth struct {
-	ContractId uint64
-	Spender    common.PubKey
-	Nonce      int64
-	Signature  []byte
+	ContractId      uint64
+	Spender         common.PubKey
+	Nonce           int64
+	Signature       []byte
+	ChainId         string
+	SignatureExpiry int64
 }
 
 // String implement fmt.Stringer
 func (aa ArkAuth) String() string {
-	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature)
+	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature, aa.ChainId)
 }
 
-func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce), hex.EncodeToString(signature))
+func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte, chainId string) string {
+	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce, chainId), hex.EncodeToString(signature))
 }
 
-func GenerateMessageToSign(contractId uint64, nonce int64) string {
+func GenerateMessageToSign(contractId uint64, nonce int64, chainId string) string {
+	return fmt.Sprintf("%d:%d:%s", contractId, nonce, chainId)
+}
+
+func GenerateContractMessageToSign(contractId uint64, nonce int64) string {
 	return fmt.Sprintf("%d:%d", contractId, nonce)
 }
 
@@ -87,7 +93,7 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 	var aa ArkAuth
 	var err error
 
-	parts := strings.SplitN(raw, ":", 3)
+	parts := strings.SplitN(raw, ":", 4)
 
 	if len(parts) > 0 {
 		aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
@@ -104,7 +110,11 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 	}
 
 	if len(parts) > 2 {
-		aa.Signature, err = hex.DecodeString(parts[2])
+		aa.ChainId = parts[2]
+	}
+
+	if len(parts) > 3 {
+		aa.Signature, err = hex.DecodeString(parts[3])
 		if err != nil {
 			return aa, err
 		}
@@ -117,7 +127,7 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	if err != nil {
 		return fmt.Errorf("internal server error: %w", err)
 	}
-	msg := types.NewMsgClaimContractIncome(creator, aa.ContractId, aa.Nonce, aa.Signature)
+	msg := types.NewMsgClaimContractIncome(creator, aa.ContractId, aa.Nonce, aa.Signature, aa.ChainId, aa.SignatureExpiry)
 	err = msg.ValidateBasic()
 	return err
 }

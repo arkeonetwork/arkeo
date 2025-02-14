@@ -42,12 +42,20 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		return err
 	}
 
+	if msg.ChainId != ctx.ChainID() {
+		return errors.Wrap(types.ErrInvalidChainId, "chain id mismatch")
+	}
+
 	if contract.Nonce >= msg.Nonce {
 		return errors.Wrapf(types.ErrClaimContractIncomeBadNonce, "contract nonce (%d) is greater than msg nonce (%d)", contract.Nonce, msg.Nonce)
 	}
 
 	if contract.IsSettled(ctx.BlockHeight()) {
 		return errors.Wrapf(types.ErrClaimContractIncomeClosed, "settled on block: %d", contract.SettlementPeriodEnd())
+	}
+
+	if msg.SignatureExpiresAt <= ctx.BlockHeight() {
+		return errors.Wrapf(types.ErrSignatureExpired, "signature expired at block: (%d)", ctx.BlockHeight())
 	}
 
 	// open subscription contracts do NOT need to verify the signature
@@ -62,7 +70,6 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 	}
 
 	// excute settlement
-
 	_, err = k.mgr.SettleContract(ctx, contract, msg.Nonce, false)
 	if err != nil {
 		return err

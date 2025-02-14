@@ -44,6 +44,8 @@ arkauth:
   id: "1"
   spender: {{ pubkey_cat}}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 repeat: 100
 inner_assert_headers:
   Tier: "paid"
@@ -71,6 +73,8 @@ arkauth:
   id: "2"
   spender: {{ pubkey_cat}}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 repeat: 101
 inner_assert_headers:
   Tier: "paid"

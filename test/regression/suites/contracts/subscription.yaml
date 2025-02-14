@@ -79,6 +79,8 @@ arkauth:
   id: "1"
   spender: {{ pubkey_cat }}
   nonce: "1"
+  chain_id: "arkeo"
+  expiry: "100"
 assert_headers:
   Tier: "paid"
 asserts:
@@ -169,6 +171,8 @@ endpoint: http://localhost:3636/mock/ping
 arkauth:
   id: "2"
   nosig: "true"
+  chain_id: "arkeo"
+  expiry: "100"
 assert_headers:
   Tier: "paid"
 asserts:

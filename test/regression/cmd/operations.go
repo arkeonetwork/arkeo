@@ -290,7 +290,7 @@ func createContractAuth(input map[string]string) (string, bool, error) {
 	}
 
 	// sign our msg
-	msg := sentinel.GenerateMessageToSign(id, timestamp)
+	msg := sentinel.GenerateContractMessageToSign(id, timestamp)
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }
@@ -323,7 +323,14 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
 	}
-	msg := sentinel.GenerateMessageToSign(id, nonce)
+
+	if len(input["chain_id"]) == 0 {
+		return "", true, fmt.Errorf("missing required field: chain_id")
+	}
+
+	chainId := input["chain_id"]
+
+	msg := sentinel.GenerateMessageToSign(id, nonce, chainId)
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }

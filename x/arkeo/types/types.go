@@ -11,6 +11,8 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 )
 
+var ExpirationDelta = int64(30)
+
 // GetRandomBech32Addr is an account address used for test
 func GetRandomBech32Addr() cosmos.AccAddress {
 	name := common.RandStringBytesMask(10)
