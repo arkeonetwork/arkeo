@@ -82,7 +82,7 @@ func (gs GenesisState) Validate() error {
 	}
 
 	// Validate version
-	if gs.Version <= 0 {
+	if gs.Version < 0 {
 		return fmt.Errorf("invalid version: %d", gs.Version)
 	}
 
