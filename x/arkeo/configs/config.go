@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 	stringOverrides       = map[ConfigName]string{}
 )
 
-var BlockTime = 5 * time.Second
+// var BlockTime = 5 * time.Second
 
 // ConfigVals implement ConfigValues interface
 type ConfigVals struct {
@@ -71,23 +71,40 @@ func (cv *ConfigVals) GetStringValue(name ConfigName) string {
 }
 
 func (cv *ConfigVals) String() string {
+	// get all the keys
+	int64Keys := make([]ConfigName, 0, len(cv.int64values))
+	for k := range cv.int64values {
+		int64Keys = append(int64Keys, k)
+	}
+	sort.Slice(int64Keys, func(i, j int) bool {
+		return int64Keys[i].String() < int64Keys[j].String()
+	})
+
+	boolKeys := make([]ConfigName, 0, len(cv.boolValues))
+	for k := range cv.boolValues {
+		boolKeys = append(boolKeys, k)
+	}
+	sort.Slice(boolKeys, func(i, j int) bool {
+		return boolKeys[i].String() < boolKeys[j].String()
+	})
+
 	sb := strings.Builder{}
-	// analyze-ignore(map-iteration)
-	for k, v := range cv.int64values {
+	for _, k := range int64Keys {
 		if overrideValue, ok := int64Overrides[k]; ok {
 			sb.WriteString(fmt.Sprintf("%s:%d\n", k, overrideValue))
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("%s:%d\n", k, v))
+		sb.WriteString(fmt.Sprintf("%s:%d\n", k, cv.int64values[k]))
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range cv.boolValues {
+
+	for _, k := range boolKeys {
 		if overrideValue, ok := boolOverrides[k]; ok {
 			sb.WriteString(fmt.Sprintf("%s:%v\n", k, overrideValue))
 			continue
 		}
-		sb.WriteString(fmt.Sprintf("%s:%v\n", k, v))
+		sb.WriteString(fmt.Sprintf("%s:%v\n", k, cv.boolValues[k]))
 	}
+
 	return sb.String()
 }
 
@@ -101,29 +118,70 @@ func (cv ConfigVals) MarshalJSON() ([]byte, error) {
 	result.Int64Values = make(map[string]int64)
 	result.BoolValues = make(map[string]bool)
 	result.StringValues = make(map[string]string)
-	// analyze-ignore(map-iteration)
-	for k, v := range cv.int64values {
-		result.Int64Values[k.String()] = v
+
+	// get and sort all keys including overrides
+	int64Keys := make([]ConfigName, 0, len(cv.int64values)+len(int64Overrides))
+	for k := range cv.int64values {
+		int64Keys = append(int64Keys, k)
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range int64Overrides {
-		result.Int64Values[k.String()] = v
+	for k := range int64Overrides {
+		if _, exists := cv.int64values[k]; !exists {
+			int64Keys = append(int64Keys, k)
+		}
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range cv.boolValues {
-		result.BoolValues[k.String()] = v
+	sort.Slice(int64Keys, func(i, j int) bool {
+		return int64Keys[i].String() < int64Keys[j].String()
+	})
+
+	// Same for bool and string keys
+	boolKeys := make([]ConfigName, 0, len(cv.boolValues)+len(boolOverrides))
+	for k := range cv.boolValues {
+		boolKeys = append(boolKeys, k)
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range boolOverrides {
-		result.BoolValues[k.String()] = v
+	for k := range boolOverrides {
+		if _, exists := cv.boolValues[k]; !exists {
+			boolKeys = append(boolKeys, k)
+		}
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range cv.stringValues {
-		result.StringValues[k.String()] = v
+	sort.Slice(boolKeys, func(i, j int) bool {
+		return boolKeys[i].String() < boolKeys[j].String()
+	})
+
+	stringKeys := make([]ConfigName, 0, len(cv.stringValues)+len(stringOverrides))
+	for k := range cv.stringValues {
+		stringKeys = append(stringKeys, k)
 	}
-	// analyze-ignore(map-iteration)
-	for k, v := range stringOverrides {
-		result.StringValues[k.String()] = v
+	for k := range stringOverrides {
+		if _, exists := cv.stringValues[k]; !exists {
+			stringKeys = append(stringKeys, k)
+		}
+	}
+	sort.Slice(stringKeys, func(i, j int) bool {
+		return stringKeys[i].String() < stringKeys[j].String()
+	})
+
+	for _, k := range int64Keys {
+		if override, ok := int64Overrides[k]; ok {
+			result.Int64Values[k.String()] = override
+		} else {
+			result.Int64Values[k.String()] = cv.int64values[k]
+		}
+	}
+
+	for _, k := range boolKeys {
+		if override, ok := boolOverrides[k]; ok {
+			result.BoolValues[k.String()] = override
+		} else {
+			result.BoolValues[k.String()] = cv.boolValues[k]
+		}
+	}
+
+	for _, k := range stringKeys {
+		if override, ok := stringOverrides[k]; ok {
+			result.StringValues[k.String()] = override
+		} else {
+			result.StringValues[k.String()] = cv.stringValues[k]
+		}
 	}
 
 	return json.MarshalIndent(result, "", " ")
