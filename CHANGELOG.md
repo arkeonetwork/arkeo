@@ -34,6 +34,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ## Changed
 - Updated docker images
+- Set minimum gas price to zero
 
 ### Fixed
 - Updated event labels on TC delegate events
