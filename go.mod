@@ -1,6 +1,7 @@
 module github.com/arkeonetwork/arkeo
 
-go 1.23
+go 1.22.11
+
 
 require (
 	cosmossdk.io/client/v2 v2.0.0-beta.4
