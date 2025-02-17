@@ -28,6 +28,9 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
+### Added
+- Update outdated dependencies 
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
