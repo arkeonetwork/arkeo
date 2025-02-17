@@ -70,17 +70,6 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	maxContractId := uint64(0)
-	for _, contract := range gs.Contracts {
-		if contract.Id > maxContractId {
-			maxContractId = contract.Id
-		}
-	}
-	if gs.NextContractId < maxContractId {
-		return fmt.Errorf("NextContractId (%d) must be greater than the highest contract ID (%d)",
-			gs.NextContractId, maxContractId)
-	}
-
 	// Validate version
 	if gs.Version < 0 {
 		return fmt.Errorf("invalid version: %d", gs.Version)
