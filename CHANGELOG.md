@@ -30,6 +30,8 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ### Added
 - Update outdated dependencies 
+- fixed old expirations are not removed
+- fixed not delegate being used in msg open contract
 
 # v1.0.5-Prerelease 
 ### Added
