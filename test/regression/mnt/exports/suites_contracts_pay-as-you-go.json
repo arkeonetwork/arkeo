@@ -25,7 +25,7 @@
         {
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
-          "delegate": "",
+          "delegate": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "deposit": "3",
           "duration": "10",
           "height": "2",
