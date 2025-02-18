@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
 )
@@ -32,6 +33,14 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 
 // Validate validates the set of params
 func (p Params) Validate() error {
+	if p.BlockPerYear <= 0 {
+		return errors.Wrap(ErrInvalidBlocksPerYear, "BlockPerYear must be greater than zero")
+	}
+
+	if p.EmissionCurve <= 0 {
+		return errors.Wrap(ErrInvalidEmissionCurve, "EmissionCurve must be greater than  ")
+	}
+
 	return nil
 }
 

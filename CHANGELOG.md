@@ -33,6 +33,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - fixed old expirations are not removed
 - fixed not delegate being used in msg open contract
 - fixed the recipient’s IsTransferable field is overwritten to false in MsgClaimThorchain
+- fixed genesis state validation 
 
 # v1.0.5-Prerelease 
 ### Added
