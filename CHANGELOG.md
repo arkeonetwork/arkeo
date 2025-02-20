@@ -58,6 +58,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 ## Changed
 - Updated sentinel to handle provider events
 - moved testnet and mainnet releaser separately 
+- tc claim address
 
 ## Fixed 
 - Fixed code lint
