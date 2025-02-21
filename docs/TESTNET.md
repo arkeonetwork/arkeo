@@ -55,11 +55,11 @@
 
 ### 2. **Configure the binary:**
    ```bash
-   arkeod keys add <key-name>
+   arkeod init <your-custom-moniker> --chain-id arkeo-testnet-3
+   arkeod config set client chain-id arkeo-testnet-3
    arkeod config set client node tcp://localhost:${ARKEO_PORT}57
    arkeod config set client keyring-backend test
-   arkeod config set client chain-id arkeo-testnet-3
-   arkeod init <your-custom-moniker> --chain-id arkeo-testnet-3
+   arkeod keys add <key-name>   
    sudo ufw allow ${ARKEO_PORT}56/tcp
    ```
 
