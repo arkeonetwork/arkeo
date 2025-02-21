@@ -66,6 +66,22 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 
 // Validate validates the set of params
 func (p Params) Validate() error {
+	if err := validateClaimDenom(p.ClaimDenom); err != nil {
+		return err
+	}
+
+	if err := validateAirdropStartTime(p.AirdropStartTime); err != nil {
+		return err
+	}
+
+	if err := validateDurationUntilDecay(p.DurationUntilDecay); err != nil {
+		return err
+	}
+
+	if err := validateDurationOfDecay(p.DurationOfDecay); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -196,6 +196,7 @@ func (mgr Manager) ContractEndBlock(ctx cosmos.Context) error {
 			ctx.Logger().Error("unable to settle contract", "id", contractId, "error", err)
 			continue
 		}
+		mgr.keeper.RemoveContractExpirationSet(ctx, contract.Expiration())
 	}
 
 	return nil

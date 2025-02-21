@@ -47,6 +47,7 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 		AmountClaim:    amountClaim,
 		AmountVote:     amountVote,
 		AmountDelegate: amountDelegate,
+		IsTransferable: toAddressClaimRecord.IsTransferable,
 	}
 	emptyClaimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,

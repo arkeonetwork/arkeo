@@ -32,6 +32,10 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ### Added
 - Update outdated dependencies 
+- fixed old expirations are not removed
+- fixed not delegate being used in msg open contract
+- fixed the recipient’s IsTransferable field is overwritten to false in MsgClaimThorchain
+- fixed genesis state validation 
 
 ### Added
 - Move funds from claim to liquidity reserve when airdrop ends

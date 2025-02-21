@@ -29,6 +29,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: false,
 	}
 	claimRecordTo := types.ClaimRecord{
 		Chain:          types.ARKEO,
@@ -36,6 +37,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: true,
 	}
 	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordFrom)
 	require.NoError(t, err)
@@ -70,6 +72,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 	claimRecordTo, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, toAddr.String(), types.ARKEO)
 	require.NoError(t, err)
 	require.True(t, !claimRecordTo.IsEmpty())
+	require.Equal(t, claimRecordTo.IsTransferable, true)
 
 	require.Equal(t, claimRecordTo.Address, toAddr.String())
 	require.Equal(t, claimRecordTo.Chain, types.ARKEO)
