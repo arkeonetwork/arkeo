@@ -26,7 +26,9 @@ Contains bug fixes.
 ### Improvements
 
 Contains all the PRs that improved the code without changing the behaviors.
--->
+
+### Fixed
+- Fix bug that would allow doubling claims with thorchain claims
 
 ### Added
 - Update outdated dependencies 
