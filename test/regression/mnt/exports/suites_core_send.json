@@ -12,6 +12,12 @@
       },
       "providers": [],
       "user_contract_sets": [],
+      "validator_versions": [
+        {
+          "validator_address": "tarkeovaloper1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyfn54sh",
+          "version": "1"
+        }
+      ],
       "version": "1"
     },
     "auth": {

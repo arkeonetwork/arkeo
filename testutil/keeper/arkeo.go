@@ -53,6 +53,7 @@ func ArkeoKeeper(t testing.TB) (cosmos.Context, keeper.Keeper) {
 
 	db := tmdb.NewMemDB()
 	stateStore := store.NewCommitMultiStore(db, logger, storemetrics.NewNoOpMetrics())
+	stateStore.MountStoreWithDB(keyStake, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(storeKey, storetypes.StoreTypeIAVL, db)
 	stateStore.MountStoreWithDB(memStoreKey, storetypes.StoreTypeMemory, nil)
 	require.NoError(t, stateStore.LoadLatestVersion())

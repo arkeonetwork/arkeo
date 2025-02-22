@@ -37,6 +37,17 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 			ctx.Logger().Error("unable to set user contract set", "user", userContractSet.User, "error", err)
 		}
 	}
+
+	for _, vv := range genState.ValidatorVersions {
+		valAddr, err := sdk.ValAddressFromBech32(vv.ValidatorAddress)
+		if err != nil {
+			ctx.Logger().Error("invalid validator address in genesis",
+				"address", vv.ValidatorAddress,
+				"error", err)
+			continue
+		}
+		k.SetVersionForAddress(ctx, valAddr, vv.Version)
+	}
 }
 
 // ExportGenesis returns the module's exported genesis
@@ -90,6 +101,28 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 			continue
 		}
 		genesis.UserContractSets = append(genesis.UserContractSets, userContractSet)
+	}
+
+	// export validator versions
+	validators, err := k.GetActiveValidators(ctx)
+	if err != nil {
+		ctx.Logger().Error("failed to get active validators during genesis export", "error", err)
+	} else {
+		for _, val := range validators {
+			valAddr, err := sdk.ValAddressFromBech32(val.GetOperator())
+			if err != nil {
+				ctx.Logger().Error("failed to parse validator address",
+					"operator", val.GetOperator(),
+					"error", err)
+				continue
+			}
+			version := k.GetVersionForAddress(ctx, valAddr)
+
+			genesis.ValidatorVersions = append(genesis.ValidatorVersions, types.ValidatorVersion{
+				ValidatorAddress: val.GetOperator(),
+				Version:          version,
+			})
+		}
 	}
 
 	return genesis

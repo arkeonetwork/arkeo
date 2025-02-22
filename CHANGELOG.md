@@ -40,6 +40,9 @@ Contains all the PRs that improved the code without changing the behaviors.
 ### Added
 - Move funds from claim to liquidity reserve when airdrop ends
 
+### Fixed
+- added VersionForAddress field to GenesisState
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
