@@ -40,6 +40,9 @@ Contains all the PRs that improved the code without changing the behaviors.
 ### Added
 - Move funds from claim to liquidity reserve when airdrop ends
 
+### Fixed 
+- validator rewards payout
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
