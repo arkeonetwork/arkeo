@@ -40,11 +40,20 @@ Contains all the PRs that improved the code without changing the behaviors.
 ### Added
 - Move funds from claim to liquidity reserve when airdrop ends
 
+
+# v1.0.6-fix
+### Added
+
+### Changed
+
+### Fixed
+- Fixed fee stuck in arkeo module by moving fees to arkeo-reserve
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
 
-## Changed
+### Changed
 - Updated docker images
 - Set minimum gas price to zero
 
