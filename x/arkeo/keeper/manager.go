@@ -111,7 +111,12 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 
 	sum := cosmos.ZeroInt()
 	iter := mgr.keeper.GetProviderIterator(ctx)
-	defer iter.Close()
+	defer func(iter cosmos.Iterator) {
+		err := iter.Close()
+		if err != nil {
+			mgr.keeper.Logger().Error("fail to iter", "error", err)
+		}
+	}(iter)
 	for ; iter.Valid(); iter.Next() {
 		var provider types.Provider
 		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &provider); err != nil {
@@ -133,7 +138,12 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 func (mgr Manager) invariantContractModule(ctx cosmos.Context) error {
 	sums := cosmos.NewCoins()
 	iter := mgr.keeper.GetContractIterator(ctx)
-	defer iter.Close()
+	defer func(iter cosmos.Iterator) {
+		err := iter.Close()
+		if err != nil {
+			mgr.keeper.Logger().Error("fail to iter", "error", err)
+		}
+	}(iter)
 	for ; iter.Valid(); iter.Next() {
 		var contract types.Contract
 		if err := mgr.keeper.Cdc().Unmarshal(iter.Value(), &contract); err != nil {
@@ -342,7 +352,7 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err := mgr.keeper.SendFromModuleToAccount(ctx, types.ContractName, provider, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, debt))); err != nil {
 			return contract, err
 		}
-		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ModuleName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome.RoundInt()))); err != nil {
+		if err := mgr.keeper.SendFromModuleToModule(ctx, types.ContractName, types.ReserveName, cosmos.NewCoins(cosmos.NewCoin(contract.Rate.Denom, valIncome.RoundInt()))); err != nil {
 			return contract, err
 		}
 	}
