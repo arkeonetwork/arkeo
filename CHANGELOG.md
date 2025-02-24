@@ -46,6 +46,9 @@ Contains all the PRs that improved the code without changing the behaviors.
 ### Fixed 
 - validator rewards payout
 
+### Fixed 
+- fix non deterministic map iteration to sorted iteration 
+
 # v1.0.5-Prerelease 
 ### Added
 - Arkeo testnet validator addresses to airdrop
