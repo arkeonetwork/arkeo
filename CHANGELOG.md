@@ -26,7 +26,25 @@ Contains bug fixes.
 ### Improvements
 
 Contains all the PRs that improved the code without changing the behaviors.
--->
+
+### Fixed
+- Fix bug that would allow doubling claims with thorchain claims
+
+### Added
+- Update outdated dependencies 
+- fixed old expirations are not removed
+- fixed not delegate being used in msg open contract
+- fixed the recipient’s IsTransferable field is overwritten to false in MsgClaimThorchain
+- fixed genesis state validation 
+
+### Added
+- Move funds from claim to liquidity reserve when airdrop ends
+
+### Fixed
+- added VersionForAddress field to GenesisState
+
+### Fixed 
+- validator rewards payout
 
 ### Fixed 
 - fix non deterministic map iteration to sorted iteration 
@@ -37,6 +55,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ## Changed
 - Updated docker images
+- Set minimum gas price to zero
 
 ### Fixed
 - Updated event labels on TC delegate events
@@ -58,6 +77,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 ## Changed
 - Updated sentinel to handle provider events
 - moved testnet and mainnet releaser separately 
+- tc claim address
 
 ## Fixed 
 - Fixed code lint

@@ -40,21 +40,31 @@ arkeod query bank balances $(arkeod keys show <your-wallet-name> -a)
 ```
 
 ## Create A Validator
-> Don’t change anything if you don’t understand what you’re doing.
-
+Get your validator public key
 ```shell
-arkeod tx staking create-validator \
---chain-id arkeo \
---commission-rate 0.05 \
---commission-max-rate 0.2 \
---commission-max-change-rate 0.1 \
---min-self-delegation "1" \
---amount <staking amount>uarkeo \
---pubkey $(arkeod tendermint show-validator) \
---moniker "<your-validator-name>" \
---from <your-wallet-name> \
---fees="5000uarkeo" \
---yes
+arkeod tendermint show-validator
+```
+
+Create a file called "validator.json". Use the template below replacing the validator pubkey with your own, insert your own moniker and optional information
+```json
+{
+	"pubkey": {"@type":"/cosmos.crypto.ed25519.PubKey","key":"EwLZ+A9ycVsWxHNyuGLHr5Na2fV7mkSG0AYO7/vQHS4="},
+	"amount": "1000000uarkeo",
+	"moniker": "myvalidator",
+	"identity": "optional identity signature (ex. UPort or Keybase)",
+	"website": "validator's (optional) website",
+	"security": "validator's (optional) security contact email",
+	"details": "validator's (optional) details",
+	"commission-rate": "0.1",
+	"commission-max-rate": "0.2",
+	"commission-max-change-rate": "0.01",
+	"min-self-delegation": "1"
+}
+```
+
+Send your validator creation request to the blockchain
+```shell
+arkeod tx staking create-validator validator.json --from <your-wallet-name> --chain-id arkeo-testnet-3 --fees="500uarkeo"
 ```
 
 ## Restart the Service

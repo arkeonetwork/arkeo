@@ -41,4 +41,6 @@ var (
 	ErrInvariantMaxSupply                     = errors.Register(ModuleName, 32, "max supply invariant")
 	ErrInvalidAuthorization                   = errors.Register(ModuleName, 33, "invalid authorization")
 	ErrInvalidVersion                         = errors.Register(ModuleName, 34, "version cannot be zero or lower")
+	ErrInvalidBlocksPerYear                   = errors.Register(ModuleName, 37, "blocks per year cannot be zero or lower")
+	ErrInvalidEmissionCurve                   = errors.Register(ModuleName, 38, "emissionCurve set is invalid")
 )

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"sort"
+	"context"
 	"strings"
 
 	sdkerror "cosmossdk.io/errors"
@@ -14,6 +15,32 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
+
+// Key for tracking if end of airdrop transfer has occurred
+var MoveClaimTokensKey = []byte("MoveClaimTokens")
+
+// EndBlocker is called at the end of every block
+func (k Keeper) EndBlocker(ctx context.Context) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	store := sdkCtx.KVStore(k.storeKey)
+
+	// Check if we've already done the transfer
+	if store.Has(MoveClaimTokensKey) {
+		return
+	}
+
+	params := k.GetParams(sdkCtx)
+	// Check if we've passed the end of the airdrop
+	if sdkCtx.BlockTime().After(params.AirdropStartTime.Add(params.DurationUntilDecay).Add(params.DurationOfDecay)) {
+		err := k.TransferRemainingToReserve(sdkCtx)
+		if err != nil {
+			k.Logger(ctx).Error("failed to transfer remaining tokens to reserve", "error", err)
+			return
+		}
+
+		store.Set(MoveClaimTokensKey, []byte{1})
+	}
+}
 
 // SetClaimRecord sets a claim record for an address in store
 func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) error {
@@ -189,6 +216,17 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	claimableCoin := sdk.NewCoin(initalClaimableAmount.Denom, claimableAmount)
 
 	return claimableCoin, nil
+}
+
+// TransferRemainingToReserve transfers remaining funds to the reserve module when airdrop period ends
+func (k Keeper) TransferRemainingToReserve(ctx sdk.Context) error {
+	remainingAmount := k.GetModuleAccountBalance(ctx)
+
+	if remainingAmount.IsZero() {
+		return nil
+	}
+
+	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, "arkeo-reserve", sdk.NewCoins(remainingAmount))
 }
 
 // GetModuleAccountBalance gets the airdrop coin balance of module account
