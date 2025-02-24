@@ -56,7 +56,7 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		if err != nil {
 			return err
 		}
-		if !pk.VerifySignature(msg.GetBytesToSign(), msg.Signature) {
+		if !pk.VerifySignature(msg.GetBytesToSign(ctx.ChainID()), msg.Signature) {
 			return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "signature mismatch")
 		}
 	}

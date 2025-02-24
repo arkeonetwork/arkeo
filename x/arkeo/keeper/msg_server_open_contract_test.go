@@ -344,7 +344,7 @@ func TestOpenContractWithSettlementPeriod(t *testing.T) {
 		Creator:    clientAddress.String(),
 		Nonce:      20,
 	}
-	message := claimMsg.GetBytesToSign()
+	message := claimMsg.GetBytesToSign("arkeo")
 	claimMsg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	_, err = s.ClaimContractIncome(ctx, &claimMsg)

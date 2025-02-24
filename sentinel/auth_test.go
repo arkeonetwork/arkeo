@@ -50,12 +50,12 @@ func TestArkAuth(t *testing.T) {
 	require.NoError(t, err)
 
 	// happy path
-	raw := GenerateArkAuthString(contractId, nonce, signature)
+	raw := GenerateArkAuthString(contractId, nonce, signature, "arkeo")
 	_, err = parseArkAuth(raw)
 	require.NoError(t, err)
 
 	// bad signature
-	raw = GenerateArkAuthString(contractId, nonce, signature)
+	raw = GenerateArkAuthString(contractId, nonce, signature, "arkeo")
 	_, err = parseArkAuth(raw + "randome not hex!")
 	require.Error(t, err)
 }

@@ -44,12 +44,12 @@ func (msg *MsgClaimContractIncome) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgClaimContractIncome) GetBytesToSign() []byte {
-	return GetBytesToSign(msg.ContractId, msg.Nonce)
+func (msg *MsgClaimContractIncome) GetBytesToSign(chainId string) []byte {
+	return GetBytesToSign(msg.ContractId, msg.Nonce, chainId)
 }
 
-func GetBytesToSign(contractId uint64, nonce int64) []byte {
-	return []byte(fmt.Sprintf("%d:%d", contractId, nonce))
+func GetBytesToSign(contractId uint64, nonce int64, chainID string) []byte {
+	return []byte(fmt.Sprintf("%d:%d:%s", contractId, nonce, chainID))
 }
 
 func (msg *MsgClaimContractIncome) ValidateBasic() error {

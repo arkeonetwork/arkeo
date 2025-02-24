@@ -32,6 +32,7 @@ type ContractAuth struct {
 	ContractId uint64
 	Timestamp  int64
 	Signature  []byte
+	ChainId    string
 }
 
 type ArkAuth struct {
@@ -39,26 +40,27 @@ type ArkAuth struct {
 	Spender    common.PubKey
 	Nonce      int64
 	Signature  []byte
+	ChainId    string
 }
 
 // String implement fmt.Stringer
 func (aa ArkAuth) String() string {
-	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature)
+	return GenerateArkAuthString(aa.ContractId, aa.Nonce, aa.Signature, aa.ChainId)
 }
 
-func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte) string {
-	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce), hex.EncodeToString(signature))
+func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte, chainId string) string {
+	return fmt.Sprintf("%s:%s", GenerateMessageToSign(contractId, nonce, chainId), hex.EncodeToString(signature))
 }
 
-func GenerateMessageToSign(contractId uint64, nonce int64) string {
-	return fmt.Sprintf("%d:%d", contractId, nonce)
+func GenerateMessageToSign(contractId uint64, nonce int64, chainId string) string {
+	return fmt.Sprintf("%d:%d:%s", contractId, nonce, chainId)
 }
 
 func parseContractAuth(raw string) (ContractAuth, error) {
 	var auth ContractAuth
 	var err error
 
-	parts := strings.SplitN(raw, ":", 3)
+	parts := strings.SplitN(raw, ":", 4)
 
 	if len(parts) > 0 {
 		auth.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
@@ -74,8 +76,12 @@ func parseContractAuth(raw string) (ContractAuth, error) {
 		}
 	}
 
-	if len(parts) > 2 {
-		auth.Signature, err = hex.DecodeString(parts[2])
+	if len(parts) > 0 {
+		auth.ChainId = parts[2]
+	}
+
+	if len(parts) > 3 {
+		auth.Signature, err = hex.DecodeString(parts[3])
 		if err != nil {
 			return auth, err
 		}
@@ -87,7 +93,7 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 	var aa ArkAuth
 	var err error
 
-	parts := strings.SplitN(raw, ":", 3)
+	parts := strings.SplitN(raw, ":", 4)
 
 	if len(parts) > 0 {
 		aa.ContractId, err = strconv.ParseUint(parts[0], 10, 64)
@@ -104,7 +110,11 @@ func parseArkAuth(raw string) (ArkAuth, error) {
 	}
 
 	if len(parts) > 2 {
-		aa.Signature, err = hex.DecodeString(parts[2])
+		aa.ChainId = parts[2]
+	}
+
+	if len(parts) > 3 {
+		aa.Signature, err = hex.DecodeString(parts[3])
 		if err != nil {
 			return aa, err
 		}
@@ -134,7 +144,7 @@ func (auth ContractAuth) Validate(lastTimestamp int64, client common.PubKey) err
 	if err != nil {
 		return err
 	}
-	msg := fmt.Sprintf("%d:%d", auth.ContractId, auth.Timestamp)
+	msg := fmt.Sprintf("%d:%d:%s", auth.ContractId, auth.Timestamp, auth.ChainId)
 	if !pk.VerifySignature([]byte(msg), auth.Signature) {
 		return fmt.Errorf("invalid signature")
 	}
