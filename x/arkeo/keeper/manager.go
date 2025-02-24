@@ -114,7 +114,7 @@ func (mgr Manager) invariantBondModule(ctx cosmos.Context) error {
 	defer func(iter cosmos.Iterator) {
 		err := iter.Close()
 		if err != nil {
-
+			mgr.keeper.Logger().Error("fail to iter", "error", err)
 		}
 	}(iter)
 	for ; iter.Valid(); iter.Next() {
@@ -141,7 +141,7 @@ func (mgr Manager) invariantContractModule(ctx cosmos.Context) error {
 	defer func(iter cosmos.Iterator) {
 		err := iter.Close()
 		if err != nil {
-
+			mgr.keeper.Logger().Error("fail to iter", "error", err)
 		}
 	}(iter)
 	for ; iter.Valid(); iter.Next() {
