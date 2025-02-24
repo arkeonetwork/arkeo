@@ -90,6 +90,7 @@ func (k msgServer) CloseContractHandle(ctx cosmos.Context, msg *types.MsgCloseCo
 	}
 
 	if contract.IsPayAsYouGo() {
+		k.RemoveContractExpirationSet(ctx, contract.Expiration())
 		// add a new expiration return deposit to user
 		newHeight := ctx.BlockHeight() + contract.SettlementDuration
 		expirationSet, err := k.GetContractExpirationSet(ctx, newHeight)

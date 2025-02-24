@@ -7,14 +7,6 @@
         {
           "contract_set": {
             "contract_ids": [
-              "1"
-            ]
-          },
-          "height": "12"
-        },
-        {
-          "contract_set": {
-            "contract_ids": [
               "2"
             ]
           },
@@ -25,7 +17,7 @@
         {
           "authorization": "STRICT",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
-          "delegate": "",
+          "delegate": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "deposit": "100",
           "duration": "10",
           "height": "2",
@@ -46,7 +38,7 @@
         {
           "authorization": "OPEN",
           "client": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
-          "delegate": "",
+          "delegate": "tarkeopub1addwnpepq2res6tu0m73ulk5sepgp6g3y37schfgymxy8z6l3lc78k7ju9u45yajwem",
           "deposit": "20",
           "duration": "5",
           "height": "16",
@@ -97,6 +89,12 @@
         }
       ],
       "user_contract_sets": [],
+      "validator_versions": [
+        {
+          "validator_address": "tarkeovaloper1hnyy4gp5tgarpg3xu6w5cw4zsyphx2lyfn54sh",
+          "version": "1"
+        }
+      ],
       "version": "1"
     },
     "auth": {

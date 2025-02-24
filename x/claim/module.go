@@ -145,7 +145,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (AppModule) ConsensusVersion() uint64 { return 1 }
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
-func (am AppModule) EndBlock(_ context.Context) ([]abci.ValidatorUpdate, error) {
+func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
+	am.keeper.EndBlocker(ctx)
 	return []abci.ValidatorUpdate{}, nil
 }
 

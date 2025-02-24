@@ -17,7 +17,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1z02ke8639m47g9dfrheegr2u9zecegt5qvtj00")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1zsafqx0qk6rp2vvs97n9udylquj7mfkt8mfypq")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()
@@ -29,6 +29,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: false,
 	}
 	claimRecordTo := types.ClaimRecord{
 		Chain:          types.ARKEO,
@@ -36,6 +37,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
 		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 100),
+		IsTransferable: true,
 	}
 	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, claimRecordFrom)
 	require.NoError(t, err)
@@ -70,6 +72,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 	claimRecordTo, err = keepers.ClaimKeeper.GetClaimRecord(sdkCtx, toAddr.String(), types.ARKEO)
 	require.NoError(t, err)
 	require.True(t, !claimRecordTo.IsEmpty())
+	require.Equal(t, claimRecordTo.IsTransferable, true)
 
 	require.Equal(t, claimRecordTo.Address, toAddr.String())
 	require.Equal(t, claimRecordTo.Chain, types.ARKEO)
@@ -89,7 +92,7 @@ func TestClaimThorchainMainnetAddress(t *testing.T) {
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("arkeo", "arkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1z02ke8639m47g9dfrheegr2u9zecegt50fjg7v")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()
@@ -155,4 +158,55 @@ func TestClaimThorchainMainnetAddress(t *testing.T) {
 	// attempt to claim again to ensure it fails.
 	_, err = msgServer.ClaimThorchain(ctx, &claimMessage)
 	require.ErrorIs(t, err, types.ErrNoClaimableAmount)
+}
+
+func TestClaimThorchainFailureCases(t *testing.T) {
+	msgServer, keepers, ctx := setupMsgServer(t)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount("arkeo", "arkeopub")
+
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr")
+	require.NoError(t, err)
+
+	fromAddr := utils.GetRandomArkeoAddress()
+	toAddr := utils.GetRandomArkeoAddress()
+
+	// Test case 1: Same from and to address
+	sameAddressMsg := types.MsgClaimThorchain{
+		Creator:     arkeoServerAddress.String(),
+		FromAddress: fromAddr.String(),
+		ToAddress:   fromAddr.String(),
+	}
+	_, err = msgServer.ClaimThorchain(ctx, &sameAddressMsg)
+	require.ErrorIs(t, types.ErrInvalidAddress, err)
+
+	// Test case 2: Empty claim record for from address
+	emptyFromMsg := types.MsgClaimThorchain{
+		Creator:     arkeoServerAddress.String(),
+		FromAddress: fromAddr.String(),
+		ToAddress:   toAddr.String(),
+	}
+	_, err = msgServer.ClaimThorchain(ctx, &emptyFromMsg)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
+
+	// Test case 3: Zero amount claim record
+	zeroClaimRecord := types.ClaimRecord{
+		Chain:          types.ARKEO,
+		Address:        fromAddr.String(),
+		AmountClaim:    sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+		AmountVote:     sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+		AmountDelegate: sdk.NewInt64Coin(types.DefaultClaimDenom, 0),
+	}
+	err = keepers.ClaimKeeper.SetClaimRecord(sdkCtx, zeroClaimRecord)
+	require.NoError(t, err)
+
+	zeroAmountMsg := types.MsgClaimThorchain{
+		Creator:     arkeoServerAddress.String(),
+		FromAddress: fromAddr.String(),
+		ToAddress:   toAddr.String(),
+	}
+	_, err = msgServer.ClaimThorchain(ctx, &zeroAmountMsg)
+	require.ErrorIs(t, types.ErrNoClaimableAmount, err)
 }
