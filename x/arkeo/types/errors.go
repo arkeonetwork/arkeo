@@ -43,4 +43,6 @@ var (
 	ErrInvalidVersion                         = errors.Register(ModuleName, 34, "version cannot be zero or lower")
 	ErrInvalidChainId                         = errors.Register(ModuleName, 35, "chain id invalid")
 	ErrSignatureExpired                       = errors.Register(ModuleName, 36, "signature expired")
+	ErrInvalidBlocksPerYear                   = errors.Register(ModuleName, 37, "blocks per year cannot be zero or lower")
+	ErrInvalidEmissionCurve                   = errors.Register(ModuleName, 38, "emissionCurve set is invalid")
 )

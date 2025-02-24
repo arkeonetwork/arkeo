@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  arkeo-node:
+    image: ghcr.io/arkeonetwork/arkeo-testnet:latest
+    entrypoint:
+      - /usr/bin/arkeod
+    command:
+      - start
+      - --pruning
+      - nothing
+      - --minimum-gas-prices
+      - 0.0001uarkeo
+      - --home 
+      - /root/.arkeo
+    ports:
+      - 1317:1317
+      - 26657:26657
+      - 26656:26656
+    volumes:
+      - ./arkeo-data:/root/.arkeo/:z
+      - /tmp:/tmp:z

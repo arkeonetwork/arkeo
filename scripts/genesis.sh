@@ -149,4 +149,4 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	arkeod validate-genesis --trace
 fi
 
-arkeod start --pruning nothing --minimum-gas-prices 0.0001uarkeo
+arkeod start --pruning nothing --minimum-gas-prices 0uarkeo

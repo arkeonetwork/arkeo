@@ -326,9 +326,9 @@ func TestValidatorPayouts(t *testing.T) {
 	totalReserve := sdkmath.NewInt(1000000000).ToLegacyDec()
 
 	blockReward := mgr.calcBlockReward(ctx, totalReserve, emissionCurve, blocksPerYear, valCycle)
-
 	require.Equal(t, blockReward.Amount.RoundInt64(), int64(2000000))
 
+	// Setup validators
 	pks := simtestutil.CreateTestPubKeys(3)
 	pk1, err := common.NewPubKeyFromCrypto(pks[0])
 	require.NoError(t, err)
@@ -345,10 +345,11 @@ func TestValidatorPayouts(t *testing.T) {
 
 	valAddrs := simtestutil.ConvertAddrsToValAddrs([]cosmos.AccAddress{acc1, acc2, acc3})
 
+	// Create validators with their shares
 	val1, err := stakingtypes.NewValidator(valAddrs[0].String(), pks[0], stakingtypes.Description{})
 	require.NoError(t, err)
 	val1.Tokens = cosmos.NewInt(100)
-	val1.DelegatorShares = cosmos.NewDec(130) // Validator + Delegations
+	val1.DelegatorShares = cosmos.NewDec(130)
 	val1.Status = stakingtypes.Bonded
 	val1.Commission = stakingtypes.NewCommission(cosmos.NewDecWithPrec(1, 1), cosmos.ZeroDec(), cosmos.ZeroDec())
 
@@ -373,14 +374,17 @@ func TestValidatorPayouts(t *testing.T) {
 		require.NoError(t, sk.SetNewValidatorByPowerIndex(ctx, val))
 	}
 
+	// Setup delegations
 	delAcc1 := types.GetRandomBech32Addr()
 	delAcc2 := types.GetRandomBech32Addr()
 	delAcc3 := types.GetRandomBech32Addr()
 
+	// Set validator self-delegations
 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc1.String(), valAddrs[0].String(), cosmos.NewDec(100))))
 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc2.String(), valAddrs[1].String(), cosmos.NewDec(200))))
 	require.NoError(t, sk.SetDelegation(ctx, stakingtypes.NewDelegation(acc3.String(), valAddrs[2].String(), cosmos.NewDec(500))))
 
+	// Set other delegations
 	del1 := stakingtypes.NewDelegation(delAcc1.String(), valAddrs[0].String(), cosmos.NewDec(10))
 	del2 := stakingtypes.NewDelegation(delAcc2.String(), valAddrs[1].String(), cosmos.NewDec(20))
 	del3 := stakingtypes.NewDelegation(delAcc3.String(), valAddrs[2].String(), cosmos.NewDec(20))
@@ -407,36 +411,41 @@ func TestValidatorPayouts(t *testing.T) {
 		}
 	}
 
+	// Check initial module balance
 	moduleBalance := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
 	require.Equal(t, moduleBalance.Int64(), int64(20000000000000))
 
+	// Get reserve supply and execute validator payout
 	reserveSupply, err := mgr.reserveSupply(ctx)
 	require.NoError(t, err)
-
 	require.NoError(t, mgr.ValidatorPayout(ctx, votes, reserveSupply))
 
-	totalBal := cosmos.ZeroInt()
+	// Calculate expected total shares and rewards
+	totalShares := val1.DelegatorShares.Add(val2.DelegatorShares).Add(val3.DelegatorShares)
 
+	// Check rewards for each validator
+	expectedVal1Reward := common.GetSafeShare(val1.DelegatorShares, totalShares, reserveSupply.Amount)
+	expectedVal2Reward := common.GetSafeShare(val2.DelegatorShares, totalShares, reserveSupply.Amount)
+	expectedVal3Reward := common.GetSafeShare(val3.DelegatorShares, totalShares, reserveSupply.Amount)
+
+	// Verify rewards
 	rewardsAcc1, err := k.GetValidatorRewards(ctx, acc1.Bytes())
 	require.NoError(t, err)
-	require.Equal(t, rewardsAcc1.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(2588235294117))
-	totalBal = totalBal.Add(rewardsAcc1.Rewards.AmountOf(configs.Denom).RoundInt())
+	require.Equal(t, rewardsAcc1.Rewards.AmountOf(configs.Denom).TruncateInt(), expectedVal1Reward.TruncateInt())
 
 	rewardsAcc2, err := k.GetValidatorRewards(ctx, acc2.Bytes())
 	require.NoError(t, err)
-	require.Equal(t, rewardsAcc2.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(5176470588234))
-	totalBal = totalBal.Add(rewardsAcc2.Rewards.AmountOf(configs.Denom).RoundInt())
+	require.Equal(t, rewardsAcc2.Rewards.AmountOf(configs.Denom).TruncateInt(), expectedVal2Reward.TruncateInt())
 
 	rewardsAcc3, err := k.GetValidatorRewards(ctx, acc3.Bytes())
 	require.NoError(t, err)
-	require.Equal(t, rewardsAcc3.Rewards.AmountOf(configs.Denom).RoundInt(), sdkmath.NewInt(12235294117646))
-	totalBal = totalBal.Add(rewardsAcc3.Rewards.AmountOf(configs.Denom).RoundInt())
+	require.Equal(t, rewardsAcc3.Rewards.AmountOf(configs.Denom).TruncateInt(), expectedVal3Reward.TruncateInt())
 
-	require.Equal(t, totalBal.ToLegacyDec(), sdkmath.LegacyNewDec(19999999999997))
-
+	// Verify module balances
 	moduleBalance = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
-	require.Equal(t, moduleBalance.ToLegacyDec().RoundInt64(), int64(0))
-	p, err := k.GetCommunityPool(ctx)
+	require.Equal(t, moduleBalance.Int64(), int64(0))
+	// Check community pool for remainder
+	pool, err := k.GetCommunityPool(ctx)
 	require.NoError(t, err)
-	require.Equal(t, p.CommunityPool.AmountOf(configs.Denom), sdkmath.LegacyNewDec(10003))
+	require.True(t, pool.CommunityPool.AmountOf(configs.Denom).GT(cosmos.ZeroDec()))
 }

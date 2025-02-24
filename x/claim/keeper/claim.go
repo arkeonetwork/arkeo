@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+	"sort"
 	"strings"
 
 	sdkerror "cosmossdk.io/errors"
@@ -13,6 +15,32 @@ import (
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/claim/types"
 )
+
+// Key for tracking if end of airdrop transfer has occurred
+var MoveClaimTokensKey = []byte("MoveClaimTokens")
+
+// EndBlocker is called at the end of every block
+func (k Keeper) EndBlocker(ctx context.Context) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	store := sdkCtx.KVStore(k.storeKey)
+
+	// Check if we've already done the transfer
+	if store.Has(MoveClaimTokensKey) {
+		return
+	}
+
+	params := k.GetParams(sdkCtx)
+	// Check if we've passed the end of the airdrop
+	if sdkCtx.BlockTime().After(params.AirdropStartTime.Add(params.DurationUntilDecay).Add(params.DurationOfDecay)) {
+		err := k.TransferRemainingToReserve(sdkCtx)
+		if err != nil {
+			k.Logger(ctx).Error("failed to transfer remaining tokens to reserve", "error", err)
+			return
+		}
+
+		store.Set(MoveClaimTokensKey, []byte{1})
+	}
+}
 
 // SetClaimRecord sets a claim record for an address in store
 func (k Keeper) SetClaimRecord(ctx sdk.Context, claimRecord types.ClaimRecord) error {
@@ -69,13 +97,24 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 
 func (k Keeper) GetAllClaimRecords(ctx sdk.Context) ([]types.ClaimRecord, error) {
 	claimRecords := []types.ClaimRecord{}
+
+	chains := make([]types.Chain, 0, len(types.Chain_name))
 	for chain := range types.Chain_name {
-		records, err := k.GetClaimRecords(ctx, types.Chain(chain))
+		chains = append(chains, types.Chain(chain))
+	}
+
+	sort.Slice(chains, func(i, j int) bool {
+		return int32(chains[i]) < int32(chains[j])
+	})
+
+	for _, chain := range chains {
+		records, err := k.GetClaimRecords(ctx, chain)
 		if err != nil {
 			return nil, err
 		}
 		claimRecords = append(claimRecords, records...)
 	}
+
 	return claimRecords, nil
 }
 
@@ -108,9 +147,19 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 		return sdk.Coin{}, nil
 	}
 
-	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, cosmos.ZeroInt())
+	actions := make([]types.Action, 0, len(types.Action_name))
 	for action := range types.Action_name {
-		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, types.Action(action), chain)
+		actions = append(actions, types.Action(action))
+	}
+
+	sort.Slice(actions, func(i, j int) bool {
+		return int32(actions[i]) < int32(actions[j])
+	})
+
+	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, cosmos.ZeroInt())
+
+	for _, action := range actions {
+		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, action, chain)
 		if err != nil {
 			return sdk.Coin{}, err
 		}
@@ -167,6 +216,17 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	claimableCoin := sdk.NewCoin(initalClaimableAmount.Denom, claimableAmount)
 
 	return claimableCoin, nil
+}
+
+// TransferRemainingToReserve transfers remaining funds to the reserve module when airdrop period ends
+func (k Keeper) TransferRemainingToReserve(ctx sdk.Context) error {
+	remainingAmount := k.GetModuleAccountBalance(ctx)
+
+	if remainingAmount.IsZero() {
+		return nil
+	}
+
+	return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, "arkeo-reserve", sdk.NewCoins(remainingAmount))
 }
 
 // GetModuleAccountBalance gets the airdrop coin balance of module account

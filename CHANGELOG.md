@@ -28,109 +28,137 @@ Contains bug fixes.
 Contains all the PRs that improved the code without changing the behaviors.
 -->
 
-### Fixed 
- - signature replay across network
+## v1.0.6-Prerelease
 
-# v1.0.5-Prerelease 
 ### Added
-- Arkeo testnet validator addresses to airdrop
+- Added `VersionForAddress` field to `GenesisState`.
 
-## Changed
-- Updated docker images
+### Changed
+- Updated outdated dependencies.
+- Moved funds from claim to liquidity reserve when airdrop ends.
 
 ### Fixed
-- Updated event labels on TC delegate events
-- Added Response to claim functions
+- Fixed old expirations not being removed.
+- Fixed incorrect delegate usage in `msg open contract`.
+- Fixed the recipient’s `IsTransferable` field being overwritten to `false` in `MsgClaimThorchain`.
+- Fixed `GenesisState` validation.
+- Fixed validator rewards payout.
+- Fixed bug allowing double claims with Thorchain claims.
+- Fixed non deterministic map iteration to sorted iteration 
+- Fixed fee stuck in arkeo module by moving fees to arkeo-reserve
+- Fixed signature replay across network
 
-# v1.0.4-Prerelease 
+---
 
-## Changed
-- Updated docker images
+## v1.0.5-Prerelease
 
-# v1.0.3-Prerelease 
+### Added
+- Added Arkeo testnet validator addresses to airdrop.
 
-## Added 
-- Added sentinel setup docs
-- Added sentinel regression test
-- Added go releaser for sentinel and directory service
+### Changed
+- Updated Docker images.
+- Set minimum gas price to zero.
 
+### Fixed
+- Updated event labels on Thorchain delegate events.
+- Added `Response` to claim functions.
 
-## Changed
-- Updated sentinel to handle provider events
-- moved testnet and mainnet releaser separately 
+---
 
-## Fixed 
-- Fixed code lint
-- Fixed ws client issue with event stream
-- Fixed swagger issue
-- Docker files and scripts
-- Go releaser for binary and docker
+## v1.0.4-Prerelease
 
-# v1.0.2-Prerelease 
+### Changed
+- Updated Docker images.
 
-## Added 
+---
 
-## Changed
-- Updated thorchain claim server address handling
+## v1.0.3-Prerelease
 
-## Fixed 
-- Fixed Regression Test Version Issues 
+### Added
+- Added Sentinel setup documentation.
+- Added Sentinel regression test.
+- Added GoReleaser for Sentinel and Directory Service.
 
-# v1.0.1-Prerelease 
+### Changed
+- Updated Sentinel to handle provider events.
+- Separated testnet and mainnet releaser.
+- Updated Thorchain claim address.
 
-## Added 
-- Add claim record scripts
-- Thorchain Claims Proto Updates
-- Documentation of Testnet Setup using local build and Cosmovisor
-- Documentation update and addition of validator setup documentation 
-- New accounts to handle rewards 
-- New Params to Arkeo Module 
-- Update validator distribution of rewards 
-- Testnet Genesis File
+### Fixed
+- Fixed code lint issues.
+- Fixed WebSocket client issue with event stream.
+- Fixed Swagger issue.
+- Fixed Docker files and scripts.
+- Fixed GoReleaser for binary and Docker.
 
-## Changed
-- Removed unused module account
-- Disabled System Validator Rewards 
-- Default Mint params set to zero
-- Validator and Delegator rewards from Reserve Module
-- Updated testnet seed and peer address
-- Updated testnet docs 
+---
 
-## Fixed 
-- Testnet binary generation using go build 
-- Fixed Regression Testing 
-- Updated Docs
-- Fixed Consumer in Directory Service
-- Fixed Regression Export 
-- Fixed localnet docker 
-- updated the genesis file
-- claim timeout
-- Fixed module imports
-- update module to implement APPModuleBasic and AppModule
-- Updated Tests on arkeo module keeper
-- version issue on begin blocker 
-- Fixed Genesis Url
-- Fixed thorchain claim server address mainnet
+## v1.0.2-Prerelease
 
-# v1.0.0-Prerelease
+### Changed
+- Updated Thorchain claim server address handling.
 
-## Added 
+### Fixed
+- Fixed regression test version issues.
 
-- Binary and Docker Image releaser 
-- Release , Lint , Release Check into CI Actions
-- Added ThorChain Claims and unit tests
+---
 
+## v1.0.1-Prerelease
 
-## Changed 
+### Added
+- Added claim record scripts.
+- Updated Thorchain Claims Proto.
+- Added testnet setup documentation using local build and Cosmovisor.
+- Added validator setup documentation.
+- Added new accounts to handle rewards.
+- Introduced new parameters to Arkeo module.
+- Updated validator reward distribution.
+- Released testnet Genesis file.
 
-- Updated Cosmos SDK from 0.46.13 to 0.50.8 
-- Updated IBC 5 to 8.3.1
-- Updated Proto generation using proto-builder image 
+### Changed
+- Removed unused module account.
+- Disabled system validator rewards.
+- Set default mint parameters to zero.
+- Redirected validator and delegator rewards from the Reserve Module.
+- Updated testnet seed and peer addresses.
+- Updated testnet documentation.
 
-## Fixed
+### Fixed
+- Fixed testnet binary generation using `go build`.
+- Fixed regression testing issues.
+- Updated documentation.
+- Fixed consumer in Directory Service.
+- Fixed regression export.
+- Fixed localnet Docker setup.
+- Updated genesis file.
+- Fixed claim timeout.
+- Fixed module imports.
+- Updated module to implement `APPModuleBasic` and `AppModule`.
+- Updated tests for Arkeo module keeper.
+- Fixed version issue in `begin_blocker`.
+- Fixed Genesis URL.
+- Fixed Thorchain claim server address on mainnet.
 
-- Event Ordering 
-- Updated Docker Dependencies 
-- Fixed CI checks and Release Checks 
-- Fixed UnitTest and Module Imports 
-- Fixed Default Commands on the Arkeo Cmd
+---
+
+## v1.0.0-Prerelease
+
+### Added
+- Introduced binary and Docker image releaser.
+- Implemented CI actions for release, lint, and release check.
+- Added Thorchain claims and unit tests.
+
+### Changed
+- Upgraded Cosmos SDK from `0.46.13` to `0.50.8`.
+- Upgraded IBC from `5` to `8.3.1`.
+- Updated Proto generation using `proto-builder` image.
+
+### Fixed
+- Fixed event ordering issues.
+- Updated Docker dependencies.
+- Fixed CI checks and release checks.
+- Fixed unit tests and module imports.
+- Fixed default commands in the Arkeo CLI.
+
+---
+
