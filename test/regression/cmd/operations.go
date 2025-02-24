@@ -290,7 +290,7 @@ func createContractAuth(input map[string]string) (string, bool, error) {
 	}
 
 	// sign our msg
-	msg := sentinel.GenerateMessageToSign(id, timestamp)
+	msg := sentinel.GenerateMessageToSign(id, timestamp, "arkeo")
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }
@@ -323,7 +323,7 @@ func createAuth(input map[string]string) (string, bool, error) {
 	if err != nil {
 		return "", true, fmt.Errorf("failed to parse nonce: %s", err)
 	}
-	msg := sentinel.GenerateMessageToSign(id, nonce)
+	msg := sentinel.GenerateMessageToSign(id, nonce, "arkeo")
 	auth, err := signThis(msg, input["signer"])
 	return auth, true, err
 }

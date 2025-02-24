@@ -42,7 +42,7 @@ func TestClaimContractIncomeValidateBasic(t *testing.T) {
 		Nonce:      24,
 	}
 
-	message := msg.GetBytesToSign()
+	message := msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	err = msg.ValidateBasic()

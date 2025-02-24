@@ -65,7 +65,7 @@ func TestValidate(t *testing.T) {
 		Nonce:      20,
 	}
 
-	message := msg.GetBytesToSign()
+	message := msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
@@ -127,7 +127,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 		Nonce:      20,
 	}
 
-	message := msg.GetBytesToSign()
+	message := msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -143,7 +143,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 		Nonce:      21,
 	}
 
-	message = msg.GetBytesToSign()
+	message = msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -157,7 +157,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	msg.Nonce = 25
 
 	// update signature for message
-	message = msg.GetBytesToSign()
+	message = msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -174,7 +174,7 @@ func TestHandlePayAsYouGo(t *testing.T) {
 	msg.Nonce = contract.Deposit.Int64() / contract.Rate.Amount.Int64() * 1000000000000
 
 	// update signature for message
-	message = msg.GetBytesToSign()
+	message = msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -311,7 +311,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 		Nonce:      20,
 	}
 
-	message := msg.GetBytesToSign()
+	message := msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -324,7 +324,7 @@ func TestClaimContractIncomeHandler(t *testing.T) {
 	// bad nonce
 	msg.Nonce = 0
 
-	message = msg.GetBytesToSign()
+	message = msg.GetBytesToSign("arkeo")
 	msg.Signature, _, err = kb.Sign("whatever", message, signing.SignMode_SIGN_MODE_DIRECT)
 	require.NoError(t, err)
 
@@ -380,4 +380,66 @@ func TestClaimContractIncomeHandlerSignatureVerification(t *testing.T) {
 
 	err = s.HandlerClaimContractIncome(ctx, &msg)
 	require.Error(t, err, types.ErrClaimContractIncomeInvalidSignature)
+}
+
+func TestSignatureReplay(t *testing.T) {
+	var err error
+	// Setup keeper, context, and staking
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(20)
+
+	s := newMsgServer(k, sk)
+
+	// Set up necessary codec and keyring for signing.
+	interfaceRegistry := codectypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	module.NewBasicManager().RegisterInterfaces(interfaceRegistry)
+	types.RegisterInterfaces(interfaceRegistry)
+	cdc := codec.NewProtoCodec(interfaceRegistry)
+
+	pubkey := types.GetRandomPubKey()
+	acc := types.GetRandomBech32Addr()
+	service := common.BTCService
+	kb := cKeys.NewInMemory(cdc)
+	info, _, err := kb.NewMnemonic("whatever", cKeys.English, `m/44'/931'/0'/0/0`, "", hd.Secp256k1)
+	require.NoError(t, err)
+	pk, err := info.GetPubKey()
+	require.NoError(t, err)
+	client, err := common.NewPubKeyFromCrypto(pk)
+	require.NoError(t, err)
+	rate, err := cosmos.ParseCoin("10uarkeo")
+	require.NoError(t, err)
+
+	contract := types.NewContract(pubkey, service, client)
+	contract.Duration = 100
+	contract.Rate = rate
+	contract.Height = 10
+	contract.Nonce = 0
+	contract.Type = types.ContractType_PAY_AS_YOU_GO
+	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
+	contract.Id = 1
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	require.NoError(t, k.MintToModule(ctx, types.ReserveName, getCoin(common.Tokens(10000*100*2))))
+	require.NoError(t, k.SendFromModuleToModule(ctx, types.ReserveName, types.ContractName, getCoins(1000*100)))
+
+	// Create a claim message
+	msg := types.MsgClaimContractIncome{
+		ContractId: contract.Id,
+		Creator:    acc.String(),
+		Nonce:      20,
+	}
+
+	// Sign the message using chain ID "arkeo"
+	messageBytes := msg.GetBytesToSign("arkeo")
+	msg.Signature, _, err = kb.Sign("whatever", messageBytes, signing.SignMode_SIGN_MODE_DIRECT)
+	require.NoError(t, err)
+
+	require.NoError(t, s.HandlerClaimContractIncome(ctx, &msg))
+
+	ctxReplay := ctx.WithChainID("otherchain")
+	msg.Nonce = 21
+	err = s.HandlerClaimContractIncome(ctxReplay, &msg)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "signature mismatch", "expected signature mismatch error when using a replayed signature on a different chain")
 }

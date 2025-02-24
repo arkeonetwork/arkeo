@@ -101,7 +101,7 @@ description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/open-claims
 asserts:
   - length == 1
-  - .[0].signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
+  - .[0].signature == "0e2ad0a02bf31ca722d67ef1af03e3f955f878e48fbc476e658b320ebbe1e9364b397a57328cf4ee6ed4cbb0cbb2bb4d538c165a3950a02ae2912c0ef370d766"
   - .[0].claimed == false
 ---
 ########################################################################################
@@ -143,7 +143,7 @@ type: check
 description: ensure contract shows up in active contracts
 endpoint: http://localhost:3636/claim/1
 asserts:
-  - .signature == "1332d913e9bd87df5b11964a2c6abc770e3fe5bf5228d38e59f23aed97708c4a669c8e050baadca897ad7bec74b7951009b38d477bccdc2427eae8cec90dce39"
+  - .signature == "0e2ad0a02bf31ca722d67ef1af03e3f955f878e48fbc476e658b320ebbe1e9364b397a57328cf4ee6ed4cbb0cbb2bb4d538c165a3950a02ae2912c0ef370d766"
   - .claimed == false
   - .contract_id == 1
 ---

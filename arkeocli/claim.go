@@ -80,7 +80,19 @@ func runClaimCmd(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	signBytes := types.GetBytesToSign(contract.Id, nonce)
+	chainId, err := cmd.Flags().GetString("chain-id")
+	if err != nil {
+		return err
+	}
+
+	if len(chainId) == 0 {
+		chainId, err = promptForArg(cmd, "specify the chain id:")
+		if err != nil {
+			return err
+		}
+	}
+
+	signBytes := types.GetBytesToSign(contract.Id, nonce, chainId)
 	signature, _, err := clientCtx.Keyring.Sign(key.Name, signBytes, signing.SignMode_SIGN_MODE_DIRECT)
 	if err != nil {
 		return errors.Wrapf(err, "error signing")

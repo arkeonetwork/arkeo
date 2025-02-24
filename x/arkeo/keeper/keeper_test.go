@@ -92,7 +92,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 		"ArkeoParams",
 	)
 
-	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger()).WithChainID("arkeo")
 
 	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
 	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
@@ -217,7 +217,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 		"ArkeoParams",
 	)
 
-	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
+	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger()).WithChainID("arkeo")
 
 	govModuleAddr := "tarkeo1krj9ywwmqcellgunxg66kjw5dtt402kq0uf6pu"
 	_ = paramskeeper.NewKeeper(cdc, amino, keyParams, tkeyParams)
