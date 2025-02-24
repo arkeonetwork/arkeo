@@ -44,6 +44,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed `GenesisState` validation.
 - Fixed validator rewards payout.
 - Fixed bug allowing double claims with Thorchain claims.
+- Fixed non deterministic map iteration to sorted iteration 
 
 ---
 

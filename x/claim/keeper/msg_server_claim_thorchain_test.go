@@ -17,7 +17,7 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1z02ke8639m47g9dfrheegr2u9zecegt5qvtj00")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1zsafqx0qk6rp2vvs97n9udylquj7mfkt8mfypq")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()
@@ -92,7 +92,7 @@ func TestClaimThorchainMainnetAddress(t *testing.T) {
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("arkeo", "arkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1z02ke8639m47g9dfrheegr2u9zecegt50fjg7v")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()
@@ -167,7 +167,7 @@ func TestClaimThorchainFailureCases(t *testing.T) {
 	config := sdk.GetConfig()
 	config.SetBech32PrefixForAccount("arkeo", "arkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1z02ke8639m47g9dfrheegr2u9zecegt50fjg7v")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()

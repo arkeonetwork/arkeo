@@ -15,7 +15,6 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
-
 	ctx, k := keepertest.ArkeoKeeper(t)
 
 	genesisState := types.GenesisState{

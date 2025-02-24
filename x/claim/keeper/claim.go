@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"sort"
 	"strings"
 
 	sdkerror "cosmossdk.io/errors"
@@ -96,13 +97,24 @@ func (k Keeper) GetClaimRecords(ctx sdk.Context, chain types.Chain) ([]types.Cla
 
 func (k Keeper) GetAllClaimRecords(ctx sdk.Context) ([]types.ClaimRecord, error) {
 	claimRecords := []types.ClaimRecord{}
+
+	chains := make([]types.Chain, 0, len(types.Chain_name))
 	for chain := range types.Chain_name {
-		records, err := k.GetClaimRecords(ctx, types.Chain(chain))
+		chains = append(chains, types.Chain(chain))
+	}
+
+	sort.Slice(chains, func(i, j int) bool {
+		return int32(chains[i]) < int32(chains[j])
+	})
+
+	for _, chain := range chains {
+		records, err := k.GetClaimRecords(ctx, chain)
 		if err != nil {
 			return nil, err
 		}
 		claimRecords = append(claimRecords, records...)
 	}
+
 	return claimRecords, nil
 }
 
@@ -135,9 +147,19 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 		return sdk.Coin{}, nil
 	}
 
-	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, cosmos.ZeroInt())
+	actions := make([]types.Action, 0, len(types.Action_name))
 	for action := range types.Action_name {
-		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, types.Action(action), chain)
+		actions = append(actions, types.Action(action))
+	}
+
+	sort.Slice(actions, func(i, j int) bool {
+		return int32(actions[i]) < int32(actions[j])
+	})
+
+	totalClaimable := sdk.NewCoin(claimRecord.AmountClaim.Denom, cosmos.ZeroInt())
+
+	for _, action := range actions {
+		claimableForAction, err := k.GetClaimableAmountForAction(ctx, addr, action, chain)
 		if err != nil {
 			return sdk.Coin{}, err
 		}
