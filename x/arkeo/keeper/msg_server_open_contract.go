@@ -126,7 +126,6 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 }
 
 func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenContract) error {
-
 	// set back client as delegate if delegate is empty
 	if msg.Delegate == "" {
 		msg.Delegate = msg.Client

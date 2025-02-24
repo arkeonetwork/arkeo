@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	"sort"
 	"context"
+	"sort"
 	"strings"
 
 	sdkerror "cosmossdk.io/errors"
