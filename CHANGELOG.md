@@ -47,6 +47,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed non deterministic map iteration to sorted iteration 
 - Fixed fee stuck in arkeo module by moving fees to arkeo-reserve
 - Fixed signature replay on different network
+- Fixed informational issues
 
 ---
 
