@@ -112,7 +112,7 @@ func (msg *MsgModProvider) ValidateBasic() error {
 
 	payRate := cosmos.NewCoins(msg.PayAsYouGoRate...)
 	if err := payRate.Validate(); err != nil {
-		return errors.Wrapf(err, "invalid subscription rate")
+		return errors.Wrapf(err, "invalid pay-as-you-go rates")
 	}
 
 	if !payRate.IsAllPositive() {

@@ -256,10 +256,6 @@ func (mgr Manager) ValidatorPayout(ctx cosmos.Context, votes []abci.VoteInfo, bl
 			mgr.keeper.Logger().Info("unable to find validator", "validator", string(vote.Validator.Address))
 			continue
 		}
-		if !val.IsBonded() || val.IsJailed() {
-			mgr.keeper.Logger().Info("validator rewards skipped due to status or jailed", "validator", val.GetOperator())
-			continue
-		}
 
 		valBz, err := mgr.sk.ValidatorAddressCodec().StringToBytes(val.GetOperator())
 		if err != nil {
