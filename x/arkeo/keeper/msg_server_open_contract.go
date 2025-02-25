@@ -92,7 +92,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 			return errors.Wrapf(types.ErrOpenContractMismatchRate, "provider rates is %d, client sent %d", cosmos.NewCoins(provider.SubscriptionRate...).AmountOf(msg.Rate.Denom).Int64(), msg.Rate.Amount.Int64())
 		}
 		if !cosmos.NewInt(msg.Rate.Amount.Int64() * msg.Duration * msg.QueriesPerMinute).Equal(msg.Deposit) {
-			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration and deposit: %d * %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.QueriesPerMinute, msg.Deposit.Int64())
+			return errors.Wrapf(types.ErrOpenContractMismatchRate, "mismatch of rate*duration*queriesPerMinute and deposit: %d * %d * %d != %d", msg.Rate.Amount.Int64(), msg.Duration, msg.QueriesPerMinute, msg.Deposit.Int64())
 		}
 	case types.ContractType_PAY_AS_YOU_GO:
 		if cosmos.NewCoins(provider.PayAsYouGoRate...).AmountOf(msg.Rate.Denom).IsZero() {
