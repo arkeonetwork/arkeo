@@ -24,7 +24,7 @@ func (k msgServer) ClaimEth(goCtx context.Context, msg *types.MsgClaimEth) (*typ
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.EthAddress)
 	}
 
-	if ethClaim.IsEmpty() || ethClaim.AmountClaim.IsZero() {
+	if ethClaim.IsEmpty() || (ethClaim.AmountClaim.IsZero() && ethClaim.AmountVote.IsZero() && ethClaim.AmountDelegate.IsZero()) {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.EthAddress)
 	}
 	totalAmountClaimable := getInitialClaimableAmountTotal(ethClaim)
