@@ -248,7 +248,8 @@ proto-gen:
 
 proto-swagger-gen:
 	@echo "Generating Swagger of Protobuf"
-	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh  ./scripts/protoc-swagger-gen.sh
+	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh ./scripts/protoc-swagger-gen.sh
+	./scripts/customize-swagger.sh
 
 proto-format:
 	@echo "Formatting Protobuf files"
