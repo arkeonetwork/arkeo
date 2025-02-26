@@ -7,7 +7,7 @@ ARG GO_VERSION="1.21"
 #
 # Build
 #
-FROM golang:${GO_VERSION} as builder
+FROM golang:${GO_VERSION} AS builder
 
 ARG GIT_VERSION
 ARG GIT_COMMIT

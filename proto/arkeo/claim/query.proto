@@ -7,6 +7,7 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "arkeo/claim/params.proto";
 import "arkeo/claim/claim_record.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
@@ -21,6 +22,11 @@ service Query {
   // Queries a list of ClaimRecord items.
   rpc ClaimRecord(QueryClaimRecordRequest) returns (QueryClaimRecordResponse) {
     option (google.api.http).get = "/arkeo/claim/claimrecord/{address}";
+  }
+  
+  // Queries the claimable amount for a specific action.
+  rpc ClaimableForAction(QueryClaimableForActionRequest) returns (QueryClaimableForActionResponse) {
+    option (google.api.http).get = "/arkeo/claim/claimable/{address}/{action}";
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -39,3 +45,13 @@ message QueryClaimRecordRequest {
 }
 
 message QueryClaimRecordResponse { ClaimRecord claim_record = 1; }
+
+message QueryClaimableForActionRequest {
+  string address = 1;
+  Action action = 2;
+  Chain chain = 3;
+}
+
+message QueryClaimableForActionResponse {
+  cosmos.base.v1beta1.Coin amount = 1 [(gogoproto.nullable) = false];
+}
