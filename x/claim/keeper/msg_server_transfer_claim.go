@@ -18,7 +18,7 @@ func (k msgServer) TransferClaim(goCtx context.Context, msg *types.MsgTransferCl
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.Creator)
 	}
 
-	if originalClaim.IsEmpty() || originalClaim.AmountClaim.IsZero() {
+	if originalClaim.IsEmpty() || (originalClaim.AmountClaim.IsZero() && originalClaim.AmountVote.IsZero() && originalClaim.AmountDelegate.IsZero()) {
 		return nil, errors.Wrapf(types.ErrNoClaimableAmount, "no claimable amount for %s", msg.Creator)
 	}
 
