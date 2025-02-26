@@ -36,6 +36,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 ### Changed
 - Updated outdated dependencies.
 - Moved funds from claim to liquidity reserve when airdrop ends.
+- Updated swagger docs
 
 ### Fixed
 - Fixed old expirations not being removed.
