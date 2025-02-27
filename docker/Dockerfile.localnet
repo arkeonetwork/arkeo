@@ -2,12 +2,12 @@
 # Arkeo
 #
 
-ARG GO_VERSION="1.21"
+ARG GO_VERSION="1.22.11"
 
 #
 # Build
 #
-FROM golang:${GO_VERSION} as builder
+FROM golang:${GO_VERSION} AS builder
 
 ARG GIT_VERSION
 ARG GIT_COMMIT
