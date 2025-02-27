@@ -32,6 +32,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 
 ### Added
 - Added `VersionForAddress` field to `GenesisState`.
+- Added `ClaimableForAction` to claim `Query`
 
 ### Changed
 - Updated outdated dependencies.

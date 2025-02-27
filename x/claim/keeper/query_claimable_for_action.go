@@ -16,7 +16,6 @@ func (k Keeper) ClaimableForAction(goCtx context.Context, req *types.QueryClaima
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
-	k.logger.Info("CLAIMABLE FOR ACTION", "address", req.Address, "action", req.Action, "chain", req.Chain)
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -30,10 +29,8 @@ func (k Keeper) ClaimableForAction(goCtx context.Context, req *types.QueryClaima
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	k.logger.Info("CLAIMABLE AMOUNT", "amount", claimableAmount)
 	// If the amount is nil or not initialized, return zero amount
 	if claimableAmount.IsNil() {
-		k.logger.Info("CLAIMABLE AMOUNT IS NIL")
 		claimableAmount = sdk.NewCoin(k.GetParams(ctx).ClaimDenom, cosmos.ZeroInt())
 	}
 
