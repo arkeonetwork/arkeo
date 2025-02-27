@@ -136,7 +136,7 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	fi
 
 	sed -i 's/"stake"/"uarkeo"/g' ~/.arkeo/config/genesis.json
-	sed -i '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"7884000s"/' ~/.arkeo/config/genesis.json
+	sed -i '/"duration_until_decay"\|"duration_of_decay"/s/"3600s"/"86400s"/' ~/.arkeo/config/genesis.json
 	sed -i 's/enable = false/enable = true/g' ~/.arkeo/config/app.toml
 	sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' ~/.arkeo/config/config.toml
 	sed -i 's/address = "tcp:\/\/localhost:1317"/address = "tcp:\/\/0.0.0.0:1317"/g' ~/.arkeo/config/app.toml

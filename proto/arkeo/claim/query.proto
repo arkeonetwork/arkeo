@@ -26,7 +26,9 @@ service Query {
   
   // Queries the claimable amount for a specific action.
   rpc ClaimableForAction(QueryClaimableForActionRequest) returns (QueryClaimableForActionResponse) {
-    option (google.api.http).get = "/arkeo/claim/claimable/{address}/{action}";
+    option (google.api.http) = {
+      get: "/arkeo/claim/claimable/{address}"
+    };
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.

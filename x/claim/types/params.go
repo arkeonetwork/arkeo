@@ -24,7 +24,7 @@ var (
 
 var (
 	KeyAirdropStartTime               = []byte("AirdropStartTime")
-	DefaultAirdropStartTime time.Time = time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
+	DefaultAirdropStartTime time.Time = time.Date(2025, 2, 25, 20, 0, 0, 0, time.UTC)
 )
 
 var _ paramtypes.ParamSet = (*Params)(nil)

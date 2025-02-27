@@ -174,6 +174,7 @@ func (k Keeper) GetUserTotalClaimable(ctx sdk.Context, addr string, chain types.
 // GetClaimable returns claimable amount for a specific action done by an address
 func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action types.Action, chain types.Chain) (sdk.Coin, error) {
 	claimRecord, err := k.GetClaimRecord(ctx, addr, chain)
+	k.Logger(ctx).Info("CLAIMABLE AMOUNT FOR ACTION", "address", addr, "action", action, "chain", chain, "claimRecord", claimRecord)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -188,22 +189,26 @@ func (k Keeper) GetClaimableAmountForAction(ctx sdk.Context, addr string, action
 	// This case _shouldn't_ occur on chain, since the
 	// start time ought to be chain start time.
 	if ctx.BlockTime().Before(params.AirdropStartTime) {
+		k.Logger(ctx).Info("CLAIMABLE AMOUNT FOR ACTION IS BEFORE START TIME")
 		return sdk.Coin{}, nil
 	}
 
 	initalClaimableAmount := getInitialClaimableAmount(claimRecord, action)
 	if initalClaimableAmount.IsNil() || initalClaimableAmount.Amount.IsZero() {
+		k.Logger(ctx).Info("CLAIMABLE AMOUNT FOR ACTION IS NIL")
 		return sdk.Coin{}, nil
 	}
 
 	elapsedAirdropTime := ctx.BlockTime().Sub(params.AirdropStartTime)
 	// Are we early enough in the airdrop s.t. theres no decay?
 	if elapsedAirdropTime <= params.DurationUntilDecay {
+		k.Logger(ctx).Info("CLAIMABLE AMOUNT FOR ACTION IS BEFORE DECAY")
 		return initalClaimableAmount, nil
 	}
 
 	// The entire airdrop has completed
 	if elapsedAirdropTime > params.DurationUntilDecay+params.DurationOfDecay {
+		k.Logger(ctx).Info("CLAIMABLE AMOUNT FOR ACTION IS AFTER DECAY")
 		return sdk.Coin{}, types.ErrAirdropEnded
 	}
 
