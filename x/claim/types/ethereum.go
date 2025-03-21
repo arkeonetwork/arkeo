@@ -15,8 +15,8 @@ var (
 		},
 		"EIP712Domain": []apitypes.Type{
 			{Name: "name", Type: "string"},
-			{Name: "chainId", Type: "uint256"},
 			{Name: "version", Type: "string"},
+			{Name: "chainId", Type: "uint256"},
 		},
 	}
 
