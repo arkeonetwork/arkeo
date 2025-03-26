@@ -15,9 +15,9 @@ func TestClaimThorchainTestnetAddress(t *testing.T) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount("tarkeo", "tarkeopub")
+	config.SetBech32PrefixForAccount("arkeo", "arkeopub")
 
-	arkeoServerAddress, err := sdk.AccAddressFromBech32("tarkeo1zsafqx0qk6rp2vvs97n9udylquj7mfkt8mfypq")
+	arkeoServerAddress, err := sdk.AccAddressFromBech32("arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr")
 	require.NoError(t, err)
 
 	fromAddr := utils.GetRandomArkeoAddress()

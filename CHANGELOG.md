@@ -52,6 +52,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Fixed informational issues
 - Fixed claim validation
 - Fixed EIP712 type ordering
+- Fixed Thorchain migration amounts
 
 ---
 
