@@ -20,7 +20,7 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 	}
 
 	// only allow thorchain claim server address to call this function
-	if msg.Creator != "tarkeo1zsafqx0qk6rp2vvs97n9udylquj7mfkt8mfypq" && msg.Creator != "arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr" {
+	if msg.Creator != "arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr" {
 		return nil, errors.Wrapf(types.ErrInvalidCreator, "Invalid Creator %s", msg.Creator)
 	}
 
@@ -37,9 +37,37 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 		return nil, errors.Wrapf(err, "failed to get claim record for %s", msg.ToAddress)
 	}
 
-	amountClaim := sdk.NewInt64Coin(types.DefaultClaimDenom, toAddressClaimRecord.AmountClaim.Amount.Int64()+fromAddressClaimRecord.AmountClaim.Amount.Int64())
-	amountVote := sdk.NewInt64Coin(types.DefaultClaimDenom, toAddressClaimRecord.AmountVote.Amount.Int64()+fromAddressClaimRecord.AmountVote.Amount.Int64())
-	amountDelegate := sdk.NewInt64Coin(types.DefaultClaimDenom, toAddressClaimRecord.AmountDelegate.Amount.Int64()+fromAddressClaimRecord.AmountDelegate.Amount.Int64())
+	// Get amounts from toAddress, defaulting to 0 if nil
+	toClaimAmount := int64(0)
+	if !toAddressClaimRecord.AmountClaim.IsNil() {
+		toClaimAmount = toAddressClaimRecord.AmountClaim.Amount.Int64()
+	}
+	toVoteAmount := int64(0)
+	if !toAddressClaimRecord.AmountVote.IsNil() {
+		toVoteAmount = toAddressClaimRecord.AmountVote.Amount.Int64()
+	}
+	toDelegateAmount := int64(0)
+	if !toAddressClaimRecord.AmountDelegate.IsNil() {
+		toDelegateAmount = toAddressClaimRecord.AmountDelegate.Amount.Int64()
+	}
+
+	// Get amounts from fromAddress, defaulting to 0 if nil
+	fromClaimAmount := int64(0)
+	if !fromAddressClaimRecord.AmountClaim.IsNil() {
+		fromClaimAmount = fromAddressClaimRecord.AmountClaim.Amount.Int64()
+	}
+	fromVoteAmount := int64(0)
+	if !fromAddressClaimRecord.AmountVote.IsNil() {
+		fromVoteAmount = fromAddressClaimRecord.AmountVote.Amount.Int64()
+	}
+	fromDelegateAmount := int64(0)
+	if !fromAddressClaimRecord.AmountDelegate.IsNil() {
+		fromDelegateAmount = fromAddressClaimRecord.AmountDelegate.Amount.Int64()
+	}
+
+	amountClaim := sdk.NewInt64Coin(types.DefaultClaimDenom, toClaimAmount+fromClaimAmount)
+	amountVote := sdk.NewInt64Coin(types.DefaultClaimDenom, toVoteAmount+fromVoteAmount)
+	amountDelegate := sdk.NewInt64Coin(types.DefaultClaimDenom, toDelegateAmount+fromDelegateAmount)
 
 	combinedClaimRecord := types.ClaimRecord{
 		Chain:          types.ARKEO,
