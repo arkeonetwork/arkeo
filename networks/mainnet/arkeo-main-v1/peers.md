@@ -1,7 +1,8 @@
 (( remove the return carriages before pasting into the config.toml ))
 
 seeds = "
-4d2c67a1d732679826b2f71c833e94b3718c2b50@seed2.arkeo.network:26656
+4d2c67a1d732679826b2f71c833e94b3718c2b50@seed2.arkeo.network:26656,
+416bd4379fa4fa3e76e59e4415396f727463142e@seed.arkeo.network:26656
 "
 
 persistent_peers = "
