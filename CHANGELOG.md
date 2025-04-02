@@ -38,6 +38,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Updated outdated dependencies.
 - Moved funds from claim to liquidity reserve when airdrop ends.
 - Updated swagger docs
+- TC Claim Address
 
 ### Fixed
 - Fixed old expirations not being removed.
