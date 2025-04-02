@@ -20,7 +20,7 @@ func (k msgServer) ClaimThorchain(goCtx context.Context, msg *types.MsgClaimThor
 	}
 
 	// only allow thorchain claim server address to call this function
-	if msg.Creator != "tarkeo1zsafqx0qk6rp2vvs97n9udylquj7mfkt8mfypq" && msg.Creator != "arkeo1zsafqx0qk6rp2vvs97n9udylquj7mfktg7s7sr" {
+	if msg.Creator != "arkeo1darsrv7x7kr26geefyn4cljn3m9y5yg5c84xgv" {
 		return nil, errors.Wrapf(types.ErrInvalidCreator, "Invalid Creator %s", msg.Creator)
 	}
 
