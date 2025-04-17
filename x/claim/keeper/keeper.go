@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
@@ -24,6 +25,9 @@ type (
 		logger        log.Logger
 	}
 )
+
+var UpdateParamsKey = []byte("UpdateParamsKey")
+var TransferTokensKey = []byte("TransferTokensKey")
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
@@ -70,4 +74,61 @@ func (k Keeper) AfterDelegationModified(ctx context.Context, delAddr sdk.AccAddr
 		k.Logger(ctx).Error("failed to claim coins for delegate", "error", err.Error())
 	}
 	return nil
+}
+
+func (k Keeper) UpdateParams(ctx context.Context) bool {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	store := sdkCtx.KVStore(k.storeKey)
+	if store.Has(UpdateParamsKey) {
+		return false
+	}
+
+	var params types.Params
+	k.paramstore.GetParamSet(sdkCtx, &params)
+
+	params.DurationOfDecay = 37 * 24 * time.Hour    // 30 days as time.Duration
+	params.DurationUntilDecay = 30 * 24 * time.Hour // 30 days as time.Duration
+
+	k.paramstore.SetParamSet(sdkCtx, &params)
+	store.Set(UpdateParamsKey, []byte{1})
+
+	return true
+}
+
+func (k Keeper) MoveTokensFromReserveToClaimModule(ctx context.Context) bool {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	store := sdkCtx.KVStore(k.storeKey)
+	if store.Has(TransferTokensKey) {
+		return false
+	}
+	// Check if we've passed the end of the airdrop
+	params := k.GetParams(sdkCtx)
+	if sdkCtx.BlockTime().After(params.AirdropStartTime.Add(params.DurationUntilDecay).Add(params.DurationOfDecay)) {
+		return false
+	}
+
+	reserveAddr := k.accountKeeper.GetModuleAddress(types.ReserveModuleName)
+	reserve := k.bankKeeper.GetBalance(ctx, reserveAddr, types.DefaultClaimDenom)
+
+	amountToSend := sdk.NewInt64Coin(types.DefaultClaimDenom, 23_000_000*int64(1e8))
+	if reserve.Amount.GTE(amountToSend.Amount) {
+		err := k.bankKeeper.SendCoinsFromModuleToModule(
+			sdkCtx,
+			types.ReserveModuleName,
+			types.ClaimModuleName,
+			sdk.NewCoins(amountToSend),
+		)
+		if err != nil {
+			k.Logger(ctx).Error("failed to transfer tokens from reserve to claim module", "error", err.Error())
+			return false
+		}
+		k.Logger(ctx).Info("transferred 23m ARKEO from reserve back to claim module")
+		store.Set(TransferTokensKey, []byte{1})
+		store.Delete(MoveClaimTokensKey)
+	} else {
+		k.Logger(ctx).Error("not enough reserve balance to transfer 23m tokens")
+		return false
+	}
+
+	return true
 }
