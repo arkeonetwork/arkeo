@@ -39,6 +39,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Moved funds from claim to liquidity reserve when airdrop ends.
 - Updated swagger docs
 - TC Claim Address
+- Decay params reset
 
 ### Fixed
 - Fixed old expirations not being removed.
