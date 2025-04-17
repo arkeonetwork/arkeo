@@ -86,8 +86,8 @@ func (k Keeper) UpdateParams(ctx context.Context) bool {
 	var params types.Params
 	k.paramstore.GetParamSet(sdkCtx, &params)
 
-	params.DurationOfDecay = 37 * 24 * time.Hour    // 30 days as time.Duration
-	params.DurationUntilDecay = 30 * 24 * time.Hour // 30 days as time.Duration
+	params.DurationOfDecay = 30 * 24 * time.Hour
+	params.DurationUntilDecay = 37 * 24 * time.Hour
 
 	k.paramstore.SetParamSet(sdkCtx, &params)
 	store.Set(UpdateParamsKey, []byte{1})
