@@ -6,9 +6,7 @@
       "contract_expiration_sets": [
         {
           "contract_set": {
-            "contract_ids": [
-              "2"
-            ]
+            "contract_ids": ["2"]
           },
           "height": "21"
         }
@@ -108,10 +106,7 @@
             "sequence": "0"
           },
           "name": "bonded_tokens_pool",
-          "permissions": [
-            "burner",
-            "staking"
-          ]
+          "permissions": ["burner", "staking"]
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -122,10 +117,7 @@
             "sequence": "0"
           },
           "name": "not_bonded_tokens_pool",
-          "permissions": [
-            "burner",
-            "staking"
-          ]
+          "permissions": ["burner", "staking"]
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
@@ -161,9 +153,7 @@
             "sequence": "0"
           },
           "name": "gov",
-          "permissions": [
-            "burner"
-          ]
+          "permissions": ["burner"]
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -174,9 +164,7 @@
             "sequence": "0"
           },
           "name": "distribution",
-          "permissions": [
-            "minter"
-          ]
+          "permissions": ["minter"]
         },
         {
           "@type": "/cosmos.auth.v1beta1.ModuleAccount",
@@ -208,9 +196,7 @@
             "sequence": "0"
           },
           "name": "mint",
-          "permissions": [
-            "minter"
-          ]
+          "permissions": ["minter"]
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
@@ -367,8 +353,8 @@
       },
       "params": {
         "claim_denom": "uarkeo",
-        "duration_of_decay": "3600s",
-        "duration_until_decay": "3600s",
+        "duration_of_decay": "2592000s",
+        "duration_until_decay": "3196800s",
         "initial_gas_amount": null
       }
     },
@@ -551,9 +537,7 @@
         "create_localhost": false,
         "next_client_sequence": "0",
         "params": {
-          "allowed_clients": [
-            "*"
-          ]
+          "allowed_clients": ["*"]
         }
       },
       "connection_genesis": {
@@ -573,10 +557,7 @@
             "state": "STATE_OPEN",
             "versions": [
               {
-                "features": [
-                  "ORDER_ORDERED",
-                  "ORDER_UNORDERED"
-                ],
+                "features": ["ORDER_ORDERED", "ORDER_UNORDERED"],
                 "identifier": "1"
               }
             ]
@@ -601,9 +582,7 @@
         "active_channels": [],
         "interchain_accounts": [],
         "params": {
-          "allow_messages": [
-            "*"
-          ],
+          "allow_messages": ["*"],
           "host_enabled": true
         },
         "port": "icahost"
@@ -738,9 +717,7 @@
         "max_bytes": "1048576"
       },
       "validator": {
-        "pub_key_types": [
-          "ed25519"
-        ]
+        "pub_key_types": ["ed25519"]
       },
       "version": {
         "app": "0"
