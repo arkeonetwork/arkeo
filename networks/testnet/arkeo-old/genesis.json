@@ -124,8 +124,8 @@
       },
       "params": {
         "airdrop_start_time": "2023-02-22T00:29:31.601029Z",
-        "duration_until_decay": "3196800s",
-        "duration_of_decay": "2592000s",
+        "duration_until_decay": "3600s",
+        "duration_of_decay": "3600s",
         "claim_denom": "uarkeo",
         "initial_gas_amount": null
       },
