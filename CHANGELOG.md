@@ -40,6 +40,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Updated swagger docs
 - TC Claim Address
 - Decay params reset
+- Used Upgrade Handler for upgrade
 
 ### Fixed
 - Fixed old expirations not being removed.
