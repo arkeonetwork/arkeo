@@ -4,6 +4,7 @@
 package app
 
 import (
+	context "context"
 	"fmt"
 	"io"
 	"os"
@@ -461,6 +462,10 @@ func NewArkeoApp(
 		app.BaseApp,
 		govModuleAddr,
 	)
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("claim-fix-v1.0.10", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		app.Keepers.ClaimKeeper.RunUpgradeClaimFix(ctx)
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
 
 	groupConfig := group.DefaultConfig()
 	/*

@@ -76,6 +76,13 @@ func (k Keeper) AfterDelegationModified(ctx context.Context, delAddr sdk.AccAddr
 	return nil
 }
 
+func (k Keeper) RunUpgradeClaimFix(ctx context.Context) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	k.UpdateParams(sdkCtx)
+	k.MoveTokensFromReserveToClaimModule(sdkCtx)
+	return nil
+}
+
 func (k Keeper) UpdateParams(ctx context.Context) bool {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	store := sdkCtx.KVStore(k.storeKey)
