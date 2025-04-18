@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"cosmossdk.io/core/appmodule"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -24,10 +26,12 @@ import (
 )
 
 var (
-	_ module.AppModule       = AppModule{}
-	_ module.AppModuleBasic  = AppModuleBasic{}
-	_ module.HasABCIEndBlock = AppModule{}
-	_ module.HasGenesis      = AppModule{}
+	_ module.AppModule          = AppModule{}
+	_ module.AppModuleBasic     = AppModuleBasic{}
+	_ module.HasABCIEndBlock    = AppModule{}
+	_ module.HasGenesis         = AppModule{}
+	_ appmodule.AppModule       = AppModule{}
+	_ appmodule.HasBeginBlocker = AppModule{}
 )
 
 // ----------------------------------------------------------------------------
@@ -143,6 +147,14 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 // ConsensusVersion is a sequence number for state-breaking change of the module. It should be incremented on each consensus-breaking change introduced by the module. To avoid wrong/empty versions, the initial version should be set to 1
 func (AppModule) ConsensusVersion() uint64 { return 1 }
+
+// BeginBlock contains the logic that is automatically triggered at the beginning of each block
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	am.keeper.UpdateParams(sdkCtx)
+	am.keeper.MoveTokensFromReserveToClaimModule(sdkCtx)
+	return nil
+}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
