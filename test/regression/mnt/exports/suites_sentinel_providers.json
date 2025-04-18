@@ -370,8 +370,8 @@
       },
       "params": {
         "claim_denom": "uarkeo",
-        "duration_of_decay": "2592000s",
-        "duration_until_decay": "3196800s",
+        "duration_of_decay": "3600s",
+        "duration_until_decay": "3600s",
         "initial_gas_amount": null
       }
     },
