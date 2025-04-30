@@ -125,7 +125,8 @@ import (
 	_ "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts" // import for side-effects
 	icahostkeeper "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/keeper"
 	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
-	_ "github.com/cosmos/ibc-go/v8/modules/apps/29-fee" // import for side-effects
+	ibcfee "github.com/cosmos/ibc-go/v8/modules/apps/29-fee"
+	ibcfeekeeper "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/keeper" // import for side-effects
 	ibcfeetypes "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/types"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibcporttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
@@ -189,6 +190,7 @@ var (
 		feegrantmodule.AppModuleBasic{},
 		groupmodule.AppModuleBasic{},
 		ibc.AppModuleBasic{},
+		ibcfee.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		transfer.AppModuleBasic{},
@@ -209,6 +211,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		ibcfeetypes.ModuleName:         nil,
 		claimmoduletypes.ModuleName:    {authtypes.Minter},
 		arkeomoduletypes.ReserveName:   {},
 		arkeomoduletypes.ModuleName:    {},
@@ -516,6 +519,16 @@ func NewArkeoApp(
 		govModuleAddr,
 	)
 
+	app.Keepers.IBCFeeKeeper = ibcfeekeeper.NewKeeper(
+		appCodec,
+		keys[ibcfeetypes.StoreKey],
+		app.Keepers.IBCKeeper.ChannelKeeper,
+		app.Keepers.IBCKeeper.ChannelKeeper,
+		app.Keepers.IBCKeeper.PortKeeper, 
+		app.Keepers.AccountKeeper, 
+		app.Keepers.BankKeeper,
+	)
+
 	// Create Transfer Keepers
 	app.Keepers.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec,
@@ -636,6 +649,7 @@ func NewArkeoApp(
 		upgrade.NewAppModule(app.Keepers.UpgradeKeeper, app.Keepers.AccountKeeper.AddressCodec()),
 		evidence.NewAppModule(app.Keepers.EvidenceKeeper),
 		ibc.NewAppModule(app.Keepers.IBCKeeper),
+		ibcfee.NewAppModule(app.Keepers.IBCFeeKeeper),
 		params.NewAppModule(app.Keepers.ParamsKeeper),
 		transferModule,
 		icaModule,
@@ -661,6 +675,7 @@ func NewArkeoApp(
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		crisistypes.ModuleName,
+		ibcfeetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
@@ -679,6 +694,7 @@ func NewArkeoApp(
 		crisistypes.ModuleName,
 		govtypes.ModuleName,
 		stakingtypes.ModuleName,
+		ibcfeetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
@@ -717,6 +733,7 @@ func NewArkeoApp(
 		minttypes.ModuleName,
 		crisistypes.ModuleName,
 		genutiltypes.ModuleName,
+		ibcfeetypes.ModuleName,
 		ibctransfertypes.ModuleName,
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
@@ -1019,6 +1036,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(govtypes.ModuleName)
 	paramsKeeper.Subspace(crisistypes.ModuleName)
+	paramsKeeper.Subspace(ibcfeetypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName) //nolint:staticcheck
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
