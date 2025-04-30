@@ -163,6 +163,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Updated Proto generation using `proto-builder` image.
 
 ### Fixed
+- IBC Implementation.
 - Fixed event ordering issues.
 - Updated Docker dependencies.
 - Fixed CI checks and release checks.
