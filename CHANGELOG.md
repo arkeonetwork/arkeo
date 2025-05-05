@@ -156,6 +156,7 @@ Contains all the PRs that improved the code without changing the behaviors.
 - Introduced binary and Docker image releaser.
 - Implemented CI actions for release, lint, and release check.
 - Added Thorchain claims and unit tests.
+- IBC Upgrade Handler
 
 ### Changed
 - Upgraded Cosmos SDK from `0.46.13` to `0.50.8`.
