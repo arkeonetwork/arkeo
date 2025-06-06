@@ -29,6 +29,10 @@ type Configuration struct {
 	ProviderPubKey              common.PubKey    `json:"provider_pubkey"`
 	FreeTierRateLimit           int              `json:"free_tier_rate_limit"`
 	TLS                         TLSConfiguration `json:"tls"`
+	ArkeoAuthContractId         uint64           `json:"arkeo_auth_contract_id"`  // Contract ID for auth
+	ArkeoAuthChainId            string           `json:"arkeo_auth_chain_id"`     // Chain ID for auth
+	ArkeoAuthMnemonic           string           `json:"arkeo_auth_mnemonic"`     // Mnemonic phrase for signing
+	ArkeoAuthNonceStore         string           `json:"arkeo_auth_nonce_store"`  // LevelDB path for nonce storage
 }
 
 // Simple helper function to read an environment or return a default value
@@ -71,6 +75,18 @@ func loadVarInt(key string) int {
 	return i
 }
 
+func loadVarIntOptional(key string, defaultValue int) int {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return defaultValue
+	}
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		panic(fmt.Errorf("env var %s is not an integer: %s", key, err))
+	}
+	return i
+}
+
 func NewTLSConfiguration() TLSConfiguration {
 	return TLSConfiguration{
 		Cert: getEnv("TLS_CERT", ""),
@@ -97,6 +113,10 @@ func NewConfiguration() Configuration {
 		ContractConfigStoreLocation: loadVarString("CONTRACT_CONFIG_STORE_LOCATION"),
 		TLS:                         NewTLSConfiguration(),
 		ProviderConfigStoreLocation: loadVarString("PROVIDER_CONFIG_STORE_LOCATION"),
+		ArkeoAuthContractId:         uint64(loadVarIntOptional("ARKEO_AUTH_CONTRACT_ID", 0)),
+		ArkeoAuthChainId:            getEnv("ARKEO_AUTH_CHAIN_ID", ""),
+		ArkeoAuthMnemonic:           getEnv("ARKEO_AUTH_MNEMONIC", ""),
+		ArkeoAuthNonceStore:         getEnv("ARKEO_AUTH_NONCE_STORE", ""),
 	}
 }
 
@@ -116,5 +136,13 @@ func (c Configuration) Print() {
 	fmt.Fprintln(writer, "Contract Config Store Location\t", c.ContractConfigStoreLocation)
 	fmt.Fprintln(writer, "Free Tier Rate Limit\t", fmt.Sprintf("%d requests per 1m", c.FreeTierRateLimit))
 	fmt.Fprintln(writer, "Provider Config Store Location\t", c.ProviderConfigStoreLocation)
+	
+	if c.ArkeoAuthContractId > 0 {
+		fmt.Fprintln(writer, "Arkeo Auth Contract ID\t", c.ArkeoAuthContractId)
+		fmt.Fprintln(writer, "Arkeo Auth Chain ID\t", c.ArkeoAuthChainId)
+		fmt.Fprintln(writer, "Arkeo Auth Configured\t", c.ArkeoAuthMnemonic != "")
+		fmt.Fprintln(writer, "Arkeo Auth Nonce Store\t", c.ArkeoAuthNonceStore)
+	}
+	
 	writer.Flush()
 }

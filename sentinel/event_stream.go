@@ -3,6 +3,7 @@ package sentinel
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -36,7 +37,26 @@ func subscribe(client *tmclient.HTTP, logger log.Logger, query string) <-chan tm
 	return out
 }
 
-func NewTendermintClient(baseURL string) (*tmclient.HTTP, error) {
+func NewTendermintClient(baseURL string, authManager *ArkeoAuthManager) (*tmclient.HTTP, error) {
+	// Add auth to WebSocket URL if configured
+	if authManager != nil {
+		authHeader, err := authManager.GenerateAuthHeader()
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate auth header: %w", err)
+		}
+
+		// Parse URL to add query parameter
+		u, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse base URL: %w", err)
+		}
+
+		q := u.Query()
+		q.Set(QueryArkAuth, authHeader)
+		u.RawQuery = q.Encode()
+		baseURL = u.String()
+	}
+
 	client, err := tmclient.New(baseURL, "/websocket")
 	if err != nil {
 		return nil, errors.Wrapf(err, "error creating websocket client")
@@ -47,7 +67,7 @@ func NewTendermintClient(baseURL string) (*tmclient.HTTP, error) {
 	return client, nil
 }
 
-func (p Proxy) EventListener(host string) {
+func (p Proxy) EventListener(host string, authManager *ArkeoAuthManager) {
 	logger := p.logger
 
 	logger.Info("starting realtime indexing using /websocket")
@@ -56,7 +76,7 @@ func (p Proxy) EventListener(host string) {
 	clients := make([]*tmclient.HTTP, numOfWebSocketClients)
 
 	for i := 0; i < numOfWebSocketClients; i++ {
-		client, err := NewTendermintClient(fmt.Sprintf("tcp://%s", host))
+		client, err := NewTendermintClient(fmt.Sprintf("tcp://%s", host), authManager)
 		if err != nil {
 			panic(fmt.Sprintf("error creating tm client for %s: %+v", host, err))
 		}
