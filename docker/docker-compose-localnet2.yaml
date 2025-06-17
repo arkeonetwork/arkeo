@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  arkeo-2:
+    image: ${IMAGE_TAG}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.localnet2
+    entrypoint:
+      - bash
+      - -c
+      - |
+        ./genesis.sh && \
+        arkeod start
+    ports:
+      - 1417:1317
+      - 27657:26657
+      - 27656:26656
+    volumes:
+      - ../scripts:/scripts:z
+    working_dir: /scripts

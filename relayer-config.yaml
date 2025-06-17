@@ -1,0 +1,23 @@
+version: '2'
+chains:
+  arkeo-1:
+    type: cosmos
+    value:
+      chain-id: arkeo-1
+      rpc-addr: http://localhost:26657
+      account-prefix: arkeo
+      key: arkeo-key
+      gas-adjustment: 1.3
+      gas-prices: "0.025uarkeo"
+      trusting-period: "336h"
+
+  arkeo-2:
+    type: cosmos
+    value:
+      chain-id: arkeo-testnet-v2
+      rpc-addr: http://localhost:55002
+      account-prefix: arkeo
+      key: gaia-key
+      gas-adjustment: 1.3
+      gas-prices: "0.025uarkeo"
+      trusting-period: "336h"
