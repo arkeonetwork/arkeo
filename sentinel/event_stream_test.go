@@ -31,6 +31,7 @@ func newTestConfig() conf.Configuration {
 		ProviderPubKey:     types.GetRandomPubKey(),
 		FreeTierRateLimit:  100,
 		ClaimStoreLocation: "",
+		ArkeoAuthContractId: 0, // No auth for tests
 	}
 }
 

@@ -28,17 +28,19 @@ type MemStore struct {
 	baseURL     string
 	blockHeight int64
 	logger      log.Logger
+	authManager *ArkeoAuthManager
 }
 
-func NewMemStore(baseURL string, logger log.Logger) *MemStore {
+func NewMemStore(baseURL string, authManager *ArkeoAuthManager, logger log.Logger) *MemStore {
 	return &MemStore{
 		storeLock: &sync.Mutex{},
 		db:        make(map[string]types.Contract),
 		client: http.Client{
 			Timeout: 10 * time.Second,
 		},
-		baseURL: baseURL,
-		logger:  logger,
+		baseURL:     baseURL,
+		authManager: authManager,
+		logger:      logger,
 	}
 }
 
@@ -131,6 +133,16 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 	if err != nil {
 		k.logger.Error("fail to create http request", "error", err)
 		return contract, err
+	}
+
+	// Add authentication header if auth manager is configured
+	if k.authManager != nil {
+		authHeader, err := k.authManager.GenerateAuthHeader()
+		if err != nil {
+			k.logger.Error("fail to generate auth header", "error", err)
+			return contract, err
+		}
+		req.Header.Set(QueryArkAuth, authHeader)
 	}
 
 	res, err := http.DefaultClient.Do(req)

@@ -34,6 +34,7 @@ type Proxy struct {
 	ProviderConfigStore *ProviderConfigurationStore
 	logger              log.Logger
 	proxies             map[string]*url.URL
+	authManager         *ArkeoAuthManager
 }
 
 func NewProxy(config conf.Configuration) (Proxy, error) {
@@ -55,15 +56,43 @@ func NewProxy(config conf.Configuration) (Proxy, error) {
 		return Proxy{}, fmt.Errorf("failed to create provider config store with error: %s", err)
 	}
 
+	// Initialize auth manager if configured
+	var authManager *ArkeoAuthManager
+	if config.ArkeoAuthContractId > 0 && config.ArkeoAuthMnemonic != "" {
+		nonceStore, err := NewNonceStore(config.ArkeoAuthNonceStore)
+		if err != nil {
+			logger.Error(fmt.Sprintf("failed to create nonce store: %s", err))
+			return Proxy{}, fmt.Errorf("failed to create nonce store: %s", err)
+		}
+
+		authManager, err = NewArkeoAuthManager(
+			config.ArkeoAuthContractId,
+			config.ArkeoAuthChainId,
+			config.ArkeoAuthMnemonic,
+			nonceStore,
+			logger,
+		)
+		if err != nil {
+			logger.Error(fmt.Sprintf("failed to create auth manager: %s", err))
+			return Proxy{}, fmt.Errorf("failed to create auth manager: %s", err)
+		}
+
+		logger.Info("arkeo auth configured", 
+			"contractId", config.ArkeoAuthContractId,
+			"chainId", config.ArkeoAuthChainId,
+		)
+	}
+
 	return Proxy{
 		Metadata:            NewMetadata(config),
 		Config:              config,
-		MemStore:            NewMemStore(config.SourceChain, logger),
+		MemStore:            NewMemStore(config.SourceChain, authManager, logger),
 		ClaimStore:          claimStore,
 		ContractConfigStore: contractConfigStore,
 		proxies:             loadProxies(),
 		logger:              logger,
 		ProviderConfigStore: providerConfigStore,
+		authManager:         authManager,
 	}, nil
 }
 
@@ -313,7 +342,10 @@ func (p Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 		service,
 		pubkey,
 	)
-	proxy := httputil.NewSingleHostReverseProxy(p.proxies["arkeo-mainnet-fullnode"])
+	
+	// Create reverse proxy with custom director to add auth
+	target := p.proxies["arkeo-mainnet-fullnode"]
+	proxy := p.createAuthenticatedReverseProxy(target)
 	proxy.ServeHTTP(w, r)
 }
 
@@ -349,7 +381,7 @@ func (p Proxy) Run() {
 	p.logger.Info("Starting Sentinel (reverse proxy)....")
 	p.Config.Print()
 
-	go p.EventListener(p.Config.EventStreamHost)
+	go p.EventListener(p.Config.EventStreamHost, p.authManager)
 
 	router := p.getRouter()
 
@@ -484,4 +516,37 @@ func (p Proxy) handleProviderData(w http.ResponseWriter, r *http.Request) {
 
 	d, _ := json.Marshal(providerConfigData)
 	_, _ = w.Write(d)
+}
+
+// createAuthenticatedReverseProxy creates a reverse proxy that adds auth headers
+func (p Proxy) createAuthenticatedReverseProxy(target *url.URL) *httputil.ReverseProxy {
+	targetQuery := target.RawQuery
+	director := func(req *http.Request) {
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+		// Preserve the original request path, don't use target.Path
+		if targetQuery == "" || req.URL.RawQuery == "" {
+			req.URL.RawQuery = targetQuery + req.URL.RawQuery
+		} else {
+			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
+		}
+		if _, ok := req.Header["User-Agent"]; !ok {
+			req.Header.Set("User-Agent", "")
+		}
+		passwd, ok := req.URL.User.Password()
+		if ok {
+			req.SetBasicAuth(req.URL.User.Username(), passwd)
+		}
+		
+		// Add auth header if configured
+		if p.authManager != nil {
+			authHeader, err := p.authManager.GenerateAuthHeader()
+			if err != nil {
+				p.logger.Error("failed to generate auth header for reverse proxy", "error", err)
+			} else {
+				req.Header.Set(QueryArkAuth, authHeader)
+			}
+		}
+	}
+	return &httputil.ReverseProxy{Director: director}
 }
