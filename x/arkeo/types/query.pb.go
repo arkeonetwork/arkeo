@@ -32,6 +32,7 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
+// QueryParamsRequest is the request message for querying module parameters.
 type QueryParamsRequest struct {
 }
 
@@ -69,6 +70,7 @@ func (m *QueryParamsRequest) XXX_DiscardUnknown() {
 var xxx_messageInfo_QueryParamsRequest proto.InternalMessageInfo
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
+// QueryParamsResponse is the response message containing the module parameters.
 type QueryParamsResponse struct {
 	// params holds all the parameters of this module.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
@@ -114,6 +116,9 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryFetchProviderRequest is the request type for fetching a provider.
+// QueryFetchProviderRequest is the request message for fetching a provider by
+// pubkey and service.
 type QueryFetchProviderRequest struct {
 	Pubkey  string `protobuf:"bytes,1,opt,name=pubkey,proto3" json:"pubkey,omitempty"`
 	Service string `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
@@ -166,6 +171,9 @@ func (m *QueryFetchProviderRequest) GetService() string {
 	return ""
 }
 
+// QueryFetchProviderResponse is the response type for fetching a provider.
+// QueryFetchProviderResponse is the response message containing the provider
+// information.
 type QueryFetchProviderResponse struct {
 	Provider Provider `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider"`
 }
@@ -210,6 +218,8 @@ func (m *QueryFetchProviderResponse) GetProvider() Provider {
 	return Provider{}
 }
 
+// QueryAllProviderRequest is the request for listing all providers.
+// QueryAllProviderRequest is the request message for listing all providers.
 type QueryAllProviderRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -254,6 +264,9 @@ func (m *QueryAllProviderRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
+// QueryAllProviderResponse is the response for listing all providers.
+// QueryAllProviderResponse is the response message containing a list of all
+// providers.
 type QueryAllProviderResponse struct {
 	Provider   []Provider          `protobuf:"bytes,1,rep,name=provider,proto3" json:"provider"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -306,6 +319,9 @@ func (m *QueryAllProviderResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
+// QueryFetchContractRequest is the request type for fetching a contract.
+// QueryFetchContractRequest is the request message for fetching a contract by
+// contract_id.
 type QueryFetchContractRequest struct {
 	ContractId uint64 `protobuf:"varint,1,opt,name=contract_id,json=contractId,proto3" json:"contract_id,omitempty"`
 }
@@ -350,6 +366,9 @@ func (m *QueryFetchContractRequest) GetContractId() uint64 {
 	return 0
 }
 
+// QueryFetchContractResponse is the response type for fetching a contract.
+// QueryFetchContractResponse is the response message containing the contract
+// information.
 type QueryFetchContractResponse struct {
 	Contract Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract"`
 }
@@ -394,6 +413,8 @@ func (m *QueryFetchContractResponse) GetContract() Contract {
 	return Contract{}
 }
 
+// QueryAllContractRequest is the request for listing all contracts.
+// QueryAllContractRequest is the request message for listing all contracts.
 type QueryAllContractRequest struct {
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
@@ -438,6 +459,9 @@ func (m *QueryAllContractRequest) GetPagination() *query.PageRequest {
 	return nil
 }
 
+// QueryAllContractResponse is the response for listing all contracts.
+// QueryAllContractResponse is the response message containing a list of all
+// contracts.
 type QueryAllContractResponse struct {
 	Contract   []Contract          `protobuf:"bytes,1,rep,name=contract,proto3" json:"contract"`
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -490,7 +514,8 @@ func (m *QueryAllContractResponse) GetPagination() *query.PageResponse {
 	return nil
 }
 
-// this line is used by starport scaffolding # 3
+// QueryActiveContractRequest is the request message for querying an active
+// contract.
 type QueryActiveContractRequest struct {
 	Provider string `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
 	Service  string `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
@@ -551,6 +576,9 @@ func (m *QueryActiveContractRequest) GetSpender() string {
 	return ""
 }
 
+// QueryActiveContractResponse returns the active contract information.
+// QueryActiveContractResponse is the response message containing the active
+// contract.
 type QueryActiveContractResponse struct {
 	Contract Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract"`
 }
@@ -674,11 +702,16 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Parameters queries the parameters of the module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
+	// FetchProvider queries a specific provider by pubkey and service.
 	FetchProvider(ctx context.Context, in *QueryFetchProviderRequest, opts ...grpc.CallOption) (*QueryFetchProviderResponse, error)
+	// ProviderAll queries for a list of all providers.
 	ProviderAll(ctx context.Context, in *QueryAllProviderRequest, opts ...grpc.CallOption) (*QueryAllProviderResponse, error)
+	// FetchContract queries a specific contract by contract_id.
 	FetchContract(ctx context.Context, in *QueryFetchContractRequest, opts ...grpc.CallOption) (*QueryFetchContractResponse, error)
+	// ContractAll queries for a list of all contracts.
 	ContractAll(ctx context.Context, in *QueryAllContractRequest, opts ...grpc.CallOption) (*QueryAllContractResponse, error)
-	// Queries an active contract by spender, provider and service.
+	// ActiveContract queries an active contract by provider, service, and
+	// spender.
 	ActiveContract(ctx context.Context, in *QueryActiveContractRequest, opts ...grpc.CallOption) (*QueryActiveContractResponse, error)
 }
 
@@ -748,11 +781,16 @@ func (c *queryClient) ActiveContract(ctx context.Context, in *QueryActiveContrac
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
+	// FetchProvider queries a specific provider by pubkey and service.
 	FetchProvider(context.Context, *QueryFetchProviderRequest) (*QueryFetchProviderResponse, error)
+	// ProviderAll queries for a list of all providers.
 	ProviderAll(context.Context, *QueryAllProviderRequest) (*QueryAllProviderResponse, error)
+	// FetchContract queries a specific contract by contract_id.
 	FetchContract(context.Context, *QueryFetchContractRequest) (*QueryFetchContractResponse, error)
+	// ContractAll queries for a list of all contracts.
 	ContractAll(context.Context, *QueryAllContractRequest) (*QueryAllContractResponse, error)
-	// Queries an active contract by spender, provider and service.
+	// ActiveContract queries an active contract by provider, service, and
+	// spender.
 	ActiveContract(context.Context, *QueryActiveContractRequest) (*QueryActiveContractResponse, error)
 }
 

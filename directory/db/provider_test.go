@@ -243,7 +243,7 @@ func TestInsertModProviderEvent(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime))
 
-	entity, err := db.InsertModProviderEvent(context.Background(), int64(1), evt)
+	entity, err := db.InsertModProviderEvent(context.Background(), int64(1), evt, evt.TxID, evt.Height)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)

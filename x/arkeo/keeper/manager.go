@@ -61,6 +61,15 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	emissionCurve := sdkmath.LegacyNewDec(int64(params.EmissionCurve)) // Emission curve factor
 	blocksPerYear := sdkmath.LegacyNewDec(int64(params.BlockPerYear))
 
+	//mgr.keeper.Logger().Info(
+	//	"Block Reward Calculation Inputs",
+	//	"block_height", ctx.BlockHeight(),
+	//	"reserve_supply", reserveSupply.Amount.String(),
+	//	"emission_curve", emissionCurve.String(),
+	//	"blocks_per_year", blocksPerYear.String(),
+	//	"validator_payout_cycle", validatorPayoutCycle.String(),
+	//)
+
 	blockReward := mgr.calcBlockReward(ctx, reserveSupply.Amount, emissionCurve, blocksPerYear, validatorPayoutCycle)
 	mgr.keeper.Logger().Info(fmt.Sprintf("Block Reward for block number %d, %v", ctx.BlockHeight(), blockReward))
 
@@ -331,6 +340,15 @@ func (mgr Manager) FetchConfig(ctx cosmos.Context, name configs.ConfigName) int6
 
 // any owed debt is paid to data provider
 func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, nonce int64, isFinal bool) (types.Contract, error) {
+
+	mgr.keeper.Logger().Info(
+		"SettleContract Debug Values (1)",
+		"isFinal:", isFinal,
+		"contract.Id:", contract.Id,
+		"nonce:", nonce,
+		"contract.Nonce:", contract.Nonce,
+	)
+
 	if nonce > contract.Nonce {
 		contract.Nonce = nonce
 	}
@@ -340,6 +358,12 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 	if err != nil {
 		return contract, err
 	}
+
+	mgr.keeper.Logger().Info(
+		"SettleContract Debug Values (2)",
+		"debt:", debt,
+	)
+
 	if !debt.IsZero() {
 		provider, err := contract.Provider.GetMyAddress()
 		if err != nil {
@@ -352,6 +376,19 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			return contract, err
 		}
 	}
+
+	mgr.keeper.Logger().Info(
+		"SettleContract Debug Values (3)",
+		"contract_id (contract.Id):", contract.Id,
+		"nonce (nonce)", nonce,
+		"contract.Nonce (contract.Nonce)", contract.Nonce,
+		"total_debt (totalDebt)", totalDebt.String(),
+		"val_income (valIncome):", valIncome.RoundInt().String(),
+		"debt_paid_to_provider (debt):", debt.String(),
+		"paid_field_before (contract.Paid):", contract.Paid.String(),
+		"deposit (contract.Deposit):", contract.Deposit.String(),
+		"contract.Rate.Denom:", contract.Rate.Denom,
+	)
 
 	contract.Paid = contract.Paid.Add(totalDebt)
 	if isFinal {
@@ -369,6 +406,16 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 			// == Deposit, which causes the record to be deleted, conserving
 			// space
 			contract.Deposit = contract.Paid
+
+			mgr.keeper.Logger().Info(
+				"SettleContract Debug Values (4)",
+				"contract_id (contract.Id):", contract.Id,
+				"isFinal (isFinal):", isFinal,
+				"remainder (remainder):", remainder.String(),
+				"client (client):", client.String(),
+				"contract.Paid (contract.Paid):", contract.Paid.String(),
+			)
+
 		}
 		contract.SettlementHeight = ctx.BlockHeight()
 		// this contract can now be removed from the users list of contracts
@@ -376,12 +423,25 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		if err != nil {
 			return contract, err
 		}
+
+		mgr.keeper.Logger().Info(
+			"SettleContract Debug Values (5)",
+			"contract_id (contract.Id):", contract.Id,
+			"contract.SettlementHeight:", contract.SettlementHeight,
+		)
+
 	}
 
 	err = mgr.keeper.SetContract(ctx, contract)
 	if err != nil {
 		return contract, err
 	}
+
+	mgr.keeper.Logger().Info(
+		"SettleContract Debug Values (6)",
+		"totalDebt:", totalDebt,
+		"valIncome.RoundInt():", valIncome.RoundInt(),
+	)
 
 	if err = mgr.EmitContractSettlementEvent(ctx, totalDebt, valIncome.RoundInt(), &contract); err != nil {
 		return contract, err
@@ -392,13 +452,26 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 
 func (mgr Manager) contractDebt(ctx cosmos.Context, contract types.Contract) (cosmos.Int, error) {
 	var debt cosmos.Int
+
+	mgr.keeper.Logger().Info(
+		"contractDebt Debug Values (1.5)",
+		"contract.Type:", contract.Type,
+		"ctx.BlockHeight():", ctx.BlockHeight(),
+		"contract.SettlementPeriodEnd():", contract.SettlementPeriodEnd(),
+		"contract.Height:", contract.Height,
+		"contract.Rate.Amount:", contract.Rate.Amount,
+		"contract.Paid:", contract.Paid,
+	)
+
 	switch contract.Type {
 	case types.ContractType_SUBSCRIPTION:
 		height := ctx.BlockHeight()
 		if height > contract.SettlementPeriodEnd() {
 			height = contract.SettlementPeriodEnd()
 		}
-		debt = contract.Rate.Amount.MulRaw(height - contract.Height).Sub(contract.Paid)
+		// debt = contract.Rate.Amount.MulRaw(height - contract.Height).Sub(contract.Paid)
+		// Missing QPM in the formula.
+		debt = contract.Rate.Amount.MulRaw(height - contract.Height).MulRaw(contract.QueriesPerMinute).Sub(contract.Paid)
 	case types.ContractType_PAY_AS_YOU_GO:
 		debt = contract.Rate.Amount.MulRaw(contract.Nonce).Sub(contract.Paid)
 	default:

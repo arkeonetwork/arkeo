@@ -1,31 +1,37 @@
-create table provider_metadata
-(
-    id                            bigserial                 not null
-        constraint provider_metadata_pk
-            primary key,
-    created                       timestamptz default now() not null,
-    updated                       timestamptz default now() not null,
-    provider_id                   bigint                    not null references providers (id),
-    nonce                         numeric not null,
-    version                       text,
-    moniker                       text,
-    website                       text,
-    description                   text,
-    location                      text,
-    port                          text,
-    source_chain                  text,
-    event_stream_host             text,
-    claim_store_location          text,
-    free_rate_limit               bigint,
-    free_rate_limit_duration      bigint,
-    subscribe_rate_limit          bigint,
-    subscribe_rate_limit_duration bigint,
-    paygo_rate_limit              bigint,
-    paygo_rate_limit_duration     bigint
-);
+BEGIN;
 
-alter table provider_metadata
-    add constraint prov_metanonce_uniq unique (provider_id, nonce);
+CREATE TABLE IF NOT EXISTS public.provider_metadata (
+    id bigserial PRIMARY KEY,
+    created timestamptz DEFAULT now() NOT NULL,
+    updated timestamptz DEFAULT now() NOT NULL,
+    provider_id bigint NOT NULL,
+    nonce numeric NOT NULL, -- (Remove if you don't need nonce)
+    "version" text,
+    moniker text,
+    website text,
+    description text,
+    "location" point,
+    port text,
+    source_chain text,
+    event_stream_host text,
+    claim_store_location text,
+    free_rate_limit bigint,
+    free_rate_limit_duration bigint,
+    subscribe_rate_limit bigint,
+    subscribe_rate_limit_duration bigint,
+    paygo_rate_limit bigint,
+    paygo_rate_limit_duration bigint
+    );
+
+ALTER TABLE IF EXISTS public.provider_metadata
+    ADD CONSTRAINT provider_metadata_provider_id_fkey
+    FOREIGN KEY (provider_id)
+    REFERENCES public.providers (id);
+
+ALTER TABLE IF EXISTS public.provider_metadata
+    ADD CONSTRAINT provider_metadata_provider_id_uniq
+    UNIQUE (provider_id);
 
 ---- create above / drop below ----
-drop table provider_metadata;
+
+DROP TABLE IF EXISTS provider_metadata;

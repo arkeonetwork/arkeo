@@ -109,9 +109,42 @@ func DownloadProviderMetadata(metadataUrl string, retries, maxBytes int) (*senti
 		}
 	}
 
+	// result := &sentinel.Metadata{}
+	// if err = json.Unmarshal(raw, result); err != nil {
+	// 	return nil, errors.Wrapf(err, "error unmarshaling")
+	// }
+
+	// Unmarshal into a generic map first
+	var generic map[string]interface{}
+	if err := json.Unmarshal(raw, &generic); err != nil {
+		return nil, errors.Wrapf(err, "error unmarshaling to generic map")
+	}
+
+	// Fix service id types if needed
+	if config, ok := generic["config"].(map[string]interface{}); ok {
+		if services, ok := config["services"].([]interface{}); ok {
+			for _, s := range services {
+				if service, ok := s.(map[string]interface{}); ok {
+					if idStr, isStr := service["id"].(string); isStr {
+						if idInt, err := strconv.Atoi(idStr); err == nil {
+							service["id"] = idInt
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Marshal back to JSON
+	fixedRaw, err := json.Marshal(generic)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error re-marshaling fixed json")
+	}
+
+	// Now unmarshal into your strict struct
 	result := &sentinel.Metadata{}
-	if err = json.Unmarshal(raw, result); err != nil {
-		return nil, errors.Wrapf(err, "error unmarshaling")
+	if err := json.Unmarshal(fixedRaw, result); err != nil {
+		return nil, errors.Wrapf(err, "error unmarshaling to Metadata struct")
 	}
 
 	return result, nil

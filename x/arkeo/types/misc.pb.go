@@ -25,6 +25,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// ProtoInt64 wraps an int64 for protobuf compatibility.
 type ProtoInt64 struct {
 	Value int64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
 }
@@ -69,6 +70,7 @@ func (m *ProtoInt64) GetValue() int64 {
 	return 0
 }
 
+// ProtoUint64 wraps a uint64 for protobuf compatibility.
 type ProtoUint64 struct {
 	Value uint64 `protobuf:"varint,1,opt,name=value,proto3" json:"value,omitempty"`
 }
@@ -113,6 +115,7 @@ func (m *ProtoUint64) GetValue() uint64 {
 	return 0
 }
 
+// ProtoAccAddresses wraps a list of account addresses.
 type ProtoAccAddresses struct {
 	Value []github_com_cosmos_cosmos_sdk_types.AccAddress `protobuf:"bytes,1,rep,name=value,proto3,casttype=github.com/cosmos/cosmos-sdk/types.AccAddress" json:"value,omitempty"`
 }
@@ -157,6 +160,7 @@ func (m *ProtoAccAddresses) GetValue() []github_com_cosmos_cosmos_sdk_types.AccA
 	return nil
 }
 
+// ProtoStrings wraps a list of strings.
 type ProtoStrings struct {
 	Value []string `protobuf:"bytes,1,rep,name=value,proto3" json:"value,omitempty"`
 }
@@ -201,6 +205,7 @@ func (m *ProtoStrings) GetValue() []string {
 	return nil
 }
 
+// ProtoBools wraps a list of booleans.
 type ProtoBools struct {
 	Value []bool `protobuf:"varint,1,rep,packed,name=value,proto3" json:"value,omitempty"`
 }

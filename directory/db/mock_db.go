@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"github.com/arkeonetwork/arkeo/directory/types"
 
 	"github.com/stretchr/testify/mock"
 
@@ -51,7 +52,7 @@ func (s *MockDataStorage) FindProvider(ctx context.Context, pubkey, service stri
 	return args.Get(0).(*ArkeoProvider), args.Error(1)
 }
 
-func (s *MockDataStorage) UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract) (*Entity, error) {
+func (s *MockDataStorage) UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract, txID string, height int64) (*Entity, error) {
 	args := s.Called(ctx, providerID, evt)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -69,7 +70,7 @@ func (s *MockDataStorage) GetContract(ctx context.Context, contractId uint64) (*
 	return args.Get(0).(*ArkeoContract), args.Error(1)
 }
 
-func (s *MockDataStorage) CloseContract(ctx context.Context, contractID uint64, height int64) (*Entity, error) {
+func (s *MockDataStorage) CloseContract(ctx context.Context, contractID uint64, txID string, height int64) (*Entity, error) {
 	args := s.Called(ctx, contractID, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -87,7 +88,7 @@ func (s *MockDataStorage) UpdateProvider(ctx context.Context, provider *ArkeoPro
 	return args.Get(0).(*Entity), args.Error(1)
 }
 
-func (s *MockDataStorage) UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract) (*Entity, error) {
+func (s *MockDataStorage) UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract, txID string, height int64) (*Entity, error) {
 	args := s.Called(ctx, evt)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -116,6 +117,24 @@ func (s *MockDataStorage) InsertBondProviderEvent(ctx context.Context, providerI
 
 func (s *MockDataStorage) InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error) {
 	args := s.Called(ctx, provider)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	//nolint:forcetypeassert
+	return args.Get(0).(*Entity), args.Error(1)
+}
+
+func (s *MockDataStorage) InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent, txID string, height int64) (*Entity, error) {
+	args := s.Called(ctx, providerID, evt)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	//nolint:forcetypeassert
+	return args.Get(0).(*Entity), args.Error(1)
+}
+
+func (s *MockDataStorage) UpsertIndexerStatus(ctx context.Context, height int64) (*Entity, error) {
+	args := s.Called(ctx, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

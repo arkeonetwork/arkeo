@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	log     = logging.WithoutFields()
-	envPath = flag.String("env", "", "path to env file (default: use os env)")
+	log        = logging.WithoutFields()
+	configPath = flag.String("config", "", "path to config file")
 )
 
 func main() {
@@ -21,8 +21,8 @@ func main() {
 	cosmos.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
 	flag.Parse()
 	var c api.ServiceParams
-	if err := utils.LoadFromEnv(&c, *envPath); err != nil {
-		log.Panicf("failed to load config from env: %+v", err)
+	if err := utils.LoadFromEnv(&c, *configPath); err != nil {
+		log.Panicf("failed to load config from yaml: %+v", err)
 	}
 	apiService := api.NewApiService(c)
 	done, err := apiService.Start()

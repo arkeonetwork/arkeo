@@ -10,13 +10,13 @@ import (
 )
 
 type ArkeoAuthManager struct {
-	contractId  uint64
-	chainId     string
-	privKey     *secp256k1.PrivKey
-	nonce       int64
-	nonceStore  *NonceStore
-	mu          sync.Mutex
-	logger      log.Logger
+	contractId uint64
+	chainId    string
+	privKey    *secp256k1.PrivKey
+	nonce      int64
+	nonceStore *NonceStore
+	mu         sync.Mutex
+	logger     log.Logger
 }
 
 func NewArkeoAuthManager(contractId uint64, chainId string, mnemonic string, nonceStore *NonceStore, logger log.Logger) (*ArkeoAuthManager, error) {
@@ -48,12 +48,12 @@ func NewArkeoAuthManager(contractId uint64, chainId string, mnemonic string, non
 	}
 
 	return &ArkeoAuthManager{
-		contractId:  contractId,
-		chainId:     chainId,
-		privKey:     privKey,
-		nonce:       lastNonce,
-		nonceStore:  nonceStore,
-		logger:      logger,
+		contractId: contractId,
+		chainId:    chainId,
+		privKey:    privKey,
+		nonce:      lastNonce,
+		nonceStore: nonceStore,
+		logger:     logger,
 	}, nil
 }
 
@@ -71,7 +71,7 @@ func (am *ArkeoAuthManager) GenerateAuthHeader() (string, error) {
 		}
 	}
 
-	// Generate message to sign (using existing function from auth.go)
+	// Generate message to sign (using existing function from sentinel_auth.go)
 	message := GenerateMessageToSign(am.contractId, am.nonce, am.chainId)
 
 	// Sign the message
@@ -80,7 +80,7 @@ func (am *ArkeoAuthManager) GenerateAuthHeader() (string, error) {
 		return "", fmt.Errorf("failed to sign message: %w", err)
 	}
 
-	// Generate auth string (using existing function from auth.go)
+	// Generate auth string (using existing function from sentinel_auth.go)
 	authString := GenerateArkAuthString(am.contractId, am.nonce, sig, am.chainId)
 
 	am.logger.Debug("generated auth header", "contractId", am.contractId, "nonce", am.nonce)

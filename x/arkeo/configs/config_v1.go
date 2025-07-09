@@ -14,7 +14,7 @@ func NewConfigValue010() *ConfigVals {
 			HandlerSetVersion:          0,                          // enable/disable set version handler
 			MaxContractLength:          5256000,                    // one year
 			MaxSupply:                  common.Tokens(121_000_000), // max supply of tokens
-			OpenContractCost:           common.Tokens(1),           // cost to open a contract
+			OpenContractCost:           20_000_000,                 // cost to open a contract (was common.Tokens(1))
 			MinProviderBond:            common.Tokens(1),           // min bond for a data provider to be able to open contracts with
 			ReserveTax:                 1000,                       // reserve income off provider income, in basis points
 			BlocksPerYear:              6311520,                    // blocks per year

@@ -7,11 +7,15 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
+// ProviderStatus defines the possible status values for a provider.
 enum ProviderStatus {
+  // OFFLINE indicates the provider is offline.
   OFFLINE = 0;
+  // ONLINE indicates the provider is online.
   ONLINE = 1;
 }
 
+// ProviderStatus defines the status of a provider.
 message Provider {
   bytes pub_key = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -35,16 +39,23 @@ message Provider {
   int64 settlement_duration = 12;
 }
 
+// ContractType defines the type of contract.
 enum ContractType {
+  // SUBSCRIPTION is a subscription contract.
   SUBSCRIPTION = 0;
+  // PAY_AS_YOU_GO is a pay-as-you-go contract.
   PAY_AS_YOU_GO = 1;
 }
 
+// ContractAuthorization defines contract authorization options.
 enum ContractAuthorization {
+  // STRICT means strict authorization.
   STRICT = 0;
+  // OPEN means open authorization.
   OPEN = 1;
 }
 
+// Contract represents a contract between client and provider.
 message Contract {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -76,13 +87,16 @@ message Contract {
   int64 queries_per_minute = 16;
 }
 
+// ContractSet defines a set of contracts.
 message ContractSet { repeated uint64 contract_ids = 1 [ packed = true ]; }
 
+// ContractExpirationSet defines a set of contract expirations.
 message ContractExpirationSet {
   int64 height = 1;
   ContractSet contract_set = 2;
 }
 
+// UserContractSet defines a set of contracts belonging to a user.
 message UserContractSet {
   bytes user = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];

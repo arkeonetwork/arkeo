@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/arkeonetwork/arkeo/directory/types"
 	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -32,14 +33,16 @@ type IDataStorage interface {
 	InsertBlock(ctx context.Context, b *Block) (*Entity, error)
 	UpsertValidatorPayoutEvent(ctx context.Context, evt atypes.EventValidatorPayout, height int64) (*Entity, error)
 	FindProvider(ctx context.Context, pubkey, service string) (*ArkeoProvider, error)
-	UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract) (*Entity, error)
+	UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract, txID string, height int64) (*Entity, error)
 	GetContract(ctx context.Context, contractId uint64) (*ArkeoContract, error)
-	CloseContract(ctx context.Context, contractID uint64, height int64) (*Entity, error)
+	CloseContract(ctx context.Context, contractID uint64, txID string, height int64) (*Entity, error)
 	UpdateProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error)
-	UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract) (*Entity, error)
+	UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract, txID string, height int64) (*Entity, error)
 	UpsertProviderMetadata(ctx context.Context, providerID, nonce int64, data sentinel.Metadata) (*Entity, error)
 	InsertBondProviderEvent(ctx context.Context, providerID int64, evt atypes.EventBondProvider, height int64, txID string) (*Entity, error)
 	InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error)
+	InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent, txID string, height int64) (*Entity, error)
+	UpsertIndexerStatus(ctx context.Context, height int64) (*Entity, error)
 }
 
 var _ IDataStorage = &DirectoryDB{}

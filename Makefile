@@ -141,11 +141,11 @@ build-docker-localnet:
 	@docker build . --file docker/Dockerfile.localnet -t ${IMAGE}:${TAG}
 
 # localnet: build-docker
-# 	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker-compose -f docker-compose-localnet.yaml  up
+# 	IMAGE_TAG=$(SHORT_COMMIT)-$(IMAGE_ARCH) docker compose -f docker-compose-localnet.yaml  up
 
 
 localnet: build-docker-localnet
-	IMAGE_TAG=${IMAGE}:${TAG} docker-compose -f docker/docker-compose-localnet.yaml  up
+	IMAGE_TAG=${IMAGE}:${TAG} docker compose -f docker/docker-compose-localnet.yaml  up
 # ------------------------------    Testnet   ------------------------------
 
 install-testnet-binary:
@@ -196,7 +196,7 @@ test-watch:
 # ------------------------------ Regression Tests ------------------------------
 
 test-regression:
-	@DOCKER_BUILDKIT=1 docker-compose -f ./test/regression/docker-compose.yml run -i -p 1317:1317 -p 3636:3636 -p 26657 --rm --build arkeo
+	@DOCKER_BUILDKIT=1 docker compose -f ./test/regression/docker-compose.yml run -i -p 1317:1317 -p 3636:3636 -p 26657 --rm --build arkeo
 
 test-regression-ci: test-regression
 
@@ -229,7 +229,8 @@ _test-regression:
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.36.0
 
 containerProtoVer=0.15.0
-containerProtoImage=ghcr.io/cosmos/proto-builder:$(containerProtoVer)
+# containerProtoImage=ghcr.io/cosmos/proto-builder:$(containerProtoVer)
+containerProtoImage=arkeo-proto-builder-swagger:latest
 containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
@@ -249,7 +250,7 @@ proto-gen:
 proto-swagger-gen:
 	@echo "Generating Swagger of Protobuf"
 	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) sh ./scripts/protoc-swagger-gen.sh
-	./scripts/customize-swagger.sh
+	./scripts/customise-swagger.sh
 
 proto-format:
 	@echo "Formatting Protobuf files"

@@ -26,7 +26,7 @@ func TestFindContract(t *testing.T) {
 			pgxmock.NewRows([]string{
 				"id", "created", "updated", "provider", "service", "delegate_pubkey", "client_pubkey", "height", "contract_type", "duration", "rate_asset",
 				"rate_amount", "open_cost", "deposit", "auth", "queries_per_minute", "settlement_duration", "paid", "reserve_contrib_asset",
-				"reserve_contrib_usd", "closed_height", "provider_id",
+				"reserve_contrib_usd", "settlement_height", "provider_id",
 			}).AddRow(int64(1), testTime, testTime, testPubKey.String(), "mock", testPubKey.String(), testPubKey.String(), int64(1024), "PayAsYouGo",
 				int64(10), "uarkeo", int64(10), int64(10), int64(100000), "STRICT", int64(10), int64(10), int64(1000), int64(100), int64(100), int64(2048), int64(1)),
 		)
@@ -47,7 +47,7 @@ func TestFindContract(t *testing.T) {
 	assert.Equal(t, int64(10), contract.OpenCost)
 	assert.Equal(t, int64(100000), contract.Deposit)
 	assert.Equal(t, "STRICT", contract.Authorization)
-	assert.Equal(t, int64(2048), contract.ClosedHeight)
+	assert.Equal(t, int64(2048), contract.SettlementHeight)
 	assert.Equal(t, int64(1), contract.ProviderID)
 	assert.Equal(t, int64(10), contract.QueriesPerMinute)
 	assert.Equal(t, int64(1000), contract.Paid)

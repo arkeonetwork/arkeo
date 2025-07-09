@@ -35,6 +35,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// MsgBondProvider is used to bond a provider.
 type MsgBondProvider struct {
 	Creator  string                `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	Provider string                `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
@@ -96,6 +97,7 @@ func (m *MsgBondProvider) GetService() string {
 	return ""
 }
 
+// MsgBondProviderResponse is the response for MsgBondProvider.
 type MsgBondProviderResponse struct {
 }
 
@@ -132,6 +134,7 @@ func (m *MsgBondProviderResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgBondProviderResponse proto.InternalMessageInfo
 
+// MsgModProvider is used to modify provider details.
 type MsgModProvider struct {
 	Creator             string                                      `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	Provider            github_com_arkeonetwork_arkeo_common.PubKey `protobuf:"bytes,2,opt,name=provider,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider,omitempty"`
@@ -256,6 +259,7 @@ func (m *MsgModProvider) GetSettlementDuration() int64 {
 	return 0
 }
 
+// MsgModProviderResponse is the response for MsgModProvider.
 type MsgModProviderResponse struct {
 }
 
@@ -292,6 +296,7 @@ func (m *MsgModProviderResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgModProviderResponse proto.InternalMessageInfo
 
+// MsgOpenContract is used to open a new contract between a client and provider.
 type MsgOpenContract struct {
 	Creator            string                `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	Provider           string                `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
@@ -417,6 +422,7 @@ func (m *MsgOpenContract) GetQueriesPerMinute() int64 {
 	return 0
 }
 
+// MsgOpenContractResponse is the response for MsgOpenContract.
 type MsgOpenContractResponse struct {
 }
 
@@ -453,6 +459,7 @@ func (m *MsgOpenContractResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgOpenContractResponse proto.InternalMessageInfo
 
+// MsgCloseContract is used to close an existing contract.
 type MsgCloseContract struct {
 	Creator    string                                      `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	ContractId uint64                                      `protobuf:"varint,2,opt,name=contract_id,json=contractId,proto3" json:"contract_id,omitempty"`
@@ -521,6 +528,7 @@ func (m *MsgCloseContract) GetDelegate() github_com_arkeonetwork_arkeo_common.Pu
 	return nil
 }
 
+// MsgCloseContractResponse is the response for MsgCloseContract.
 type MsgCloseContractResponse struct {
 }
 
@@ -557,6 +565,7 @@ func (m *MsgCloseContractResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgCloseContractResponse proto.InternalMessageInfo
 
+// MsgClaimContractIncome is used by a provider to claim contract income.
 type MsgClaimContractIncome struct {
 	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	ContractId uint64 `protobuf:"varint,2,opt,name=contract_id,json=contractId,proto3" json:"contract_id,omitempty"`
@@ -625,6 +634,7 @@ func (m *MsgClaimContractIncome) GetNonce() int64 {
 	return 0
 }
 
+// MsgClaimContractIncomeResponse is the response for MsgClaimContractIncome.
 type MsgClaimContractIncomeResponse struct {
 }
 
@@ -661,6 +671,7 @@ func (m *MsgClaimContractIncomeResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgClaimContractIncomeResponse proto.InternalMessageInfo
 
+// MsgSetVersion is used to set the chain version.
 // this line is used by starport scaffolding # proto/tx/message
 type MsgSetVersion struct {
 	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
@@ -714,6 +725,7 @@ func (m *MsgSetVersion) GetVersion() int64 {
 	return 0
 }
 
+// MsgSetVersionResponse is the response for MsgSetVersion.
 type MsgSetVersionResponse struct {
 }
 
@@ -851,11 +863,17 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
+	// BondProvider creates or updates a provider bond.
 	BondProvider(ctx context.Context, in *MsgBondProvider, opts ...grpc.CallOption) (*MsgBondProviderResponse, error)
+	// ModProvider modifies provider details.
 	ModProvider(ctx context.Context, in *MsgModProvider, opts ...grpc.CallOption) (*MsgModProviderResponse, error)
+	// OpenContract opens a contract between a client and provider.
 	OpenContract(ctx context.Context, in *MsgOpenContract, opts ...grpc.CallOption) (*MsgOpenContractResponse, error)
+	// CloseContract closes an existing contract.
 	CloseContract(ctx context.Context, in *MsgCloseContract, opts ...grpc.CallOption) (*MsgCloseContractResponse, error)
+	// ClaimContractIncome allows a provider to claim contract income.
 	ClaimContractIncome(ctx context.Context, in *MsgClaimContractIncome, opts ...grpc.CallOption) (*MsgClaimContractIncomeResponse, error)
+	// SetVersion sets the chain version.
 	// this line is used by starport scaffolding # proto/tx/rpc
 	SetVersion(ctx context.Context, in *MsgSetVersion, opts ...grpc.CallOption) (*MsgSetVersionResponse, error)
 }
@@ -924,11 +942,17 @@ func (c *msgClient) SetVersion(ctx context.Context, in *MsgSetVersion, opts ...g
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
+	// BondProvider creates or updates a provider bond.
 	BondProvider(context.Context, *MsgBondProvider) (*MsgBondProviderResponse, error)
+	// ModProvider modifies provider details.
 	ModProvider(context.Context, *MsgModProvider) (*MsgModProviderResponse, error)
+	// OpenContract opens a contract between a client and provider.
 	OpenContract(context.Context, *MsgOpenContract) (*MsgOpenContractResponse, error)
+	// CloseContract closes an existing contract.
 	CloseContract(context.Context, *MsgCloseContract) (*MsgCloseContractResponse, error)
+	// ClaimContractIncome allows a provider to claim contract income.
 	ClaimContractIncome(context.Context, *MsgClaimContractIncome) (*MsgClaimContractIncomeResponse, error)
+	// SetVersion sets the chain version.
 	// this line is used by starport scaffolding # proto/tx/rpc
 	SetVersion(context.Context, *MsgSetVersion) (*MsgSetVersionResponse, error)
 }

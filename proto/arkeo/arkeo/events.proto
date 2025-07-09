@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
@@ -9,6 +8,7 @@ import "arkeo/arkeo/keeper.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
+// EventBondProvider is emitted when a provider bonds tokens to their service.
 message EventBondProvider {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -25,6 +25,7 @@ message EventBondProvider {
   ];
 }
 
+// EventModProvider is emitted when a provider's metadata or status is modified.
 message EventModProvider {
   bytes creator = 1 [ (gogoproto.casttype) =
                           "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
@@ -48,6 +49,7 @@ message EventModProvider {
   int64 settlement_duration = 12;
 }
 
+// EventOpenContract is emitted when a contract is opened on chain.
 message EventOpenContract {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -70,8 +72,10 @@ message EventOpenContract {
   int64 settlement_duration = 12;
   ContractAuthorization authorization = 13;
   int64 queries_per_minute = 14;
+  int64 settlement_height = 15;
 }
 
+// EventSettleContract is emitted when a contract is settled.
 message EventSettleContract {
   bytes provider = 1
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
@@ -96,6 +100,7 @@ message EventSettleContract {
   ];
 }
 
+// EventCloseContract is emitted when a contract is closed or expires.
 message EventCloseContract {
   uint64 contract_id = 1;
   bytes provider = 2
@@ -107,6 +112,7 @@ message EventCloseContract {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
 }
 
+// EventValidatorPayout is emitted when a validator receives a payout.
 message EventValidatorPayout {
   bytes validator = 1 [ (gogoproto.casttype) =
                             "github.com/cosmos/cosmos-sdk/types.AccAddress" ];

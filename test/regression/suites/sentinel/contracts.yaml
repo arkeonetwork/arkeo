@@ -50,7 +50,7 @@ asserts:
   - .contract_type == "SUBSCRIPTION"
   - .duration == 10
   - .open_cost == 100000000
-  - .closed_height == 0
+  - .settlement_height == 0
   - .deposit == 100
   - .authorization == "STRICT"
   - .queries_per_minute == 1

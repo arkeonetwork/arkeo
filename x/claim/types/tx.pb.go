@@ -32,10 +32,15 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// / MsgClaimEth defines a message for claiming ETH tokens with an EIP712
+// / signature.
 type MsgClaimEth struct {
-	Creator    string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The address initiating the claim.
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The ETH address to claim for.
 	EthAddress string `protobuf:"bytes,2,opt,name=eth_address,json=ethAddress,proto3" json:"eth_address,omitempty"`
-	Signature  string `protobuf:"bytes,3,opt,name=signature,proto3" json:"signature,omitempty"`
+	// The EIP712 signature from eth_address.
+	Signature string `protobuf:"bytes,3,opt,name=signature,proto3" json:"signature,omitempty"`
 }
 
 func (m *MsgClaimEth) Reset()         { *m = MsgClaimEth{} }
@@ -92,11 +97,17 @@ func (m *MsgClaimEth) GetSignature() string {
 	return ""
 }
 
+// / MsgClaimEthResponse defines the response after successfully claiming ETH
+// / tokens.
 type MsgClaimEthResponse struct {
-	EthAddress       string `protobuf:"bytes,1,opt,name=ethAddress,proto3" json:"ethAddress,omitempty"`
-	ArkeoAddress     string `protobuf:"bytes,2,opt,name=arkeoAddress,proto3" json:"arkeoAddress,omitempty"`
-	EthClaimAmount   int64  `protobuf:"varint,3,opt,name=ethClaimAmount,proto3" json:"ethClaimAmount,omitempty"`
-	ArkeoClaimAmount int64  `protobuf:"varint,4,opt,name=arkeoClaimAmount,proto3" json:"arkeoClaimAmount,omitempty"`
+	// The ETH address that performed the claim.
+	EthAddress string `protobuf:"bytes,1,opt,name=ethAddress,proto3" json:"ethAddress,omitempty"`
+	// The Arkeo address that received the claim.
+	ArkeoAddress string `protobuf:"bytes,2,opt,name=arkeoAddress,proto3" json:"arkeoAddress,omitempty"`
+	// The claimed ETH amount.
+	EthClaimAmount int64 `protobuf:"varint,3,opt,name=ethClaimAmount,proto3" json:"ethClaimAmount,omitempty"`
+	// The claimed Arkeo amount.
+	ArkeoClaimAmount int64 `protobuf:"varint,4,opt,name=arkeoClaimAmount,proto3" json:"arkeoClaimAmount,omitempty"`
 }
 
 func (m *MsgClaimEthResponse) Reset()         { *m = MsgClaimEthResponse{} }
@@ -160,7 +171,9 @@ func (m *MsgClaimEthResponse) GetArkeoClaimAmount() int64 {
 	return 0
 }
 
+// / MsgClaimArkeo defines a message for claiming Arkeo tokens for the sender.
 type MsgClaimArkeo struct {
+	// The address initiating the claim.
 	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 }
 
@@ -204,9 +217,13 @@ func (m *MsgClaimArkeo) GetCreator() string {
 	return ""
 }
 
+// / MsgClaimArkeoResponse defines the response after successfully claiming Arkeo
+// / tokens.
 type MsgClaimArkeoResponse struct {
+	// The address that received the claimed Arkeo tokens.
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Amount  int64  `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// The claimed Arkeo amount.
+	Amount int64 `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
 }
 
 func (m *MsgClaimArkeoResponse) Reset()         { *m = MsgClaimArkeoResponse{} }
@@ -256,8 +273,11 @@ func (m *MsgClaimArkeoResponse) GetAmount() int64 {
 	return 0
 }
 
+// / MsgTransferClaim transfers an existing claim to another address.
 type MsgTransferClaim struct {
-	Creator   string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The address initiating the claim transfer.
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The destination address for claim transfer.
 	ToAddress string `protobuf:"bytes,2,opt,name=toAddress,proto3" json:"toAddress,omitempty"`
 }
 
@@ -308,6 +328,7 @@ func (m *MsgTransferClaim) GetToAddress() string {
 	return ""
 }
 
+// / MsgTransferClaimResponse is the response for a claim transfer.
 type MsgTransferClaimResponse struct {
 }
 
@@ -344,11 +365,17 @@ func (m *MsgTransferClaimResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgTransferClaimResponse proto.InternalMessageInfo
 
+// / MsgAddClaim adds a new claim record for a specified chain, address, and
+// / amount.
 type MsgAddClaim struct {
+	// The address initiating the add claim message.
 	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
-	Chain   Chain  `protobuf:"varint,2,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
+	// The blockchain for the claim.
+	Chain Chain `protobuf:"varint,2,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
+	// The address for the claim record.
 	Address string `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
-	Amount  int64  `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
+	// The amount being claimed.
+	Amount int64 `protobuf:"varint,4,opt,name=amount,proto3" json:"amount,omitempty"`
 }
 
 func (m *MsgAddClaim) Reset()         { *m = MsgAddClaim{} }
@@ -412,6 +439,7 @@ func (m *MsgAddClaim) GetAmount() int64 {
 	return 0
 }
 
+// / MsgAddClaimResponse is the response after successfully adding a claim.
 type MsgAddClaimResponse struct {
 }
 
@@ -448,10 +476,15 @@ func (m *MsgAddClaimResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgAddClaimResponse proto.InternalMessageInfo
 
+// / MsgClaimThorchain delegates a claim from one address to another via
+// / Thorchain.
 type MsgClaimThorchain struct {
-	Creator     string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The address initiating the claim delegation.
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	// The source address delegating the claim.
 	FromAddress string `protobuf:"bytes,2,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress   string `protobuf:"bytes,3,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
+	// The destination address to delegate the claim to.
+	ToAddress string `protobuf:"bytes,3,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
 }
 
 func (m *MsgClaimThorchain) Reset()         { *m = MsgClaimThorchain{} }
@@ -508,9 +541,12 @@ func (m *MsgClaimThorchain) GetToAddress() string {
 	return ""
 }
 
+// / MsgClaimThorchainResponse is the response after claiming via Thorchain.
 type MsgClaimThorchainResponse struct {
+	// The source address for claim delegation.
 	FromAddress string `protobuf:"bytes,1,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress   string `protobuf:"bytes,2,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
+	// The destination address for claim delegation.
+	ToAddress string `protobuf:"bytes,2,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
 }
 
 func (m *MsgClaimThorchainResponse) Reset()         { *m = MsgClaimThorchainResponse{} }
@@ -635,10 +671,15 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
+	// / Claim ETH tokens using an EIP712 signature from the provided ETH address.
 	ClaimEth(ctx context.Context, in *MsgClaimEth, opts ...grpc.CallOption) (*MsgClaimEthResponse, error)
+	// / Claim Arkeo tokens for the specified address.
 	ClaimArkeo(ctx context.Context, in *MsgClaimArkeo, opts ...grpc.CallOption) (*MsgClaimArkeoResponse, error)
+	// / Transfer a claim from one address to another.
 	TransferClaim(ctx context.Context, in *MsgTransferClaim, opts ...grpc.CallOption) (*MsgTransferClaimResponse, error)
+	// / Add a new claim record for the given chain and address.
 	AddClaim(ctx context.Context, in *MsgAddClaim, opts ...grpc.CallOption) (*MsgAddClaimResponse, error)
+	// / Claim tokens on Arkeo based on Thorchain claim delegation.
 	ClaimThorchain(ctx context.Context, in *MsgClaimThorchain, opts ...grpc.CallOption) (*MsgClaimThorchainResponse, error)
 }
 
@@ -697,10 +738,15 @@ func (c *msgClient) ClaimThorchain(ctx context.Context, in *MsgClaimThorchain, o
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
+	// / Claim ETH tokens using an EIP712 signature from the provided ETH address.
 	ClaimEth(context.Context, *MsgClaimEth) (*MsgClaimEthResponse, error)
+	// / Claim Arkeo tokens for the specified address.
 	ClaimArkeo(context.Context, *MsgClaimArkeo) (*MsgClaimArkeoResponse, error)
+	// / Transfer a claim from one address to another.
 	TransferClaim(context.Context, *MsgTransferClaim) (*MsgTransferClaimResponse, error)
+	// / Add a new claim record for the given chain and address.
 	AddClaim(context.Context, *MsgAddClaim) (*MsgAddClaimResponse, error)
+	// / Claim tokens on Arkeo based on Thorchain claim delegation.
 	ClaimThorchain(context.Context, *MsgClaimThorchain) (*MsgClaimThorchainResponse, error)
 }
 

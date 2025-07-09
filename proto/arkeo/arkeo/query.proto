@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 package arkeo.arkeo;
 
 import "gogoproto/gogo.proto";
@@ -12,29 +11,32 @@ import "arkeo/arkeo/keeper.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
-// Query defines the gRPC querier service.
+// Query defines the gRPC querier service for the Arkeo module.
 service Query {
-
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/arkeo/params";
   }
+  // FetchProvider queries a specific provider by pubkey and service.
   rpc FetchProvider(QueryFetchProviderRequest)
       returns (QueryFetchProviderResponse) {
     option (google.api.http).get = "/arkeo/provider/{pubkey}/{service}";
   }
+  // ProviderAll queries for a list of all providers.
   rpc ProviderAll(QueryAllProviderRequest) returns (QueryAllProviderResponse) {
     option (google.api.http).get = "/arkeo/providers";
   }
+  // FetchContract queries a specific contract by contract_id.
   rpc FetchContract(QueryFetchContractRequest)
       returns (QueryFetchContractResponse) {
     option (google.api.http).get = "/arkeo/contract/{contract_id}";
   }
+  // ContractAll queries for a list of all contracts.
   rpc ContractAll(QueryAllContractRequest) returns (QueryAllContractResponse) {
     option (google.api.http).get = "/arkeo/contracts";
   }
-
-  // Queries an active contract by spender, provider and service.
+  // ActiveContract queries an active contract by provider, service, and
+  // spender.
   rpc ActiveContract(QueryActiveContractRequest)
       returns (QueryActiveContractResponse) {
     option (google.api.http).get =
@@ -42,55 +44,82 @@ service Query {
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
+// QueryParamsRequest is the request message for querying module parameters.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
+// QueryParamsResponse is the response message containing the module parameters.
 message QueryParamsResponse {
-
   // params holds all the parameters of this module.
   Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
+// QueryFetchProviderRequest is the request type for fetching a provider.
+// QueryFetchProviderRequest is the request message for fetching a provider by
+// pubkey and service.
 message QueryFetchProviderRequest {
   string pubkey = 1;
   string service = 2;
 }
 
+// QueryFetchProviderResponse is the response type for fetching a provider.
+// QueryFetchProviderResponse is the response message containing the provider
+// information.
 message QueryFetchProviderResponse {
   Provider provider = 1 [ (gogoproto.nullable) = false ];
 }
 
+// QueryAllProviderRequest is the request for listing all providers.
+// QueryAllProviderRequest is the request message for listing all providers.
 message QueryAllProviderRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
+// QueryAllProviderResponse is the response for listing all providers.
+// QueryAllProviderResponse is the response message containing a list of all
+// providers.
 message QueryAllProviderResponse {
   repeated Provider provider = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
+// QueryFetchContractRequest is the request type for fetching a contract.
+// QueryFetchContractRequest is the request message for fetching a contract by
+// contract_id.
 message QueryFetchContractRequest { uint64 contract_id = 1; }
 
+// QueryFetchContractResponse is the response type for fetching a contract.
+// QueryFetchContractResponse is the response message containing the contract
+// information.
 message QueryFetchContractResponse {
   Contract contract = 1 [ (gogoproto.nullable) = false ];
 }
 
+// QueryAllContractRequest is the request for listing all contracts.
+// QueryAllContractRequest is the request message for listing all contracts.
 message QueryAllContractRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
+// QueryAllContractResponse is the response for listing all contracts.
+// QueryAllContractResponse is the response message containing a list of all
+// contracts.
 message QueryAllContractResponse {
   repeated Contract contract = 1 [ (gogoproto.nullable) = false ];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
-// this line is used by starport scaffolding # 3
+// QueryActiveContractRequest is the request message for querying an active
+// contract.
 message QueryActiveContractRequest {
   string provider = 1;
   string service = 2;
   string spender = 3;
 }
 
+// QueryActiveContractResponse returns the active contract information.
+// QueryActiveContractResponse is the response message containing the active
+// contract.
 message QueryActiveContractResponse {
   Contract contract = 1 [ (gogoproto.nullable) = false ];
 }

@@ -143,6 +143,12 @@ func (s *Service) fillGap(gap db.BlockGap) error {
 
 	for i := gap.Start; i <= gap.End; i++ {
 		s.logger.Infof("processing block: %d", i)
+
+		// Upsert indexer status to track latest block height
+		if _, err := s.db.UpsertIndexerStatus(context.Background(), i); err != nil {
+			s.logger.WithError(err).Errorf("failed to upsert indexer status for height %d", i)
+		}
+
 		block, err := s.consumeHistoricalBlock(i)
 		if err != nil {
 			s.logger.WithError(err).Errorf("err consuming block %d:", i)

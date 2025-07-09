@@ -25,12 +25,15 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// actions for arkeo chain
+// Action enumerates all possible claim actions on Arkeo.
 type Action int32
 
 const (
-	ACTION_CLAIM    Action = 0
-	ACTION_VOTE     Action = 1
+	// ACTION_CLAIM indicates a claim action.
+	ACTION_CLAIM Action = 0
+	// ACTION_VOTE indicates a vote action.
+	ACTION_VOTE Action = 1
+	// ACTION_DELEGATE indicates a delegate action.
 	ACTION_DELEGATE Action = 2
 )
 
@@ -54,10 +57,13 @@ func (Action) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_db5386e8ec5cd28f, []int{0}
 }
 
+// Chain represents the blockchain origin for the claim.
 type Chain int32
 
 const (
-	ARKEO    Chain = 0
+	// ARKEO indicates the Arkeo chain.
+	ARKEO Chain = 0
+	// ETHEREUM indicates the Ethereum chain.
 	ETHEREUM Chain = 1
 )
 
@@ -79,17 +85,23 @@ func (Chain) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_db5386e8ec5cd28f, []int{1}
 }
 
-// A Claim Records is the metadata of claim data per address
+// ClaimRecord is the metadata of claim data per address.
 type ClaimRecord struct {
+	// chain specifies the blockchain origin of the claim.
 	Chain Chain `protobuf:"varint,1,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
-	// arkeo address of claim user
+	// address is the arkeo address of claim user.
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty" yaml:"address"`
-	// claimable amount per action (claim, vote, delegate - changed to 0 after
-	// action completed)
-	AmountClaim    types.Coin `protobuf:"bytes,3,opt,name=amount_claim,json=amountClaim,proto3" json:"amount_claim" yaml:"amount_claim"`
-	AmountVote     types.Coin `protobuf:"bytes,4,opt,name=amount_vote,json=amountVote,proto3" json:"amount_vote" yaml:"amount_vote"`
+	// amount_claim is the claimable amount for claim action (set to 0 after
+	// action completed).
+	AmountClaim types.Coin `protobuf:"bytes,3,opt,name=amount_claim,json=amountClaim,proto3" json:"amount_claim" yaml:"amount_claim"`
+	// amount_vote is the claimable amount for vote action (set to 0 after action
+	// completed).
+	AmountVote types.Coin `protobuf:"bytes,4,opt,name=amount_vote,json=amountVote,proto3" json:"amount_vote" yaml:"amount_vote"`
+	// amount_delegate is the claimable amount for delegate action (set to 0 after
+	// action completed).
 	AmountDelegate types.Coin `protobuf:"bytes,5,opt,name=amount_delegate,json=amountDelegate,proto3" json:"amount_delegate" yaml:"amount_delegate"`
-	IsTransferable bool       `protobuf:"varint,6,opt,name=is_transferable,json=isTransferable,proto3" json:"is_transferable,omitempty"`
+	// is_transferable specifies if the claim can be transferred.
+	IsTransferable bool `protobuf:"varint,6,opt,name=is_transferable,json=isTransferable,proto3" json:"is_transferable,omitempty"`
 }
 
 func (m *ClaimRecord) Reset()         { *m = ClaimRecord{} }

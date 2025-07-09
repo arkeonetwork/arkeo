@@ -8,9 +8,9 @@ import "cosmos_proto/cosmos.proto";
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 // Params defines the parameters for the module.
-message Params { 
-    option (gogoproto.goproto_stringer) = false; 
-    uint64 block_per_year = 8;
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  uint64 block_per_year = 8;
 
-    uint64 emission_curve = 9;
+  uint64 emission_curve = 9;
 }

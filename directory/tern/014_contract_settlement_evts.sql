@@ -16,10 +16,16 @@ create table contract_settlement_events
 
 create index contract_settle_evts_contract_id_idx on contract_settlement_events (contract_id);
 
+drop view providers_v;
+drop view providers_base_v;
+{{ template "views/providers_base_v_v2.sql" . }}
+{{ template "views/providers_v_v1.sql" . }}
+
 ---- create above / drop below ----
+
 -- {{ template "views/providers_base_v_v1.sql" . }}
 drop view providers_v;
 drop view providers_base_v;
-{{ template "views/providers_base_v_v1.sql" . }}
-{{ template "views/providers_v.sql" . }}
+{{ template "views/providers_base_v_v2.sql" . }}
+{{ template "views/providers_v_v1.sql" . }}
 drop table contract_settlement_events;

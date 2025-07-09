@@ -8,6 +8,7 @@ import "arkeo/arkeo/keeper.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
+// ValidatorVersion defines the version of a validator in genesis state.
 message ValidatorVersion {
   string validator_address = 1;
   int64 version = 2;
@@ -24,6 +25,7 @@ message GenesisState {
   repeated UserContractSet user_contract_sets = 6
       [ (gogoproto.nullable) = false ];
   int64 version = 7;
-  repeated ValidatorVersion validator_versions = 8 [(gogoproto.nullable) = false];
+  repeated ValidatorVersion validator_versions = 8
+      [ (gogoproto.nullable) = false ];
   // this line is used by starport scaffolding # genesis/proto/state
 }

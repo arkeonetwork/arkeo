@@ -15,13 +15,13 @@
 create or replace view network_stats_v as
 (
 select (select count(1) from contracts)                                 as total_contracts,
-       (select count(1) from contracts c where c.closed_height = 0)     as open_contracts,
+       (select count(1) from contracts c where c.settlement_height = 0)     as open_contracts,
        (SELECT percentile_cont(0.5) within group (order by duration) -- percentile_disc
         from contracts c
-        where c.closed_height = 0)                                      as median_open_contract_length,
+        where c.settlement_height = 0)                                      as median_open_contract_length,
        (SELECT percentile_cont(0.5) within group (order by rate_amount)
         from contracts c
-        where c.closed_height = 0)                                      as median_open_contract_rate,
-       (select count(1) from providers where status = 'Online')         as total_online_providers,
+        where c.settlement_height = 0)                                      as median_open_contract_rate,
+       (select count(1) from providers where status = 'ONLINE')         as total_online_providers,
        (select coalesce(sum(nonce), 0) from contract_settlement_events) as total_queries, -- nonce here is serviced request count
        (select coalesce(sum(paid), 0) from contract_settlement_events)  as total_paid );

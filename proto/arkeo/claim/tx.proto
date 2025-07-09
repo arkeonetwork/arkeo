@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 package arkeo.claim;
 
 import "cosmos_proto/cosmos.proto";
@@ -10,73 +9,112 @@ import "amino/amino.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
-
-// Msg defines the Msg service.
+/// Msg defines the claim module transaction service for Arkeo chain.
 service Msg {
   option (cosmos.msg.v1.service) = true;
+  /// Claim ETH tokens using an EIP712 signature from the provided ETH address.
   rpc ClaimEth(MsgClaimEth) returns (MsgClaimEthResponse);
+  /// Claim Arkeo tokens for the specified address.
   rpc ClaimArkeo(MsgClaimArkeo) returns (MsgClaimArkeoResponse);
+  /// Transfer a claim from one address to another.
   rpc TransferClaim(MsgTransferClaim) returns (MsgTransferClaimResponse);
+  /// Add a new claim record for the given chain and address.
   rpc AddClaim(MsgAddClaim) returns (MsgAddClaimResponse);
+  /// Claim tokens on Arkeo based on Thorchain claim delegation.
   rpc ClaimThorchain(MsgClaimThorchain) returns (MsgClaimThorchainResponse);
-
 }
 
+/// MsgClaimEth defines a message for claiming ETH tokens with an EIP712
+/// signature.
 message MsgClaimEth {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name)           = "arkeo/x/claim/MsgClaimEth";  
-  string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  string eth_address = 2; // the address the claim is for
-  string signature = 3; // EIP712 signature that has to be signed by ethAddress
+  option (amino.name) = "arkeo/x/claim/MsgClaimEth";
+  // The address initiating the claim.
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The ETH address to claim for.
+  string eth_address = 2;
+  // The EIP712 signature from eth_address.
+  string signature = 3;
 }
 
+/// MsgClaimEthResponse defines the response after successfully claiming ETH
+/// tokens.
 message MsgClaimEthResponse {
-  string ethAddress = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string arkeoAddress = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  int64 ethClaimAmount = 3 [(cosmos_proto.scalar) = "cosmos.Int"];
-  int64 arkeoClaimAmount = 4 [(cosmos_proto.scalar) = "cosmos.Int"];
+  // The ETH address that performed the claim.
+  string ethAddress = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The Arkeo address that received the claim.
+  string arkeoAddress = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The claimed ETH amount.
+  int64 ethClaimAmount = 3 [ (cosmos_proto.scalar) = "cosmos.Int" ];
+  // The claimed Arkeo amount.
+  int64 arkeoClaimAmount = 4 [ (cosmos_proto.scalar) = "cosmos.Int" ];
 }
 
+/// MsgClaimArkeo defines a message for claiming Arkeo tokens for the sender.
 message MsgClaimArkeo {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name)           = "arkeo/x/claim/MsgClaimArkeo";  
-  string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
+  option (amino.name) = "arkeo/x/claim/MsgClaimArkeo";
+  // The address initiating the claim.
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
+/// MsgClaimArkeoResponse defines the response after successfully claiming Arkeo
+/// tokens.
 message MsgClaimArkeoResponse {
-  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  int64 amount = 2 [(cosmos_proto.scalar) = "cosmos.Int"];
+  // The address that received the claimed Arkeo tokens.
+  string address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The claimed Arkeo amount.
+  int64 amount = 2 [ (cosmos_proto.scalar) = "cosmos.Int" ];
 }
 
+/// MsgTransferClaim transfers an existing claim to another address.
 message MsgTransferClaim {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name)           = "arkeo/x/claim/MsgTransferClaim"; 
-  string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  string toAddress = 2 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
+  option (amino.name) = "arkeo/x/claim/MsgTransferClaim";
+  // The address initiating the claim transfer.
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The destination address for claim transfer.
+  string toAddress = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
+/// MsgTransferClaimResponse is the response for a claim transfer.
 message MsgTransferClaimResponse {}
 
+/// MsgAddClaim adds a new claim record for a specified chain, address, and
+/// amount.
 message MsgAddClaim {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name)           = "arkeo/x/claim/MsgAddClaim"; 
-  string creator = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
+  option (amino.name) = "arkeo/x/claim/MsgAddClaim";
+  // The address initiating the add claim message.
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The blockchain for the claim.
   Chain chain = 2;
+  // The address for the claim record.
   string address = 3;
+  // The amount being claimed.
   int64 amount = 4;
 }
 
+/// MsgAddClaimResponse is the response after successfully adding a claim.
 message MsgAddClaimResponse {}
 
+/// MsgClaimThorchain delegates a claim from one address to another via
+/// Thorchain.
 message MsgClaimThorchain {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name)           = "arkeo/x/claim/MsgClaimThorchain"; 
-  string  creator  = 1 [(cosmos_proto.scalar)  = "cosmos.AddressString"] ;
-  string from_address = 2; // the address that is delegating the claim
-  string to_address = 3; // the address to delegate the claim to
+  option (amino.name) = "arkeo/x/claim/MsgClaimThorchain";
+  // The address initiating the claim delegation.
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The source address delegating the claim.
+  string from_address = 2;
+  // The destination address to delegate the claim to.
+  string to_address = 3;
 }
 
+/// MsgClaimThorchainResponse is the response after claiming via Thorchain.
 message MsgClaimThorchainResponse {
-  string from_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string to_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // The source address for claim delegation.
+  string from_address = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The destination address for claim delegation.
+  string to_address = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }

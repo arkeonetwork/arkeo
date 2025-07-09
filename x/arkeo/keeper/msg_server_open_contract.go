@@ -119,7 +119,10 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 	}
 
 	if !activeContract.IsEmpty() && !activeContract.IsExpired(ctx.BlockHeight()) {
-		return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
+		if msg.ContractType != types.ContractType_PAY_AS_YOU_GO {
+			return errors.Wrapf(types.ErrOpenContractAlreadyOpen, "expires in %d blocks", activeContract.Expiration()-ctx.BlockHeight())
+		}
+		// For PAYG, allow multiple overlapping contracts
 	}
 
 	return nil
