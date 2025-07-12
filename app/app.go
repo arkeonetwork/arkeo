@@ -479,15 +479,23 @@ func NewArkeoApp(
 	})
 
 	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		sdkCtx := sdk.UnwrapSDKContext(ctx)
-		// Get the current params
-		arkeoParams := app.Keepers.ArkeoKeeper.GetParams(sdkCtx)
-		// Set the emission curve to the new value
-		arkeoParams.EmissionCurve = 10
-		// Save the updated params
-		app.Keepers.ArkeoKeeper.SetParams(sdkCtx, arkeoParams)
-		// Run the rest of the upgrade (other migrations)
-		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+
+		vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		if err != nil {
+			return vm, err
+		}
+
+		updated, err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		if err != nil {
+			return vm, err
+		}
+		if updated {
+			app.Logger().Info("emission curve upgraded to 10")
+		} else {
+			app.Logger().Info("emission curve already at new value; no update")
+		}
+		return vm, nil
+
 	})
 
 	groupConfig := group.DefaultConfig()

@@ -61,14 +61,14 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	emissionCurve := sdkmath.LegacyNewDec(int64(params.EmissionCurve)) // Emission curve factor
 	blocksPerYear := sdkmath.LegacyNewDec(int64(params.BlockPerYear))
 
-	//mgr.keeper.Logger().Info(
-	//	"Block Reward Calculation Inputs",
-	//	"block_height", ctx.BlockHeight(),
-	//	"reserve_supply", reserveSupply.Amount.String(),
-	//	"emission_curve", emissionCurve.String(),
-	//	"blocks_per_year", blocksPerYear.String(),
-	//	"validator_payout_cycle", validatorPayoutCycle.String(),
-	//)
+	mgr.keeper.Logger().Info(
+		"Block Reward Calculation Inputs",
+		"block_height", ctx.BlockHeight(),
+		"reserve_supply", reserveSupply.Amount.String(),
+		"emission_curve", emissionCurve.String(),
+		"blocks_per_year", blocksPerYear.String(),
+		"validator_payout_cycle", validatorPayoutCycle.String(),
+	)
 
 	blockReward := mgr.calcBlockReward(ctx, reserveSupply.Amount, emissionCurve, blocksPerYear, validatorPayoutCycle)
 	mgr.keeper.Logger().Info(fmt.Sprintf("Block Reward for block number %d, %v", ctx.BlockHeight(), blockReward))

@@ -141,6 +141,11 @@ if [ ! -f ~/.arkeo/config/genesis.json ]; then
 	jq --arg DENOM "$TOKEN" --arg AMOUNT "$TOTAL_SUPPLY" '.app_state.bank.supply = [{"denom": $DENOM, "amount": $AMOUNT}]' <~/.arkeo/config/genesis.json >/tmp/genesis.json
 	mv /tmp/genesis.json ~/.arkeo/config/genesis.json
 
+  # Set proposal voting period to 15min (900s) and expedited to 10min (600s)
+  jq '.app_state.gov.params.voting_period = "900s" | .app_state.gov.params.expedited_voting_period = "600s"' \
+    <~/.arkeo/config/genesis.json >/tmp/genesis.json
+  mv /tmp/genesis.json ~/.arkeo/config/genesis.json
+
 	set -e
 	arkeod validate-genesis --trace
 
