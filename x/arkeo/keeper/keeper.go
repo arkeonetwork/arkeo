@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"cosmossdk.io/errors"
@@ -77,6 +78,9 @@ type Keeper interface {
 	// Keeper Interfaces
 	KeeperProvider
 	KeeperContract
+
+	//Services
+	AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error)
 }
 
 type KeeperProvider interface {
@@ -397,4 +401,24 @@ func (k KVStore) GetValidatorRewards(ctx context.Context, val sdk.ValAddress) (d
 
 func (k KVStore) GetCommunityPool(ctx context.Context) (disttypes.FeePool, error) {
 	return k.distributionKeeper.FeePool.Get(ctx)
+}
+
+func (k KVStore) AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error) {
+	// Collect all service names
+	names := make([]string, 0, len(common.ServiceLookup))
+	for name := range common.ServiceLookup {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	var services []*types.ServiceEnum
+	for _, name := range names {
+		id := common.ServiceLookup[name]
+		services = append(services, &types.ServiceEnum{
+			ServiceId:   id,
+			Name:        name,
+			Description: common.ServiceDescriptionMap[name],
+		})
+	}
+	return &types.QueryAllServicesResponse{Services: services}, nil
 }

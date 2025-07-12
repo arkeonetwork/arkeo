@@ -31,6 +31,149 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Request for all known services
+type QueryAllServicesRequest struct {
+}
+
+func (m *QueryAllServicesRequest) Reset()         { *m = QueryAllServicesRequest{} }
+func (m *QueryAllServicesRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAllServicesRequest) ProtoMessage()    {}
+func (*QueryAllServicesRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4b28dca1d1dd051d, []int{0}
+}
+func (m *QueryAllServicesRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllServicesRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllServicesRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllServicesRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllServicesRequest.Merge(m, src)
+}
+func (m *QueryAllServicesRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllServicesRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllServicesRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllServicesRequest proto.InternalMessageInfo
+
+// Service enum details
+type ServiceEnum struct {
+	ServiceId   int32  `protobuf:"varint,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+}
+
+func (m *ServiceEnum) Reset()         { *m = ServiceEnum{} }
+func (m *ServiceEnum) String() string { return proto.CompactTextString(m) }
+func (*ServiceEnum) ProtoMessage()    {}
+func (*ServiceEnum) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4b28dca1d1dd051d, []int{1}
+}
+func (m *ServiceEnum) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ServiceEnum) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ServiceEnum.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ServiceEnum) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ServiceEnum.Merge(m, src)
+}
+func (m *ServiceEnum) XXX_Size() int {
+	return m.Size()
+}
+func (m *ServiceEnum) XXX_DiscardUnknown() {
+	xxx_messageInfo_ServiceEnum.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ServiceEnum proto.InternalMessageInfo
+
+func (m *ServiceEnum) GetServiceId() int32 {
+	if m != nil {
+		return m.ServiceId
+	}
+	return 0
+}
+
+func (m *ServiceEnum) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *ServiceEnum) GetDescription() string {
+	if m != nil {
+		return m.Description
+	}
+	return ""
+}
+
+// Response with all known services
+type QueryAllServicesResponse struct {
+	Services []*ServiceEnum `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
+}
+
+func (m *QueryAllServicesResponse) Reset()         { *m = QueryAllServicesResponse{} }
+func (m *QueryAllServicesResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAllServicesResponse) ProtoMessage()    {}
+func (*QueryAllServicesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4b28dca1d1dd051d, []int{2}
+}
+func (m *QueryAllServicesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllServicesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllServicesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllServicesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllServicesResponse.Merge(m, src)
+}
+func (m *QueryAllServicesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllServicesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllServicesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllServicesResponse proto.InternalMessageInfo
+
+func (m *QueryAllServicesResponse) GetServices() []*ServiceEnum {
+	if m != nil {
+		return m.Services
+	}
+	return nil
+}
+
 // QueryParamsRequest is request type for the Query/Params RPC method.
 // QueryParamsRequest is the request message for querying module parameters.
 type QueryParamsRequest struct {
@@ -40,7 +183,7 @@ func (m *QueryParamsRequest) Reset()         { *m = QueryParamsRequest{} }
 func (m *QueryParamsRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryParamsRequest) ProtoMessage()    {}
 func (*QueryParamsRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{0}
+	return fileDescriptor_4b28dca1d1dd051d, []int{3}
 }
 func (m *QueryParamsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -80,7 +223,7 @@ func (m *QueryParamsResponse) Reset()         { *m = QueryParamsResponse{} }
 func (m *QueryParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryParamsResponse) ProtoMessage()    {}
 func (*QueryParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{1}
+	return fileDescriptor_4b28dca1d1dd051d, []int{4}
 }
 func (m *QueryParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -128,7 +271,7 @@ func (m *QueryFetchProviderRequest) Reset()         { *m = QueryFetchProviderReq
 func (m *QueryFetchProviderRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryFetchProviderRequest) ProtoMessage()    {}
 func (*QueryFetchProviderRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{2}
+	return fileDescriptor_4b28dca1d1dd051d, []int{5}
 }
 func (m *QueryFetchProviderRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -182,7 +325,7 @@ func (m *QueryFetchProviderResponse) Reset()         { *m = QueryFetchProviderRe
 func (m *QueryFetchProviderResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryFetchProviderResponse) ProtoMessage()    {}
 func (*QueryFetchProviderResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{3}
+	return fileDescriptor_4b28dca1d1dd051d, []int{6}
 }
 func (m *QueryFetchProviderResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -228,7 +371,7 @@ func (m *QueryAllProviderRequest) Reset()         { *m = QueryAllProviderRequest
 func (m *QueryAllProviderRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryAllProviderRequest) ProtoMessage()    {}
 func (*QueryAllProviderRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{4}
+	return fileDescriptor_4b28dca1d1dd051d, []int{7}
 }
 func (m *QueryAllProviderRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -276,7 +419,7 @@ func (m *QueryAllProviderResponse) Reset()         { *m = QueryAllProviderRespon
 func (m *QueryAllProviderResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryAllProviderResponse) ProtoMessage()    {}
 func (*QueryAllProviderResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{5}
+	return fileDescriptor_4b28dca1d1dd051d, []int{8}
 }
 func (m *QueryAllProviderResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -330,7 +473,7 @@ func (m *QueryFetchContractRequest) Reset()         { *m = QueryFetchContractReq
 func (m *QueryFetchContractRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryFetchContractRequest) ProtoMessage()    {}
 func (*QueryFetchContractRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{6}
+	return fileDescriptor_4b28dca1d1dd051d, []int{9}
 }
 func (m *QueryFetchContractRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -377,7 +520,7 @@ func (m *QueryFetchContractResponse) Reset()         { *m = QueryFetchContractRe
 func (m *QueryFetchContractResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryFetchContractResponse) ProtoMessage()    {}
 func (*QueryFetchContractResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{7}
+	return fileDescriptor_4b28dca1d1dd051d, []int{10}
 }
 func (m *QueryFetchContractResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -423,7 +566,7 @@ func (m *QueryAllContractRequest) Reset()         { *m = QueryAllContractRequest
 func (m *QueryAllContractRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryAllContractRequest) ProtoMessage()    {}
 func (*QueryAllContractRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{8}
+	return fileDescriptor_4b28dca1d1dd051d, []int{11}
 }
 func (m *QueryAllContractRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -471,7 +614,7 @@ func (m *QueryAllContractResponse) Reset()         { *m = QueryAllContractRespon
 func (m *QueryAllContractResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryAllContractResponse) ProtoMessage()    {}
 func (*QueryAllContractResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{9}
+	return fileDescriptor_4b28dca1d1dd051d, []int{12}
 }
 func (m *QueryAllContractResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -526,7 +669,7 @@ func (m *QueryActiveContractRequest) Reset()         { *m = QueryActiveContractR
 func (m *QueryActiveContractRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryActiveContractRequest) ProtoMessage()    {}
 func (*QueryActiveContractRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{10}
+	return fileDescriptor_4b28dca1d1dd051d, []int{13}
 }
 func (m *QueryActiveContractRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -576,9 +719,7 @@ func (m *QueryActiveContractRequest) GetSpender() string {
 	return ""
 }
 
-// QueryActiveContractResponse returns the active contract information.
-// QueryActiveContractResponse is the response message containing the active
-// contract.
+// Response for the ActiveContract query.
 type QueryActiveContractResponse struct {
 	Contract Contract `protobuf:"bytes,1,opt,name=contract,proto3" json:"contract"`
 }
@@ -587,7 +728,7 @@ func (m *QueryActiveContractResponse) Reset()         { *m = QueryActiveContract
 func (m *QueryActiveContractResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryActiveContractResponse) ProtoMessage()    {}
 func (*QueryActiveContractResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4b28dca1d1dd051d, []int{11}
+	return fileDescriptor_4b28dca1d1dd051d, []int{14}
 }
 func (m *QueryActiveContractResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -624,6 +765,9 @@ func (m *QueryActiveContractResponse) GetContract() Contract {
 }
 
 func init() {
+	proto.RegisterType((*QueryAllServicesRequest)(nil), "arkeo.arkeo.QueryAllServicesRequest")
+	proto.RegisterType((*ServiceEnum)(nil), "arkeo.arkeo.ServiceEnum")
+	proto.RegisterType((*QueryAllServicesResponse)(nil), "arkeo.arkeo.QueryAllServicesResponse")
 	proto.RegisterType((*QueryParamsRequest)(nil), "arkeo.arkeo.QueryParamsRequest")
 	proto.RegisterType((*QueryParamsResponse)(nil), "arkeo.arkeo.QueryParamsResponse")
 	proto.RegisterType((*QueryFetchProviderRequest)(nil), "arkeo.arkeo.QueryFetchProviderRequest")
@@ -641,51 +785,59 @@ func init() {
 func init() { proto.RegisterFile("arkeo/arkeo/query.proto", fileDescriptor_4b28dca1d1dd051d) }
 
 var fileDescriptor_4b28dca1d1dd051d = []byte{
-	// 702 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x55, 0xcf, 0x4f, 0xd4, 0x40,
-	0x14, 0xde, 0x02, 0xae, 0x32, 0x1b, 0xd4, 0x0c, 0x20, 0x6b, 0xd5, 0x5d, 0xd2, 0xf0, 0x2b, 0x18,
-	0xdb, 0x80, 0x31, 0x5c, 0xf4, 0x00, 0x46, 0xd4, 0x83, 0x09, 0x6e, 0xa2, 0x07, 0x2f, 0x66, 0xb6,
-	0x4c, 0x4a, 0xb3, 0xa5, 0x53, 0x3a, 0xb3, 0xab, 0x64, 0xc3, 0xc5, 0x8b, 0x17, 0x0f, 0x26, 0xc6,
-	0x9b, 0x27, 0xff, 0x1a, 0x8e, 0x24, 0x5e, 0x3c, 0x19, 0x03, 0xfe, 0x21, 0x66, 0x67, 0xde, 0xb8,
-	0x6d, 0xb7, 0x4d, 0x49, 0xd4, 0x4b, 0xa1, 0xf3, 0xbe, 0xf7, 0xbe, 0xef, 0xbd, 0x6f, 0xfa, 0x16,
-	0xcd, 0x91, 0xb8, 0x43, 0x99, 0xa3, 0x9e, 0x07, 0x5d, 0x1a, 0x1f, 0xda, 0x51, 0xcc, 0x04, 0xc3,
-	0x35, 0x79, 0x64, 0xcb, 0xa7, 0x39, 0xe3, 0x31, 0x8f, 0xc9, 0x73, 0x67, 0xf0, 0x9f, 0x82, 0x98,
-	0x37, 0x3d, 0xc6, 0xbc, 0x80, 0x3a, 0x24, 0xf2, 0x1d, 0x12, 0x86, 0x4c, 0x10, 0xe1, 0xb3, 0x90,
-	0x43, 0x74, 0xd5, 0x65, 0x7c, 0x9f, 0x71, 0xa7, 0x4d, 0x38, 0x55, 0x95, 0x9d, 0xde, 0x5a, 0x9b,
-	0x0a, 0xb2, 0xe6, 0x44, 0xc4, 0xf3, 0x43, 0x09, 0x06, 0x6c, 0x3d, 0xa9, 0x22, 0x22, 0x31, 0xd9,
-	0xe7, 0x79, 0x91, 0x0e, 0xa5, 0x11, 0x8d, 0x55, 0xc4, 0x9a, 0x41, 0xf8, 0xf9, 0xa0, 0xea, 0x8e,
-	0x84, 0xb7, 0xe8, 0x41, 0x97, 0x72, 0x61, 0x3d, 0x41, 0xd3, 0xa9, 0x53, 0x1e, 0xb1, 0x90, 0x53,
-	0xbc, 0x86, 0xaa, 0xaa, 0x6c, 0xdd, 0x98, 0x37, 0x56, 0x6a, 0xeb, 0xd3, 0x76, 0xa2, 0x3d, 0x5b,
-	0x81, 0xb7, 0x26, 0x8e, 0x7f, 0x34, 0x2b, 0x2d, 0x00, 0x5a, 0xcf, 0xd0, 0x75, 0x59, 0x69, 0x9b,
-	0x0a, 0x77, 0x6f, 0x27, 0x66, 0x3d, 0x7f, 0x97, 0xc6, 0x40, 0x83, 0xaf, 0xa1, 0x6a, 0xd4, 0x6d,
-	0x77, 0xe8, 0xa1, 0xac, 0x37, 0xd9, 0x82, 0x37, 0x5c, 0x47, 0x17, 0x39, 0x8d, 0x7b, 0xbe, 0x4b,
-	0xeb, 0x63, 0x32, 0xa0, 0x5f, 0xad, 0x17, 0xc8, 0xcc, 0x2b, 0x07, 0xfa, 0x36, 0xd0, 0xa5, 0x08,
-	0xce, 0x40, 0xe1, 0x6c, 0x5a, 0x21, 0x04, 0x41, 0xe3, 0x1f, 0xb0, 0x45, 0xd0, 0x9c, 0x2c, 0xbb,
-	0x19, 0x04, 0x59, 0x8d, 0xdb, 0x08, 0x0d, 0x07, 0x0d, 0x55, 0x97, 0x6c, 0xe5, 0x8a, 0x3d, 0x70,
-	0xc5, 0x56, 0x7e, 0x83, 0x2b, 0xf6, 0x0e, 0xf1, 0x28, 0xe4, 0xb6, 0x12, 0x99, 0xd6, 0x17, 0x03,
-	0xd5, 0x47, 0x39, 0x72, 0x85, 0x8f, 0x9f, 0x5b, 0x38, 0x7e, 0x9c, 0x52, 0x37, 0x26, 0xd5, 0x2d,
-	0x97, 0xaa, 0x53, 0xac, 0x29, 0x79, 0xf7, 0x93, 0x3e, 0x3d, 0x64, 0xa1, 0x88, 0x89, 0x2b, 0xf4,
-	0x0c, 0x9a, 0xa8, 0xe6, 0xc2, 0xd1, 0x6b, 0x7f, 0x57, 0x0e, 0x61, 0xa2, 0x85, 0xf4, 0xd1, 0xd3,
-	0xdd, 0xb4, 0x2d, 0xc3, 0xec, 0x61, 0x77, 0x1a, 0x9b, 0x6b, 0x8b, 0x4e, 0xd0, 0xdd, 0x69, 0x70,
-	0xd2, 0x96, 0xac, 0xa4, 0xff, 0x61, 0x4b, 0x89, 0xf0, 0xf1, 0x73, 0x0b, 0xff, 0x77, 0xb6, 0x04,
-	0x30, 0xd8, 0x4d, 0x57, 0xf8, 0x3d, 0x9a, 0x1d, 0x82, 0x99, 0xb9, 0xef, 0x93, 0x89, 0x9b, 0x51,
-	0xf8, 0x0d, 0xc9, 0x48, 0x44, 0xc3, 0x41, 0xd2, 0x38, 0x44, 0xd4, 0xab, 0xf5, 0x12, 0xdd, 0xc8,
-	0x65, 0xfb, 0x4b, 0x1f, 0xd7, 0x3f, 0x57, 0xd1, 0x05, 0x59, 0x18, 0xb7, 0x51, 0x55, 0xad, 0x09,
-	0xdc, 0x4c, 0xa5, 0x8e, 0xee, 0x20, 0x73, 0xbe, 0x18, 0xa0, 0xf4, 0x58, 0xb3, 0xef, 0xbe, 0xfd,
-	0xfa, 0x34, 0x76, 0x05, 0x4f, 0xa5, 0x56, 0x1e, 0xfe, 0x60, 0xa0, 0xa9, 0xd4, 0x7e, 0xc0, 0x4b,
-	0xa3, 0xa5, 0xf2, 0xf6, 0x91, 0xb9, 0x5c, 0x8a, 0x03, 0xe6, 0x55, 0xc9, 0xbc, 0x80, 0x2d, 0xcd,
-	0x0c, 0x00, 0xa7, 0xaf, 0x36, 0xd8, 0x91, 0xd3, 0x87, 0x69, 0x1f, 0x61, 0x81, 0x6a, 0x3a, 0x7f,
-	0x33, 0x08, 0xf0, 0xc2, 0x28, 0xc7, 0xe8, 0xd6, 0x31, 0x17, 0x4b, 0x50, 0xa0, 0xa3, 0x2e, 0x75,
-	0x60, 0x7c, 0x35, 0xa3, 0x83, 0xe3, 0xf7, 0x7a, 0x08, 0xda, 0x94, 0xc2, 0x21, 0x64, 0x2e, 0x55,
-	0xe1, 0x10, 0xb2, 0xd7, 0xc1, 0x5a, 0x94, 0xe4, 0x4d, 0x7c, 0x0b, 0xc8, 0xb5, 0xdd, 0x4e, 0x3f,
-	0xb1, 0x2c, 0x64, 0xff, 0x3a, 0xb5, 0xb8, 0xff, 0xac, 0x88, 0xc5, 0x12, 0x54, 0x41, 0xff, 0x9a,
-	0x98, 0xe3, 0xaf, 0x06, 0xba, 0x9c, 0xbe, 0xc6, 0x38, 0xa7, 0xb1, 0xdc, 0xcf, 0xca, 0x5c, 0x29,
-	0x07, 0x02, 0xff, 0x03, 0xc9, 0xbf, 0x81, 0xef, 0x01, 0x3f, 0x91, 0xb0, 0x3b, 0xc3, 0x49, 0x68,
-	0x43, 0x12, 0x17, 0xc2, 0xe9, 0xc3, 0xe7, 0x76, 0xb4, 0xf5, 0xe8, 0xf8, 0xb4, 0x61, 0x9c, 0x9c,
-	0x36, 0x8c, 0x9f, 0xa7, 0x0d, 0xe3, 0xe3, 0x59, 0xa3, 0x72, 0x72, 0xd6, 0xa8, 0x7c, 0x3f, 0x6b,
-	0x54, 0x5e, 0xdd, 0xf6, 0x7c, 0xb1, 0xd7, 0x6d, 0xdb, 0x2e, 0xdb, 0x57, 0xa5, 0x43, 0x2a, 0xde,
-	0xb0, 0xb8, 0x03, 0x3c, 0x6f, 0xe1, 0xaf, 0x38, 0x8c, 0x28, 0x6f, 0x57, 0xe5, 0x4f, 0xf9, 0xdd,
-	0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x07, 0x9a, 0xac, 0x8f, 0x86, 0x08, 0x00, 0x00,
+	// 818 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x4f, 0xdb, 0x48,
+	0x14, 0x8e, 0x09, 0x04, 0x32, 0x16, 0xcb, 0xee, 0x00, 0x8b, 0xf1, 0x2e, 0x49, 0x64, 0xf1, 0x23,
+	0x62, 0xb5, 0xb6, 0x60, 0x77, 0xc5, 0x65, 0x7b, 0x80, 0x0a, 0x5a, 0x0e, 0x95, 0x52, 0x57, 0xed,
+	0xa1, 0x97, 0xca, 0x71, 0x46, 0xc1, 0x4a, 0xe2, 0x31, 0x1e, 0x27, 0x2d, 0x8a, 0xb8, 0xf4, 0x52,
+	0xa9, 0xea, 0xa1, 0x52, 0xaf, 0x3d, 0xf5, 0xaf, 0xe1, 0x88, 0xd4, 0x4b, 0x4f, 0x55, 0x05, 0xfd,
+	0x43, 0xaa, 0xcc, 0xbc, 0x21, 0xb6, 0x13, 0x2b, 0x48, 0x6d, 0x2f, 0x49, 0xe6, 0xcd, 0xf7, 0xde,
+	0xf7, 0xbd, 0x1f, 0x7e, 0x31, 0x5a, 0x71, 0xc2, 0x16, 0xa1, 0x96, 0xf8, 0x3c, 0xed, 0x92, 0xf0,
+	0xcc, 0x0c, 0x42, 0x1a, 0x51, 0xac, 0x72, 0x93, 0xc9, 0x3f, 0xf5, 0xa5, 0x26, 0x6d, 0x52, 0x6e,
+	0xb7, 0x06, 0xbf, 0x04, 0x44, 0xff, 0xb3, 0x49, 0x69, 0xb3, 0x4d, 0x2c, 0x27, 0xf0, 0x2c, 0xc7,
+	0xf7, 0x69, 0xe4, 0x44, 0x1e, 0xf5, 0x19, 0xdc, 0x6e, 0xbb, 0x94, 0x75, 0x28, 0xb3, 0xea, 0x0e,
+	0x23, 0x22, 0xb2, 0xd5, 0xdb, 0xa9, 0x93, 0xc8, 0xd9, 0xb1, 0x02, 0xa7, 0xe9, 0xf9, 0x1c, 0x0c,
+	0x58, 0x2d, 0xae, 0x22, 0x70, 0x42, 0xa7, 0xc3, 0xc6, 0xdd, 0xb4, 0x08, 0x09, 0x48, 0x28, 0x6e,
+	0x8c, 0x55, 0xb4, 0xf2, 0x70, 0x10, 0x75, 0xbf, 0xdd, 0x7e, 0x44, 0xc2, 0x9e, 0xe7, 0x12, 0x66,
+	0x93, 0xd3, 0x2e, 0x61, 0x91, 0x51, 0x47, 0x2a, 0x98, 0x0e, 0xfd, 0x6e, 0x07, 0xaf, 0x21, 0xc4,
+	0xc4, 0xf1, 0x99, 0xd7, 0xd0, 0x94, 0x8a, 0x52, 0x9d, 0xb1, 0x8b, 0x60, 0x39, 0x6e, 0x60, 0x8c,
+	0xa6, 0x7d, 0xa7, 0x43, 0xb4, 0xa9, 0x8a, 0x52, 0x2d, 0xda, 0xfc, 0x37, 0xae, 0x20, 0xb5, 0x41,
+	0x98, 0x1b, 0x7a, 0xc1, 0x40, 0xa5, 0x96, 0xe7, 0x57, 0x71, 0x93, 0x51, 0x43, 0xda, 0x28, 0x3d,
+	0x0b, 0xa8, 0xcf, 0x08, 0xfe, 0x17, 0xcd, 0x41, 0x78, 0xa6, 0x29, 0x95, 0x7c, 0x55, 0xdd, 0xd5,
+	0xcc, 0x58, 0x39, 0xcd, 0x98, 0x38, 0xfb, 0x06, 0x69, 0x2c, 0x21, 0xcc, 0x23, 0xd6, 0x78, 0xfe,
+	0x32, 0x97, 0xfb, 0x68, 0x31, 0x61, 0x05, 0x8a, 0x1d, 0x54, 0x10, 0x75, 0xe2, 0xf9, 0xa8, 0xbb,
+	0x8b, 0x09, 0x02, 0x01, 0x3e, 0x98, 0xbe, 0xf8, 0x5c, 0xce, 0xd9, 0x00, 0x34, 0x1e, 0xa0, 0x55,
+	0x1e, 0xe9, 0x88, 0x44, 0xee, 0x49, 0x2d, 0xa4, 0x3d, 0xaf, 0x41, 0x42, 0xa0, 0xc1, 0xbf, 0xa3,
+	0x42, 0xd0, 0xad, 0xb7, 0xc8, 0x19, 0x8f, 0x57, 0xb4, 0xe1, 0x84, 0x35, 0x34, 0x0b, 0x02, 0xa1,
+	0x3e, 0xf2, 0x68, 0x3c, 0x46, 0xfa, 0xb8, 0x70, 0xa0, 0x6f, 0x0f, 0xcd, 0x05, 0x60, 0x03, 0x85,
+	0xcb, 0x49, 0x85, 0x70, 0x09, 0x1a, 0x6f, 0xc0, 0x86, 0x33, 0x6c, 0x6b, 0x5a, 0xe3, 0x11, 0x42,
+	0xc3, 0xc9, 0x81, 0xa8, 0x9b, 0xa6, 0x18, 0x33, 0x73, 0x30, 0x66, 0xa6, 0x18, 0x60, 0x18, 0x33,
+	0xb3, 0xe6, 0x34, 0x09, 0xf8, 0xda, 0x31, 0x4f, 0xe3, 0xbd, 0x32, 0xec, 0xdd, 0x04, 0xe1, 0xf9,
+	0x5b, 0x0b, 0xc7, 0xf7, 0x12, 0xea, 0xa6, 0xb8, 0xba, 0xad, 0x89, 0xea, 0x04, 0x6b, 0x42, 0xde,
+	0xff, 0xf1, 0x3e, 0xdd, 0xa5, 0x7e, 0x14, 0x3a, 0x6e, 0x24, 0x6b, 0x50, 0x46, 0xaa, 0x0b, 0x26,
+	0x39, 0xcc, 0xd3, 0x36, 0x92, 0xa6, 0xe3, 0x46, 0xb2, 0x2d, 0x43, 0xef, 0x61, 0x76, 0x12, 0x3b,
+	0xb6, 0x2d, 0xd2, 0x41, 0x66, 0x27, 0xc1, 0xf1, 0xb6, 0xa4, 0x25, 0xfd, 0x8c, 0xb6, 0x4c, 0x10,
+	0x9e, 0xbf, 0xb5, 0xf0, 0x1f, 0xd7, 0x96, 0x36, 0x14, 0x76, 0xdf, 0x8d, 0xbc, 0x1e, 0x49, 0x17,
+	0x41, 0x4f, 0xcd, 0x7b, 0x31, 0x36, 0x19, 0x99, 0xcf, 0x10, 0xbf, 0x09, 0x88, 0x3f, 0x70, 0xca,
+	0xc3, 0x8d, 0x38, 0x1a, 0x4f, 0xd0, 0x1f, 0x63, 0xd9, 0xbe, 0xb3, 0x8f, 0xbb, 0xaf, 0x67, 0xd1,
+	0x0c, 0x0f, 0x8c, 0xeb, 0xa8, 0x20, 0xd6, 0x04, 0x2e, 0x27, 0x5c, 0x47, 0x77, 0x90, 0x5e, 0xc9,
+	0x06, 0x08, 0x3d, 0xc6, 0xf2, 0xcb, 0x8f, 0x5f, 0xdf, 0x4d, 0x2d, 0xe0, 0xf9, 0xc4, 0x0e, 0xc7,
+	0x6f, 0x14, 0x34, 0x9f, 0xd8, 0x0f, 0x78, 0x73, 0x34, 0xd4, 0xb8, 0x7d, 0xa4, 0x6f, 0x4d, 0xc4,
+	0x01, 0xf3, 0x36, 0x67, 0x5e, 0xc7, 0x86, 0x64, 0x06, 0x80, 0xd5, 0x17, 0x1b, 0xec, 0xdc, 0xea,
+	0x43, 0xb5, 0xcf, 0x71, 0x84, 0x54, 0xe9, 0xbf, 0xdf, 0x6e, 0xe3, 0xf5, 0x51, 0x8e, 0xd1, 0xad,
+	0xa3, 0x6f, 0x4c, 0x40, 0x81, 0x0e, 0x8d, 0xeb, 0xc0, 0xf8, 0xd7, 0x94, 0x0e, 0x86, 0x5f, 0xc9,
+	0x22, 0xc8, 0xa6, 0x64, 0x16, 0x21, 0x35, 0x54, 0x99, 0x45, 0x48, 0x8f, 0x83, 0xb1, 0xc1, 0xc9,
+	0xcb, 0x78, 0x0d, 0xc8, 0x65, 0xbb, 0xad, 0x7e, 0x6c, 0x59, 0xf0, 0xfc, 0xa5, 0x6b, 0x76, 0xfe,
+	0x69, 0x11, 0x1b, 0x13, 0x50, 0x19, 0xf9, 0x4b, 0x62, 0x86, 0x3f, 0x28, 0xe8, 0x97, 0xe4, 0x18,
+	0xe3, 0x31, 0x89, 0x8d, 0x7d, 0xac, 0xf4, 0xea, 0x64, 0x20, 0xf0, 0xdf, 0xe1, 0xfc, 0x7b, 0xf8,
+	0x3f, 0xe0, 0x77, 0x38, 0xec, 0xef, 0x61, 0x25, 0x64, 0x43, 0x62, 0x03, 0x61, 0xf5, 0xe1, 0x71,
+	0x3b, 0xc7, 0x0c, 0xa9, 0xb1, 0x7f, 0xf2, 0x8c, 0xd2, 0xa4, 0xde, 0x33, 0x32, 0x4a, 0x93, 0x7e,
+	0x1d, 0x30, 0x56, 0xb8, 0xb4, 0xdf, 0xf0, 0x02, 0x48, 0x93, 0xff, 0xf8, 0x07, 0x87, 0x17, 0x57,
+	0x25, 0xe5, 0xf2, 0xaa, 0xa4, 0x7c, 0xb9, 0x2a, 0x29, 0x6f, 0xaf, 0x4b, 0xb9, 0xcb, 0xeb, 0x52,
+	0xee, 0xd3, 0x75, 0x29, 0xf7, 0xf4, 0xaf, 0xa6, 0x17, 0x9d, 0x74, 0xeb, 0xa6, 0x4b, 0x3b, 0xc2,
+	0xc9, 0x27, 0xd1, 0x73, 0x1a, 0xb6, 0x20, 0xc2, 0x0b, 0xf8, 0x8e, 0xce, 0x02, 0xc2, 0xea, 0x05,
+	0xfe, 0x42, 0xf4, 0xcf, 0xb7, 0x00, 0x00, 0x00, 0xff, 0xff, 0x8e, 0x8a, 0x49, 0xff, 0xcc, 0x09,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -713,6 +865,8 @@ type QueryClient interface {
 	// ActiveContract queries an active contract by provider, service, and
 	// spender.
 	ActiveContract(ctx context.Context, in *QueryActiveContractRequest, opts ...grpc.CallOption) (*QueryActiveContractResponse, error)
+	// Returns a list of all service enum values and descriptions.
+	AllServices(ctx context.Context, in *QueryAllServicesRequest, opts ...grpc.CallOption) (*QueryAllServicesResponse, error)
 }
 
 type queryClient struct {
@@ -777,6 +931,15 @@ func (c *queryClient) ActiveContract(ctx context.Context, in *QueryActiveContrac
 	return out, nil
 }
 
+func (c *queryClient) AllServices(ctx context.Context, in *QueryAllServicesRequest, opts ...grpc.CallOption) (*QueryAllServicesResponse, error) {
+	out := new(QueryAllServicesResponse)
+	err := c.cc.Invoke(ctx, "/arkeo.arkeo.Query/AllServices", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Parameters queries the parameters of the module.
@@ -792,6 +955,8 @@ type QueryServer interface {
 	// ActiveContract queries an active contract by provider, service, and
 	// spender.
 	ActiveContract(context.Context, *QueryActiveContractRequest) (*QueryActiveContractResponse, error)
+	// Returns a list of all service enum values and descriptions.
+	AllServices(context.Context, *QueryAllServicesRequest) (*QueryAllServicesResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -815,6 +980,9 @@ func (*UnimplementedQueryServer) ContractAll(ctx context.Context, req *QueryAllC
 }
 func (*UnimplementedQueryServer) ActiveContract(ctx context.Context, req *QueryActiveContractRequest) (*QueryActiveContractResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ActiveContract not implemented")
+}
+func (*UnimplementedQueryServer) AllServices(ctx context.Context, req *QueryAllServicesRequest) (*QueryAllServicesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllServices not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -929,6 +1097,24 @@ func _Query_ActiveContract_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_AllServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllServicesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AllServices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/arkeo.arkeo.Query/AllServices",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AllServices(ctx, req.(*QueryAllServicesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var Query_serviceDesc = _Query_serviceDesc
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "arkeo.arkeo.Query",
@@ -958,9 +1144,115 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			MethodName: "ActiveContract",
 			Handler:    _Query_ActiveContract_Handler,
 		},
+		{
+			MethodName: "AllServices",
+			Handler:    _Query_AllServices_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "arkeo/arkeo/query.proto",
+}
+
+func (m *QueryAllServicesRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllServicesRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllServicesRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *ServiceEnum) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ServiceEnum) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ServiceEnum) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.ServiceId != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.ServiceId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllServicesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllServicesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllServicesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Services) > 0 {
+		for iNdEx := len(m.Services) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Services[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *QueryParamsRequest) Marshal() (dAtA []byte, err error) {
@@ -1406,6 +1698,50 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *QueryAllServicesRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *ServiceEnum) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ServiceId != 0 {
+		n += 1 + sovQuery(uint64(m.ServiceId))
+	}
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAllServicesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Services) > 0 {
+		for _, e := range m.Services {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
 func (m *QueryParamsRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1578,6 +1914,273 @@ func sovQuery(x uint64) (n int) {
 }
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *QueryAllServicesRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllServicesRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllServicesRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ServiceEnum) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ServiceEnum: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ServiceEnum: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceId", wireType)
+			}
+			m.ServiceId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ServiceId |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAllServicesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllServicesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllServicesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Services", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Services = append(m.Services, &ServiceEnum{})
+			if err := m.Services[len(m.Services)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *QueryParamsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
