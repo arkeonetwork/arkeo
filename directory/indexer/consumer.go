@@ -215,6 +215,9 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err := s.handleCloseContractEvent(ctx, eventCloseContract, txID, height); err != nil {
 			return err
 		}
+	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "withdraw_rewards", "delegate":
+		// No-op: this event is intentionally ignored by the indexer.
+		s.logger.Debugf("received event type %s at height %d; ignoring.", event.Type, height)
 	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
 		// do nothing
 	default:
