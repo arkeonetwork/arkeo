@@ -28,11 +28,14 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// ProviderStatus defines the possible status values for a provider.
 type ProviderStatus int32
 
 const (
+	// OFFLINE indicates the provider is offline.
 	ProviderStatus_OFFLINE ProviderStatus = 0
-	ProviderStatus_ONLINE  ProviderStatus = 1
+	// ONLINE indicates the provider is online.
+	ProviderStatus_ONLINE ProviderStatus = 1
 )
 
 var ProviderStatus_name = map[int32]string{
@@ -53,10 +56,13 @@ func (ProviderStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_f833050061122841, []int{0}
 }
 
+// ContractType defines the type of contract.
 type ContractType int32
 
 const (
-	ContractType_SUBSCRIPTION  ContractType = 0
+	// SUBSCRIPTION is a subscription contract.
+	ContractType_SUBSCRIPTION ContractType = 0
+	// PAY_AS_YOU_GO is a pay-as-you-go contract.
 	ContractType_PAY_AS_YOU_GO ContractType = 1
 )
 
@@ -78,11 +84,14 @@ func (ContractType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_f833050061122841, []int{1}
 }
 
+// ContractAuthorization defines contract authorization options.
 type ContractAuthorization int32
 
 const (
+	// STRICT means strict authorization.
 	ContractAuthorization_STRICT ContractAuthorization = 0
-	ContractAuthorization_OPEN   ContractAuthorization = 1
+	// OPEN means open authorization.
+	ContractAuthorization_OPEN ContractAuthorization = 1
 )
 
 var ContractAuthorization_name = map[int32]string{
@@ -103,6 +112,7 @@ func (ContractAuthorization) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_f833050061122841, []int{2}
 }
 
+// ProviderStatus defines the status of a provider.
 type Provider struct {
 	PubKey              github_com_arkeonetwork_arkeo_common.PubKey  `protobuf:"bytes,1,opt,name=pub_key,json=pubKey,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"pub_key,omitempty"`
 	Service             github_com_arkeonetwork_arkeo_common.Service `protobuf:"varint,2,opt,name=service,proto3,casttype=github.com/arkeonetwork/arkeo/common.Service" json:"service,omitempty"`
@@ -228,6 +238,7 @@ func (m *Provider) GetSettlementDuration() int64 {
 	return 0
 }
 
+// Contract represents a contract between client and provider.
 type Contract struct {
 	Provider           github_com_arkeonetwork_arkeo_common.PubKey  `protobuf:"bytes,1,opt,name=provider,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"provider,omitempty"`
 	Service            github_com_arkeonetwork_arkeo_common.Service `protobuf:"varint,2,opt,name=service,proto3,casttype=github.com/arkeonetwork/arkeo/common.Service" json:"service,omitempty"`
@@ -378,6 +389,7 @@ func (m *Contract) GetQueriesPerMinute() int64 {
 	return 0
 }
 
+// ContractSet defines a set of contracts.
 type ContractSet struct {
 	ContractIds []uint64 `protobuf:"varint,1,rep,packed,name=contract_ids,json=contractIds,proto3" json:"contract_ids,omitempty"`
 }
@@ -422,6 +434,7 @@ func (m *ContractSet) GetContractIds() []uint64 {
 	return nil
 }
 
+// ContractExpirationSet defines a set of contract expirations.
 type ContractExpirationSet struct {
 	Height      int64        `protobuf:"varint,1,opt,name=height,proto3" json:"height,omitempty"`
 	ContractSet *ContractSet `protobuf:"bytes,2,opt,name=contract_set,json=contractSet,proto3" json:"contract_set,omitempty"`
@@ -474,6 +487,7 @@ func (m *ContractExpirationSet) GetContractSet() *ContractSet {
 	return nil
 }
 
+// UserContractSet defines a set of contracts belonging to a user.
 type UserContractSet struct {
 	User        github_com_arkeonetwork_arkeo_common.PubKey `protobuf:"bytes,1,opt,name=user,proto3,casttype=github.com/arkeonetwork/arkeo/common.PubKey" json:"user,omitempty"`
 	ContractSet *ContractSet                                `protobuf:"bytes,2,opt,name=contract_set,json=contractSet,proto3" json:"contract_set,omitempty"`

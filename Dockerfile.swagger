@@ -1,0 +1,7 @@
+FROM ghcr.io/cosmos/proto-builder:0.15.0
+
+USER root
+RUN apk add --no-cache go git && \
+    go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.16.0 && \
+    cp /go/bin/protoc-gen-swagger /usr/bin/
+USER 1000

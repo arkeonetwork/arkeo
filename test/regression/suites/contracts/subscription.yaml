@@ -49,7 +49,7 @@ asserts:
   - .contract_type == "SUBSCRIPTION"
   - .duration == 10
   - .open_cost == 100000000
-  - .closed_height == 0
+  - .settlement_height == 0
   - .deposit == 100
   - .authorization == "STRICT"
   - .queries_per_minute == 1
@@ -155,7 +155,7 @@ asserts:
   - .contract_type == "SUBSCRIPTION"
   - .duration == 5
   - .open_cost == 100000000
-  - .closed_height == 0
+  - .settlement_height == 0
   - .deposit == 50
   - .authorization == "OPEN"
   - .queries_per_minute == 1

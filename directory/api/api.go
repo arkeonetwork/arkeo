@@ -71,7 +71,7 @@ func buildRouter(a *ApiService) *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", handleHealth).Methods(http.MethodGet)
 	router.HandleFunc("/stats", a.getStatsArkeo).Methods(http.MethodGet)
-	router.HandleFunc("/stats/{service}", getStatsService).Methods(http.MethodGet)
+	router.HandleFunc("/stats/{service}", a.getStatsService).Methods(http.MethodGet)
 
 	if a.params.StaticDir == "" {
 		log.Warnf("API_STATIC_DIR not set, using ./auto_static")
@@ -86,8 +86,12 @@ func buildRouter(a *ApiService) *mux.Router {
 	contractRouter.HandleFunc("/{id}", a.getContract).Methods(http.MethodGet)
 
 	providerRouter := router.PathPrefix("/provider").Subrouter()
-	providerRouter.HandleFunc("/{pubkey}", a.getProvider).Methods(http.MethodGet)
+	providerRouter.HandleFunc("/search", a.searchProviders).Methods(http.MethodGet)
 	providerRouter.HandleFunc("/search/", a.searchProviders).Methods(http.MethodGet)
+	providerRouter.HandleFunc("/{pubkey}", a.getProvider).Methods(http.MethodGet)
+
+	subscriberRouter := router.PathPrefix("/subscriber").Subrouter()
+	subscriberRouter.HandleFunc("/{pubkey}", a.getSubscriberContracts).Methods(http.MethodGet)
 
 	// router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 	// 	tpl, _ := route.GetPathTemplate()

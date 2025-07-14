@@ -180,7 +180,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleModProviderEvent(ctx, modProviderEvent); err != nil {
+		if err := s.handleModProviderEvent(ctx, modProviderEvent, txID, height); err != nil {
 			return err
 		}
 	case atypes.EventTypeOpenContract:
@@ -188,16 +188,15 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleOpenContractEvent(ctx, contractOpenEvent); err != nil {
+		if err := s.handleOpenContractEvent(ctx, contractOpenEvent, txID, height); err != nil {
 			return err
 		}
-
 	case atypes.EventTypeSettleContract:
 		eventSettleContract, err := parseEventToConcreteType[atypes.EventSettleContract](event)
 		if err != nil {
 			return err
 		}
-		if err := s.handleContractSettlementEvent(ctx, eventSettleContract); err != nil {
+		if err := s.handleContractSettlementEvent(ctx, eventSettleContract, txID, height); err != nil {
 			return err
 		}
 	case atypes.EventTypeValidatorPayout:
@@ -213,9 +212,12 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err != nil {
 			return err
 		}
-		if err := s.handleCloseContractEvent(ctx, eventCloseContract, height); err != nil {
+		if err := s.handleCloseContractEvent(ctx, eventCloseContract, txID, height); err != nil {
 			return err
 		}
+	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "withdraw_rewards", "delegate":
+		// No-op: this event is intentionally ignored by the indexer.
+		s.logger.Debugf("received event type %s at height %d; ignoring.", event.Type, height)
 	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
 		// do nothing
 	default:

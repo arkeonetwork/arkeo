@@ -478,6 +478,26 @@ func NewArkeoApp(
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+
+		vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		if err != nil {
+			return vm, err
+		}
+
+		updated, err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		if err != nil {
+			return vm, err
+		}
+		if updated {
+			app.Logger().Info("emission curve upgraded to 10")
+		} else {
+			app.Logger().Info("emission curve already at new value; no update")
+		}
+		return vm, nil
+
+	})
+
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:
@@ -528,8 +548,8 @@ func NewArkeoApp(
 		keys[ibcfeetypes.StoreKey],
 		app.Keepers.IBCKeeper.ChannelKeeper,
 		app.Keepers.IBCKeeper.ChannelKeeper,
-		app.Keepers.IBCKeeper.PortKeeper, 
-		app.Keepers.AccountKeeper, 
+		app.Keepers.IBCKeeper.PortKeeper,
+		app.Keepers.AccountKeeper,
 		app.Keepers.BankKeeper,
 	)
 

@@ -5,16 +5,21 @@ option go_package = "github.com/arkeonetwork/arkeo/x/arkeo/types";
 
 import "gogoproto/gogo.proto";
 
+// ProtoInt64 wraps an int64 for protobuf compatibility.
 message ProtoInt64 { int64 value = 1; }
 
+// ProtoUint64 wraps a uint64 for protobuf compatibility.
 message ProtoUint64 { uint64 value = 1; }
 
+// ProtoAccAddresses wraps a list of account addresses.
 message ProtoAccAddresses {
   repeated bytes value = 1
       [ (gogoproto.casttype) =
             "github.com/cosmos/cosmos-sdk/types.AccAddress" ];
 }
 
+// ProtoStrings wraps a list of strings.
 message ProtoStrings { repeated string value = 1; }
 
+// ProtoBools wraps a list of booleans.
 message ProtoBools { repeated bool value = 1; }

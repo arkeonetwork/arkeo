@@ -31,9 +31,65 @@ type ArkeoProvider struct {
 	MinContractDuration int64        `json:"min_contract_duration" db:"min_contract_duration"`
 	MaxContractDuration int64        `json:"max_contract_duration" db:"max_contract_duration"`
 	SettlementDuration  int64        `json:"settlement_duration" db:"settlement_duration"`
+	SubscriptionRateRaw string       `json:"-" db:"subscription_rate"`
+	PaygoRateRaw        string       `json:"-" db:"paygo_rate"`
 	SubscriptionRate    cosmos.Coins `json:"subscription_rates" db:"-"`
 	PayAsYouGoRate      cosmos.Coins `json:"paygo_rates" db:"-"`
 }
+
+type SubscriberContract struct {
+	// From open_contracts_v
+	ContractID          int64     `db:"contract_id"`
+	ContractCreated     time.Time `db:"contract_created"`
+	ContractUpdated     time.Time `db:"contract_updated"`
+	ProviderID          int64     `db:"provider_id"`
+	DelegatePubkey      string    `db:"delegate_pubkey"`
+	ClientPubkey        string    `db:"client_pubkey"`
+	Height              int64     `db:"height"`
+	ContractType        string    `db:"contract_type"`
+	Duration            int64     `db:"duration"`
+	RateAsset           string    `db:"rate_asset"`
+	RateAmount          int64     `db:"rate_amount"`
+	Auth                string    `db:"auth"`
+	OpenCost            int64     `db:"open_cost"`
+	Deposit             int64     `db:"deposit"`
+	QueriesPerMinute    int64     `db:"queries_per_minute"`
+	SettlementDuration  int64     `db:"settlement_duration"`
+	Nonce               int64     `db:"nonce"`
+	Paid                int64     `db:"paid"`
+	ReserveContribAsset int64     `db:"reserve_contrib_asset"`
+	ReserveContribUsd   int64     `db:"reserve_contrib_usd"`
+	SettlementHeight    int64     `db:"settlement_height"`
+	StartHeight         int64     `db:"start_height"`
+	CurrentHeight       int64     `db:"current_height"`
+	Remaining           int64     `db:"remaining"`
+	// From providers_v
+	ProviderPubkey                string    `db:"pubkey"`
+	Service                       string    `db:"service"`
+	Bond                          int64     `db:"bond"`
+	MetadataURI                   string    `db:"metadata_uri"`
+	MetadataNonce                 int64     `db:"metadata_nonce"`
+	ProviderStatus                string    `db:"provider_status"`
+	MinContractDuration           int64     `db:"min_contract_duration"`
+	MaxContractDuration           int64     `db:"max_contract_duration"`
+	ProviderCreated               time.Time `db:"provider_created"`
+	ProviderUpdated               time.Time `db:"provider_updated"`
+	MetadataNonceValue            int64     `db:"metadata_nonce_value"`
+	MetadataVersion               string    `db:"metadata_version"`
+	MetadataMoniker               string    `db:"metadata_moniker"`
+	MetadataWebsite               string    `db:"metadata_website"`
+	MetadataDescription           string    `db:"metadata_description"`
+	MetadataLocation              string    `db:"metadata_location"`
+	MetadataFreeRateLimit         int64     `db:"metadata_free_rate_limit"`
+	MetadataFreeRateLimitDuration int64     `db:"metadata_free_rate_limit_duration"`
+	ContractCount                 int64     `db:"contract_count"`
+	BirthHeight                   int64     `db:"birth_height"`
+	CurHeight                     int64     `db:"cur_height"`
+	TotalPaid                     int64     `db:"total_paid"`
+	Age                           int64     `db:"age"`
+}
+
+type SubscriberContracts []*SubscriberContract
 
 func (d *DirectoryDB) InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error) {
 	if provider == nil {
@@ -149,6 +205,7 @@ func (d *DirectoryDB) FindProvider(ctx context.Context, pubkey, service string) 
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
+
 	provider := ArkeoProvider{}
 	if err = selectOne(ctx, conn, sqlFindProvider, &provider, pubkey, service); err != nil {
 		return nil, errors.Wrapf(err, "error selecting")
@@ -210,8 +267,8 @@ const provSearchCols = `
 	coalesce(p.status,'OFFLINE') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
-	coalesce(p.subscription_rate,0) as subscription_rate,
-	coalesce(p.paygo_rate,0) as paygo_rate,
+	coalesce(p.subscription_rate,'') as subscription_rate,
+	coalesce(p.paygo_rate,'') as paygo_rate,
 	coalesce(p.min_contract_duration,0) as min_contract_duration,
 	coalesce(p.max_contract_duration,0) as max_contract_duration,
 	coalesce(p.bond,0) as bond
@@ -285,6 +342,17 @@ func (d *DirectoryDB) SearchProviders(ctx context.Context, criteria types.Provid
 		return nil, errors.Wrapf(err, "error selecting many")
 	}
 
+	for _, provider := range providers {
+		coins, err := cosmos.ParseCoins(provider.SubscriptionRateRaw)
+		if err == nil {
+			provider.SubscriptionRate = coins
+		}
+		coins, err = cosmos.ParseCoins(provider.PaygoRateRaw)
+		if err == nil {
+			provider.PayAsYouGoRate = coins
+		}
+	}
+
 	return providers, nil
 }
 
@@ -314,7 +382,7 @@ func (d *DirectoryDB) InsertBondProviderEvent(ctx context.Context, providerID in
 	return insert(ctx, conn, sqlInsertBondProviderEvent, providerID, height, txID, evt.BondRel.String(), evt.BondAbs.String())
 }
 
-func (d *DirectoryDB) InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent) (*Entity, error) {
+func (d *DirectoryDB) InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent, txID string, height int64) (*Entity, error) {
 	conn, err := d.getConnection(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error obtaining db connection")
@@ -345,4 +413,38 @@ func (d *DirectoryDB) UpsertProviderMetadata(ctx context.Context, providerID, no
 
 	// TODO - always insert instead of upsert, fail on dupe (or read and fail on exists). are there any restrictions on version string?
 	return insert(ctx, conn, sqlUpsertProviderMetadata, providerID, nonce, c.Moniker, c.Website, c.Description, location, c.FreeTierRateLimit)
+}
+
+func (d *DirectoryDB) FindSubscriberContracts(ctx context.Context, pubkey, service string) (SubscriberContracts, error) {
+	conn, err := d.getConnection(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error obtaining db connection")
+	}
+	defer conn.Release()
+
+	var contracts SubscriberContracts
+	err = pgxscan.Select(ctx, conn, &contracts, sqlFindSubscriberContractsByService, pubkey, service)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error selecting subscriber contracts")
+	}
+
+	return contracts, nil
+}
+
+func (d *DirectoryDB) ServiceExists(ctx context.Context, service string) (bool, error) {
+	conn, err := d.getConnection(ctx)
+	if err != nil {
+		return false, errors.Wrapf(err, "error obtaining db connection")
+	}
+	defer conn.Release()
+
+	var dummy int
+	err = selectOne(ctx, conn, sqlServiceExists, &dummy, service)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, errors.Wrapf(err, "error checking service existence")
+	}
+	return true, nil
 }

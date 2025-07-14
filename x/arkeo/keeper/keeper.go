@@ -2,12 +2,10 @@ package keeper
 
 import (
 	"context"
-	"fmt"
-	"strings"
-
 	"cosmossdk.io/errors"
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -19,6 +17,8 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"sort"
+	"strings"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -77,6 +77,12 @@ type Keeper interface {
 	// Keeper Interfaces
 	KeeperProvider
 	KeeperContract
+
+	//Services
+	AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error)
+
+	//Upgrade Plan Emission Curve
+	UpgradeEmissionCurve(ctx context.Context, newValue uint64) (bool, error)
 }
 
 type KeeperProvider interface {
@@ -397,4 +403,48 @@ func (k KVStore) GetValidatorRewards(ctx context.Context, val sdk.ValAddress) (d
 
 func (k KVStore) GetCommunityPool(ctx context.Context) (disttypes.FeePool, error) {
 	return k.distributionKeeper.FeePool.Get(ctx)
+}
+
+func (k KVStore) AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error) {
+	// Collect all service names
+	names := make([]string, 0, len(common.ServiceLookup))
+	for name := range common.ServiceLookup {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	var services []*types.ServiceEnum
+	for _, name := range names {
+		id := common.ServiceLookup[name]
+		services = append(services, &types.ServiceEnum{
+			ServiceId:   id,
+			Name:        name,
+			Description: common.ServiceDescriptionMap[name],
+		})
+	}
+	return &types.QueryAllServicesResponse{Services: services}, nil
+}
+
+var UpdateParamsEmissionKey = []byte("arkeo/params/emission_curve_done")
+
+// UpgradeEmissionCurve sets EmissionCurve to newValue once and only once.
+// returns (wasUpdated, error)
+func (k KVStore) UpgradeEmissionCurve(ctx context.Context, newValue uint64) (bool, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	store := sdkCtx.KVStore(k.storeKey)
+
+	// idempotency guard – already done?
+	if store.Has(UpdateParamsEmissionKey) {
+		return false, nil
+	}
+
+	// fetch‑modify‑store
+	params := k.GetParams(sdkCtx) // canonical getter
+	params.EmissionCurve = newValue
+	k.SetParams(sdkCtx, params) // canonical setter (no error today)
+
+	// write marker so we don’t repeat the mutation
+	store.Set(UpdateParamsEmissionKey, []byte{1})
+
+	return true, nil
 }

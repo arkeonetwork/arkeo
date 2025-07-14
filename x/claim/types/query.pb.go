@@ -32,7 +32,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryParamsRequest is request type for the Query/Params RPC method.
+// QueryParamsRequest is the request type for querying claim module parameters.
+// Used to request the current parameters of the claim module.
 type QueryParamsRequest struct {
 }
 
@@ -69,7 +70,8 @@ func (m *QueryParamsRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryParamsRequest proto.InternalMessageInfo
 
-// QueryParamsResponse is response type for the Query/Params RPC method.
+// QueryParamsResponse is the response type for querying claim module
+// parameters. Contains the parameters of the claim module.
 type QueryParamsResponse struct {
 	// params holds all the parameters of this module.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
@@ -115,9 +117,13 @@ func (m *QueryParamsResponse) GetParams() Params {
 	return Params{}
 }
 
+// QueryClaimRecordRequest is the request type for querying a single claim
+// record. Used to request the claim record for a specific address and chain.
 type QueryClaimRecordRequest struct {
+	// address is the address to query claim records for.
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Chain   Chain  `protobuf:"varint,2,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
+	// chain is the chain identifier for the claim record.
+	Chain Chain `protobuf:"varint,2,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
 }
 
 func (m *QueryClaimRecordRequest) Reset()         { *m = QueryClaimRecordRequest{} }
@@ -167,7 +173,10 @@ func (m *QueryClaimRecordRequest) GetChain() Chain {
 	return ARKEO
 }
 
+// QueryClaimRecordResponse is the response type for a single claim record
+// query. Contains the claim record for the requested address and chain.
 type QueryClaimRecordResponse struct {
+	// claim_record is the claim record for the requested address and chain.
 	ClaimRecord *ClaimRecord `protobuf:"bytes,1,opt,name=claim_record,json=claimRecord,proto3" json:"claim_record,omitempty"`
 }
 
@@ -211,10 +220,16 @@ func (m *QueryClaimRecordResponse) GetClaimRecord() *ClaimRecord {
 	return nil
 }
 
+// QueryClaimableForActionRequest is the request type for querying the claimable
+// amount for an action. Used to request the claimable amount for a given
+// address, action, and chain.
 type QueryClaimableForActionRequest struct {
+	// address is the address for which to check claimable amount.
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Action  Action `protobuf:"varint,2,opt,name=action,proto3,enum=arkeo.claim.Action" json:"action,omitempty"`
-	Chain   Chain  `protobuf:"varint,3,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
+	// action is the action type for which claimable is queried.
+	Action Action `protobuf:"varint,2,opt,name=action,proto3,enum=arkeo.claim.Action" json:"action,omitempty"`
+	// chain is the chain identifier for the claimable action.
+	Chain Chain `protobuf:"varint,3,opt,name=chain,proto3,enum=arkeo.claim.Chain" json:"chain,omitempty"`
 }
 
 func (m *QueryClaimableForActionRequest) Reset()         { *m = QueryClaimableForActionRequest{} }
@@ -271,7 +286,11 @@ func (m *QueryClaimableForActionRequest) GetChain() Chain {
 	return ARKEO
 }
 
+// QueryClaimableForActionResponse is the response type for claimable amount
+// query for an action. Contains the claimable coin for the
+// address/action/chain.
 type QueryClaimableForActionResponse struct {
+	// amount is the claimable coin for the address/action/chain.
 	Amount types.Coin `protobuf:"bytes,1,opt,name=amount,proto3" json:"amount"`
 }
 
@@ -376,11 +395,12 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// Parameters queries the parameters of the module.
+	// Params returns the current parameters of the claim module.
 	Params(ctx context.Context, in *QueryParamsRequest, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	// Queries a list of ClaimRecord items.
+	// ClaimRecord queries a single claim record by a given address and chain.
 	ClaimRecord(ctx context.Context, in *QueryClaimRecordRequest, opts ...grpc.CallOption) (*QueryClaimRecordResponse, error)
-	// Queries the claimable amount for a specific action.
+	// ClaimableForAction queries the claimable amount for a specific action and
+	// address.
 	ClaimableForAction(ctx context.Context, in *QueryClaimableForActionRequest, opts ...grpc.CallOption) (*QueryClaimableForActionResponse, error)
 }
 
@@ -421,11 +441,12 @@ func (c *queryClient) ClaimableForAction(ctx context.Context, in *QueryClaimable
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// Parameters queries the parameters of the module.
+	// Params returns the current parameters of the claim module.
 	Params(context.Context, *QueryParamsRequest) (*QueryParamsResponse, error)
-	// Queries a list of ClaimRecord items.
+	// ClaimRecord queries a single claim record by a given address and chain.
 	ClaimRecord(context.Context, *QueryClaimRecordRequest) (*QueryClaimRecordResponse, error)
-	// Queries the claimable amount for a specific action.
+	// ClaimableForAction queries the claimable amount for a specific action and
+	// address.
 	ClaimableForAction(context.Context, *QueryClaimableForActionRequest) (*QueryClaimableForActionResponse, error)
 }
 

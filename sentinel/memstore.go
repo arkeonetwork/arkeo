@@ -128,7 +128,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 
 	var data fetch
 	requestURL := fmt.Sprintf("%s/arkeo/contract/%s", k.baseURL, key)
-	k.logger.Info("request uri", "uri", requestURL)
+	k.logger.Info("DEBUG: request uri", "uri", requestURL)
 	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		k.logger.Error("fail to create http request", "error", err)
@@ -144,7 +144,7 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 		}
 		req.Header.Set(QueryArkAuth, authHeader)
 	}
-
+	
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		k.logger.Error("fail to send http request", "error", err)
@@ -153,15 +153,15 @@ func (k *MemStore) fetchContract(key string) (types.Contract, error) {
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
-		k.logger.Error("fail to read from response body", "error", err)
+		k.logger.Error("DEBUG: fail to read from response body", "error", err)
 		return contract, err
 	}
 
-	k.logger.Info("response body", "body", string(resBody))
+	k.logger.Info("DEBUG: response body", "body", string(resBody))
 
 	err = json.Unmarshal(resBody, &data)
 	if err != nil {
-		k.logger.Error("fail to unmarshal response", "error", err)
+		k.logger.Error("DEBUG: fail to unmarshal response", "error", err)
 		return contract, err
 	}
 

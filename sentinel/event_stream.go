@@ -401,6 +401,9 @@ func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 
+	p.logger.Error(fmt.Sprintf("evt.Provider: ", evt.Provider))
+	p.logger.Error(fmt.Sprintf("service.String(): ", service.String()))
+
 	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider, service.String())
 	if err != nil {
 		p.logger.Error(fmt.Sprintf("failed to get provider %s", err))

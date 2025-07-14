@@ -17,7 +17,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 func NewParams() Params {
 	return Params{
 		BlockPerYear:  6311520,
-		EmissionCurve: 6,
+		EmissionCurve: 10,
 	}
 }
 

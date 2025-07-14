@@ -3,6 +3,7 @@ package indexer
 import (
 	"context"
 	"fmt"
+	"github.com/arkeonetwork/arkeo/directory/types"
 	"net/url"
 
 	"github.com/pkg/errors"
@@ -12,7 +13,7 @@ import (
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
-func (s *Service) handleModProviderEvent(ctx context.Context, evt atypes.EventModProvider) error {
+func (s *Service) handleModProviderEvent(ctx context.Context, evt atypes.EventModProvider, txID string, height int64) error {
 	provider, err := s.db.FindProvider(ctx, evt.Provider.String(), evt.Service)
 	if err != nil {
 		return fmt.Errorf("fail to find provider %s for service %s,err: %w", evt.Provider, evt.Service, err)
@@ -33,22 +34,26 @@ func (s *Service) handleModProviderEvent(ctx context.Context, evt atypes.EventMo
 	if _, err = s.db.UpdateProvider(ctx, provider); err != nil {
 		return fmt.Errorf("error updating provider for mod event %s service %s,err: %w", provider.Pubkey, provider.Service, err)
 	}
-	/*
-		// currently, we're not utilizing the inserts for mod provider events, so
-		// i'm disabling for now. If we want to re-enable it (because we see s need
-		// for it), we should create s new modevent struct that looks something
-		// like this...
-		type ModProviderEvent struct {
-			atypes.EventModProvider
-			Height              int64          `mapstructure:"height"`
-			TxID                string         `mapstructure:"hash"`
-		}
 
-		log.Infof("updated provider %s service %s", provider.Pubkey, provider.Service)
-		if _, err = s.db.InsertModProviderEvent(provider.ID, evt); err != nil {
-			return errors.Wrapf(err, "error inserting ModProviderEvent for %s service %s", evt.Provider, evt.Service)
-		}
-	*/
+	// we should create s new modevent struct that looks something
+	log.Infof("updated provider %s service %s", provider.Pubkey, provider.Service)
+	modEvent := types.ModProviderEvent{
+		Pubkey:              evt.Provider.String(),
+		Service:             evt.Service,
+		Height:              height,
+		TxID:                txID,
+		MetadataURI:         evt.MetadataUri,
+		MetadataNonce:       evt.MetadataNonce,
+		Status:              types.ProviderStatus(evt.Status.String()),
+		MinContractDuration: evt.MinContractDuration,
+		MaxContractDuration: evt.MaxContractDuration,
+		SettlementDuration:  evt.SettlementDuration,
+		SubscriptionRate:    evt.SubscriptionRate,
+		PayAsYouGoRate:      evt.PayAsYouGoRate,
+	}
+	if _, err = s.db.InsertModProviderEvent(ctx, provider.ID, modEvent, txID, height); err != nil {
+		return errors.Wrapf(err, "error inserting ModProviderEvent for %s service %s", evt.Provider, evt.Service)
+	}
 
 	if !isMetaDataUpdated {
 		return nil
@@ -73,6 +78,7 @@ func (s *Service) handleModProviderEvent(ctx context.Context, evt atypes.EventMo
 	if _, err = s.db.UpsertProviderMetadata(ctx, provider.ID, int64(provider.MetadataNonce), *providerMetadata); err != nil {
 		return errors.Wrapf(err, "error updating provider metadta for mod event %s service %s", provider.Pubkey, provider.Service)
 	}
+
 	return nil
 }
 

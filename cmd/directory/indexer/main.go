@@ -15,17 +15,20 @@ import (
 )
 
 var (
-	log     = logging.WithoutFields()
-	envPath = flag.String("env", "", "path to env file (default: use os env)")
+	log        = logging.WithoutFields()
+	configPath = flag.String("config", "", "Path to config file")
 )
 
 func main() {
 	log.Info("starting indexer")
 	cosmos.GetConfig().SetBech32PrefixForAccount(app.AccountAddressPrefix, app.AccountAddressPrefix+"pub")
 	flag.Parse()
+	if *configPath == "" {
+		log.Panic("No config file provided. Use --config <path>")
+	}
 	var c indexer.ServiceParams
-	if err := utils.LoadFromEnv(&c, *envPath); err != nil {
-		log.Panicf("failed to load config from env: %+v", err)
+	if err := utils.LoadFromEnv(&c, *configPath); err != nil {
+		log.Panicf("failed to load config from file: %+v", err)
 	}
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

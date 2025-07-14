@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	"github.com/arkeonetwork/arkeo/directory/types"
 )
 
 // swagger:route Get /stats getStatsArkeo
@@ -41,12 +39,20 @@ func (a *ApiService) getStatsArkeo(w http.ResponseWriter, r *http.Request) {
 //	200: ServiceStats
 //	500: InternalServerError
 
-func getStatsService(w http.ResponseWriter, r *http.Request) {
+func (a *ApiService) getStatsService(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	service := vars["service"]
 	if service == "" {
 		respondWithError(w, http.StatusBadRequest, "service is required")
 		return
 	}
-	respondWithJSON(w, http.StatusOK, &types.ServiceStats{})
+
+	arkeoStats, err := a.db.GetArkeoNetworkStatsByService(r.Context(), service)
+	if err != nil {
+		log.Error("error finding stats for Arkeo Network")
+		respondWithError(w, http.StatusInternalServerError, "error finding stats for Arkeo Network")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, arkeoStats)
 }

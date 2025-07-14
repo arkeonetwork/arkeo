@@ -81,3 +81,26 @@ func (a *ApiService) findProvider(ctx context.Context, pubkey, service string) (
 	// provider := &db.ArkeoProvider{Pubkey: dbProvider.Pubkey}
 	return dbProvider, nil
 }
+
+func (a *ApiService) getSubscriberContracts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	pubkey := vars["pubkey"]
+	service := r.FormValue("service")
+	if pubkey == "" {
+		respondWithError(w, http.StatusBadRequest, "pubkey is required")
+		return
+	}
+	if service == "" {
+		respondWithError(w, http.StatusBadRequest, "service is required")
+		return
+	}
+
+	contracts, err := a.db.FindSubscriberContracts(r.Context(), pubkey, service)
+	if err != nil {
+		log.Errorf("error finding provider for %s service %s: %+v", pubkey, service, err)
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error finding subscriber with pubkey %s", pubkey))
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, contracts)
+}

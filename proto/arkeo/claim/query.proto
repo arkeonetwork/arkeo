@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 package arkeo.claim;
 
 import "gogoproto/gogo.proto";
@@ -11,49 +10,71 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/arkeonetwork/arkeo/x/claim/types";
 
-// Query defines the gRPC querier service.
+// Query defines the gRPC query service for the claim module.
 service Query {
-
-  // Parameters queries the parameters of the module.
+  // Params returns the current parameters of the claim module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/arkeo/claim/params";
   }
 
-  // Queries a list of ClaimRecord items.
+  // ClaimRecord queries a single claim record by a given address and chain.
   rpc ClaimRecord(QueryClaimRecordRequest) returns (QueryClaimRecordResponse) {
     option (google.api.http).get = "/arkeo/claim/claimrecord/{address}";
   }
-  
-  // Queries the claimable amount for a specific action.
-  rpc ClaimableForAction(QueryClaimableForActionRequest) returns (QueryClaimableForActionResponse) {
+
+  // ClaimableForAction queries the claimable amount for a specific action and
+  // address.
+  rpc ClaimableForAction(QueryClaimableForActionRequest)
+      returns (QueryClaimableForActionResponse) {
     option (google.api.http) = {
-      get: "/arkeo/claim/claimable/{address}"
+      get : "/arkeo/claim/claimable/{address}"
     };
   }
 }
-// QueryParamsRequest is request type for the Query/Params RPC method.
+
+// QueryParamsRequest is the request type for querying claim module parameters.
+// Used to request the current parameters of the claim module.
 message QueryParamsRequest {}
 
-// QueryParamsResponse is response type for the Query/Params RPC method.
+// QueryParamsResponse is the response type for querying claim module
+// parameters. Contains the parameters of the claim module.
 message QueryParamsResponse {
-
   // params holds all the parameters of this module.
   Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
+// QueryClaimRecordRequest is the request type for querying a single claim
+// record. Used to request the claim record for a specific address and chain.
 message QueryClaimRecordRequest {
+  // address is the address to query claim records for.
   string address = 1;
+  // chain is the chain identifier for the claim record.
   Chain chain = 2;
 }
 
-message QueryClaimRecordResponse { ClaimRecord claim_record = 1; }
+// QueryClaimRecordResponse is the response type for a single claim record
+// query. Contains the claim record for the requested address and chain.
+message QueryClaimRecordResponse {
+  // claim_record is the claim record for the requested address and chain.
+  ClaimRecord claim_record = 1;
+}
 
+// QueryClaimableForActionRequest is the request type for querying the claimable
+// amount for an action. Used to request the claimable amount for a given
+// address, action, and chain.
 message QueryClaimableForActionRequest {
+  // address is the address for which to check claimable amount.
   string address = 1;
+  // action is the action type for which claimable is queried.
   Action action = 2;
+  // chain is the chain identifier for the claimable action.
   Chain chain = 3;
 }
 
+// QueryClaimableForActionResponse is the response type for claimable amount
+// query for an action. Contains the claimable coin for the
+// address/action/chain.
 message QueryClaimableForActionResponse {
-  cosmos.base.v1beta1.Coin amount = 1 [(gogoproto.nullable) = false];
+  // amount is the claimable coin for the address/action/chain.
+  cosmos.base.v1beta1.Coin amount = 1 [ (gogoproto.nullable) = false ];
 }

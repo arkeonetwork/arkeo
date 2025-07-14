@@ -24,6 +24,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// ValidatorVersion defines the version of a validator in genesis state.
 type ValidatorVersion struct {
 	ValidatorAddress string `protobuf:"bytes,1,opt,name=validator_address,json=validatorAddress,proto3" json:"validator_address,omitempty"`
 	Version          int64  `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
