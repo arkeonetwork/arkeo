@@ -31,6 +31,8 @@ type ArkeoProvider struct {
 	MinContractDuration int64        `json:"min_contract_duration" db:"min_contract_duration"`
 	MaxContractDuration int64        `json:"max_contract_duration" db:"max_contract_duration"`
 	SettlementDuration  int64        `json:"settlement_duration" db:"settlement_duration"`
+	SubscriptionRateRaw string       `json:"-" db:"subscription_rate"`
+	PaygoRateRaw        string       `json:"-" db:"paygo_rate"`
 	SubscriptionRate    cosmos.Coins `json:"subscription_rates" db:"-"`
 	PayAsYouGoRate      cosmos.Coins `json:"paygo_rates" db:"-"`
 }
@@ -265,8 +267,8 @@ const provSearchCols = `
 	coalesce(p.status,'OFFLINE') as status,
 	coalesce(p.metadata_uri,'') as metadata_uri,
 	coalesce(p.metadata_nonce,0) as metadata_nonce,
-	coalesce(p.subscription_rate,0) as subscription_rate,
-	coalesce(p.paygo_rate,0) as paygo_rate,
+	coalesce(p.subscription_rate,'') as subscription_rate,
+	coalesce(p.paygo_rate,'') as paygo_rate,
 	coalesce(p.min_contract_duration,0) as min_contract_duration,
 	coalesce(p.max_contract_duration,0) as max_contract_duration,
 	coalesce(p.bond,0) as bond
@@ -338,6 +340,17 @@ func (d *DirectoryDB) SearchProviders(ctx context.Context, criteria types.Provid
 	providers := make([]*ArkeoProvider, 0, 512)
 	if err := pgxscan.Select(ctx, conn, &providers, q, params...); err != nil {
 		return nil, errors.Wrapf(err, "error selecting many")
+	}
+
+	for _, provider := range providers {
+		coins, err := cosmos.ParseCoins(provider.SubscriptionRateRaw)
+		if err == nil {
+			provider.SubscriptionRate = coins
+		}
+		coins, err = cosmos.ParseCoins(provider.PaygoRateRaw)
+		if err == nil {
+			provider.PayAsYouGoRate = coins
+		}
 	}
 
 	return providers, nil
@@ -416,4 +429,22 @@ func (d *DirectoryDB) FindSubscriberContracts(ctx context.Context, pubkey, servi
 	}
 
 	return contracts, nil
+}
+
+func (d *DirectoryDB) ServiceExists(ctx context.Context, service string) (bool, error) {
+	conn, err := d.getConnection(ctx)
+	if err != nil {
+		return false, errors.Wrapf(err, "error obtaining db connection")
+	}
+	defer conn.Release()
+
+	var dummy int
+	err = selectOne(ctx, conn, sqlServiceExists, &dummy, service)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, errors.Wrapf(err, "error checking service existence")
+	}
+	return true, nil
 }

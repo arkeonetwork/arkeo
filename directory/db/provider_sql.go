@@ -168,4 +168,8 @@ var (
 		WHERE ocv.client_pubkey = $1
 		AND pv.service = $2
 	`
+
+	sqlServiceExists = `
+		SELECT 1 FROM providers WHERE service = $1 LIMIT 1
+	`
 )

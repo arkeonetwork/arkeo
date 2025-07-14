@@ -13,6 +13,7 @@ SELECT p.id,
        p.status,
        p.min_contract_duration,
        p.max_contract_duration,
+       p.settlement_duration,
        p.created,
        p.updated,
        m.nonce AS metadata_nonce_value,
@@ -23,7 +24,15 @@ SELECT p.id,
        m.location AS metadata_location,
        m.free_rate_limit AS metadata_free_rate_limit,
        m.free_rate_limit_duration AS metadata_free_rate_limit_duration,
-       ( SELECT count(1) AS count
+       ( SELECT ((sr.token_amount)::text || sr.token_name)
+FROM provider_subscription_rates sr
+WHERE (sr.provider_id = p.id)
+    LIMIT 1) AS subscription_rate,
+    ( SELECT ((pr.token_amount)::text || pr.token_name)
+FROM provider_pay_as_you_go_rates pr
+WHERE (pr.provider_id = p.id)
+    LIMIT 1) AS paygo_rate,
+    ( SELECT count(1) AS count
 FROM contracts oc
 WHERE (oc.provider_id = p.id)) AS contract_count,
     ( SELECT min(bond_evts.height) AS min

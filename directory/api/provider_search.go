@@ -113,8 +113,20 @@ func (a *ApiService) searchProviders(response http.ResponseWriter, request *http
 
 	searchParams.Pubkey = pubkey
 
-	if service != "" && !utils.ValidateService(service) {
-		respondWithError(response, http.StatusBadRequest, fmt.Sprintf("%s is not a valid service", service))
+	//if service != "" && !utils.ValidateService(service) {
+	//	respondWithError(response, http.StatusBadRequest, fmt.Sprintf("%s is not a valid service", service))
+	//}
+	//searchParams.Service = service
+	if service != "" {
+		ok, err := a.db.ServiceExists(request.Context(), service)
+		if err != nil {
+			respondWithError(response, http.StatusBadRequest, fmt.Sprintf("error validating %s as a service", service))
+			return
+		}
+		if !ok {
+			respondWithError(response, http.StatusBadRequest, fmt.Sprintf("%s is not a valid service", service))
+			return
+		}
 	}
 	searchParams.Service = service
 
