@@ -24,7 +24,7 @@ func (d *DirectoryDB) InsertBlock(ctx context.Context, b *Block) (*Entity, error
 		return nil, errors.Wrapf(err, "error obtaining db connection")
 	}
 	defer conn.Release()
-	return insert(ctx, conn, sqlInsertBlock, b.Height, b.Hash, b.BlockTime)
+	return insert(ctx, conn, sqlUpsertBlock, b.Height, b.Hash, b.BlockTime)
 }
 
 func (d *DirectoryDB) FindLatestBlock(ctx context.Context) (*Block, error) {
