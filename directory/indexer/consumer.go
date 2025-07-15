@@ -218,7 +218,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "withdraw_rewards", "delegate":
 		// No-op: this event is intentionally ignored by the indexer.
 		s.logger.Debugf("received event type %s at height %d; ignoring.", event.Type, height)
-	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
+	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards", "liveness":
 		// do nothing
 	default:
 		// panic to make it immediately obvious that something is not handled
