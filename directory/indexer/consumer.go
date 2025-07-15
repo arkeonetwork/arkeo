@@ -220,7 +220,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		s.logger.Debugf("received event type %s at height %d; ignoring.", event.Type, height)
 	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
 		// do nothing
-	case "liveness", "claim_thor_delegate", "claim_from_eth":
+	case "liveness", "claim_thor_delegate", "claim_from_eth", "claim":
 		// do nothing
 	default:
 		// panic to make it immediately obvious that something is not handled
