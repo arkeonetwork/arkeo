@@ -9,7 +9,17 @@ const (
 		b.hash,
 		b.block_time
 	`
-	sqlInsertBlock     = `insert into blocks(height,hash,block_time) values($1,$2,$3) returning id, created, updated`
+
+	sqlUpsertBlock = `
+		INSERT INTO blocks(id, height, hash, block_time)
+		VALUES (1, $1, $2, $3)
+		ON CONFLICT (id) DO UPDATE
+		  SET height     = EXCLUDED.height,
+			  hash       = EXCLUDED.hash,
+			  block_time = EXCLUDED.block_time
+		RETURNING id, created, updated
+		`
+
 	sqlFindLatestBlock = `
 		select ` + blockCols + `
 		from blocks b
