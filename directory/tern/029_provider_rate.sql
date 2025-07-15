@@ -18,6 +18,12 @@ CREATE TABLE provider_pay_as_you_go_rates (
 
 ALTER TABLE providers DROP COLUMN paygo_rate;
 
+-- Rebuild provider views now that subscription-rate table exists
+DROP VIEW IF EXISTS public.providers_v;
+DROP VIEW IF EXISTS public.providers_base_v;
+{{ template "views/providers_base_v_v2.sql" . }}
+{{ template "views/providers_v_v1.sql" . }}
+
 ---- create above / drop below ----
 
 drop table provider_subscription_rates;

@@ -498,6 +498,31 @@ func NewArkeoApp(
 
 	})
 
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.1", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		//err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		//if err != nil {
+		//	return fromVM, err
+		//}
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.2", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		if err != nil {
+			return vm, err
+		}
+		//app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(sdk.UnwrapSDKContext(ctx), 10)
+		return vm, nil
+	})
+
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.3", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		//err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		//if err != nil {
+		//	return fromVM, err
+		//}
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:
