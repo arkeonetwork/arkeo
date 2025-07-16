@@ -243,7 +243,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Burn events
-	case "burn", "slash", "jail", "unjail", "cosmos.authz.v1beta1.EventGrant":
+	case "burn", "slash", "jail", "unjail", "cosmos.authz.v1beta1.EventGrant", "cosmos.authz.v1beta1.EventRevoke":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
