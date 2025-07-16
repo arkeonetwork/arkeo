@@ -243,7 +243,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Burn events
-	case "burn":
+	case "burn", "slash":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
