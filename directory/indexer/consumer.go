@@ -234,7 +234,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Staking module events
-	case "create_validator", "edit_validator", "redelegate", "unbond":
+	case "create_validator", "edit_validator", "redelegate", "unbond", "complete_redelegation":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
