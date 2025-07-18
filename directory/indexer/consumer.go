@@ -243,7 +243,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// IBC Events
-	case "channel_open_init", "channel_open_ack", "connection_open_init", "connection_open_ack", "create_client", "update_client":
+	case "channel_open_init", "channel_open_ack", "connection_open_init", "connection_open_ack", "create_client":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
@@ -252,7 +252,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// IBC Events (Untracked)
-	case "send_packet", "recv_packet", "acknowledge_packet", "write_acknowledgement", "timeout_packet", "channel_open_try", "channel_open_confirm", "channel_close_init", "channel_close_confirm", "connection_open_try", "connection_open_confirm", "ics20_transfer", "timeout":
+	case "send_packet", "recv_packet", "acknowledge_packet", "write_acknowledgement", "timeout_packet", "channel_open_try", "channel_open_confirm", "channel_close_init", "channel_close_confirm", "connection_open_try", "connection_open_confirm", "ics20_transfer", "update_client", "timeout", "fungible_token_packet", "denomination_trace", "send_native", "recv_native", "timeout_native":
 		// Not logged, too high volume.
 	// Bridge/claim events
 	case "withdraw_rewards", "delegate", "claim", "withdraw_commission", "claim_from_eth", "claim_thor_delegate":
