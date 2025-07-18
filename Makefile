@@ -67,7 +67,20 @@ GORELEASER_SKIP_PUBLISH ?= false
 # ------------------------------ Build ------------------------------
 
 build:
-	go build ${BUILD_FLAGS} ${BINARIES}
+	@echo "Building binaries into ./bin: arkeod, sentinel, indexer, api"
+	@mkdir -p bin
+	go build ${BUILD_FLAGS} -o bin/arkeod   ./cmd/arkeod
+	go build ${BUILD_FLAGS} -o bin/sentinel ./cmd/sentinel
+	go build ${BUILD_FLAGS} -o bin/indexer  ./cmd/directory/indexer
+	go build ${BUILD_FLAGS} -o bin/api      ./cmd/directory/api
+	@echo "==== Build output in ./bin ===="
+	@for bin in arkeod sentinel indexer api; do \
+		if [ -f "bin/$$bin" ]; then \
+			echo "Found binary at: $$(realpath bin/$$bin)"; \
+		else \
+			echo "Binary $$bin not found in ./bin"; \
+		fi \
+	done
 
 install:
 	go install ${BUILD_FLAGS} ${BINARIES}

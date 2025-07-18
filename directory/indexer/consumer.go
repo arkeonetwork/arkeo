@@ -215,11 +215,76 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err := s.handleCloseContractEvent(ctx, eventCloseContract, txID, height); err != nil {
 			return err
 		}
-	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "withdraw_rewards", "delegate":
-		// No-op: this event is intentionally ignored by the indexer.
-		s.logger.Debugf("received event type %s at height %d; ignoring.", event.Type, height)
-	case "coin_spent", "coin_received", "transfer", "message", "tx", "coinbase", "mint", "commission", "rewards":
-		// do nothing
+	// Proposal events
+	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "inactive_proposal", "proposal_execution_failed":
+		attrJSON, err := json.Marshal(event.Attributes)
+		if err != nil {
+			return err
+		}
+		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
+			return err
+		}
+	// Staking module events
+	case "create_validator", "edit_validator", "redelegate", "unbond", "complete_redelegation", "complete_unbonding", "begin_redelegate":
+		attrJSON, err := json.Marshal(event.Attributes)
+		if err != nil {
+			return err
+		}
+		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
+			return err
+		}
+	// Burn events
+	case "burn", "slash", "jail", "unjail", "cosmos.authz.v1beta1.EventGrant", "cosmos.authz.v1beta1.EventRevoke", "set_withdraw_address", "withdraw_validator_commission":
+		attrJSON, err := json.Marshal(event.Attributes)
+		if err != nil {
+			return err
+		}
+		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
+			return err
+		}
+	// IBC Events
+	case "channel_open_init", "channel_open_ack", "connection_open_init", "connection_open_ack", "create_client":
+		attrJSON, err := json.Marshal(event.Attributes)
+		if err != nil {
+			return err
+		}
+		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
+			return err
+		}
+	// IBC Events (Untracked)
+	case "send_packet", "recv_packet", "acknowledge_packet", "write_acknowledgement", "timeout_packet", "channel_open_try", "channel_open_confirm", "channel_close_init", "channel_close_confirm", "connection_open_try", "connection_open_confirm", "ics20_transfer", "update_client", "timeout", "fungible_token_packet", "denomination_trace", "send_native", "recv_native", "timeout_native":
+		// Not logged, too high volume.
+	// Bridge/claim events
+	case "withdraw_rewards", "delegate", "claim", "withdraw_commission", "claim_from_eth", "claim_thor_delegate":
+		// Not logging these because they are tied to claims and rewards, but are a lot of data.
+		// High volume, generally only useful for low-level validator monitoring.
+	// Authz/Group Module
+	case "cosmos.group.v1.EventCreateGroup", "cosmos.group.v1.EventExec", "cosmos.group.v1.EventLeaveGroup":
+	// Extra Modules
+	case "cosmos.feegrant.v1beta1.EventGrant", "cosmos.feegrant.v1beta1.EventRevoke", "wasm", "instantiate_contract", "execute_contract", "migrate_contract", "update_admin", "clear_admin", "multisend", "ibc_transfer":
+	// Liveness events
+	case "liveness":
+		// Not logging these because liveness events are emitted for every block to track validator uptime/missed blocks.
+		// High volume, generally only useful for low-level validator monitoring.
+	//Mint module events
+	case "coinbase", "mint":
+		// Not logging these events because coinbase and mint are generated frequently during block production,
+		// leading to high event volume mostly relevant for inflation tracking or supply adjustments.
+		// Typically not needed for higher-level application indexing.
+	// Distribution events
+	case "commission", "rewards":
+		// Not logging commission and rewards events as they occur very frequently for validator payouts and delegator rewards,
+		// which can create significant noise and storage overhead in the indexer.
+		// Usually these are monitored via specialized tools or modules.
+	// Bank module events
+	case "coin_spent", "coin_received", "transfer":
+		// Not logging bank module events like coin_spent, coin_received, and transfer because they generate a large volume
+		// of events for all token movements across accounts, which can overwhelm the indexer.
+		// These are better handled by dedicated transaction or balance tracking systems.
+	// Core transaction events
+	case "message", "tx":
+		// Not logging core transaction events such as message and tx due to their high frequency and verbosity.
+		// These events are typically processed by transaction-level handlers or explorers rather than the indexer.
 	default:
 		// panic to make it immediately obvious that something is not handled
 		// by directory indexer

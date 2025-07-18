@@ -43,6 +43,7 @@ type IDataStorage interface {
 	InsertProvider(ctx context.Context, provider *ArkeoProvider) (*Entity, error)
 	InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent, txID string, height int64) (*Entity, error)
 	UpsertIndexerStatus(ctx context.Context, height int64) (*Entity, error)
+	InsertGenericEvent(ctx context.Context, eventType, txID string, height int64, attrJSON []byte) (*Entity, error)
 }
 
 var _ IDataStorage = &DirectoryDB{}

@@ -141,3 +141,12 @@ func (s *MockDataStorage) UpsertIndexerStatus(ctx context.Context, height int64)
 	//nolint:forcetypeassert
 	return args.Get(0).(*Entity), args.Error(1)
 }
+
+func (s *MockDataStorage) InsertGenericEvent(ctx context.Context, eventType string, txID string, height int64, attrJSON []byte) (*Entity, error) {
+	args := s.Called(ctx, eventType, txID, height, attrJSON)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	//nolint:forcetypeassert
+	return args.Get(0).(*Entity), args.Error(1)
+}
