@@ -216,16 +216,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Proposal events
-	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "withdraw_rewards", "withdraw_commission", "delegate":
-		attrJSON, err := json.Marshal(event.Attributes)
-		if err != nil {
-			return err
-		}
-		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
-			return err
-		}
-	// Bridge/claim events
-	case "claim_thor_delegate", "claim_from_eth", "claim":
+	case "submit_proposal", "proposal_deposit", "proposal_vote", "active_proposal", "inactive_proposal", "proposal_execution_failed":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
@@ -234,7 +225,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Staking module events
-	case "create_validator", "edit_validator", "redelegate", "unbond", "complete_redelegation", "complete_unbonding", "create_client", "update_client", "connection_open_init", "connection_open_ack", "channel_open_init", "channel_open_ack":
+	case "create_validator", "edit_validator", "redelegate", "unbond", "complete_redelegation", "complete_unbonding", "begin_redelegate":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
@@ -243,7 +234,7 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	// Burn events
-	case "burn", "slash", "jail", "unjail", "cosmos.authz.v1beta1.EventGrant", "cosmos.authz.v1beta1.EventRevoke", "set_withdraw_address":
+	case "burn", "slash", "jail", "unjail", "cosmos.authz.v1beta1.EventGrant", "cosmos.authz.v1beta1.EventRevoke", "set_withdraw_address", "withdraw_validator_commission":
 		attrJSON, err := json.Marshal(event.Attributes)
 		if err != nil {
 			return err
@@ -251,6 +242,26 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
 			return err
 		}
+	// IBC Events
+	case "channel_open_init", "channel_open_ack", "connection_open_init", "connection_open_ack", "create_client", "update_client":
+		attrJSON, err := json.Marshal(event.Attributes)
+		if err != nil {
+			return err
+		}
+		if err := s.handleGenericEvent(ctx, event.Type, txID, height, attrJSON); err != nil {
+			return err
+		}
+	// IBC Events (Untracked)
+	case "send_packet", "recv_packet", "acknowledge_packet", "write_acknowledgement", "timeout_packet", "channel_open_try", "channel_open_confirm", "channel_close_init", "channel_close_confirm", "connection_open_try", "connection_open_confirm", "ics20_transfer":
+		// Not logged, too high volume.
+	// Bridge/claim events
+	case "withdraw_rewards", "delegate", "claim", "withdraw_commission", "claim_from_eth", "claim_thor_delegate":
+		// Not logging these because they are tied to claims and rewards, but are a lot of data.
+		// High volume, generally only useful for low-level validator monitoring.
+	// Authz/Group Module
+	case "cosmos.group.v1.EventCreateGroup", "cosmos.group.v1.EventExec", "cosmos.group.v1.EventLeaveGroup":
+	// Extra Modules
+	case "cosmos.feegrant.v1beta1.EventGrant", "cosmos.feegrant.v1beta1.EventRevoke", "wasm", "instantiate_contract", "execute_contract", "migrate_contract", "update_admin", "clear_admin", "multisend", "ibc_transfer":
 	// Liveness events
 	case "liveness":
 		// Not logging these because liveness events are emitted for every block to track validator uptime/missed blocks.
