@@ -528,6 +528,10 @@ func NewArkeoApp(
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.15", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:
