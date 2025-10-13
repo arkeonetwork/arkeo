@@ -8,10 +8,6 @@ DROP VIEW IF EXISTS providers_base_v CASCADE;
 -- 2. Change column type
 ALTER TABLE provider_metadata ALTER COLUMN location TYPE point USING location::point;
 
--- 3. Re-create views
-{{ template "views/providers_base_v_v2.sql" . }}
-{{ template "views/providers_v_v1.sql" . }}
-
 ---- create above / drop below ----
 
 -- note: this doesn't work perfectly.  Assuming original string format was "X,Y" this will end up being "(X,Y)" when we convert 

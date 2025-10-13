@@ -405,6 +405,13 @@ var ServiceLookup = map[string]int32{
 	"zksync-mainnet-unchained":         384,
 	"zksync-testnet-archivenode":       385,
 	"zksync-testnet-fullnode":          386,
+	"tao-mainnet-archivenode":          387,
+	"tao-mainnet-fullnode":             388,
+	"tao-mainnet-lightnode":            389,
+	"tao-testnet-fullnode":             390,
+	"tao-testnet-archivenode":          391,
+	"tao-indexer-subsquid":             392,
+	"tao-indexer-subquery":             393,
 }
 
 var ServiceReverseLookup = map[Service]string{
@@ -795,6 +802,13 @@ var ServiceReverseLookup = map[Service]string{
 	384: "zksync-mainnet-unchained",
 	385: "zksync-testnet-archivenode",
 	386: "zksync-testnet-fullnode",
+	387: "tao-mainnet-archivenode",
+	388: "tao-mainnet-fullnode",
+	389: "tao-mainnet-lightnode",
+	390: "tao-testnet-fullnode",
+	391: "tao-testnet-archivenode",
+	392: "tao-indexer-subsquid",
+	393: "tao-indexer-subquery",
 }
 
 var ServiceDescriptionMap = map[string]string{
@@ -1185,6 +1199,13 @@ var ServiceDescriptionMap = map[string]string{
 	"zksync-mainnet-unchained":         "ZkSync Mainnet Unchained",
 	"zksync-testnet-archivenode":       "ZkSync Testnet Archivenode",
 	"zksync-testnet-fullnode":          "ZkSync Testnet Fullnode",
+	"tao-mainnet-archivenode":          "Bittensor TAO Archive Node",
+	"tao-mainnet-fullnode":             "Bittensor TAO Full Node",
+	"tao-mainnet-lightnode":            "Bittensor TAO Light Node",
+	"tao-testnet-fullnode":             "Bittensor TAO Testnet Full Node",
+	"tao-testnet-archivenode":          "Bittensor TAO Testnet Archive Node",
+	"tao-indexer-subsquid":             "Bittensor TAO Indexer Subsquid",
+	"tao-indexer-subquery":             "Bittensor TAO Indexer Subquery",
 }
 
 func (c Service) String() string {

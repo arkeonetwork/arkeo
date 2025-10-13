@@ -86,3 +86,14 @@ func upsert(ctx context.Context, conn IConnection, sql string, params ...interfa
 func getFlavor() sqlbuilder.Flavor {
 	return sqlbuilder.PostgreSQL
 }
+
+// Upsert Generic Event
+func (d *DirectoryDB) InsertGenericEvent(ctx context.Context, eventType, txID string, height int64, attrJSON []byte) (*Entity, error) {
+	conn, err := d.getConnection(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error obtaining db connection")
+	}
+	defer conn.Release()
+
+	return insert(ctx, conn, sqlInsertGenericEvent, eventType, txID, height, attrJSON)
+}

@@ -142,6 +142,9 @@ import (
 	claimmodulekeeper "github.com/arkeonetwork/arkeo/x/claim/keeper"
 	claimmoduletypes "github.com/arkeonetwork/arkeo/x/claim/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
+
+	// This is for updating the ibc client gov prop
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 )
 
 const (
@@ -309,6 +312,8 @@ func NewArkeoApp(
 
 	// Register IBC client state types
 	ibctm.RegisterInterfaces(interfaceRegistry)
+
+	ibcclienttypes.RegisterInterfaces(interfaceRegistry)
 
 	bApp := baseapp.NewBaseApp(AppName, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
@@ -496,6 +501,31 @@ func NewArkeoApp(
 		}
 		return vm, nil
 
+	})
+
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.1", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		//err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		//if err != nil {
+		//	return fromVM, err
+		//}
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.2", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		if err != nil {
+			return vm, err
+		}
+		//app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(sdk.UnwrapSDKContext(ctx), 10)
+		return vm, nil
+	})
+
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.14.3", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		//err := app.Keepers.ArkeoKeeper.UpgradeEmissionCurve(ctx, 10)
+		//if err != nil {
+		//	return fromVM, err
+		//}
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
 	groupConfig := group.DefaultConfig()
