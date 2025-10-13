@@ -142,6 +142,9 @@ import (
 	claimmodulekeeper "github.com/arkeonetwork/arkeo/x/claim/keeper"
 	claimmoduletypes "github.com/arkeonetwork/arkeo/x/claim/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
+
+	// This is for updating the ibc client gov prop
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 )
 
 const (
@@ -309,6 +312,8 @@ func NewArkeoApp(
 
 	// Register IBC client state types
 	ibctm.RegisterInterfaces(interfaceRegistry)
+
+	ibcclienttypes.RegisterInterfaces(interfaceRegistry)
 
 	bApp := baseapp.NewBaseApp(AppName, logger, db, encodingConfig.TxConfig.TxDecoder(), baseAppOptions...)
 	bApp.SetCommitMultiStoreTracer(traceStore)
