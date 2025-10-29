@@ -281,6 +281,8 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		// Not logging bank module events like coin_spent, coin_received, and transfer because they generate a large volume
 		// of events for all token movements across accounts, which can overwhelm the indexer.
 		// These are better handled by dedicated transaction or balance tracking systems.
+	//IBC Messages
+	case "recover_client":
 	// Core transaction events
 	case "message", "tx":
 		// Not logging core transaction events such as message and tx due to their high frequency and verbosity.
