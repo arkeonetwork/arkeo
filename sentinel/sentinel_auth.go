@@ -1,7 +1,6 @@
 package sentinel
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/arkeonetwork/arkeo/common"
@@ -472,16 +471,16 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// Optional self-verify so only claimable entries are stored.
-	// Preimage the chain uses: "<cid>:<nonce>:"
+	// Preimage the gateway/proxy signs: "<cid>:<nonce>:"
 	{
 		pre := fmt.Sprintf("%d:%d:", aa.ContractId, aa.Nonce)
-		digest := sha256.Sum256([]byte(pre))
 
 		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, aa.Spender.String())
 		if err != nil {
 			return http.StatusUnauthorized, fmt.Errorf("invalid client pubkey: %w", err)
 		}
-		if !pk.VerifySignature(digest[:], aa.Signature) {
+		// Verify against the raw preimage (proxy/gateway signs the raw bytes).
+		if !pk.VerifySignature([]byte(pre), aa.Signature) {
 			return http.StatusUnauthorized, fmt.Errorf("invalid signature for client")
 		}
 	}
