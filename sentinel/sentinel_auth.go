@@ -1,6 +1,7 @@
 package sentinel
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/arkeonetwork/arkeo/common"
@@ -51,7 +52,7 @@ func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte, cha
 }
 
 func GenerateMessageToSign(contractId uint64, nonce int64, chainId string) string {
-	return fmt.Sprintf("%d:%d:%s", contractId, nonce, chainId)
+	return fmt.Sprintf("%d:%d:", contractId, nonce)
 }
 
 func parseContractAuth(raw string) (ContractAuth, error) {
@@ -440,6 +441,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
+	// Ensure spender (client) is recorded in the claim even when arkauth is 3-part.
+	if aa.Spender.IsEmpty() {
+		aa.Spender = contract.Client
+		p.logger.Debug("paidTier: inferred spender from contract client", "spender", aa.Spender.String())
+	}
+
 	// Check if the contract has expired (based on current chain height).
 	// If expired, require the client to open a new contract before continuing.
 	if contract.IsExpired(p.MemStore.GetHeight()) {
@@ -462,6 +469,21 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	// Open contracts do not require per-request client signatures or nonce/accounting.
 	if contract.IsOpenAuthorization() {
 		return http.StatusOK, nil
+	}
+
+	// Optional self-verify so only claimable entries are stored.
+	// Preimage the chain uses: "<cid>:<nonce>:"
+	{
+		pre := fmt.Sprintf("%d:%d:", aa.ContractId, aa.Nonce)
+		digest := sha256.Sum256([]byte(pre))
+
+		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, aa.Spender.String())
+		if err != nil {
+			return http.StatusUnauthorized, fmt.Errorf("invalid client pubkey: %w", err)
+		}
+		if !pk.VerifySignature(digest[:], aa.Signature) {
+			return http.StatusUnauthorized, fmt.Errorf("invalid signature for client")
+		}
 	}
 
 	// Create or update the claim for this contract request:
