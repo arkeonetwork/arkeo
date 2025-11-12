@@ -472,7 +472,8 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// Optional self-verify so only claimable entries are stored.
-	// Chain verify uses SHA-256("<cid>:<nonce>:") with the contract client pubkey.
+	// Primary: chain verify uses SHA-256("<cid>:<nonce>:") with the contract client pubkey.
+	// Compatibility: allow raw-preimage signatures during migration.
 	{
 		pre := fmt.Sprintf("%d:%d:", aa.ContractId, aa.Nonce)
 		digest := sha256.Sum256([]byte(pre))
@@ -481,8 +482,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		if err != nil {
 			return http.StatusUnauthorized, fmt.Errorf("invalid client pubkey: %w", err)
 		}
-		// Verify against SHA-256(preimage).
-		if !pk.VerifySignature(digest[:], aa.Signature) {
+
+		ok := pk.VerifySignature(digest[:], aa.Signature) // preferred (chain style)
+		if !ok {
+			ok = pk.VerifySignature([]byte(pre), aa.Signature) // compatibility (raw-preimage)
+		}
+		if !ok {
 			return http.StatusUnauthorized, fmt.Errorf("invalid signature for client")
 		}
 	}
