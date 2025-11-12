@@ -510,6 +510,40 @@ func (p *Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(d)
 }
 
+func (p *Proxy) handleMarkClaimed(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	type markReq struct {
+		ContractID uint64 `json:"contract_id"`
+		Nonce      uint64 `json:"nonce"`
+	}
+	var req markReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	updated := 0
+	claims := p.ClaimStore.List()
+	for i := range claims {
+		c := claims[i]
+		if c.ContractId == req.ContractID && uint64(c.Nonce) == req.Nonce {
+			// flip the bit; do NOT remove — we want highestNonce to remain monotonic
+			if !c.Claimed {
+				c.Claimed = true
+				if err := p.ClaimStore.Set(c); err != nil { // <-- Set instead of Put
+					respondWithError(w, "persist failed", http.StatusInternalServerError)
+					return
+				}
+			}
+			updated = 1
+			break
+		}
+	}
+
+	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "updated": updated})
+}
+
 func (p *Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -646,6 +680,12 @@ func (p *Proxy) getRouter() *mux.Router {
 	router.HandleFunc(RoutesClaim, p.handleClaim).Methods(http.MethodGet)
 	router.HandleFunc(RoutesClaims, p.handleClaims).Methods(http.MethodGet)
 	router.HandleFunc(RoutesOpenClaims, p.handleOpenClaims).Methods(http.MethodGet)
+
+	router.HandleFunc("/mark-claimed", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/mark-claimed/", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/{service}/mark-claimed", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/{service}/mark-claimed/", p.handleMarkClaimed).Methods(http.MethodPost)
+
 	router.HandleFunc(RouteManage, p.handleContract).Methods(http.MethodGet, http.MethodPost)
 	router.HandleFunc(RouteProviderData, p.handleProviderData).Methods(http.MethodGet)
 	router.PathPrefix("/").Handler(

@@ -11,7 +11,13 @@ import (
 
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"encoding/base64"
+	"math/big"
 )
+
+var secpN, _ = new(big.Int).SetString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16)
+var secpHalfN = new(big.Int).Rsh(secpN, 1)
 
 func (k msgServer) ClaimContractIncome(goCtx context.Context, msg *types.MsgClaimContractIncome) (*types.MsgClaimContractIncomeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
@@ -62,17 +68,71 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		pre := fmt.Sprintf("%d:%d:", msg.ContractId, msg.Nonce)
 		digest := sha256.Sum256([]byte(pre))
 
+		// Unpack r||s (64 bytes, big-endian)
+		r := new(big.Int).SetBytes(msg.Signature[:32])
+		s := new(big.Int).SetBytes(msg.Signature[32:])
+		highS := s.Cmp(secpHalfN) == 1
+
 		ctx.Logger().Info("claim signature verification debug",
 			"preimage", pre,
 			"digest_hex", fmt.Sprintf("%x", digest[:]),
 			"signature_len", len(msg.Signature),
+			"r_hex", fmt.Sprintf("%064x", r),
+			"s_hex", fmt.Sprintf("%064x", s),
+			"s_high", highS,
 		)
 
-		if !pk.VerifySignature(digest[:], msg.Signature) {
+		sigHex := fmt.Sprintf("%064x%064x", r, s)
+		ctx.Logger().Info("claim sig hex (r||s)",
+			"contract_id", msg.ContractId,
+			"nonce", msg.Nonce,
+			"sig_hex", sigHex,
+		)
+
+		pkB64 := base64.StdEncoding.EncodeToString(pk.Bytes())
+		sigHexFull := fmt.Sprintf("%064x%064x", r, s)
+		ctx.Logger().Info("claim sig verify inputs (keeper)",
+			"contract_id", msg.ContractId,
+			"nonce", msg.Nonce,
+			"preimage", pre,
+			"digest_hex", fmt.Sprintf("%x", digest[:]),
+			"pk_b64", pkB64,
+			"sig_hex", sigHexFull,
+		)
+		
+		ok := pk.VerifySignature([]byte(pre), msg.Signature)
+		if !ok && highS {
+			// normalize to low-S for dev/local testing only
+			s.Sub(secpN, s)
+			rb := r.FillBytes(make([]byte, 32))
+			sb := s.FillBytes(make([]byte, 32))
+			norm := append(rb, sb...)
+			ctx.Logger().Info("claim sig normalized to low-S", "nonce", msg.Nonce)
+			ok = pk.VerifySignature(digest[:], norm)
+			if ok {
+				ctx.Logger().Info("claim sig normalized verification succeeded",
+					"contract_id", msg.ContractId,
+					"nonce", msg.Nonce,
+					"preimage", pre,
+					"digest_hex", fmt.Sprintf("%x", digest[:]),
+					"r_hex", fmt.Sprintf("%064x", r),
+					"s_hex", fmt.Sprintf("%064x", s),
+					"s_high", true,
+					"normalized", true,
+				)
+			}
+		}
+
+		if !ok {
 			ctx.Logger().Error("claim signature verify failed",
 				"contract_id", msg.ContractId,
 				"nonce", msg.Nonce,
 				"spender", contract.GetSpender().String(),
+				"preimage", pre,
+				"digest_hex", fmt.Sprintf("%x", digest[:]),
+				"pk_b64", pkB64,
+				"sig_hex", sigHexFull,
+				"s_high", highS,
 			)
 			return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "signature mismatch")
 		}
