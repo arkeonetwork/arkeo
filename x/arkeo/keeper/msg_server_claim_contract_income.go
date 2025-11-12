@@ -52,12 +52,17 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 
 	// open subscription contracts do NOT need to verify the signature
 	if !(contract.IsSubscription() && contract.IsOpenAuthorization()) {
-		// pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
-		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetProvider().String())
+		// Verify with the contract's spender (client) pubkey, not the provider.
+		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
 		if err != nil {
 			return err
 		}
 		if !pk.VerifySignature(msg.GetBytesToSign(ctx.ChainID()), msg.Signature) {
+			ctx.Logger().Error("claim signature verify failed",
+				"contract_id", msg.ContractId,
+				"nonce", msg.Nonce,
+				"spender", contract.GetSpender().String(),
+			)
 			return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "signature mismatch")
 		}
 	}
