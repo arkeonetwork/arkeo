@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
@@ -52,12 +54,21 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 
 	// open subscription contracts do NOT need to verify the signature
 	if !(contract.IsSubscription() && contract.IsOpenAuthorization()) {
-		// Verify with the contract's spender (client) pubkey, not the provider.
+		// Verify with the contract's spender (client) pubkey using SHA-256("<cid>:<nonce>:")
 		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
 		if err != nil {
 			return err
 		}
-		if !pk.VerifySignature(msg.GetBytesToSign(ctx.ChainID()), msg.Signature) {
+		pre := fmt.Sprintf("%d:%d:", msg.ContractId, msg.Nonce)
+		digest := sha256.Sum256([]byte(pre))
+
+		ctx.Logger().Info("claim signature verification debug",
+			"preimage", pre,
+			"digest_hex", fmt.Sprintf("%x", digest[:]),
+			"signature_len", len(msg.Signature),
+		)
+
+		if !pk.VerifySignature(digest[:], msg.Signature) {
 			ctx.Logger().Error("claim signature verify failed",
 				"contract_id", msg.ContractId,
 				"nonce", msg.Nonce,
