@@ -7,12 +7,12 @@ import (
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"golang.org/x/crypto/sha3"
+	"golang.org/x/time/rate"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
-
-	"golang.org/x/time/rate"
 )
 
 const (
@@ -472,8 +472,8 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	}
 
 	// Optional self-verify so only claimable entries are stored.
-	// Primary: chain verify uses SHA-256("<cid>:<nonce>:") with the contract client pubkey.
-	// Compatibility: allow raw-preimage signatures during migration.
+	// Preferred: chain-style SHA-256("<cid>:<nonce>:")
+	// Compat: raw preimage, Keccak(preimage), and EIP-191 personal_sign over preimage.
 	{
 		pre := fmt.Sprintf("%d:%d:", aa.ContractId, aa.Nonce)
 		digest := sha256.Sum256([]byte(pre))
@@ -483,10 +483,30 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 			return http.StatusUnauthorized, fmt.Errorf("invalid client pubkey: %w", err)
 		}
 
-		ok := pk.VerifySignature(digest[:], aa.Signature) // preferred (chain style)
+		// 1) chain preferred: SHA-256(preimage)
+		ok := pk.VerifySignature(digest[:], aa.Signature)
+
+		// 2) compat: raw preimage
 		if !ok {
-			ok = pk.VerifySignature([]byte(pre), aa.Signature) // compatibility (raw-preimage)
+			ok = pk.VerifySignature([]byte(pre), aa.Signature)
 		}
+
+		// 3) compat: keccak256(preimage)
+		if !ok {
+			k := sha3.NewLegacyKeccak256()
+			k.Write([]byte(pre))
+			ok = pk.VerifySignature(k.Sum(nil), aa.Signature)
+		}
+
+		// 4) compat: EIP-191 personal_sign (Ethereum prefix)
+		if !ok {
+			prefix := fmt.Sprintf("\x19Ethereum Signed Message:\n%d", len(pre))
+			k := sha3.NewLegacyKeccak256()
+			k.Write([]byte(prefix))
+			k.Write([]byte(pre))
+			ok = pk.VerifySignature(k.Sum(nil), aa.Signature)
+		}
+
 		if !ok {
 			return http.StatusUnauthorized, fmt.Errorf("invalid signature for client")
 		}
