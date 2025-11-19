@@ -335,7 +335,10 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		// treat open contracts + whitelisted IPs as paid
 		if err == nil && (aa.Validate(p.Config.ProviderPubKey) == nil || (contract.IsOpenAuthorization() && whitelisted)) {
 			w.Header().Set("tier", "paid")
-			serviceName := r.Header.Get(ServiceHeader)
+
+			// Determine service name from header or URL path.
+			rawHeaderService := r.Header.Get(ServiceHeader)
+			serviceName := rawHeaderService
 			if serviceName == "" {
 				parts := strings.Split(r.URL.Path, "/")
 				if len(parts) > 1 {
@@ -343,9 +346,31 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				}
 			}
 
+			// Log the raw header and derived service name.
+			p.logger.Info("DEBUG: service header and path",
+				"header_service", rawHeaderService,
+				"url_path", r.URL.Path,
+				"derived_service_name", serviceName,
+			)
+
 			ser, serr := common.NewService(serviceName)
+
+			// Log parsing results and contract service enum.
+			p.logger.Info("DEBUG: service match check",
+				"contract_id", contract.Id,
+				"contract_service_enum", contract.Service,
+				"parsed_service_enum", ser,
+				"new_service_err", serr,
+			)
+
 			if serr != nil || ser != contract.Service {
-				p.logger.Error("Service match failed", "serviceName", serviceName)
+				p.logger.Error("Service match failed",
+					"serviceName", serviceName,
+					"contract_id", contract.Id,
+					"contract_service_enum", contract.Service,
+					"parsed_service_enum", ser,
+					"new_service_err", serr,
+				)
 				http.Error(w, "Service mismatch", http.StatusUnauthorized)
 				return
 			}
