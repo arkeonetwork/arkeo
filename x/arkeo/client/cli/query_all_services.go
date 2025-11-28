@@ -1,9 +1,8 @@
 package cli
 
 import (
-	"context"
-
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -14,12 +13,15 @@ func CmdAllServices() *cobra.Command {
 		Use:   "all-services",
 		Short: "Query all service enums and descriptions",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx := client.GetClientContextFromCmd(cmd)
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
 			queryClient := types.NewQueryClient(clientCtx)
 
 			params := &types.QueryAllServicesRequest{}
 
-			res, err := queryClient.AllServices(context.Background(), params)
+			res, err := queryClient.AllServices(cmd.Context(), params)
 			if err != nil {
 				return err
 			}
@@ -31,6 +33,8 @@ func CmdAllServices() *cobra.Command {
 			return nil
 		},
 	}
+
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }
