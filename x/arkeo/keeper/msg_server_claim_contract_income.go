@@ -65,6 +65,7 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		if err != nil {
 			return err
 		}
+
 		pre := fmt.Sprintf("%d:%d:", msg.ContractId, msg.Nonce)
 		digest := sha256.Sum256([]byte(pre))
 
@@ -99,8 +100,10 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 			"pk_b64", pkB64,
 			"sig_hex", sigHexFull,
 		)
-		
-		ok := pk.VerifySignature([]byte(pre), msg.Signature)
+
+		//ok := pk.VerifySignature([]byte(pre), msg.Signature)
+		ok := pk.VerifySignature(digest[:], msg.Signature)
+
 		if !ok && highS {
 			// normalize to low-S for dev/local testing only
 			s.Sub(secpN, s)
