@@ -102,7 +102,8 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		)
 
 		//ok := pk.VerifySignature([]byte(pre), msg.Signature)
-		ok := pk.VerifySignature(digest[:], msg.Signature)
+		//ok := pk.VerifySignature(digest[:], msg.Signature)
+		ok := pk.VerifySignature([]byte(pre), msg.Signature)
 
 		if !ok && highS {
 			// normalize to low-S for dev/local testing only
@@ -111,7 +112,8 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 			sb := s.FillBytes(make([]byte, 32))
 			norm := append(rb, sb...)
 			ctx.Logger().Info("claim sig normalized to low-S", "nonce", msg.Nonce)
-			ok = pk.VerifySignature(digest[:], norm)
+			//ok = pk.VerifySignature(digest[:], norm)
+			ok = pk.VerifySignature([]byte(pre), norm)
 			if ok {
 				ctx.Logger().Info("claim sig normalized verification succeeded",
 					"contract_id", msg.ContractId,
