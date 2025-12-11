@@ -412,6 +412,7 @@ var ServiceLookup = map[string]int32{
 	"tao-testnet-archivenode":          391,
 	"tao-indexer-subsquid":             392,
 	"tao-indexer-subquery":             393,
+	"arkeo-mainnet-rest":               394,
 }
 
 var ServiceReverseLookup = map[Service]string{
@@ -809,6 +810,7 @@ var ServiceReverseLookup = map[Service]string{
 	391: "tao-testnet-archivenode",
 	392: "tao-indexer-subsquid",
 	393: "tao-indexer-subquery",
+	394: "arkeo-mainnet-rest",
 }
 
 var ServiceDescriptionMap = map[string]string{
@@ -1206,6 +1208,7 @@ var ServiceDescriptionMap = map[string]string{
 	"tao-testnet-archivenode":          "Bittensor TAO Testnet Archive Node",
 	"tao-indexer-subsquid":             "Bittensor TAO Indexer Subsquid",
 	"tao-indexer-subquery":             "Bittensor TAO Indexer Subquery",
+	"arkeo-mainnet-rest":               "Arkeo Mainnet Rest",
 }
 
 func (c Service) String() string {
