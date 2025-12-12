@@ -574,7 +574,7 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	used := contract.Nonce * contract.Rate.Amount.Int64()
 	remaining := contract.Deposit.Int64() - used
 
-	p.logger.Debug("Error:Contract Usage: ",
+	p.logger.Debug("Contract Usage: ",
 		"contract_id", contract.Id,
 		"nonce", contract.Nonce,
 		"deposit", contract.Deposit.Int64(),
