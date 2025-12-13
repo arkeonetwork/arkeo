@@ -51,7 +51,7 @@ func (k KVStore) FetchProvider(c context.Context, req *types.QueryFetchProviderR
 		return nil, status.Error(codes.NotFound, "pubkey not found")
 	}
 
-	service, err := common.NewService(req.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, req.Service)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "service not found")
 	}

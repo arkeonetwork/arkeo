@@ -60,14 +60,18 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 
 	// open subscription contracts do NOT need to verify the signature
 	if !(contract.IsSubscription() && contract.IsOpenAuthorization()) {
-		// Verify with the contract's spender (client) pubkey using SHA-256("<cid>:<nonce>:")
+		// Verify with the contract's spender (client) pubkey using preimage "<cid>:<nonce>:<chain_id>"
 		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, contract.GetSpender().String())
 		if err != nil {
 			return err
 		}
 
-		pre := fmt.Sprintf("%d:%d:", msg.ContractId, msg.Nonce)
+		pre := fmt.Sprintf("%d:%d:%s", msg.ContractId, msg.Nonce, ctx.ChainID())
 		digest := sha256.Sum256([]byte(pre))
+
+		if len(msg.Signature) != 64 {
+			return errors.Wrap(types.ErrClaimContractIncomeInvalidSignature, "signature must be 64 bytes (r||s)")
+		}
 
 		// Unpack r||s (64 bytes, big-endian)
 		r := new(big.Int).SetBytes(msg.Signature[:32])

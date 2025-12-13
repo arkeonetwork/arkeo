@@ -49,7 +49,7 @@ func (k msgServer) OpenContractValidate(ctx cosmos.Context, msg *types.MsgOpenCo
 		return errors.Wrapf(types.ErrDisabledHandler, "open contract")
 	}
 
-	service, err := common.NewService(msg.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, msg.Service)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 		return errors.Wrapf(err, "failed to send deposit=%d", msg.Deposit.Int64())
 	}
 
-	service, err := common.NewService(msg.Service)
+	service, svcRecord, err := k.ResolveServiceEnum(ctx, msg.Service)
 	if err != nil {
 		return err
 	}
@@ -221,6 +221,11 @@ func (k msgServer) OpenContractHandle(ctx cosmos.Context, msg *types.MsgOpenCont
 	if err != nil {
 		return err
 	}
+
+	ctx.Logger().Info("contract opened",
+		"contract_id", contract.Id,
+		"service", svcRecord.Name,
+	)
 
 	return k.EmitOpenContractEvent(ctx, openCost, &contract)
 }

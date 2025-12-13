@@ -64,14 +64,15 @@ func TestCloseContractHandle(t *testing.T) {
 	require.NoError(t, err)
 
 	openContractMessage := types.MsgOpenContract{
-		Creator:      clientAccount.String(),
-		Client:       clientPubKey.String(),
-		Service:      service.String(),
-		Provider:     providerPubKey.String(),
-		Deposit:      cosmos.NewInt(500),
-		Rate:         rate,
-		Duration:     100,
-		ContractType: types.ContractType_SUBSCRIPTION,
+		Creator:          clientAccount.String(),
+		Client:           clientPubKey.String(),
+		Service:          service.String(),
+		Provider:         providerPubKey.String(),
+		Deposit:          cosmos.NewInt(500),
+		Rate:             rate,
+		Duration:         100,
+		ContractType:     types.ContractType_SUBSCRIPTION,
+		QueriesPerMinute: 1,
 	}
 
 	require.NoError(t, k.MintAndSendToAccount(ctx, clientAccount, getCoin(common.Tokens(10))))
@@ -104,8 +105,9 @@ func TestCloseContractHandle(t *testing.T) {
 	require.Equal(t, bal.Int64(), int64(0))
 	require.True(t, k.HasCoins(ctx, provider, getCoins(18)))
 	require.True(t, k.HasCoins(ctx, contract.ClientAddress(), getCoins(480)))
-	bal = k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
-	require.Equal(t, bal.Int64(), int64(100000002)) // open cost + fee
+	openCost := configs.GetConfigValues(k.GetVersion(ctx)).GetInt64Value(configs.OpenContractCost)
+	reserveBal := k.GetBalanceOfModule(ctx, types.ReserveName, configs.Denom)
+	require.Equal(t, reserveBal.Int64(), openCost+2) // open cost + reserve tax on payout
 }
 
 func TestCloseSubscriptionContract(t *testing.T) {

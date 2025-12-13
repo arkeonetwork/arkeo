@@ -128,6 +128,11 @@ func NewAppModule(
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper, am.stakingKeeper))
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
+
+	// Migrations: no-op from v1 -> v2 (dynamic service registry intro)
+	if err := cfg.RegisterMigration(types.ModuleName, 1, func(ctx sdk.Context) error { return nil }); err != nil {
+		panic(err)
+	}
 }
 
 // RegisterInvariants registers the invariants of the module. If an invariant deviates from its predicted value, the InvariantRegistry triggers appropriate logic (most often the chain will be halted)
@@ -148,8 +153,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(genState)
 }
 
-// ConsensusVersion is a sequence number for state-breaking change of the module. It should be incremented on each consensus-breaking change introduced by the module. To avoid wrong/empty versions, the initial version should be set to 1
-func (am AppModule) ConsensusVersion() uint64 { return 1 }
+// ConsensusVersion is a sequence number for state-breaking changes. Bumped to 2 for the dynamic service registry migration.
+func (am AppModule) ConsensusVersion() uint64 { return 2 }
 
 // BeginBlock contains the logic that is automatically triggered at the beginning of each block
 func (am AppModule) BeginBlock(ctx context.Context) error {

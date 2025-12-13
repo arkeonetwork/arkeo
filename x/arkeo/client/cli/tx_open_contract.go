@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -21,7 +22,7 @@ func CmdOpenContract() *cobra.Command {
 		Args:  cobra.MinimumNArgs(9),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
-			argService := args[1]
+			argService := strings.ToLower(args[1])
 			argClient := args[2]
 			argDeposit := args[4]
 			deposit, ok := cosmos.NewIntFromString(argDeposit)
@@ -83,6 +84,11 @@ func CmdOpenContract() *cobra.Command {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
+			}
+
+			// best-effort registry check; warn if unknown but allow proceeding
+			if ok, _ := serviceExists(clientCtx, argService); !ok {
+				cmd.Printf("warning: service %s not found in registry; proceeding anyway\n", argService)
 			}
 
 			msg := types.NewMsgOpenContract(

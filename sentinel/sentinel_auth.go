@@ -353,26 +353,39 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				"derived_service_name", serviceName,
 			)
 
-			ser, serr := common.NewService(serviceName)
+			// Try to resolve via dynamic registry; fallback to legacy parse for logging only.
+			p.serviceMu.RLock()
+			reqServiceID, ok := p.serviceIDs[strings.ToLower(serviceName)]
+			p.serviceMu.RUnlock()
 
-			// Log parsing results and contract service enum.
-			p.logger.Info("DEBUG: service match check",
-				"contract_id", contract.Id,
-				"contract_service_enum", contract.Service,
-				"parsed_service_enum", ser,
-				"new_service_err", serr,
-			)
+			if ok {
+				p.logger.Info("DEBUG: service match check",
+					"contract_id", contract.Id,
+					"contract_service_enum", contract.Service,
+					"request_service_id", reqServiceID,
+				)
 
-			if serr != nil || ser != contract.Service {
-				p.logger.Error("Service match failed",
+				if int32(reqServiceID) != int32(contract.Service) {
+					p.logger.Error("Service match failed",
+						"serviceName", serviceName,
+						"contract_id", contract.Id,
+						"contract_service_enum", contract.Service,
+						"request_service_id", reqServiceID,
+					)
+					http.Error(w, "Service mismatch", http.StatusUnauthorized)
+					return
+				}
+			} else {
+				// Legacy logging fallback
+				ser, serr := common.NewService(serviceName)
+				p.logger.Info("DEBUG: service not in registry; legacy parse",
 					"serviceName", serviceName,
 					"contract_id", contract.Id,
 					"contract_service_enum", contract.Service,
 					"parsed_service_enum", ser,
 					"new_service_err", serr,
 				)
-				http.Error(w, "Service mismatch", http.StatusUnauthorized)
-				return
+				// allow if registry doesn’t know it (dynamic addition)
 			}
 
 			httpCode, tierErr := p.paidTier(aa, remoteAddr)

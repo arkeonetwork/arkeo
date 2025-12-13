@@ -15,6 +15,9 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgCloseContract{}, "arkeo/CloseContract", nil)
 	cdc.RegisterConcrete(&MsgClaimContractIncome{}, "arkeo/ClaimContractIncome", nil)
 	cdc.RegisterConcrete(&MsgSetVersion{}, "arkeo/SetVersion", nil)
+	cdc.RegisterConcrete(&MsgRegisterService{}, "arkeo/RegisterService", nil)
+	cdc.RegisterConcrete(&MsgUpdateService{}, "arkeo/UpdateService", nil)
+	cdc.RegisterConcrete(&MsgRemoveService{}, "arkeo/RemoveService", nil)
 	// this line is used by starport scaffolding # 2
 }
 
@@ -26,6 +29,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgCloseContract{},
 		&MsgClaimContractIncome{},
 		&MsgSetVersion{},
+		&MsgRegisterService{},
+		&MsgUpdateService{},
+		&MsgRemoveService{},
 	)
 	// this line is used by starport scaffolding # 3
 

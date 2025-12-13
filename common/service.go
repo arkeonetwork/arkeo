@@ -1215,7 +1215,12 @@ func (c Service) String() string {
 	if r, ok := ServiceReverseLookup[c]; ok {
 		return r
 	}
-	return "unknown"
+	// Fallback to a stable string using the numeric id so dynamic services
+	// added at runtime don't collapse to "unknown".
+	if c == 0 {
+		return "unknown"
+	}
+	return fmt.Sprintf("service-%d", c)
 }
 
 // NewService create a new service

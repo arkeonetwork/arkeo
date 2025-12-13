@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
@@ -20,7 +21,7 @@ func CmdBondProvider() *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argPubkey := args[0]
-			argService := args[1]
+			argService := strings.ToLower(args[1])
 			argBond := args[2]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -36,6 +37,10 @@ func CmdBondProvider() *cobra.Command {
 			bond, ok := cosmos.NewIntFromString(argBond)
 			if !ok {
 				return fmt.Errorf("bad bond amount: %s", argBond)
+			}
+
+			if ok, _ := serviceExists(clientCtx, argService); !ok {
+				cmd.Printf("warning: service %s not found in registry; proceeding anyway\n", argService)
 			}
 
 			msg := types.NewMsgBondProvider(

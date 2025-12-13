@@ -19,10 +19,24 @@ message ServiceEnum {
   int32 service_id = 1;
   string name = 2;
   string description = 3;
+  // optional type/classification (e.g., rpc, rest, indexer)
+  string service_type = 4;
 }
 
 // Response with all known services
 message QueryAllServicesResponse { repeated ServiceEnum services = 1; }
+
+// Request for a single service by name or id.
+message QueryServiceRequest {
+  // one of name or id must be set
+  string name = 1;
+  uint64 id = 2;
+}
+
+// Response with a single service
+message QueryServiceResponse {
+  Service service = 1 [ (gogoproto.nullable) = false ];
+}
 
 // Query defines the gRPC querier service for the Arkeo module.
 service Query {
@@ -59,6 +73,11 @@ service Query {
   // Returns a list of all service enum values and descriptions.
   rpc AllServices(QueryAllServicesRequest) returns (QueryAllServicesResponse) {
     option (google.api.http).get = "/arkeo/services";
+  }
+
+  // Returns a single service by name or id.
+  rpc Service(QueryServiceRequest) returns (QueryServiceResponse) {
+    option (google.api.http).get = "/arkeo/service";
   }
 }
 

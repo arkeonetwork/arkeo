@@ -12,6 +12,9 @@ const (
 	EventTypeSettleContract  = "arkeo.arkeo.EventSettleContract"
 	EventTypeCloseContract   = "arkeo.arkeo.EventCloseContract"
 	EventTypeValidatorPayout = "arkeo.arkeo.EventValidatorPayout"
+	EventTypeRegisterService = "arkeo.arkeo.EventRegisterService"
+	EventTypeUpdateService   = "arkeo.arkeo.EventUpdateService"
+	EventTypeRemoveService   = "arkeo.arkeo.EventRemoveService"
 )
 
 func NewOpenContractEvent(openCost int64, contract *Contract) EventOpenContract {

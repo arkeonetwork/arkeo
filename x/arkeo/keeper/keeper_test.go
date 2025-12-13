@@ -171,6 +171,7 @@ func SetupKeeper(t testing.TB) (cosmos.Context, Keeper) {
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
+	k.EnsureServiceRegistrySeeded(ctx)
 
 	return ctx, *k
 }
@@ -298,6 +299,7 @@ func SetupKeeperWithStaking(t testing.TB) (cosmos.Context, Keeper, stakingkeeper
 
 	// Initialize params
 	k.SetParams(ctx, types.DefaultParams())
+	k.EnsureServiceRegistrySeeded(ctx)
 
 	return ctx, *k, *sk
 }

@@ -6,7 +6,6 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/configs"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -59,7 +58,7 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 		}
 	}
 
-	service, err := common.NewService(msg.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, msg.Service)
 	if err != nil {
 		return err
 	}
@@ -75,7 +74,7 @@ func (k msgServer) ModProviderValidate(ctx cosmos.Context, msg *types.MsgModProv
 }
 
 func (k msgServer) ModProviderHandle(ctx cosmos.Context, msg *types.MsgModProvider) error {
-	service, err := common.NewService(msg.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, msg.Service)
 	if err != nil {
 		return err
 	}

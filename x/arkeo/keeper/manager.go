@@ -89,6 +89,10 @@ func (mgr *Manager) BeginBlock(ctx cosmos.Context) error {
 	if err := mgr.ValidatorPayout(ctx, votes, blockReward); err != nil {
 		mgr.keeper.Logger().Error("unable to settle contracts", "error", err)
 	}
+
+	// One-time seeding of service registry for upgrade compatibility.
+	mgr.keeper.EnsureServiceRegistrySeeded(ctx)
+
 	return nil
 }
 

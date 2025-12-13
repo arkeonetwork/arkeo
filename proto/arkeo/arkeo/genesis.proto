@@ -27,5 +27,6 @@ message GenesisState {
   int64 version = 7;
   repeated ValidatorVersion validator_versions = 8
       [ (gogoproto.nullable) = false ];
+  repeated Service services = 9 [ (gogoproto.nullable) = false ];
   // this line is used by starport scaffolding # genesis/proto/state
 }

@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"strings"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
@@ -23,7 +25,7 @@ func CmdModProvider() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			argService := args[1]
+			argService := strings.ToLower(args[1])
 
 			argMetatadataURI := args[2]
 			argMetadataNonce, err := cast.ToUint64E(args[3])
@@ -59,6 +61,10 @@ func CmdModProvider() *cobra.Command {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
+			}
+
+			if ok, _ := serviceExists(clientCtx, argService); !ok {
+				cmd.Printf("warning: service %s not found in registry; proceeding anyway\n", argService)
 			}
 
 			msg := types.NewMsgModProvider(

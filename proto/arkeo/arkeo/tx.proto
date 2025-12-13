@@ -27,6 +27,18 @@ service Msg {
   // SetVersion sets the chain version.
   // this line is used by starport scaffolding # proto/tx/rpc
   rpc SetVersion(MsgSetVersion) returns (MsgSetVersionResponse);
+
+  // RegisterService registers a new provider service in the on-chain registry.
+  rpc RegisterService(MsgRegisterService)
+      returns (MsgRegisterServiceResponse);
+
+  // UpdateService updates an existing service in the registry.
+  rpc UpdateService(MsgUpdateService)
+      returns (MsgUpdateServiceResponse);
+
+  // RemoveService removes an existing service from the registry.
+  rpc RemoveService(MsgRemoveService)
+      returns (MsgRemoveServiceResponse);
 }
 
 // MsgBondProvider is used to bond a provider.
@@ -133,3 +145,54 @@ message MsgSetVersion {
 
 // MsgSetVersionResponse is the response for MsgSetVersion.
 message MsgSetVersionResponse {}
+
+// MsgRegisterService registers a new service in the registry.
+message MsgRegisterService {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "arkeo/x/arkeo/MsgRegisterService";
+  // authority/owner of the registry mutation
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // globally unique numeric identifier
+  uint64 id = 2;
+  // canonical service name (lowercase, dash separated)
+  string name = 3;
+  // optional human description
+  string description = 4;
+  // optional type/classification (e.g., rpc/rest/indexer)
+  string service_type = 5;
+}
+
+// MsgRegisterServiceResponse is the response for MsgRegisterService.
+message MsgRegisterServiceResponse {}
+
+// MsgUpdateService updates an existing service in the registry.
+message MsgUpdateService {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "arkeo/x/arkeo/MsgUpdateService";
+  // authority/owner of the registry mutation
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // globally unique numeric identifier (immutable)
+  uint64 id = 2;
+  // canonical service name (immutable)
+  string name = 3;
+  // optional human description
+  string description = 4;
+  // optional type/classification (e.g., rpc/rest/indexer)
+  string service_type = 5;
+}
+
+// MsgUpdateServiceResponse is the response for MsgUpdateService.
+message MsgUpdateServiceResponse {}
+
+// MsgRemoveService removes an existing service from the registry.
+message MsgRemoveService {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "arkeo/x/arkeo/MsgRemoveService";
+  // authority/owner of the registry mutation
+  string creator = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // service name to delete
+  string name = 2;
+}
+
+// MsgRemoveServiceResponse is the response for MsgRemoveService.
+message MsgRemoveServiceResponse {}

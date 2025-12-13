@@ -2,6 +2,7 @@ package types
 
 import (
 	fmt "fmt"
+	"strings"
 
 	"cosmossdk.io/errors"
 
@@ -77,10 +78,9 @@ func (msg *MsgOpenContract) ValidateBasic() error {
 		return errors.Wrapf(ErrInvalidPubKey, "invalid pubkey (%s)", err)
 	}
 
-	// verify service
-	_, err = common.NewService(msg.Service)
-	if err != nil {
-		return errors.Wrapf(ErrInvalidService, "invalid service (%s): %s", msg.Service, err)
+	// basic service sanity
+	if strings.TrimSpace(msg.Service) == "" {
+		return errors.Wrapf(ErrInvalidService, "service cannot be empty")
 	}
 
 	// verify client
