@@ -112,10 +112,11 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 		// 2) sha256(preimage with chain-id)
 		// 3) raw preimage without chain-id
 		// 4) sha256(preimage without chain-id)
+		preNoChainDigest := sha256.Sum256([]byte(preNoChain))
 		ok := pk.VerifySignature([]byte(pre), msg.Signature) ||
 			pk.VerifySignature(digest[:], msg.Signature) ||
 			pk.VerifySignature([]byte(preNoChain), msg.Signature) ||
-			pk.VerifySignature(sha256.Sum256([]byte(preNoChain))[:], msg.Signature)
+			pk.VerifySignature(preNoChainDigest[:], msg.Signature)
 
 		if !ok && highS {
 			// normalize to low-S for dev/local testing only
@@ -127,7 +128,7 @@ func (k msgServer) HandlerClaimContractIncome(ctx cosmos.Context, msg *types.Msg
 			ok = pk.VerifySignature([]byte(pre), norm) ||
 				pk.VerifySignature(digest[:], norm) ||
 				pk.VerifySignature([]byte(preNoChain), norm) ||
-				pk.VerifySignature(sha256.Sum256([]byte(preNoChain))[:], norm)
+				pk.VerifySignature(preNoChainDigest[:], norm)
 			if ok {
 				ctx.Logger().Info("claim sig normalized verification succeeded",
 					"contract_id", msg.ContractId,
