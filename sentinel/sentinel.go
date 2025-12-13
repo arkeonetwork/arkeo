@@ -569,22 +569,39 @@ func (p *Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 		p.logger.Debug("claim:", "key", claim.Key(), "nonce", claim.Nonce)
 
 		if claim.Claimed {
-			p.logger.Info("already claimed")
+			p.logger.Info("open-claims: skip claimed entry",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+				"spender", claim.Spender.String(),
+			)
 			continue
 		}
 
 		contract, err := p.MemStore.Get(claim.Key())
 
 		if err != nil {
-			p.logger.Error("bad fetch")
+			p.logger.Error("open-claims: failed to fetch contract for claim",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+				"error", err,
+			)
 			continue
 		}
 
 		if contract.IsExpired(p.MemStore.GetHeight()) {
 			_ = p.ClaimStore.Remove(claim.Key()) // clearly expired
-			p.logger.Info("claim expired")
+			p.logger.Info("open-claims: claim expired and removed",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+			)
 			continue
 		}
+
+		p.logger.Debug("open-claims: claim still open",
+			"contract_id", claim.ContractId,
+			"nonce", claim.Nonce,
+			"spender", claim.Spender.String(),
+		)
 
 		openClaims = append(openClaims, claim)
 	}

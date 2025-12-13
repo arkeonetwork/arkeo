@@ -506,6 +506,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	// For open authorization (subscription) contracts, skip PAYG nonce/signature tracking.
 	// Open contracts do not require per-request client signatures or nonce/accounting.
 	if contract.IsOpenAuthorization() {
+		p.logger.Debug("paidTier: open authorization contract; skipping claim enqueue",
+			"contract_id", contract.Id,
+			"nonce", aa.Nonce,
+			"service", contract.Service.String(),
+			"spender", aa.Spender.String(),
+		)
 		return http.StatusOK, nil
 	}
 
@@ -579,8 +585,20 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	claim.Signature = sig
 	claim.Claimed = false
 	if err := p.ClaimStore.Set(claim); err != nil {
+		p.logger.Error("paidTier: failed to persist claim",
+			"contract_id", claim.ContractId,
+			"nonce", claim.Nonce,
+			"spender", claim.Spender.String(),
+			"error", err,
+		)
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
+	p.logger.Info("paidTier: claim stored",
+		"contract_id", claim.ContractId,
+		"nonce", claim.Nonce,
+		"spender", claim.Spender.String(),
+		"service", contract.Service.String(),
+	)
 	contract.Nonce = aa.Nonce
 	p.MemStore.Put(contract)
 
