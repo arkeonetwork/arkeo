@@ -98,7 +98,7 @@ func (s *Service) handleBondProviderEvent(ctx context.Context, evt atypes.EventB
 		isNewProvider = true
 	}
 	if !isNewProvider {
-		if evt.BondAbs.IsNil() {
+		if !evt.BondAbs.IsNil() {
 			provider.Bond = evt.BondAbs.String()
 		}
 		// TODO change this to just update bond , `UpdateProvider` does a lot other stuff

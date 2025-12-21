@@ -61,9 +61,8 @@ const (
 			height
 		)
 		VALUES ($1, $2, $3, $4, $5)
-		ON CONFLICT (id) DO UPDATE SET
+		ON CONFLICT (txid) DO UPDATE SET
 			contract_id = EXCLUDED.contract_id,
-			txid = EXCLUDED.txid,
 			client_pubkey = EXCLUDED.client_pubkey,
 			delegate_pubkey = EXCLUDED.delegate_pubkey,
 			height = EXCLUDED.height,
@@ -89,12 +88,10 @@ const (
 			reserve
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (id) DO UPDATE SET
-			contract_id = EXCLUDED.contract_id,
+		ON CONFLICT (contract_id, nonce) DO UPDATE SET
 			txid = EXCLUDED.txid,
 			client_pubkey = EXCLUDED.client_pubkey,
 			height = EXCLUDED.height,
-			nonce = EXCLUDED.nonce,
 			paid = EXCLUDED.paid,
 			reserve = EXCLUDED.reserve,
 			updated = now()

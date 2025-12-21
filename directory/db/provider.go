@@ -193,7 +193,8 @@ func (d *DirectoryDB) getRateArgs(providerID int64, query string, coins cosmos.C
 		if i > 0 {
 			query += ","
 		}
-		query += "($1, $2, $3)"
+		argPos := len(args) + 1
+		query += fmt.Sprintf("($%d, $%d, $%d)", argPos, argPos+1, argPos+2)
 		args = append(args, row.ProviderID, row.TokenName, row.TokenAmount)
 	}
 	return query, args

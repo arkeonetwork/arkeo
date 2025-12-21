@@ -31,7 +31,7 @@ func TestInsertBlock(t *testing.T) {
 	blockTime := time.Now()
 	returnTime := time.Now()
 
-	m.ExpectQuery(`insert into blocks(height,hash,block_time)*`).
+	m.ExpectQuery(`(?i)INSERT INTO blocks\(id, height, hash, block_time\).*`).
 		WithArgs(int64(1), hash, AnyTime{}).WillReturnRows(
 		pgxmock.NewRows([]string{"id", "created", "updated"}).
 			AddRow(int64(1), returnTime, returnTime),

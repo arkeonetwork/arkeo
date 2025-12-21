@@ -14,64 +14,110 @@ import (
 	tmclient "github.com/cometbft/cometbft/rpc/client/http"
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
 	tmtypes "github.com/cometbft/cometbft/types"
-	"github.com/cosmos/gogoproto/jsonpb"
-	"github.com/cosmos/gogoproto/proto"
-	"github.com/pkg/errors"
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/gogo/protobuf/proto"
 
 	"github.com/arkeonetwork/arkeo/common/utils"
 	"github.com/arkeonetwork/arkeo/directory/db"
 	atypes "github.com/arkeonetwork/arkeo/x/arkeo/types"
 )
 
-func (s *Service) handleValidatorPayoutEvent(ctx context.Context, evt atypes.EventValidatorPayout, txID string, height int64) error {
-	if evt.Reward.IsNegative() {
-		return fmt.Errorf("received negative paid amt: %d for tx %s", evt.Reward.Int64(), txID)
-	}
-	if evt.Reward.IsZero() {
-		return nil
-	}
-	s.logger.Infof("upserting validator payout event for tx %s", txID)
-	if _, err := s.db.UpsertValidatorPayoutEvent(ctx, evt, height); err != nil {
-		return errors.Wrapf(err, "error upserting validator payout event")
-	}
-	return nil
-}
+const (
+	defaultGapFillInterval    = 30 * time.Second
+	defaultTMReconnectBackoff = 5 * time.Second
+)
+
+var warnedUnhandledAbciEventTypes sync.Map
 
 // consumeEvents make connection to tendermint using websocket and then consume NewBlock event
 func (s *Service) consumeEvents() error {
 	s.logger.WithField("websocket", s.params.TendermintWs).Info("starting realtime indexing using /websocket")
-	client, err := utils.NewTendermintClient(s.params.TendermintWs)
-	if err != nil {
-		return fmt.Errorf("fail to create tm client for %s, err: %w", s.params.TendermintWs, err)
-	}
 
-	if err = client.Start(); err != nil {
-		return fmt.Errorf("fail to start websocket client,endpoint:%s,err: %w", s.params.TendermintWs, err)
-	}
-	defer func() {
+	ticker := time.NewTicker(defaultGapFillInterval)
+	defer ticker.Stop()
+
+	for {
+		if err := s.gapFiller(); err != nil {
+			s.logger.WithError(err).Error("fail to create block gap")
+		}
+
+		client, err := utils.NewTendermintClient(s.params.TendermintWs)
+		if err != nil {
+			s.logger.WithError(err).WithField("endpoint", s.params.TendermintWs).Error("failed to create tendermint client")
+			select {
+			case <-time.After(defaultTMReconnectBackoff):
+				continue
+			case <-s.done:
+				return nil
+			}
+		}
+
+		if err := client.Start(); err != nil {
+			s.logger.WithError(err).WithField("endpoint", s.params.TendermintWs).Error("failed to start websocket client")
+			_ = client.Stop()
+			select {
+			case <-time.After(defaultTMReconnectBackoff):
+				continue
+			case <-s.done:
+				return nil
+			}
+		}
+
+		subCtx, cancel := context.WithCancel(context.Background())
+		// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
+		blockEvents, err := subscribe(subCtx, client, "tm.event = 'NewBlock'")
+		if err != nil {
+			s.logger.WithError(err).Error("failed to subscribe to NewBlock")
+			cancel()
+			_ = client.Stop()
+			select {
+			case <-time.After(defaultTMReconnectBackoff):
+				continue
+			case <-s.done:
+				return nil
+			}
+		}
+
+		s.logger.Info("beginning realtime event consumption")
+
+	readLoop:
+		for {
+			select {
+			case evt, ok := <-blockEvents:
+				if !ok {
+					s.logger.Warn("tendermint subscription closed; reconnecting")
+					break readLoop
+				}
+				data, ok := evt.Data.(tmtypes.EventDataNewBlock)
+				if !ok {
+					continue
+				}
+				s.logger.WithField("height", data.Block.Height).Debug("received block")
+				if err := s.gapFiller(); err != nil {
+					s.logger.WithError(err).Error("fail to create block gap")
+				}
+			case <-ticker.C:
+				if err := s.gapFiller(); err != nil {
+					s.logger.WithError(err).Error("fail to create block gap")
+				}
+			case <-s.done: // finished
+				cancel()
+				if err := client.Stop(); err != nil {
+					s.logger.WithError(err).Error("error stopping client")
+				}
+				return nil
+			}
+		}
+
+		cancel()
 		if err := client.Stop(); err != nil {
 			s.logger.WithError(err).Error("error stopping client")
 		}
-	}()
-	// splitting across multiple tendermint clients as websocket allows max of 5 subscriptions per client
-	blockEvents, err := subscribe(context.Background(), client, "tm.event = 'NewBlock'")
-	if err != nil {
-		return err
-	}
 
-	s.logger.Info("beginning realtime event consumption")
-	for {
 		select {
-		case evt := <-blockEvents:
-			data, ok := evt.Data.(tmtypes.EventDataNewBlock)
-			if !ok {
-				continue
-			}
-			s.logger.WithField("height", data.Block.Height).Debug("received block")
-			if err := s.gapFiller(); err != nil {
-				s.logger.WithError(err).Error("fail to create block gap")
-			}
-		case <-s.done: // finished
+		case <-time.After(defaultTMReconnectBackoff):
+			continue
+		case <-s.done:
 			return nil
 		}
 	}
@@ -118,9 +164,20 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 	}
 
 	log := s.logger.WithField("height", block.Block.Height)
-	for _, transaction := range block.Block.Txs {
-		if err := s.handleTransaction(block.Block.Height, transaction); err != nil {
-			log.WithError(err).Error("fail to handler transaction")
+
+	if len(blockResults.TxsResults) != len(block.Block.Txs) {
+		log.WithField("txs", len(block.Block.Txs)).
+			WithField("tx_results", len(blockResults.TxsResults)).
+			Warn("tx results count mismatch")
+	}
+
+	for i, transaction := range block.Block.Txs {
+		var txResult *abcitypes.ExecTxResult
+		if i < len(blockResults.TxsResults) {
+			txResult = blockResults.TxsResults[i]
+		}
+		if err := s.handleTransaction(block.Block.Height, transaction, txResult); err != nil {
+			log.WithError(err).Error("fail to handle transaction")
 		}
 	}
 
@@ -139,14 +196,11 @@ func (s *Service) consumeHistoricalBlock(blockHeight int64) (result *db.Block, e
 	return r, nil
 }
 
-func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), defaultRetrieveTransactionTimeout)
-	defer cancel()
-	txInfo, err := s.tmClient.Tx(ctx, transaction.Hash(), false)
-	if err != nil {
-		return fmt.Errorf("failed to get transaction data for %s,err:%w", string(transaction.Hash()), err)
+func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx, txResult *abcitypes.ExecTxResult) error {
+	if txResult == nil {
+		return fmt.Errorf("nil tx result for tx %s", hex.EncodeToString(transaction.Hash()))
 	}
-	for _, event := range txInfo.TxResult.Events {
+	for _, event := range txResult.Events {
 		s.logger.WithField("height", height).Debugf("received %s txevent", event.Type)
 		if err := s.handleAbciEvent(event, transaction, height); err != nil {
 			// move on
@@ -157,13 +211,15 @@ func (s *Service) handleTransaction(height int64, transaction tmtypes.Tx) error 
 }
 
 func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx, height int64) error {
-	s.logger.WithField("height", height).
-		WithField("event", Stringfy(event)).
-		WithField("type", event.Type).Info("handle abci event")
 	var txID string
 	if transaction != nil {
 		txID = hex.EncodeToString(transaction.Hash())
 	}
+	s.logger.WithField("height", height).
+		WithField("type", event.Type).
+		WithField("tx_id", txID).
+		Debug("handle abci event")
+
 	ctx, cancel := context.WithTimeout(context.Background(), defaultHandleEventTimeout)
 	defer cancel()
 	switch event.Type {
@@ -200,13 +256,8 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 			return err
 		}
 	case atypes.EventTypeValidatorPayout:
-		eventValidatorPayout, err := parseEventToConcreteType[atypes.EventValidatorPayout](event)
-		if err != nil {
-			return err
-		}
-		if err := s.handleValidatorPayoutEvent(ctx, eventValidatorPayout, txID, height); err != nil {
-			return err
-		}
+		// Intentionally ignored: writing these to `validator_payout_events` is very high-volume
+		// and isn't currently used by the directory/indexer.
 	case atypes.EventTypeCloseContract:
 		eventCloseContract, err := parseEventToConcreteType[atypes.EventCloseContract](event)
 		if err != nil {
@@ -288,9 +339,9 @@ func (s *Service) handleAbciEvent(event abcitypes.Event, transaction tmtypes.Tx,
 		// Not logging core transaction events such as message and tx due to their high frequency and verbosity.
 		// These events are typically processed by transaction-level handlers or explorers rather than the indexer.
 	default:
-		// panic to make it immediately obvious that something is not handled
-		// by directory indexer
-		s.logger.Panicf("unrecognized event %s", event.Type)
+		if _, loaded := warnedUnhandledAbciEventTypes.LoadOrStore(event.Type, struct{}{}); !loaded {
+			s.logger.WithField("type", event.Type).Warn("unhandled abci event type; ignoring")
+		}
 	}
 	return nil
 }

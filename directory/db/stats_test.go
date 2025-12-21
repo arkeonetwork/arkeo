@@ -11,7 +11,7 @@ import (
 func TestGetArkeoNetworkStats(t *testing.T) {
 	m, db := getMockDirectoryDBForTest(t)
 	defer m.Close()
-	m.ExpectQuery("select.*from network_stats_v.*").
+	m.ExpectQuery(`(?is)select.*from network_stats_v.*`).
 		WillReturnRows(
 			pgxmock.NewRows([]string{
 				"open_contracts", "total_contracts", "median_open_contract_length",
