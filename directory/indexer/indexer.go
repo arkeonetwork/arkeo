@@ -16,10 +16,10 @@ import (
 )
 
 const (
-	defaultRetrieveBlockTimeout       = time.Second * 5
-	defaultRetrieveTransactionTimeout = time.Second
-	defaultHandleEventTimeout         = time.Second * 5
-	defaultFindLastBlockTimeout       = time.Second
+	defaultRetrieveBlockTimeout = time.Second * 5
+	defaultHandleEventTimeout   = time.Second * 5
+	defaultFindLastBlockTimeout = time.Second
+	defaultDBWriteTimeout       = time.Second * 5
 )
 
 // Service consume events from blockchain and persist it to a database
@@ -73,6 +73,11 @@ func (s *Service) Run() error {
 }
 
 func (s *Service) gapFiller() error {
+	select {
+	case <-s.done:
+		return nil
+	default:
+	}
 	ctxFindLastBlock, cancelFindLastBlock := context.WithTimeout(context.Background(), defaultFindLastBlockTimeout)
 	defer cancelFindLastBlock()
 	latestStored, err := s.db.FindLatestBlock(ctxFindLastBlock)
@@ -121,9 +126,16 @@ func (s *Service) blockGapProcessor() {
 	defer s.wg.Done()
 	for {
 		select {
+		case <-s.done:
+			return
 		case blockGap, more := <-s.blockFillQueue:
 			if !more {
 				return
+			}
+			select {
+			case <-s.done:
+				return
+			default:
 			}
 			if err := s.fillGap(blockGap); err != nil {
 				s.logger.WithError(err).
@@ -131,8 +143,6 @@ func (s *Service) blockGapProcessor() {
 					WithField("end", blockGap.End).
 					Error("fail to process blockgap")
 			}
-		case <-s.done:
-			return
 		}
 	}
 }
@@ -142,20 +152,33 @@ func (s *Service) fillGap(gap db.BlockGap) error {
 	s.logger.Infof("gap filling %s", gap)
 
 	for i := gap.Start; i <= gap.End; i++ {
-		s.logger.Infof("processing block: %d", i)
-
-		// Upsert indexer status to track latest block height
-		if _, err := s.db.UpsertIndexerStatus(context.Background(), i); err != nil {
-			s.logger.WithError(err).Errorf("failed to upsert indexer status for height %d", i)
+		select {
+		case <-s.done:
+			s.logger.Info("shutdown requested; stopping gap fill")
+			return nil
+		default:
 		}
+		s.logger.Infof("processing block: %d", i)
 
 		block, err := s.consumeHistoricalBlock(i)
 		if err != nil {
-			s.logger.WithError(err).Errorf("err consuming block %d:", i)
+			return fmt.Errorf("error consuming block %d: %w", i, err)
+		}
+
+		ctxInsertBlock, cancelInsertBlock := context.WithTimeout(context.Background(), defaultDBWriteTimeout)
+		_, err = s.db.InsertBlock(ctxInsertBlock, block)
+		cancelInsertBlock()
+		if err != nil {
+			s.logger.WithError(err).Errorf("error inserting block %d with hash %s", block.Height, block.Hash)
 			continue
 		}
-		if _, err = s.db.InsertBlock(context.Background(), block); err != nil {
-			s.logger.WithError(err).Errorf("error inserting block %d with hash %s", block.Height, block.Hash)
+
+		// Upsert indexer status to track latest block height (best-effort)
+		ctxUpsertStatus, cancelUpsertStatus := context.WithTimeout(context.Background(), defaultDBWriteTimeout)
+		_, err = s.db.UpsertIndexerStatus(ctxUpsertStatus, i)
+		cancelUpsertStatus()
+		if err != nil {
+			s.logger.WithError(err).Errorf("failed to upsert indexer status for height %d", i)
 		}
 	}
 	return nil
@@ -164,8 +187,12 @@ func (s *Service) fillGap(gap db.BlockGap) error {
 // Close will be called when it is time to shut down the service
 // this allows the service to shut down itself gracefully
 func (s *Service) Close() error {
-	close(s.done)
-	close(s.blockFillQueue)
+	select {
+	case <-s.done:
+		return nil
+	default:
+		close(s.done)
+	}
 	s.wg.Wait()
 	return nil
 }

@@ -30,9 +30,10 @@ func parseProviderBondEvent(input map[string]string) (ProviderBondEvent, error) 
 				return evt, err
 			}
 		case "service":
-			evt.Service, err = common.NewService(v)
-			if err != nil {
-				return evt, err
+			if s, serr := common.NewService(v); serr == nil {
+				evt.Service = s
+			} else {
+				evt.Service = common.EmptyService
 			}
 		case "bond_rel":
 			evt.BondRelative, ok = cosmos.NewIntFromString(v)
@@ -67,9 +68,8 @@ func parseProviderModEvent(input map[string]string) (ProviderModEvent, error) {
 				return evt, err
 			}
 		case "service":
-			evt.Provider.Service, err = common.NewService(v)
-			if err != nil {
-				return evt, err
+			if s, serr := common.NewService(v); serr == nil {
+				evt.Provider.Service = s
 			}
 		case "metadata_uri":
 			evt.Provider.MetadataUri = v
@@ -138,9 +138,8 @@ func parseContractSettlementEvent(input map[string]string) (ClaimContractIncome,
 				return evt, err
 			}
 		case "service":
-			evt.Contract.Service, err = common.NewService(v)
-			if err != nil {
-				return evt, err
+			if s, serr := common.NewService(v); serr == nil {
+				evt.Contract.Service = s
 			}
 		case "client":
 			evt.Contract.Client, err = common.NewPubKey(v)

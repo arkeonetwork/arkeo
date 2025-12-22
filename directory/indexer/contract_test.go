@@ -47,7 +47,7 @@ func TestHandleOpenContractEvent(t *testing.T) {
 		Authorization:      arkeotypes.ContractAuthorization_STRICT,
 		QueriesPerMinute:   10,
 	}
-	err := s.handleOpenContractEvent(context.Background(), eventOpenContract)
+	err := s.handleOpenContractEvent(context.Background(), eventOpenContract, arkeotypes.GetRandomTxID(), eventOpenContract.Height)
 	assert.NotNil(t, err)
 	mockFindProvider.Unset()
 	mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(&db.ArkeoProvider{
@@ -57,17 +57,17 @@ func TestHandleOpenContractEvent(t *testing.T) {
 			Updated: time.Now(),
 		},
 	}, nil)
-	mockUpdateContract := mockDb.On("UpsertContract", mock.Anything, int64(1), mock.Anything).Return(nil, fmt.Errorf("fail to update contract"))
-	err = s.handleOpenContractEvent(context.Background(), eventOpenContract)
+	mockUpdateContract := mockDb.On("UpsertContract", mock.Anything, int64(1), mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to update contract"))
+	err = s.handleOpenContractEvent(context.Background(), eventOpenContract, arkeotypes.GetRandomTxID(), eventOpenContract.Height)
 	assert.NotNil(t, err)
 	mockUpdateContract.Unset()
 
-	mockDb.On("UpsertContract", mock.Anything, int64(1), mock.Anything).Return(&db.Entity{
+	mockDb.On("UpsertContract", mock.Anything, int64(1), mock.Anything, mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      2,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleOpenContractEvent(context.Background(), eventOpenContract)
+	err = s.handleOpenContractEvent(context.Background(), eventOpenContract, arkeotypes.GetRandomTxID(), eventOpenContract.Height)
 	assert.Nil(t, err)
 }
 
@@ -90,17 +90,17 @@ func TestHandleCloseContractEvent(t *testing.T) {
 		Client:     arkeotypes.GetRandomPubKey(),
 		Delegate:   arkeotypes.GetRandomPubKey(),
 	}
-	mockCloseContract := mockDb.On("CloseContract", mock.Anything, uint64(1), int64(1)).Return(nil, fmt.Errorf("fail to close contract"))
-	err := s.handleCloseContractEvent(context.Background(), eventCloseContract, 1)
+	mockCloseContract := mockDb.On("CloseContract", mock.Anything, uint64(1), mock.Anything, int64(1)).Return(nil, fmt.Errorf("fail to close contract"))
+	err := s.handleCloseContractEvent(context.Background(), eventCloseContract, arkeotypes.GetRandomTxID(), 1)
 	assert.NotNil(t, err)
 	mockCloseContract.Unset()
 
-	mockDb.On("CloseContract", mock.Anything, uint64(1), int64(1)).Return(&db.Entity{
+	mockDb.On("CloseContract", mock.Anything, uint64(1), mock.Anything, int64(1)).Return(&db.Entity{
 		ID:      2,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleCloseContractEvent(context.Background(), eventCloseContract, 1)
+	err = s.handleCloseContractEvent(context.Background(), eventCloseContract, arkeotypes.GetRandomTxID(), 1)
 	assert.Nil(t, err)
 }
 
@@ -116,7 +116,7 @@ func TestHandleContractSettlementEvent(t *testing.T) {
 		blockFillQueue: make(chan db.BlockGap),
 	}
 	testPubKey := arkeotypes.GetRandomPubKey()
-	mockSettlement := mockDb.On("UpsertContractSettlementEvent", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to upsert contract settlement event"))
+	mockSettlement := mockDb.On("UpsertContractSettlementEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("fail to upsert contract settlement event"))
 	eventSettleContract := arkeotypes.EventSettleContract{
 		Provider:   testPubKey,
 		ContractId: 1,
@@ -129,14 +129,14 @@ func TestHandleContractSettlementEvent(t *testing.T) {
 		Paid:       math.NewInt(1024),
 		Reserve:    math.NewInt(100000),
 	}
-	err := s.handleContractSettlementEvent(context.Background(), eventSettleContract)
+	err := s.handleContractSettlementEvent(context.Background(), eventSettleContract, arkeotypes.GetRandomTxID(), eventSettleContract.Height)
 	assert.NotNil(t, err)
 	mockSettlement.Unset()
-	mockDb.On("UpsertContractSettlementEvent", mock.Anything, mock.Anything).Return(&db.Entity{
+	mockDb.On("UpsertContractSettlementEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      1,
 		Created: time.Now(),
 		Updated: time.Now(),
 	}, nil)
-	err = s.handleContractSettlementEvent(context.Background(), eventSettleContract)
+	err = s.handleContractSettlementEvent(context.Background(), eventSettleContract, arkeotypes.GetRandomTxID(), eventSettleContract.Height)
 	assert.Nil(t, err)
 }

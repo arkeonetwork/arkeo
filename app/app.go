@@ -532,6 +532,18 @@ func NewArkeoApp(
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
+	// Dynamic service registry upgrade: bumps module version to 2 (no store upgrades).
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("service-registry-v2", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		app.Logger().Info("running service registry v2 upgrade (module version -> 2)")
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	// providers v1.0.16.1 upgrade handler
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.16.1", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		app.Logger().Info("running providers-v1.0.16.1 upgrade")
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:

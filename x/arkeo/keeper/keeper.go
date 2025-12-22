@@ -17,6 +17,8 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"sort"
 	"strings"
 
@@ -79,7 +81,16 @@ type Keeper interface {
 	KeeperContract
 
 	//Services
+	SetService(ctx cosmos.Context, svc types.Service) error
+	GetService(ctx cosmos.Context, name string) (types.Service, bool)
+	GetServiceByID(ctx cosmos.Context, id uint64) (types.Service, bool)
+	IterateServices(ctx cosmos.Context, cb func(types.Service) bool)
+	ResolveServiceEnum(ctx cosmos.Context, name string) (common.Service, types.Service, error)
+	RemoveService(ctx cosmos.Context, name string) error
 	AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error)
+	Service(ctx context.Context, req *types.QueryServiceRequest) (*types.QueryServiceResponse, error)
+	EnsureServiceRegistrySeeded(ctx cosmos.Context)
+	GetAuthority() string
 
 	//Upgrade Plan Emission Curve
 	UpgradeEmissionCurve(ctx context.Context, newValue uint64) (bool, error)
@@ -406,23 +417,73 @@ func (k KVStore) GetCommunityPool(ctx context.Context) (disttypes.FeePool, error
 }
 
 func (k KVStore) AllServices(ctx context.Context, req *types.QueryAllServicesRequest) (*types.QueryAllServicesResponse, error) {
-	// Collect all service names
-	names := make([]string, 0, len(common.ServiceLookup))
-	for name := range common.ServiceLookup {
-		names = append(names, name)
+	cCtx := sdk.UnwrapSDKContext(ctx)
+
+	// If registry is empty, seed from legacy static map for compatibility.
+	hasAny := false
+	k.IterateServices(cCtx, func(types.Service) bool {
+		hasAny = true
+		return true
+	})
+	if !hasAny {
+		for name, id := range common.ServiceLookup {
+			_ = k.SetService(cCtx, types.Service{
+				Id:          uint64(id),
+				Name:        name,
+				Description: common.ServiceDescriptionMap[name],
+			})
+		}
 	}
-	sort.Strings(names)
 
 	var services []*types.ServiceEnum
-	for _, name := range names {
-		id := common.ServiceLookup[name]
+	k.IterateServices(cCtx, func(svc types.Service) bool {
 		services = append(services, &types.ServiceEnum{
-			ServiceId:   id,
-			Name:        name,
-			Description: common.ServiceDescriptionMap[name],
+			ServiceId:   int32(svc.Id),
+			Name:        svc.Name,
+			Description: svc.Description,
+			ServiceType: svc.ServiceType,
 		})
-	}
+		return false
+	})
+
+	// sort by name for stable output
+	sort.Slice(services, func(i, j int) bool {
+		return services[i].Name < services[j].Name
+	})
+
 	return &types.QueryAllServicesResponse{Services: services}, nil
+}
+
+// Service returns a single service by name or id.
+func (k KVStore) Service(ctx context.Context, req *types.QueryServiceRequest) (*types.QueryServiceResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+	cCtx := sdk.UnwrapSDKContext(ctx)
+
+	if strings.TrimSpace(req.Name) == "" && req.Id == 0 {
+		return nil, status.Error(codes.InvalidArgument, "name or id must be provided")
+	}
+
+	// Resolve by name first if provided
+	if strings.TrimSpace(req.Name) != "" {
+		if svc, ok := k.GetService(cCtx, req.Name); ok {
+			return &types.QueryServiceResponse{Service: svc}, nil
+		}
+		// fall through to id check if provided
+		if req.Id == 0 {
+			return nil, status.Error(codes.NotFound, "service not found")
+		}
+	}
+
+	if req.Id > 0 {
+		if svc, ok := k.GetServiceByID(cCtx, req.Id); ok {
+			return &types.QueryServiceResponse{Service: svc}, nil
+		}
+		return nil, status.Error(codes.NotFound, "service not found")
+	}
+
+	return nil, status.Error(codes.NotFound, "service not found")
 }
 
 var UpdateParamsEmissionKey = []byte("arkeo/params/emission_curve_done")

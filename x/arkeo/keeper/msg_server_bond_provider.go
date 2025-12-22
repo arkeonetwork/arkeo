@@ -53,7 +53,7 @@ func (k msgServer) BondProviderValidate(ctx cosmos.Context, msg *types.MsgBondPr
 }
 
 func (k msgServer) BondProviderHandle(ctx cosmos.Context, msg *types.MsgBondProvider) error {
-	service, err := common.NewService(msg.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, msg.Service)
 	if err != nil {
 		return err
 	}

@@ -273,7 +273,7 @@ func TestUpsertProviderMetadata(t *testing.T) {
 		},
 		Version: "1",
 	}
-	m.ExpectQuery("insert into provider_metadata.*").
+	m.ExpectQuery(`(?is)insert into provider_metadata.*`).
 		WithArgs(int64(1), int64(1), metadata.Configuration.Moniker,
 			metadata.Configuration.Website,
 			metadata.Configuration.Description,

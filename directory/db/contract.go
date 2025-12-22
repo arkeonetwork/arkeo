@@ -129,7 +129,7 @@ func (d *DirectoryDB) UpsertContract(ctx context.Context, providerID int64, evt 
 		evt.QueriesPerMinute,
 	)
 	if insertErr != nil {
-		return nil, err
+		return nil, errors.Wrap(insertErr, "failed to insert open contract event record")
 	}
 
 	return entity, nil

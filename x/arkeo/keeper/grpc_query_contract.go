@@ -68,7 +68,7 @@ func (k KVStore) ActiveContract(goCtx context.Context, req *types.QueryActiveCon
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid provider pubkey")
 	}
-	service, err := common.NewService(req.Service)
+	service, _, err := k.ResolveServiceEnum(ctx, req.Service)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid service")
 	}

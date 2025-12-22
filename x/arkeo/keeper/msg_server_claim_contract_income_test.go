@@ -214,6 +214,7 @@ func TestHandleSubscription(t *testing.T) {
 	contract.Deposit = cosmos.NewInt(contract.Duration * contract.Rate.Amount.Int64())
 	contract.Id = 3
 	contract.Authorization = types.ContractAuthorization_OPEN
+	contract.QueriesPerMinute = 1
 	require.NoError(t, k.SetContract(ctx, contract))
 
 	// happy path

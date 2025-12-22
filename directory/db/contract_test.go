@@ -62,6 +62,7 @@ func TestUpdateContract(t *testing.T) {
 	defer m.Close()
 	testTime := time.Now()
 	testPubKey := arkeotypes.GetRandomPubKey()
+	txID := arkeotypes.GetRandomTxID()
 	evt := arkeotypes.EventOpenContract{
 		Provider:           testPubKey,
 		ContractId:         1,
@@ -88,6 +89,7 @@ func TestUpdateContract(t *testing.T) {
 			evt.Height,
 			evt.Deposit.Int64(),
 			evt.SettlementDuration,
+			evt.SettlementHeight,
 			evt.Authorization,
 			evt.QueriesPerMinute,
 			evt.ContractId).
@@ -95,7 +97,28 @@ func TestUpdateContract(t *testing.T) {
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.UpsertContract(context.Background(), 1, evt)
+
+	m.ExpectQuery("INSERT INTO open_contract_events.*").
+		WithArgs(
+			evt.ContractId,
+			txID,
+			evt.Client.String(),
+			evt.Type.String(),
+			evt.Duration,
+			evt.Rate.Amount.Int64(),
+			evt.OpenCost,
+			evt.Height,
+			evt.Deposit.Int64(),
+			evt.SettlementDuration,
+			evt.Authorization.String(),
+			evt.QueriesPerMinute,
+		).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+
+	entity, err := db.UpsertContract(context.Background(), 1, evt, txID, evt.Height)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -108,13 +131,20 @@ func TestCloseContract(t *testing.T) {
 	m, db := getMockDirectoryDBForTest(t)
 	defer m.Close()
 	testTime := time.Now()
+	txID := arkeotypes.GetRandomTxID()
 	m.ExpectQuery("update contracts.*").
 		WithArgs(int64(1024), uint64(1)).
 		WillReturnRows(
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.CloseContract(context.Background(), 1, 1024)
+	m.ExpectQuery("INSERT INTO close_contract_events.*").
+		WithArgs(uint64(1), txID, "", "", int64(1024)).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+	entity, err := db.CloseContract(context.Background(), 1, txID, 1024)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)
@@ -127,6 +157,7 @@ func TestUpsertContractSettltementEvent(t *testing.T) {
 	m, db := getMockDirectoryDBForTest(t)
 	defer m.Close()
 	testTime := time.Now()
+	txID := arkeotypes.GetRandomTxID()
 
 	testPubKey := arkeotypes.GetRandomPubKey()
 	evt := arkeotypes.EventSettleContract{
@@ -142,12 +173,20 @@ func TestUpsertContractSettltementEvent(t *testing.T) {
 		Reserve:    math.NewInt(1000),
 	}
 	m.ExpectQuery("UPDATE contracts.*").
-		WithArgs(evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId).
+		WithArgs(evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64(), evt.ContractId, evt.Height).
 		WillReturnRows(
 			pgxmock.NewRows([]string{"id", "created", "updated"}).
 				AddRow(int64(1), testTime, testTime),
 		)
-	entity, err := db.UpsertContractSettlementEvent(context.Background(), evt)
+
+	m.ExpectQuery("INSERT INTO contract_settlement_events.*").
+		WithArgs(evt.ContractId, txID, evt.Client.String(), evt.Height, evt.Nonce, evt.Paid.Int64(), evt.Reserve.Int64()).
+		WillReturnRows(
+			pgxmock.NewRows([]string{"id", "created", "updated"}).
+				AddRow(int64(1), testTime, testTime),
+		)
+
+	entity, err := db.UpsertContractSettlementEvent(context.Background(), evt, txID, evt.Height)
 	assert.Nil(t, err)
 	assert.NotNil(t, entity)
 	assert.Equal(t, int64(1), entity.ID)

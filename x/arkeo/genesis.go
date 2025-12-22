@@ -1,6 +1,7 @@
 package arkeo
 
 import (
+	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/x/arkeo/keeper"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 
@@ -11,6 +12,28 @@ import (
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	// this line is used by starport scaffolding # genesis/module/init
 	k.SetParams(ctx, genState.Params)
+
+	// Seed service registry: use provided services, otherwise bootstrap from static list once.
+	if len(genState.Services) > 0 {
+		for _, svc := range genState.Services {
+			if err := k.SetService(ctx, svc); err != nil {
+				ctx.Logger().Error("unable to set service", "service", svc.Name, "id", svc.Id, "error", err)
+			}
+		}
+	} else {
+		// Backfill from legacy static map for compatibility.
+			for name, id := range common.ServiceLookup {
+				desc := common.ServiceDescriptionMap[name]
+				svc := types.Service{
+					Id:          uint64(id),
+					Name:        name,
+					Description: desc,
+				}
+				if err := k.SetService(ctx, svc); err != nil {
+					ctx.Logger().Error("unable to seed service", "service", name, "id", id, "error", err)
+				}
+			}
+	}
 
 	for _, provider := range genState.Providers {
 		if err := k.SetProvider(ctx, provider); err != nil {
@@ -66,6 +89,12 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 		genesis.Providers = append(genesis.Providers, provider)
 	}
 	iter.Close()
+
+	// services
+	k.IterateServices(ctx, func(svc types.Service) bool {
+		genesis.Services = append(genesis.Services, svc)
+		return false
+	})
 
 	// contracts
 	iter = k.GetContractIterator(ctx)

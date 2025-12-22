@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strings"
+
 	"cosmossdk.io/errors"
 
 	"github.com/arkeonetwork/arkeo/common"
@@ -62,9 +64,8 @@ func (msg *MsgModProvider) ValidateBasic() error {
 	}
 
 	// verify service
-	_, err = common.NewService(msg.Service)
-	if err != nil {
-		return errors.Wrapf(ErrInvalidService, "invalid service (%s): %s", msg.Service, err)
+	if strings.TrimSpace(msg.Service) == "" {
+		return errors.Wrapf(ErrInvalidService, "service cannot be empty")
 	}
 
 	signer := msg.MustGetSigner()

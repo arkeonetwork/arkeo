@@ -1,17 +1,18 @@
 package sentinel
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
+	"golang.org/x/crypto/sha3"
+	"golang.org/x/time/rate"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
-
-	"golang.org/x/time/rate"
 )
 
 const (
@@ -51,7 +52,7 @@ func GenerateArkAuthString(contractId uint64, nonce int64, signature []byte, cha
 }
 
 func GenerateMessageToSign(contractId uint64, nonce int64, chainId string) string {
-	return fmt.Sprintf("%d:%d:%s", contractId, nonce, chainId)
+	return fmt.Sprintf("%d:%d:", contractId, nonce)
 }
 
 func parseContractAuth(raw string) (ContractAuth, error) {
@@ -334,7 +335,10 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 		// treat open contracts + whitelisted IPs as paid
 		if err == nil && (aa.Validate(p.Config.ProviderPubKey) == nil || (contract.IsOpenAuthorization() && whitelisted)) {
 			w.Header().Set("tier", "paid")
-			serviceName := r.Header.Get(ServiceHeader)
+
+			// Determine service name from header or URL path.
+			rawHeaderService := r.Header.Get(ServiceHeader)
+			serviceName := rawHeaderService
 			if serviceName == "" {
 				parts := strings.Split(r.URL.Path, "/")
 				if len(parts) > 1 {
@@ -342,11 +346,46 @@ func (p Proxy) auth(next http.Handler) http.Handler {
 				}
 			}
 
-			ser, serr := common.NewService(serviceName)
-			if serr != nil || ser != contract.Service {
-				p.logger.Error("Service match failed", "serviceName", serviceName)
-				http.Error(w, "Service mismatch", http.StatusUnauthorized)
-				return
+			// Log the raw header and derived service name.
+			p.logger.Info("DEBUG: service header and path",
+				"header_service", rawHeaderService,
+				"url_path", r.URL.Path,
+				"derived_service_name", serviceName,
+			)
+
+			// Try to resolve via dynamic registry; fallback to legacy parse for logging only.
+			p.serviceMu.RLock()
+			reqServiceID, ok := p.serviceIDs[strings.ToLower(serviceName)]
+			p.serviceMu.RUnlock()
+
+			if ok {
+				p.logger.Info("DEBUG: service match check",
+					"contract_id", contract.Id,
+					"contract_service_enum", contract.Service,
+					"request_service_id", reqServiceID,
+				)
+
+				if int32(reqServiceID) != int32(contract.Service) {
+					p.logger.Error("Service match failed",
+						"serviceName", serviceName,
+						"contract_id", contract.Id,
+						"contract_service_enum", contract.Service,
+						"request_service_id", reqServiceID,
+					)
+					http.Error(w, "Service mismatch", http.StatusUnauthorized)
+					return
+				}
+			} else {
+				// Legacy logging fallback
+				ser, serr := common.NewService(serviceName)
+				p.logger.Info("DEBUG: service not in registry; legacy parse",
+					"serviceName", serviceName,
+					"contract_id", contract.Id,
+					"contract_service_enum", contract.Service,
+					"parsed_service_enum", ser,
+					"new_service_err", serr,
+				)
+				// allow if registry doesn’t know it (dynamic addition)
 			}
 
 			httpCode, tierErr := p.paidTier(aa, remoteAddr)
@@ -440,6 +479,12 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
 
+	// Ensure spender (client) is recorded in the claim even when arkauth is 3-part.
+	if aa.Spender.IsEmpty() {
+		aa.Spender = contract.Client
+		p.logger.Debug("paidTier: inferred spender from contract client", "spender", aa.Spender.String())
+	}
+
 	// Check if the contract has expired (based on current chain height).
 	// If expired, require the client to open a new contract before continuing.
 	if contract.IsExpired(p.MemStore.GetHeight()) {
@@ -461,7 +506,54 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	// For open authorization (subscription) contracts, skip PAYG nonce/signature tracking.
 	// Open contracts do not require per-request client signatures or nonce/accounting.
 	if contract.IsOpenAuthorization() {
+		p.logger.Debug("paidTier: open authorization contract; skipping claim enqueue",
+			"contract_id", contract.Id,
+			"nonce", aa.Nonce,
+			"service", contract.Service.String(),
+			"spender", aa.Spender.String(),
+		)
 		return http.StatusOK, nil
+	}
+
+	// Optional self-verify so only claimable entries are stored.
+	// Preferred: chain-style SHA-256("<cid>:<nonce>:")
+	// Compat: raw preimage, Keccak(preimage), and EIP-191 personal_sign over preimage.
+	{
+		pre := fmt.Sprintf("%d:%d:", aa.ContractId, aa.Nonce)
+		digest := sha256.Sum256([]byte(pre))
+
+		pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, aa.Spender.String())
+		if err != nil {
+			return http.StatusUnauthorized, fmt.Errorf("invalid client pubkey: %w", err)
+		}
+
+		// 1) chain preferred: SHA-256(preimage)
+		ok := pk.VerifySignature(digest[:], aa.Signature)
+
+		// 2) compat: raw preimage
+		if !ok {
+			ok = pk.VerifySignature([]byte(pre), aa.Signature)
+		}
+
+		// 3) compat: keccak256(preimage)
+		if !ok {
+			k := sha3.NewLegacyKeccak256()
+			k.Write([]byte(pre))
+			ok = pk.VerifySignature(k.Sum(nil), aa.Signature)
+		}
+
+		// 4) compat: EIP-191 personal_sign (Ethereum prefix)
+		if !ok {
+			prefix := fmt.Sprintf("\x19Ethereum Signed Message:\n%d", len(pre))
+			k := sha3.NewLegacyKeccak256()
+			k.Write([]byte(prefix))
+			k.Write([]byte(pre))
+			ok = pk.VerifySignature(k.Sum(nil), aa.Signature)
+		}
+
+		if !ok {
+			return http.StatusUnauthorized, fmt.Errorf("invalid signature for client")
+		}
 	}
 
 	// Create or update the claim for this contract request:
@@ -493,15 +585,27 @@ func (p Proxy) paidTier(aa ArkAuth, remoteAddr string) (code int, err error) {
 	claim.Signature = sig
 	claim.Claimed = false
 	if err := p.ClaimStore.Set(claim); err != nil {
+		p.logger.Error("paidTier: failed to persist claim",
+			"contract_id", claim.ContractId,
+			"nonce", claim.Nonce,
+			"spender", claim.Spender.String(),
+			"error", err,
+		)
 		return http.StatusInternalServerError, fmt.Errorf("internal server error: %w", err)
 	}
+	p.logger.Info("paidTier: claim stored",
+		"contract_id", claim.ContractId,
+		"nonce", claim.Nonce,
+		"spender", claim.Spender.String(),
+		"service", contract.Service.String(),
+	)
 	contract.Nonce = aa.Nonce
 	p.MemStore.Put(contract)
 
 	used := contract.Nonce * contract.Rate.Amount.Int64()
 	remaining := contract.Deposit.Int64() - used
 
-	p.logger.Debug("Error:Contract Usage: ",
+	p.logger.Debug("Contract Usage: ",
 		"contract_id", contract.Id,
 		"nonce", contract.Nonce,
 		"deposit", contract.Deposit.Int64(),

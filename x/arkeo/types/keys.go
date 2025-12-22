@@ -15,6 +15,11 @@ const (
 
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_arkeo"
+
+	// Service registry prefixes (name -> record, id -> name)
+	ServiceNameKeyPrefix = "service/name/"
+	ServiceIDKeyPrefix   = "service/id/"
+	ServiceSeedMarkerKey = "service/seeded"
 )
 
 func KeyPrefix(p string) []byte {

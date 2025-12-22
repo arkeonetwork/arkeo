@@ -53,7 +53,7 @@ func (s *MockDataStorage) FindProvider(ctx context.Context, pubkey, service stri
 }
 
 func (s *MockDataStorage) UpsertContract(ctx context.Context, providerID int64, evt atypes.EventOpenContract, txID string, height int64) (*Entity, error) {
-	args := s.Called(ctx, providerID, evt)
+	args := s.Called(ctx, providerID, evt, txID, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -71,7 +71,7 @@ func (s *MockDataStorage) GetContract(ctx context.Context, contractId uint64) (*
 }
 
 func (s *MockDataStorage) CloseContract(ctx context.Context, contractID uint64, txID string, height int64) (*Entity, error) {
-	args := s.Called(ctx, contractID, height)
+	args := s.Called(ctx, contractID, txID, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -89,7 +89,7 @@ func (s *MockDataStorage) UpdateProvider(ctx context.Context, provider *ArkeoPro
 }
 
 func (s *MockDataStorage) UpsertContractSettlementEvent(ctx context.Context, evt atypes.EventSettleContract, txID string, height int64) (*Entity, error) {
-	args := s.Called(ctx, evt)
+	args := s.Called(ctx, evt, txID, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -125,7 +125,7 @@ func (s *MockDataStorage) InsertProvider(ctx context.Context, provider *ArkeoPro
 }
 
 func (s *MockDataStorage) InsertModProviderEvent(ctx context.Context, providerID int64, evt types.ModProviderEvent, txID string, height int64) (*Entity, error) {
-	args := s.Called(ctx, providerID, evt)
+	args := s.Called(ctx, providerID, evt, txID, height)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

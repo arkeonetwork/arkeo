@@ -2,6 +2,7 @@ package sentinel
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -21,6 +22,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/koding/websocketproxy"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
+	"sync"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
@@ -35,7 +38,10 @@ type Proxy struct {
 	ProviderConfigStore *ProviderConfigurationStore
 	logger              log.Logger
 	proxies             map[string]*url.URL
+	proxyMu             sync.RWMutex
+	serviceIDs          map[string]int32
 	authManager         *ArkeoAuthManager
+	serviceMu           sync.RWMutex
 }
 
 func NewProxy(config conf.Configuration) (*Proxy, error) {
@@ -64,7 +70,8 @@ func NewProxy(config conf.Configuration) (*Proxy, error) {
 		return nil, fmt.Errorf("failed to create provider config store with error: %s", err)
 	}
 
-	proxies := loadProxies(config, logger)
+	serviceIDs := loadServiceRegistry(config, logger)
+	proxies := loadProxies(config, logger, serviceIDs)
 
 	fmt.Println("DEBUG: Proxies loaded at startup:")
 	for name, uri := range proxies {
@@ -109,13 +116,16 @@ func NewProxy(config conf.Configuration) (*Proxy, error) {
 		ClaimStore:          claimStore,
 		ContractConfigStore: contractConfigStore,
 		proxies:             proxies, // <-- use the local variable here
+		proxyMu:             sync.RWMutex{},
 		logger:              logger,
 		ProviderConfigStore: providerConfigStore,
+		serviceIDs:          serviceIDs,
 		authManager:         authManager,
+		serviceMu:           sync.RWMutex{},
 	}, nil
 }
 
-func loadProxies(config conf.Configuration, logger log.Logger) map[string]*url.URL {
+func loadProxies(config conf.Configuration, logger log.Logger, serviceIDs map[string]int32) map[string]*url.URL {
 
 	logger.Error("DEBUG:FUNCTION: loadProxies")
 
@@ -141,7 +151,7 @@ func loadProxies(config conf.Configuration, logger log.Logger) map[string]*url.U
 		logger.Error("DEBUG: serviceMap entry", "name", k, "RpcUrl", v.RpcUrl, "RpcUser", v.RpcUser, "RpcPassSet", v.RpcPass != "")
 	}
 
-	for serviceName := range common.ServiceLookup {
+	for serviceName := range serviceIDs {
 		//logger.Error("DEBUG: Checking serviceName", "serviceName", serviceName)
 		if svc, ok := serviceMap[serviceName]; ok {
 			var fullURL string
@@ -200,6 +210,75 @@ func loadProxies(config conf.Configuration, logger log.Logger) map[string]*url.U
 	return proxies
 }
 
+// loadServiceRegistry attempts to fetch the on-chain service registry via REST
+// (defaulting to the legacy static list on failure).
+func loadServiceRegistry(config conf.Configuration, logger log.Logger) map[string]int32 {
+	registry := make(map[string]int32)
+
+	// Attempt to pull from REST gateway if available.
+	if config.HubProviderURI != "" {
+		reqURL := strings.TrimRight(config.HubProviderURI, "/") + "/arkeo/services"
+		resp, err := http.Get(reqURL) //nolint:gosec // expected simple GET to local/known endpoint
+		if err == nil && resp.StatusCode == http.StatusOK {
+			defer resp.Body.Close()
+			var payload struct {
+				Services []struct {
+					ServiceId int32  `json:"service_id"`
+					Name      string `json:"name"`
+				} `json:"services"`
+			}
+			if err := json.NewDecoder(resp.Body).Decode(&payload); err == nil {
+				for _, svc := range payload.Services {
+					registry[strings.ToLower(svc.Name)] = svc.ServiceId
+				}
+			} else {
+				logger.Error("DEBUG: failed to decode registry response", "err", err)
+			}
+		} else if err != nil {
+			logger.Error("DEBUG: failed to fetch registry", "err", err)
+		} else {
+			logger.Error("DEBUG: registry fetch non-200", "status", resp.StatusCode)
+		}
+	}
+
+	// Fallback to static map if empty.
+	if len(registry) == 0 {
+		for name, id := range common.ServiceLookup {
+			registry[name] = id
+		}
+	}
+
+	return registry
+}
+
+// refreshServiceRegistry updates the in-memory registry periodically.
+func (p *Proxy) refreshServiceRegistry(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			reg := loadServiceRegistry(p.Config, p.logger)
+			if len(reg) == 0 {
+				continue
+			}
+			p.serviceMu.Lock()
+			p.serviceIDs = reg
+			p.serviceMu.Unlock()
+
+			// rebuild proxies to include any new services (using existing config/env)
+			newProxies := loadProxies(p.Config, p.logger, reg)
+			p.proxyMu.Lock()
+			p.proxies = newProxies
+			p.proxyMu.Unlock()
+
+			p.logger.Info("DEBUG: refreshed service registry", "count", len(reg))
+		}
+	}
+}
+
 // Given a request, send it to the appropriate url
 func (p *Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request) {
 	// Limit the Size of incoming requests
@@ -227,6 +306,7 @@ func (p *Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Print all proxies and their URIs (for live debugging)
+	p.proxyMu.RLock()
 	for k, v := range p.proxies {
 		if v == nil {
 			//p.logger.Info("DEBUG:TRACE: Current proxy state", "service", k, "uri", "[NOT CONFIGURED]")
@@ -234,8 +314,11 @@ func (p *Proxy) handleRequestAndRedirect(w http.ResponseWriter, r *http.Request)
 			p.logger.Info("DEBUG:TRACE: Current proxy state", "service", k, "uri", v.String())
 		}
 	}
+	p.proxyMu.RUnlock()
 
+	p.proxyMu.RLock()
 	uri, exists := p.proxies[serviceName]
+	p.proxyMu.RUnlock()
 	if !exists || uri == nil {
 		p.logger.Error("DEBUG:TRACE: Service proxy not found or nil", "serviceName", serviceName)
 		respondWithError(w, "could not find service", http.StatusBadRequest)
@@ -486,28 +569,79 @@ func (p *Proxy) handleOpenClaims(w http.ResponseWriter, r *http.Request) {
 		p.logger.Debug("claim:", "key", claim.Key(), "nonce", claim.Nonce)
 
 		if claim.Claimed {
-			p.logger.Info("already claimed")
+			p.logger.Info("open-claims: skip claimed entry",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+				"spender", claim.Spender.String(),
+			)
 			continue
 		}
 
 		contract, err := p.MemStore.Get(claim.Key())
 
 		if err != nil {
-			p.logger.Error("bad fetch")
+			p.logger.Error("open-claims: failed to fetch contract for claim",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+				"error", err,
+			)
 			continue
 		}
 
 		if contract.IsExpired(p.MemStore.GetHeight()) {
 			_ = p.ClaimStore.Remove(claim.Key()) // clearly expired
-			p.logger.Info("claim expired")
+			p.logger.Info("open-claims: claim expired and removed",
+				"contract_id", claim.ContractId,
+				"nonce", claim.Nonce,
+			)
 			continue
 		}
+
+		p.logger.Debug("open-claims: claim still open",
+			"contract_id", claim.ContractId,
+			"nonce", claim.Nonce,
+			"spender", claim.Spender.String(),
+		)
 
 		openClaims = append(openClaims, claim)
 	}
 
 	d, _ := json.Marshal(openClaims)
 	_, _ = w.Write(d)
+}
+
+func (p *Proxy) handleMarkClaimed(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	type markReq struct {
+		ContractID uint64 `json:"contract_id"`
+		Nonce      uint64 `json:"nonce"`
+	}
+	var req markReq
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondWithError(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	updated := 0
+	claims := p.ClaimStore.List()
+	for i := range claims {
+		c := claims[i]
+		if c.ContractId == req.ContractID && uint64(c.Nonce) == req.Nonce {
+			// flip the bit; do NOT remove — we want highestNonce to remain monotonic
+			if !c.Claimed {
+				c.Claimed = true
+				if err := p.ClaimStore.Set(c); err != nil { // <-- Set instead of Put
+					respondWithError(w, "persist failed", http.StatusInternalServerError)
+					return
+				}
+			}
+			updated = 1
+			break
+		}
+	}
+
+	_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "updated": updated})
 }
 
 func (p *Proxy) handleActiveContract(w http.ResponseWriter, r *http.Request) {
@@ -579,6 +713,15 @@ func (p *Proxy) Run() {
 	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.InfoLevel)
 
+	// Periodically refresh registry in background.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var g errgroup.Group
+	g.Go(func() error {
+		p.refreshServiceRegistry(ctx)
+		return nil
+	})
+
 	// Add the Logrus middleware to the router
 	loggingRouter := p.logrusMiddleware(router)
 
@@ -634,9 +777,13 @@ func (p *Proxy) Run() {
 			MaxHeaderBytes:    1 << 20,
 		}
 		if err := server.ListenAndServe(); err != nil {
+			cancel()
 			panic(err)
 		}
 	}
+
+	// wait for background goroutines (refresh) to exit
+	_ = g.Wait()
 }
 
 func (p *Proxy) getRouter() *mux.Router {
@@ -646,6 +793,12 @@ func (p *Proxy) getRouter() *mux.Router {
 	router.HandleFunc(RoutesClaim, p.handleClaim).Methods(http.MethodGet)
 	router.HandleFunc(RoutesClaims, p.handleClaims).Methods(http.MethodGet)
 	router.HandleFunc(RoutesOpenClaims, p.handleOpenClaims).Methods(http.MethodGet)
+
+	router.HandleFunc("/mark-claimed", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/mark-claimed/", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/{service}/mark-claimed", p.handleMarkClaimed).Methods(http.MethodPost)
+	router.HandleFunc("/{service}/mark-claimed/", p.handleMarkClaimed).Methods(http.MethodPost)
+
 	router.HandleFunc(RouteManage, p.handleContract).Methods(http.MethodGet, http.MethodPost)
 	router.HandleFunc(RouteProviderData, p.handleProviderData).Methods(http.MethodGet)
 	router.PathPrefix("/").Handler(

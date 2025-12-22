@@ -183,6 +183,8 @@ func TestHandleModProviderEvent(t *testing.T) {
 		blockFillQueue: make(chan db.BlockGap),
 	}
 	testPubKey := arkeotypes.GetRandomPubKey()
+	txID := arkeotypes.GetRandomTxID()
+	height := int64(1)
 
 	// fail to find provider should result in an error
 	mockFindProvider := mockDb.On("FindProvider", mock.Anything, testPubKey.String(), "mock").Return(nil, fmt.Errorf("fail to find provider"))
@@ -199,7 +201,7 @@ func TestHandleModProviderEvent(t *testing.T) {
 		PayAsYouGoRate:      nil,
 		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
-	})
+	}, txID, height)
 	assert.NotNil(t, err)
 	mockFindProvider.Unset()
 
@@ -219,10 +221,15 @@ func TestHandleModProviderEvent(t *testing.T) {
 		PayAsYouGoRate:      nil,
 		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
-	})
+	}, txID, height)
 	assert.NotNil(t, err)
 	mockUpdateProvider.Unset()
 	mockDb.On("UpdateProvider", mock.Anything, mock.Anything).Return(&db.Entity{
+		ID:      0,
+		Created: time.Now(),
+		Updated: time.Now(),
+	}, nil)
+	mockDb.On("InsertModProviderEvent", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&db.Entity{
 		ID:      0,
 		Created: time.Now(),
 		Updated: time.Now(),
@@ -240,6 +247,6 @@ func TestHandleModProviderEvent(t *testing.T) {
 		PayAsYouGoRate:      nil,
 		Bond:                cosmos.NewInt(100),
 		SettlementDuration:  0,
-	})
+	}, txID, height)
 	assert.Nil(t, err)
 }

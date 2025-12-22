@@ -1,6 +1,8 @@
 package types
 
 import (
+	"strings"
+
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -58,10 +60,9 @@ func (msg *MsgBondProvider) ValidateBasic() error {
 		return errors.Wrapf(ErrProviderBadSigner, "Signer: %s, Provider Address: %s", msg.GetSigners(), provider)
 	}
 
-	// verify service
-	_, err = common.NewService(msg.Service)
-	if err != nil {
-		return errors.Wrapf(ErrInvalidService, "invalid service (%s): %s", msg.Service, err)
+	// basic service sanity
+	if strings.TrimSpace(msg.Service) == "" {
+		return errors.Wrapf(ErrInvalidService, "service cannot be empty")
 	}
 
 	if msg.Bond.IsNil() || msg.Bond.IsZero() {

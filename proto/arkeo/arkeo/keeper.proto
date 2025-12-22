@@ -102,3 +102,18 @@ message UserContractSet {
       [ (gogoproto.casttype) = "github.com/arkeonetwork/arkeo/common.PubKey" ];
   ContractSet contract_set = 2;
 }
+
+// Service captures the metadata for a dynamically-registered provider service.
+message Service {
+  // Globally-unique numeric identifier for this service.
+  uint64 id = 1;
+
+  // Canonical, lowercase name (e.g., "arkeo-mainnet-rest").
+  string name = 2;
+
+  // Optional human-friendly description.
+  string description = 3;
+
+  // Optional type/classification (e.g., "rpc", "rest", "indexer").
+  string service_type = 4;
+}
