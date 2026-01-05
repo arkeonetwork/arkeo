@@ -76,7 +76,12 @@ func (p Proxy) EventListener(host string, authManager *ArkeoAuthManager) {
 	clients := make([]*tmclient.HTTP, numOfWebSocketClients)
 
 	for i := 0; i < numOfWebSocketClients; i++ {
-		client, err := NewTendermintClient(fmt.Sprintf("tcp://%s", host), authManager)
+		// client, err := NewTendermintClient(fmt.Sprintf("tcp://%s", host), authManager)
+		baseURL := strings.TrimSpace(host)
+		if !strings.Contains(baseURL, "://") {
+			baseURL = "tcp://" + baseURL
+		}
+		client, err := NewTendermintClient(baseURL, authManager)
 		if err != nil {
 			panic(fmt.Sprintf("error creating tm client for %s: %+v", host, err))
 		}

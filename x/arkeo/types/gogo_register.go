@@ -14,6 +14,7 @@ func init() {
 	cosmosproto.RegisterFile("arkeo/arkeo/keeper.proto", fileDescriptor_f833050061122841)
 	cosmosproto.RegisterFile("arkeo/arkeo/misc.proto", fileDescriptor_64a3fa5463db3b34)
 	cosmosproto.RegisterFile("arkeo/arkeo/params.proto", fileDescriptor_47c871f4fc73dfc5)
+	cosmosproto.RegisterFile("arkeo/arkeo/events.proto", fileDescriptor_39b4417094f69f41)
 	cosmosproto.RegisterType((*MsgBondProvider)(nil), "arkeo.arkeo.MsgBondProvider")
 	cosmosproto.RegisterType((*MsgBondProviderResponse)(nil), "arkeo.arkeo.MsgBondProviderResponse")
 	cosmosproto.RegisterType((*MsgModProvider)(nil), "arkeo.arkeo.MsgModProvider")
@@ -32,4 +33,10 @@ func init() {
 	cosmosproto.RegisterType((*MsgUpdateServiceResponse)(nil), "arkeo.arkeo.MsgUpdateServiceResponse")
 	cosmosproto.RegisterType((*MsgRemoveService)(nil), "arkeo.arkeo.MsgRemoveService")
 	cosmosproto.RegisterType((*MsgRemoveServiceResponse)(nil), "arkeo.arkeo.MsgRemoveServiceResponse")
+	cosmosproto.RegisterType((*EventBondProvider)(nil), "arkeo.arkeo.EventBondProvider")
+	cosmosproto.RegisterType((*EventModProvider)(nil), "arkeo.arkeo.EventModProvider")
+	cosmosproto.RegisterType((*EventOpenContract)(nil), "arkeo.arkeo.EventOpenContract")
+	cosmosproto.RegisterType((*EventSettleContract)(nil), "arkeo.arkeo.EventSettleContract")
+	cosmosproto.RegisterType((*EventCloseContract)(nil), "arkeo.arkeo.EventCloseContract")
+	cosmosproto.RegisterType((*EventValidatorPayout)(nil), "arkeo.arkeo.EventValidatorPayout")
 }
