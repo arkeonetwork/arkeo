@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	clienthelpers "cosmossdk.io/client/v2/helpers"
 	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
@@ -918,6 +919,23 @@ func (app *ArkeoApp) GetSubspace(moduleName string) paramstypes.Subspace {
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
 func (app *ArkeoApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+	// Legacy LCD compat: map ?events=... to ?query=...
+	apiSvr.Router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/cosmos/tx/v1beta1/txs" {
+				q := r.URL.Query()
+				if q.Get("query") == "" {
+					if evs, ok := q["events"]; ok && len(evs) > 0 {
+						q.Set("query", strings.Join(evs, " AND "))
+						q.Del("events")
+						r.URL.RawQuery = q.Encode()
+					}
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	clientCtx := apiSvr.ClientCtx
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
