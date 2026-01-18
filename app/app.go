@@ -7,7 +7,9 @@ import (
 	context "context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
+	"strings"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -544,6 +546,18 @@ func NewArkeoApp(
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	})
 
+	// general v1.0.17.1 upgrade handler
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("general-v1.0.17.1", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		app.Logger().Info("running general-v1.0.17.1 upgrade")
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
+	// providers v1.0.17.1 upgrade handler
+	app.Keepers.UpgradeKeeper.SetUpgradeHandler("providers-v1.0.17.1", func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		app.Logger().Info("running providers-v1.0.17.1 upgrade")
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	})
+
 	groupConfig := group.DefaultConfig()
 	/*
 		Example of setting group params:
@@ -1044,6 +1058,23 @@ func (app *ArkeoApp) GetSubspace(moduleName string) paramstypes.Subspace {
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
 func (app *ArkeoApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig) {
+	// Legacy LCD compat: map ?events=... to ?query=...
+	apiSvr.Router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/cosmos/tx/v1beta1/txs" {
+				q := r.URL.Query()
+				if q.Get("query") == "" {
+					if evs, ok := q["events"]; ok && len(evs) > 0 {
+						q.Set("query", strings.Join(evs, " AND "))
+						q.Del("events")
+						r.URL.RawQuery = q.Encode()
+					}
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	clientCtx := apiSvr.ClientCtx
 	// Register new tx routes from grpc-gateway.
 	authtx.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
