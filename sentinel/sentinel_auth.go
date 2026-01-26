@@ -4,15 +4,18 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"net"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/common/cosmos"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"golang.org/x/crypto/sha3"
 	"golang.org/x/time/rate"
-	"net/http"
-	"strconv"
-	"strings"
-	"sync"
 )
 
 const (
@@ -164,6 +167,15 @@ func (aa ArkAuth) Validate(provider common.PubKey) error {
 	return err
 }
 
+// ContractAuthTimestampWindow defines the maximum allowed time window for contract auth timestamps.
+// This prevents replay attacks where an attacker generates a signature with a timestamp far in the future
+// and reuses it indefinitely until that future time is reached.
+const ContractAuthTimestampWindow = 300 // 5 minutes in seconds
+
+// ContractAuthClockSkewTolerance defines the maximum allowed clock skew (timestamps in the past).
+// This accounts for small clock differences between client and server while preventing replay of very old signatures.
+const ContractAuthClockSkewTolerance = 60 // 1 minute in seconds
+
 func (auth ContractAuth) Validate(lastTimestamp int64, client common.PubKey) error {
 	if auth.ContractId == 0 {
 		return fmt.Errorf("contract id cannot be zero")
@@ -172,29 +184,37 @@ func (auth ContractAuth) Validate(lastTimestamp int64, client common.PubKey) err
 		return fmt.Errorf("timestamp must be larger than %d", lastTimestamp)
 	}
 
+	currentTime := time.Now().Unix()
+	
+	// Security: Prevent replay attacks by ensuring timestamp is not too far in the future.
+	// An attacker could generate a signature with a future timestamp and reuse it until that time.
+	// By limiting the window, we force signatures to be regenerated periodically.
+	maxAllowedTimestamp := currentTime + ContractAuthTimestampWindow
+	if auth.Timestamp > maxAllowedTimestamp {
+		return fmt.Errorf("timestamp %d exceeds maximum allowed window (current: %d, max: %d, window: %ds)",
+			auth.Timestamp, currentTime, maxAllowedTimestamp, ContractAuthTimestampWindow)
+	}
+	
+	// Security: Prevent replay of very old signatures by checking lower bound.
+	// This also provides clock skew protection - allows small differences between client/server clocks
+	// but rejects timestamps that are too far in the past (likely replay attacks).
+	minAllowedTimestamp := currentTime - ContractAuthClockSkewTolerance
+	if auth.Timestamp < minAllowedTimestamp {
+		return fmt.Errorf("timestamp %d is too far in the past (current: %d, min: %d, tolerance: %ds) - possible replay attack or clock skew",
+			auth.Timestamp, currentTime, minAllowedTimestamp, ContractAuthClockSkewTolerance)
+	}
+
 	pk, err := cosmos.GetPubKeyFromBech32(cosmos.Bech32PubKeyTypeAccPub, client.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid client pubkey: %w", err)
 	}
 
 	msg := fmt.Sprintf("%d:%d:%s", auth.ContractId, auth.Timestamp, auth.ChainId)
 
-	// --- DEBUG PRINTS ---
-	fmt.Printf("DEBUG: ContractId: %d\n", auth.ContractId)
-	fmt.Printf("DEBUG: Timestamp:  %d\n", auth.Timestamp)
-	fmt.Printf("DEBUG: ChainId:    '%s'\n", auth.ChainId)
-	fmt.Printf("DEBUG: Message:    '%s'\n", msg)
-	fmt.Printf("DEBUG: Client PubKey (bech32): %s\n", client.String())
-	fmt.Printf("DEBUG: Client PubKey (hex):    %x\n", pk.Bytes())
-	fmt.Printf("DEBUG: Signature (hex):        %x\n", auth.Signature)
-	// --- END DEBUG PRINTS ---
-
 	if !pk.VerifySignature([]byte(msg), auth.Signature) {
-		fmt.Println("DEBUG: Signature verification FAILED")
 		return fmt.Errorf("invalid signature")
 	}
 
-	fmt.Println("DEBUG: Signature verification PASSED")
 	return nil
 }
 
@@ -419,17 +439,152 @@ const (
 	xRealIPName       = `X-Real-Ip`
 )
 
+// isValidIPAddress validates that a string is a valid IPv4 or IPv6 address.
+// This prevents IP spoofing attacks where malicious clients set X-Forwarded-For
+// or X-Real-Ip headers to bypass IP whitelist restrictions.
+func isValidIPAddress(ip string) bool {
+	if ip == "" {
+		return false
+	}
+	// Use net.ParseIP for proper validation of both IPv4 and IPv6
+	parsedIP := net.ParseIP(ip)
+	return parsedIP != nil
+}
+
+// isLocalhost checks if the given IP address is a localhost address.
+func isLocalhost(ip string) bool {
+	// Handle IPv6 addresses which may come with brackets from RemoteAddr
+	ip = strings.Trim(ip, "[]")
+	return ip == "127.0.0.1" || ip == "::1" || ip == "localhost"
+}
+
+// matchesTrustedProxy checks if the remoteAddr matches any of the trusted proxy IPs/CIDRs.
+// Supports both exact IP matches and CIDR notation (e.g., "10.0.0.0/8").
+func matchesTrustedProxy(remoteAddr string, trustedIPs []string) bool {
+	if len(trustedIPs) == 0 {
+		return false
+	}
+	
+	// Extract IP from "IP:port" format
+	ip := remoteAddr
+	if strings.Contains(ip, ":") {
+		ip, _, _ = strings.Cut(ip, ":")
+	}
+	
+	parsedRemoteIP := net.ParseIP(ip)
+	if parsedRemoteIP == nil {
+		return false
+	}
+	
+	for _, trusted := range trustedIPs {
+		trusted = strings.TrimSpace(trusted)
+		if trusted == "" {
+			continue
+		}
+		
+		// Check if it's a CIDR notation
+		if strings.Contains(trusted, "/") {
+			_, ipNet, err := net.ParseCIDR(trusted)
+			if err == nil && ipNet.Contains(parsedRemoteIP) {
+				return true
+			}
+		} else {
+			// Exact IP match
+			if ip == trusted {
+				return true
+			}
+			// Also try parsing as IP for comparison
+			trustedIP := net.ParseIP(trusted)
+			if trustedIP != nil && trustedIP.Equal(parsedRemoteIP) {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
+// isTrustedProxy checks if the request is coming from a trusted proxy.
+// Only when behind a trusted proxy should we trust X-Forwarded-For and X-Real-Ip headers.
+// This prevents IP spoofing attacks where malicious clients set these headers to bypass IP whitelist restrictions.
+//
+// Trusted proxies are determined by:
+// 1. If TrustedProxyIPs is configured, check if remoteAddr matches any of them
+// 2. Otherwise, default to localhost-only (secure default)
+func isTrustedProxy(remoteAddr string, trustedProxyIPs []string) bool {
+	if remoteAddr == "" {
+		return false
+	}
+	
+	// Extract IP from "IP:port" or "[IP]:port" format
+	// IPv6 addresses come as "[::1]:port", IPv4 as "127.0.0.1:port"
+	ip := remoteAddr
+	if strings.Contains(ip, ":") {
+		// Handle IPv6 format: "[::1]:port"
+		if strings.HasPrefix(ip, "[") {
+			// Extract everything between brackets
+			endBracket := strings.Index(ip, "]")
+			if endBracket > 0 {
+				ip = ip[1:endBracket] // Remove brackets
+			}
+		} else {
+			// IPv4 format: "127.0.0.1:port"
+			ip, _, _ = strings.Cut(ip, ":")
+		}
+	}
+	
+	// If trusted proxy IPs are configured, use them
+	if len(trustedProxyIPs) > 0 {
+		return matchesTrustedProxy(remoteAddr, trustedProxyIPs)
+	}
+	
+	// Default: only trust localhost (secure default for direct connections)
+	// In production behind a load balancer/reverse proxy, configure TrustedProxyIPs
+	return isLocalhost(ip)
+}
+
+// getRemoteAddr extracts the client's remote IP address from the request.
+// Security: Only trusts proxy headers (X-Forwarded-For, X-Real-Ip) when the request
+// comes from a trusted proxy. This prevents IP spoofing attacks where malicious
+// clients set these headers to bypass IP whitelist restrictions.
+//
+// Trusted proxies are configured via Proxy.Config.TrustedProxyIPs. If not configured,
+// defaults to localhost-only (secure default).
+//
+// For X-Forwarded-For, we take the first IP in the comma-separated list, which
+// represents the original client IP (format: "client, proxy1, proxy2").
 func (p Proxy) getRemoteAddr(r *http.Request) string {
-	realIP := r.Header.Get(xRealIPName)
-	if realIP != "" {
-		return realIP
+	remoteAddr := r.RemoteAddr
+
+	// Only trust proxy headers if we're behind a trusted proxy
+	if isTrustedProxy(remoteAddr, p.Config.TrustedProxyIPs) {
+		// X-Real-Ip is set by trusted proxies and contains a single IP
+		realIP := r.Header.Get(xRealIPName)
+		if realIP != "" {
+			realIP = strings.TrimSpace(realIP)
+			if isValidIPAddress(realIP) {
+				return realIP
+			}
+		}
+
+		// X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+		// We take the first one (original client IP)
+		forwardIP := r.Header.Get(forwardHeaderName)
+		if forwardIP != "" {
+			// Split by comma and take the first IP
+			ips := strings.Split(forwardIP, ",")
+			if len(ips) > 0 {
+				firstIP := strings.TrimSpace(ips[0])
+				if isValidIPAddress(firstIP) {
+					return firstIP
+				}
+			}
+		}
 	}
-	forwardIP := r.Header.Get(forwardHeaderName)
-	if forwardIP != "" {
-		return forwardIP
-	}
-	// Extract IP from "IP:port"
-	ip := r.RemoteAddr
+
+	// Fallback to RemoteAddr if proxy headers are not trusted or invalid
+	// Extract IP from "IP:port" format
+	ip := remoteAddr
 	if strings.Contains(ip, ":") {
 		ip, _, _ = strings.Cut(ip, ":")
 	}

@@ -46,6 +46,7 @@ type Configuration struct {
 	ArkeoAuthChainId            string           `json:"arkeo_auth_chain_id,omitempty"`    // Chain ID for auth
 	ArkeoAuthMnemonic           string           `json:"arkeo_auth_mnemonic,omitempty"`    // Mnemonic phrase for signing
 	ArkeoAuthNonceStore         string           `json:"arkeo_auth_nonce_store,omitempty"` // LevelDB path for nonce storage
+	TrustedProxyIPs             []string         `json:"trusted_proxy_ips,omitempty"`       // List of trusted proxy IPs/CIDRs for X-Forwarded-For header validation
 }
 
 // Simple helper function to read an environment or return a default value
@@ -131,7 +132,28 @@ func NewConfiguration() Configuration {
 		ArkeoAuthChainId:            getEnv("ARKEO_AUTH_CHAIN_ID", ""),
 		ArkeoAuthMnemonic:           getEnv("ARKEO_AUTH_MNEMONIC", ""),
 		ArkeoAuthNonceStore:         getEnv("ARKEO_AUTH_NONCE_STORE", ""),
+		TrustedProxyIPs:             loadTrustedProxyIPs(),
 	}
+}
+
+// loadTrustedProxyIPs loads trusted proxy IPs from environment variable.
+// Format: comma-separated list of IPs or CIDRs (e.g., "10.0.0.1,192.168.0.0/16")
+// If not set, returns empty slice (defaults to localhost-only).
+func loadTrustedProxyIPs() []string {
+	envVal := getEnv("TRUSTED_PROXY_IPS", "")
+	if envVal == "" {
+		return []string{} // Empty = default to localhost-only
+	}
+	// Split by comma and trim whitespace
+	ips := strings.Split(envVal, ",")
+	result := make([]string, 0, len(ips))
+	for _, ip := range ips {
+		ip = strings.TrimSpace(ip)
+		if ip != "" {
+			result = append(result, ip)
+		}
+	}
+	return result
 }
 
 func (c Configuration) Print() {
@@ -229,6 +251,14 @@ func LoadConfigurationFromFile(filename string) (Configuration, error) {
 	cfg.ArkeoAuthChainId = overrideString("ArkeoAuthChainId", cfg.ArkeoAuthChainId)
 	cfg.ArkeoAuthMnemonic = overrideString("ArkeoAuthMnemonic", cfg.ArkeoAuthMnemonic)
 	cfg.ArkeoAuthNonceStore = overrideString("ArkeoAuthNonceStore", cfg.ArkeoAuthNonceStore)
+	
+	// TrustedProxyIPs: if set in env, override; otherwise use YAML value
+	if envVal := os.Getenv("TRUSTED_PROXY_IPS"); envVal != "" {
+		cfg.TrustedProxyIPs = loadTrustedProxyIPs()
+	} else if len(cfg.TrustedProxyIPs) == 0 {
+		// If not in YAML either, default to empty (localhost-only)
+		cfg.TrustedProxyIPs = []string{}
+	}
 
 	return cfg, nil
 }
