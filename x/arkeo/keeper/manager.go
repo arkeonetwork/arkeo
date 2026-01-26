@@ -353,6 +353,27 @@ func (mgr Manager) SettleContract(ctx cosmos.Context, contract types.Contract, n
 		"contract.Nonce:", contract.Nonce,
 	)
 
+	// Security: Prevent double settlement attacks.
+	// If a contract has already been settled (SettlementHeight > 0), we must not settle it again.
+	// This prevents:
+	// 1. Providers from receiving payment multiple times
+	// 2. Clients from receiving refunds multiple times
+	// 3. Reserve tax from being collected multiple times
+	// This check is critical because SettleContract can be called from multiple places:
+	// - ClaimContractIncome (with nonce)
+	// - ContractEndBlock (for expired contracts)
+	// Without this check, a contract could be settled multiple times in the same block or across blocks.
+	if contract.SettlementHeight > 0 {
+		mgr.keeper.Logger().Info("contract already settled, skipping settlement",
+			"contract_id", contract.Id,
+			"settlement_height", contract.SettlementHeight,
+			"current_height", ctx.BlockHeight(),
+			"requested_nonce", nonce,
+		)
+		// Return the contract as-is without modifying it
+		return contract, nil
+	}
+
 	if nonce > contract.Nonce {
 		contract.Nonce = nonce
 	}

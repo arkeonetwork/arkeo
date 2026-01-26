@@ -220,7 +220,7 @@ func (p Proxy) handleCloseContractEvent(result tmCoreTypes.ResultEvent) {
 
 	evt, ok := typedEvent.(*types.EventCloseContract)
 	if !ok {
-		p.logger.Error(fmt.Sprintf("failed to cast %T to EventCloseContract", typedEvent))
+		p.logger.Error("failed to cast to EventCloseContract", "type", fmt.Sprintf("%T", typedEvent))
 		return
 	}
 
@@ -406,12 +406,12 @@ func (p Proxy) handleModProviderEvent(result tmCoreTypes.ResultEvent) {
 		return
 	}
 
-	p.logger.Error(fmt.Sprintf("evt.Provider: ", evt.Provider))
-	p.logger.Error(fmt.Sprintf("service.String(): ", service.String()))
+	p.logger.Error("evt.Provider", "provider", evt.Provider)
+	p.logger.Error("service", "service", service.String())
 
 	providerConfig, err := p.ProviderConfigStore.Get(evt.Provider, service.String())
 	if err != nil {
-		p.logger.Error(fmt.Sprintf("failed to get provider %s", err))
+		p.logger.Error("failed to get provider", "error", err)
 		return
 	}
 

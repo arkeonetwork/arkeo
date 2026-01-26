@@ -1,7 +1,6 @@
 package sentinel
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -10,13 +9,16 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/arkeonetwork/arkeo/common"
 	"github.com/arkeonetwork/arkeo/sentinel/conf"
 	"github.com/arkeonetwork/arkeo/x/arkeo/types"
 	"github.com/cometbft/cometbft/libs/log"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // If both files define testMnemonic, keep only one definition.
@@ -377,4 +379,288 @@ func TestProxy_NoAuth(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	resp.Body.Close()
+}
+
+func TestContractAuth_Validate_TimestampUpperBound(t *testing.T) {
+	client := types.GetRandomPubKey()
+	lastTimestamp := int64(1000)
+	
+	// Create auth with timestamp too far in the future (replay attack)
+	// We use time.Now() to get current time, then add more than the window
+	futureTimestamp := time.Now().Unix() + ContractAuthTimestampWindow + 100 // 6+ minutes in future
+	
+	auth := ContractAuth{
+		ContractId: 123,
+		Timestamp:  futureTimestamp,
+		Signature:  []byte("dummy-signature"),
+		ChainId:    "test-chain",
+	}
+	
+	// This should fail due to upper bound check (before signature validation)
+	err := auth.Validate(lastTimestamp, client)
+	
+	// Should fail on timestamp upper bound check
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "exceeds maximum allowed window", "Should reject future timestamp")
+}
+
+func TestContractAuth_Validate_TimestampLowerBound(t *testing.T) {
+	client := types.GetRandomPubKey()
+	lastTimestamp := int64(1000)
+	
+	// Create auth with timestamp too far in the past (replay attack)
+	// This simulates a very old signature being replayed
+	oldTimestamp := time.Now().Unix() - ContractAuthClockSkewTolerance - 100 // More than 1 minute in past
+	
+	auth := ContractAuth{
+		ContractId: 123,
+		Timestamp:  oldTimestamp,
+		Signature:  []byte("dummy-signature"),
+		ChainId:    "test-chain",
+	}
+	
+	err := auth.Validate(lastTimestamp, client)
+	
+	// Should fail on timestamp lower bound check (before signature validation)
+	assert.Error(t, err)
+	// Could fail on either "must be larger than lastTimestamp" or "too far in the past"
+	// Both are valid security checks
+	if !strings.Contains(err.Error(), "must be larger than") {
+		assert.Contains(t, err.Error(), "too far in the past", "Should reject very old timestamp")
+	}
+}
+
+func TestContractAuth_Validate_ValidTimestampBounds(t *testing.T) {
+	client := types.GetRandomPubKey()
+	lastTimestamp := time.Now().Unix() - 60 // 1 minute ago
+	
+	// Create auth with valid timestamp (within window, after lastTimestamp)
+	// Note: This will still fail signature validation, but timestamp bounds should pass
+	validTimestamp := time.Now().Unix() - 30 // 30 seconds ago, within window
+	
+	auth := ContractAuth{
+		ContractId: 123,
+		Timestamp:  validTimestamp,
+		Signature:  []byte("dummy-signature"),
+		ChainId:    "test-chain",
+	}
+	
+	err := auth.Validate(lastTimestamp, client)
+	
+	// Should fail on signature validation (expected), but NOT on timestamp bounds
+	assert.Error(t, err)
+	// Should NOT contain timestamp window errors - means bounds check passed
+	assert.NotContains(t, err.Error(), "exceeds maximum allowed window")
+	assert.NotContains(t, err.Error(), "too far in the past")
+	// Should fail on signature (expected)
+	assert.Contains(t, err.Error(), "invalid signature")
+}
+
+func TestContractAuth_Validate_ZeroContractId(t *testing.T) {
+	client := types.GetRandomPubKey()
+	
+	auth := ContractAuth{
+		ContractId: 0, // Invalid
+		Timestamp:  1000,
+		Signature:  []byte("dummy"),
+		ChainId:    "test",
+	}
+	
+	err := auth.Validate(500, client)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "contract id cannot be zero")
+}
+
+func TestIsValidIPAddress_ValidIPs(t *testing.T) {
+	validIPs := []string{
+		"127.0.0.1",
+		"192.168.1.1",
+		"10.0.0.1",
+		"::1",
+		"2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+		"2001:db8::1",
+	}
+	
+	for _, ip := range validIPs {
+		t.Run(ip, func(t *testing.T) {
+			assert.True(t, isValidIPAddress(ip), "IP %s should be valid", ip)
+		})
+	}
+}
+
+func TestIsValidIPAddress_InvalidIPs(t *testing.T) {
+	invalidIPs := []string{
+		"",
+		"not.an.ip",
+		"256.256.256.256",
+		"192.168.1",
+		"192.168.1.1.1",
+		"invalid",
+		"localhost", // Not a valid IP format (though we check for it separately)
+	}
+	
+	for _, ip := range invalidIPs {
+		t.Run(ip, func(t *testing.T) {
+			if ip == "localhost" {
+				// localhost is not a valid IP but we handle it separately in isLocalhost
+				t.Skip("localhost handled separately")
+			}
+			assert.False(t, isValidIPAddress(ip), "IP %s should be invalid", ip)
+		})
+	}
+}
+
+func TestIsTrustedProxy_DefaultLocalhost(t *testing.T) {
+	// Test default behavior (no trusted IPs configured)
+	trustedIPs := []string{} // Empty = default to localhost
+	
+	tests := []struct {
+		name       string
+		remoteAddr string
+		expected   bool
+	}{
+		{"localhost IPv4", "127.0.0.1:12345", true},
+		{"localhost IPv6", "[::1]:12345", true},
+		{"localhost string", "localhost:12345", true},
+		{"external IP", "192.168.1.1:12345", false},
+		{"public IP", "8.8.8.8:12345", false},
+		{"empty", "", false},
+	}
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isTrustedProxy(tt.remoteAddr, trustedIPs)
+			assert.Equal(t, tt.expected, result, "isTrustedProxy(%q, %v) = %v, want %v", 
+				tt.remoteAddr, trustedIPs, result, tt.expected)
+		})
+	}
+}
+
+func TestIsTrustedProxy_ConfiguredIPs(t *testing.T) {
+	// Test with configured trusted proxy IPs
+	trustedIPs := []string{"10.0.0.1", "192.168.0.0/16", "172.16.0.1"}
+	
+	tests := []struct {
+		name       string
+		remoteAddr string
+		expected   bool
+	}{
+		{"exact match", "10.0.0.1:12345", true},
+		{"CIDR match", "192.168.1.1:12345", true},
+		{"CIDR match boundary", "192.168.255.255:12345", true},
+		{"CIDR no match", "192.169.1.1:12345", false},
+		{"exact match 172", "172.16.0.1:12345", true},
+		{"no match", "8.8.8.8:12345", false},
+		{"localhost still works", "127.0.0.1:12345", false}, // Not in config, so false
+	}
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isTrustedProxy(tt.remoteAddr, trustedIPs)
+			assert.Equal(t, tt.expected, result, "isTrustedProxy(%q, %v) = %v, want %v", 
+				tt.remoteAddr, trustedIPs, result, tt.expected)
+		})
+	}
+}
+
+func TestGetRemoteAddr_DirectConnection(t *testing.T) {
+	// Test direct connection (no proxy)
+	proxy := Proxy{
+		Config: conf.Configuration{
+			TrustedProxyIPs: []string{}, // Empty = localhost-only
+		},
+	}
+	
+	req := httptest.NewRequest("GET", "/", nil)
+	req.RemoteAddr = "203.0.113.1:54321" // External IP
+	
+	// Attacker tries to spoof X-Forwarded-For
+	req.Header.Set("X-Forwarded-For", "1.2.3.4")
+	req.Header.Set("X-Real-Ip", "1.2.3.4")
+	
+	ip := proxy.getRemoteAddr(req)
+	
+	// Should ignore spoofed headers and use RemoteAddr
+	assert.Equal(t, "203.0.113.1", ip, "Should use RemoteAddr, not spoofed header")
+}
+
+func TestGetRemoteAddr_BehindTrustedProxy(t *testing.T) {
+	// Test behind trusted proxy
+	proxy := Proxy{
+		Config: conf.Configuration{
+			TrustedProxyIPs: []string{"127.0.0.1"}, // Trust localhost
+		},
+	}
+	
+	req := httptest.NewRequest("GET", "/", nil)
+	req.RemoteAddr = "127.0.0.1:54321" // From localhost proxy
+	
+	// Proxy sets real client IP
+	req.Header.Set("X-Real-Ip", "192.168.1.100")
+	
+	ip := proxy.getRemoteAddr(req)
+	
+	// Should trust header from trusted proxy
+	assert.Equal(t, "192.168.1.100", ip, "Should use X-Real-Ip from trusted proxy")
+}
+
+func TestGetRemoteAddr_XForwardedFor_MultipleIPs(t *testing.T) {
+	// Test X-Forwarded-For with multiple IPs (client, proxy1, proxy2)
+	proxy := Proxy{
+		Config: conf.Configuration{
+			TrustedProxyIPs: []string{"10.0.0.1"},
+		},
+	}
+	
+	req := httptest.NewRequest("GET", "/", nil)
+	req.RemoteAddr = "10.0.0.1:54321" // From trusted proxy
+	
+	// X-Forwarded-For format: "client, proxy1, proxy2"
+	req.Header.Set("X-Forwarded-For", "203.0.113.50, 10.0.0.2, 10.0.0.1")
+	
+	ip := proxy.getRemoteAddr(req)
+	
+	// Should take first IP (original client)
+	assert.Equal(t, "203.0.113.50", ip, "Should extract first IP from X-Forwarded-For")
+}
+
+func TestGetRemoteAddr_InvalidIPInHeader(t *testing.T) {
+	// Test with invalid IP in header
+	proxy := Proxy{
+		Config: conf.Configuration{
+			TrustedProxyIPs: []string{"127.0.0.1"},
+		},
+	}
+	
+	req := httptest.NewRequest("GET", "/", nil)
+	req.RemoteAddr = "127.0.0.1:54321"
+	
+	// Invalid IP format
+	req.Header.Set("X-Real-Ip", "not.an.ip.address")
+	
+	ip := proxy.getRemoteAddr(req)
+	
+	// Should fallback to RemoteAddr
+	assert.Equal(t, "127.0.0.1", ip, "Should fallback to RemoteAddr on invalid header IP")
+}
+
+func TestGetRemoteAddr_SpoofingPrevention(t *testing.T) {
+	// Test that spoofed headers from untrusted source are ignored
+	proxy := Proxy{
+		Config: conf.Configuration{
+			TrustedProxyIPs: []string{"10.0.0.1"}, // Only trust this IP
+		},
+	}
+	
+	req := httptest.NewRequest("GET", "/", nil)
+	req.RemoteAddr = "203.0.113.1:54321" // Attacker's real IP (not trusted)
+	
+	// Attacker tries to spoof
+	req.Header.Set("X-Forwarded-For", "1.2.3.4") // Whitelisted IP
+	req.Header.Set("X-Real-Ip", "1.2.3.4")
+	
+	ip := proxy.getRemoteAddr(req)
+	
+	// Should ignore headers and use RemoteAddr
+	assert.Equal(t, "203.0.113.1", ip, "Should ignore spoofed headers from untrusted source")
 }

@@ -449,3 +449,251 @@ func TestValidatorPayouts(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, pool.CommunityPool.AmountOf(configs.Denom).GT(cosmos.ZeroDec()))
 }
+
+func TestSettleContract_DoubleSettlementPrevention(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(10)
+	mgr := NewManager(k, sk)
+
+	// Setup provider
+	providerPubKey := types.GetRandomPubKey()
+	provider, err := providerPubKey.GetMyAddress()
+	require.NoError(t, err)
+	service := common.BTCService
+	providerObj := types.NewProvider(providerPubKey, service)
+	providerObj.Bond = cosmos.NewInt(10000000000)
+	require.NoError(t, k.SetProvider(ctx, providerObj))
+
+	// Setup client
+	clientPubKey := types.GetRandomPubKey()
+	client, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+
+	// Create and fund contract
+	contract := types.NewContract(providerPubKey, service, clientPubKey)
+	contract.Id = k.GetAndIncrementNextContractId(ctx)
+	contract.Height = 10
+	contract.Duration = 100
+	contract.Type = types.ContractType_SUBSCRIPTION
+	contract.Rate = cosmos.NewInt64Coin("uarkeo", 10)
+	contract.Deposit = cosmos.NewInt(1000)
+	contract.Paid = cosmos.ZeroInt()
+	contract.QueriesPerMinute = 1
+	
+	// Set up expiration set (required for settlement)
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
+	require.NoError(t, err)
+	expirationSet.Append(contract.Id)
+	require.NoError(t, k.SetContractExpirationSet(ctx, expirationSet))
+	
+	// Set up user contract set (required for final settlement)
+	userSet, err := k.GetUserContractSet(ctx, contract.GetSpender())
+	require.NoError(t, err)
+	if userSet.ContractSet == nil {
+		userSet.ContractSet = &types.ContractSet{}
+	}
+	userSet.ContractSet.ContractIds = append(userSet.ContractSet.ContractIds, contract.Id)
+	require.NoError(t, k.SetUserContractSet(ctx, userSet))
+	
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	// Fund the contract module
+	require.NoError(t, k.MintAndSendToAccount(ctx, client, getCoin(1000)))
+	require.NoError(t, k.SendFromAccountToModule(ctx, client, types.ContractName, getCoins(1000)))
+
+	// Advance block height so contract has debt to settle
+	// For subscription: debt = rate * (height - contract.Height) * QPM - paid
+	// We need height > contract.Height to have debt
+	ctx = ctx.WithBlockHeight(contract.Height + 10) // 10 blocks later
+
+	// Get initial balances
+	initialProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	initialContractModuleBalance := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
+
+	// First settlement - should succeed
+	settledContract, err := mgr.SettleContract(ctx, contract, 0, true)
+	require.NoError(t, err)
+	require.Greater(t, settledContract.SettlementHeight, int64(0), "SettlementHeight should be set after first settlement")
+
+	// Verify balances changed
+	afterFirstProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	afterFirstContractModuleBalance := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
+
+	// Provider should have received payment
+	require.True(t, afterFirstProviderBalance.GT(initialProviderBalance),
+		"Provider should receive payment on first settlement")
+
+	// Contract module balance should have decreased
+	require.True(t, afterFirstContractModuleBalance.LT(initialContractModuleBalance),
+		"Contract module balance should decrease after settlement")
+
+	// Store the settled contract
+	require.NoError(t, k.SetContract(ctx, settledContract))
+
+	// Attempt second settlement - should be prevented
+	settledContract2, err := mgr.SettleContract(ctx, settledContract, 0, true)
+	require.NoError(t, err, "Should not error, but should return early")
+
+	// Verify contract unchanged (no double settlement)
+	require.Equal(t, settledContract.SettlementHeight, settledContract2.SettlementHeight,
+		"SettlementHeight should not change on second settlement attempt")
+	require.Equal(t, settledContract.Paid, settledContract2.Paid,
+		"Paid amount should not change on second settlement attempt")
+
+	// Verify balances did NOT change again
+	afterSecondProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	afterSecondContractModuleBalance := k.GetBalanceOfModule(ctx, types.ContractName, configs.Denom)
+
+	require.Equal(t, afterFirstProviderBalance, afterSecondProviderBalance,
+		"Provider should NOT receive payment again on second settlement attempt")
+	require.Equal(t, afterFirstContractModuleBalance, afterSecondContractModuleBalance,
+		"Contract module balance should NOT change again on second settlement attempt")
+}
+
+func TestSettleContract_DoubleSettlementFromDifferentCallers(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(10)
+	mgr := NewManager(k, sk)
+
+	// Setup provider
+	providerPubKey := types.GetRandomPubKey()
+	provider, err := providerPubKey.GetMyAddress()
+	require.NoError(t, err)
+	service := common.BTCService
+	providerObj := types.NewProvider(providerPubKey, service)
+	providerObj.Bond = cosmos.NewInt(10000000000)
+	require.NoError(t, k.SetProvider(ctx, providerObj))
+
+	// Setup client
+	clientPubKey := types.GetRandomPubKey()
+	client, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+
+	// Create contract
+	contract := types.NewContract(providerPubKey, service, clientPubKey)
+	contract.Id = k.GetAndIncrementNextContractId(ctx)
+	contract.Height = 10
+	contract.Duration = 100
+	contract.Type = types.ContractType_SUBSCRIPTION
+	contract.Rate = cosmos.NewInt64Coin("uarkeo", 10)
+	contract.Deposit = cosmos.NewInt(1000)
+	contract.Paid = cosmos.ZeroInt()
+	contract.QueriesPerMinute = 1
+	
+	// Set up expiration set
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
+	require.NoError(t, err)
+	expirationSet.Append(contract.Id)
+	require.NoError(t, k.SetContractExpirationSet(ctx, expirationSet))
+	
+	// Set up user contract set
+	userSet, err := k.GetUserContractSet(ctx, contract.GetSpender())
+	require.NoError(t, err)
+	if userSet.ContractSet == nil {
+		userSet.ContractSet = &types.ContractSet{}
+	}
+	userSet.ContractSet.ContractIds = append(userSet.ContractSet.ContractIds, contract.Id)
+	require.NoError(t, k.SetUserContractSet(ctx, userSet))
+	
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	// Fund contract
+	require.NoError(t, k.MintAndSendToAccount(ctx, client, getCoin(1000)))
+	require.NoError(t, k.SendFromAccountToModule(ctx, client, types.ContractName, getCoins(1000)))
+
+	// Get initial provider balance
+	initialProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+
+	// Settle via ContractEndBlock (simulating expiration)
+	ctx = ctx.WithBlockHeight(contract.Expiration())
+	settledContract, err := mgr.SettleContract(ctx, contract, 0, true)
+	require.NoError(t, err)
+	require.Greater(t, settledContract.SettlementHeight, int64(0))
+
+	// Verify provider received payment
+	afterFirstBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	require.True(t, afterFirstBalance.GT(initialProviderBalance), "Provider should receive payment")
+
+	// Attempt to settle again via ClaimContractIncome (different caller path)
+	// This simulates the attack scenario where settlement is attempted from multiple places
+	settledContract2, err := mgr.SettleContract(ctx, settledContract, 10, false)
+	require.NoError(t, err, "Should not error, but should return early")
+
+	// Verify no double payment
+	afterSecondBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	require.Equal(t, afterFirstBalance, afterSecondBalance,
+		"Provider should NOT receive payment again - double settlement prevented")
+	require.Equal(t, settledContract.SettlementHeight, settledContract2.SettlementHeight,
+		"SettlementHeight should remain unchanged")
+}
+
+func TestSettleContract_DoubleSettlementSameBlock(t *testing.T) {
+	ctx, k, sk := SetupKeeperWithStaking(t)
+	ctx = ctx.WithBlockHeight(10)
+	mgr := NewManager(k, sk)
+
+	// Setup
+	providerPubKey := types.GetRandomPubKey()
+	provider, err := providerPubKey.GetMyAddress()
+	require.NoError(t, err)
+	service := common.BTCService
+	providerObj := types.NewProvider(providerPubKey, service)
+	providerObj.Bond = cosmos.NewInt(10000000000)
+	require.NoError(t, k.SetProvider(ctx, providerObj))
+
+	clientPubKey := types.GetRandomPubKey()
+	client, err := clientPubKey.GetMyAddress()
+	require.NoError(t, err)
+
+	contract := types.NewContract(providerPubKey, service, clientPubKey)
+	contract.Id = k.GetAndIncrementNextContractId(ctx)
+	contract.Height = 10
+	contract.Duration = 100
+	contract.Type = types.ContractType_SUBSCRIPTION
+	contract.Rate = cosmos.NewInt64Coin("uarkeo", 10)
+	contract.Deposit = cosmos.NewInt(1000)
+	contract.Paid = cosmos.ZeroInt()
+	contract.QueriesPerMinute = 1
+	
+	// Set up expiration set
+	expirationSet, err := k.GetContractExpirationSet(ctx, contract.SettlementPeriodEnd())
+	require.NoError(t, err)
+	expirationSet.Append(contract.Id)
+	require.NoError(t, k.SetContractExpirationSet(ctx, expirationSet))
+	
+	// Set up user contract set
+	userSet, err := k.GetUserContractSet(ctx, contract.GetSpender())
+	require.NoError(t, err)
+	if userSet.ContractSet == nil {
+		userSet.ContractSet = &types.ContractSet{}
+	}
+	userSet.ContractSet.ContractIds = append(userSet.ContractSet.ContractIds, contract.Id)
+	require.NoError(t, k.SetUserContractSet(ctx, userSet))
+	
+	require.NoError(t, k.SetContract(ctx, contract))
+
+	require.NoError(t, k.MintAndSendToAccount(ctx, client, getCoin(1000)))
+	require.NoError(t, k.SendFromAccountToModule(ctx, client, types.ContractName, getCoins(1000)))
+
+	initialProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+
+	// First settlement
+	settledContract, err := mgr.SettleContract(ctx, contract, 0, true)
+	require.NoError(t, err)
+	require.Greater(t, settledContract.SettlementHeight, int64(0))
+
+	// Store the contract with SettlementHeight set
+	require.NoError(t, k.SetContract(ctx, settledContract))
+
+	// Immediately attempt second settlement in same block (attack scenario)
+	settledContract2, err := mgr.SettleContract(ctx, settledContract, 0, true)
+	require.NoError(t, err)
+
+	// Verify no double payment
+	finalProviderBalance := k.GetBalance(ctx, provider).AmountOf(configs.Denom)
+	afterFirstBalance := initialProviderBalance.Add(settledContract.Paid)
+	require.Equal(t, afterFirstBalance, finalProviderBalance,
+		"Provider should only receive payment once, even if SettleContract called twice in same block")
+	require.Equal(t, settledContract.SettlementHeight, settledContract2.SettlementHeight)
+	require.Equal(t, settledContract.Paid, settledContract2.Paid)
+}
